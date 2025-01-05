@@ -126,7 +126,6 @@ public class PollingAppMonService extends AbstractComponent {
         for (String id : expiredSessions) {
             sessions.remove(id);
         }
-
         if (sessions.isEmpty()) {
             buffer.clear();
         } else {
