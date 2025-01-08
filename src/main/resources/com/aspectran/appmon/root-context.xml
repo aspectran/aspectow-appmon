@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 8.0//EN"
+        "http://aspectran.github.io/dtd/aspectran-8.dtd">
+<aspectran>
+
+    <description style="apon">
+        |
+        |JPetStore is a full web application built on top of MyBatis 3, Aspectran 8.
+        |
+    </description>
+
+    <bean id="basePath" class="com.aspectran.core.support.BasePathFactoryBean"/>
+    <bean id="currentEnv" class="com.aspectran.core.support.CurrentEnvironmentFactoryBean"/>
+    <bean id="currentTranslet" class="com.aspectran.core.support.CurrentTransletFactoryBean" scope="request"/>
+    <bean id="currentActivityData" class="com.aspectran.core.support.CurrentActivityDataFactoryBean" scope="request"/>
+
+    <aspect id="activityDataAccessibility">
+        <description>
+            The activity data of each translet can be referenced with the "data" attribute.
+        </description>
+        <advice>
+            <before>
+                <echo>
+                    <item name="data">#{currentActivityData}</item>
+                </echo>
+            </before>
+        </advice>
+    </aspect>
+
+    <aspect id="defaultTransletSettings">
+        <description>
+            Defines an aspect that injects default settings into all translets.
+        </description>
+        <settings>
+            <setting name="format.indentSize" value="2"/>
+            <setting name="format.dateFormat" value="yyyy-MM-dd"/>
+            <setting name="format.dateTimeFormat" value="yyyy-MM-dd HH:mm:ss"/>
+            <setting name="format.nullWritable" value="true"/>
+        </settings>
+    </aspect>
+
+    <append resource="app/demo/web/demo-web.xml"/>
+
+</aspectran>

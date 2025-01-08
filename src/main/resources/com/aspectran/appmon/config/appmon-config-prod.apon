@@ -1,0 +1,114 @@
+endpoint: {
+    name: endpoint-1
+    title: Server-1
+    url: /appmon/server1/endpoint
+    resident: true
+    polling: {
+        pollingInterval: 3000
+        sessionTimeout: 10000
+        initialBufferSize: 9999
+        enabled: true
+    }
+}
+endpoint: {
+    name: endpoint-2
+    title: Server-2
+    url: /appmon/server2/endpoint
+    resident: false
+    polling: {
+        pollingInterval: 3000
+        sessionTimeout: 10000
+        initialBufferSize: 9999
+        enabled: true
+    }
+}
+group: {
+    name: jpetstore
+    title: JPetStore
+    event: {
+        name: request
+        reader: request.event.exporter.com.aspectran.appmon.RequestEventReader
+        target: jpetstore
+    }
+    state: {
+        name: session
+        title: JPetStore App Session Statistics
+        reader: session.state.exporter.com.aspectran.appmon.SessionStateReader
+        target: tow.server/jpetstore
+        sampleInterval: 5000
+    }
+    log: {
+        name: app
+        title: JPetStore App
+        file: /logs/jpetstore.log
+        lastLines: 1000
+        sampleInterval: 300
+    }
+    log: {
+        name: access
+        title: JPetStore Access
+        file: /logs/jpetstore-access.log
+        lastLines: 1000
+        sampleInterval: 300
+    }
+}
+group: {
+    name: demo
+    title: Demo
+    event: {
+        name: request
+        reader: request.event.exporter.com.aspectran.appmon.RequestEventReader
+        target: demo
+    }
+    state: {
+        name: session
+        title: Demo App Session Statistics
+        reader: session.state.exporter.com.aspectran.appmon.SessionStateReader
+        target: tow.server/demo
+        sampleInterval: 5000
+    }
+    log: {
+        name: app
+        title: Demo App
+        file: /logs/demo.log
+        lastLines: 1000
+        sampleInterval: 300
+    }
+    log: {
+        name: access
+        title: Demo Access
+        file: /logs/demo-access.log
+        lastLines: 1000
+        sampleInterval: 300
+    }
+}
+group: {
+    name: root
+    title: Root
+    event: {
+        name: request
+        reader: request.event.exporter.com.aspectran.appmon.RequestEventReader
+        target: root
+    }
+    state: {
+        name: session
+        title: Root App Session Statistics
+        reader: session.state.exporter.com.aspectran.appmon.SessionStateReader
+        target: tow.server/root
+        sampleInterval: 5000
+    }
+    log: {
+        name: app
+        title: Root App
+        file: /logs/root.log
+        lastLines: 1000
+        sampleInterval: 300
+    }
+    log: {
+        name: access
+        title: Root Access
+        file: /logs/root-access.log
+        lastLines: 1000
+        sampleInterval: 300
+    }
+}

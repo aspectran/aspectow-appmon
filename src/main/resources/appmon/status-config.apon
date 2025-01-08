@@ -1,9 +1,0 @@
-status: {
-    group: root
-    name: root
-    title: Root App Session Statistics
-    collector: app.logrelay.appmon.status.session.LocalSessionStatusCollector
-    source: tow.server
-    label: session
-    sampleInterval: 5000
-}
