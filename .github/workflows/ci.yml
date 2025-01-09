@@ -29,4 +29,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2
       - name: Test with Maven
-        run: ./mvnw test -B -V -ntp -D"license.skip=true" -D"jacoco.skip=true"
+        run: ./mvnw test -B -V -U -ntp -D"license.skip=true" -D"jacoco.skip=true"

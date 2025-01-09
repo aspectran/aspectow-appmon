@@ -16,7 +16,7 @@ jobs:
           java-version: 17
           distribution: temurin
       - name: Deploy to Sonatype
-        run: ./mvnw deploy -DskipTests -B -V -ntp --settings ./.mvn/settings.xml -Dlicense.skip=true
+        run: ./mvnw deploy -DskipTests -B -V -U -ntp --settings ./.mvn/settings.xml -Dlicense.skip=true
         env:
           CI_DEPLOY_USERNAME: ${{ secrets.CI_DEPLOY_USERNAME }}
           CI_DEPLOY_PASSWORD: ${{ secrets.CI_DEPLOY_PASSWORD }}
