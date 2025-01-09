@@ -11,16 +11,16 @@ Aspectow AppMon provides an integrated view to observe logs and events of Aspect
 
 - Check out and build:
   ```sh
-  git clone git://github.com/aspectran/aspectow-appmon.git
+  git clone https://github.com/aspectran/aspectow-appmon.git
   cd aspectow-appmon
   ./build rebuild
   ```
 
 ## Running the demo
 
-1. To run the demo, use the following command after building:
+1) To run the demo, use the following command after building:
    ```sh
    ./build demo
    ```
 
-2. Access in your browser at http://localhost:8082
+2) Access in your browser at http://localhost:8082
