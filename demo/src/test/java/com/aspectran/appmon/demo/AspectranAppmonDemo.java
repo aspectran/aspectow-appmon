@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package app;
+package com.aspectran.appmon.demo;
 
 import com.aspectran.utils.ResourceUtils;
 import com.aspectran.shell.jline.JLineAspectranShell;
@@ -26,7 +26,7 @@ import static com.aspectran.core.context.config.AspectranConfig.BASE_PATH_PROPER
 /**
  * Main entry point for the application.
  */
-public class LogRelay {
+public class AspectranAppmonDemo {
 
     public static void main(String[] args) {
         try {

@@ -7,6 +7,5 @@
     <include file="${aspectran.basePath:-app}/config/logging/included/logback-console.xml"/>
 
     <logger name="com.aspectran.daemon.command.polling.DefaultFileCommander" level="trace"/>
-    <logger name="app.logrelay" level="debug"/>
 
 </configuration>
