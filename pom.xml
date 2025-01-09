@@ -18,13 +18,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.aspectran</groupId>
-    <artifactId>aspectran-appmon-project</artifactId>
+    <artifactId>aspectow-appmon-project</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Aspectran Appmon Project</name>
-    <description>Aspectran Appmon Project</description>
-    <url>https://aspectran.com/</url>
+    <name>Aspectow AppMon Project</name>
+    <description>Aspectow AppMon provides an integrated view to observe logs and events of Aspectran-based application servers in real time.</description>
+    <url>https://aspectran.com/aspectow-appmon</url>
     <inceptionYear>2025</inceptionYear>
 
     <organization>
@@ -97,7 +97,7 @@
     </repositories>
 
     <modules>
-        <module>appmon</module>
+        <module>backend</module>
         <module>demo</module>
     </modules>
 
@@ -228,8 +228,8 @@
                                     <message>[ERROR] OLD JDK in use. Aspectran Release ${project.version} MUST use JDK 17 or newer</message>
                                 </requireJavaVersion>
                                 <requireMavenVersion>
-                                    <version>[3.5.0,)</version>
-                                    <message>[ERROR] OLD MAVEN in use, Aspectran ${project.version} requires Maven 3.5.0 or newer</message>
+                                    <version>[3.6.3,)</version>
+                                    <message>[ERROR] OLD MAVEN in use, Aspectran ${project.version} requires Maven 3.6.3 or newer</message>
                                 </requireMavenVersion>
                             </rules>
                         </configuration>

@@ -19,16 +19,16 @@
 
     <parent>
         <groupId>com.aspectran</groupId>
-        <artifactId>aspectran-appmon-project</artifactId>
+        <artifactId>aspectow-appmon-project</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>aspectran-appmon</artifactId>
+    <artifactId>aspectow-appmon-backend</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Aspectran Appmon</name>
-    <description>Aspectran Appmon provides an integrated view to observe logs and events of Aspectran-based application servers in real time.</description>
+    <name>Aspectow AppMon Backend</name>
+    <description>AppMon provides an integrated view to observe logs and events of Aspectran-based application servers in real time.</description>
 
     <properties>
         <main.basedir>${project.parent.basedir}</main.basedir>

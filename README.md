@@ -1,28 +1,37 @@
 Log Relay
 =========
 
-Log Relay provides an integrated view to observe logs of multiple servers in real time.
+Aspectow AppMon provides an integrated view to observe logs and events of Aspectran-based application servers in real time.
 
 ## Running Aspectow
 
 - Clone this repository
 
   ```sh
-  $ git clone https://github.com/aspectran/log-relay.git
+  $ git clone https://github.com/aspectran/aspectow-appmon.git
   ```
 
-- Build with Maven
+## Building
 
-  ```sh
-  $ cd log-relay
-  $ mvn clean package
-  ```
+Requirements
 
-- Run with Aspectran Shell
+* Maven 3.6.3+ (prefer included maven-wrapper)
+* Java 17+
 
-  ```sh
-  $ cd app/bin
-  $ ./shell.sh
-  ```
+Check out and build:
 
-- Access in your browser at http://localhost:8090
+```sh
+git clone git://github.com/aspectran/aspectow-appmon.git
+cd aspectow-appmon
+./build rebuild
+```
+
+## Running the demo
+
+To run the demo, simply use the following command after having build `Aspectran`
+
+```sh
+./build demo
+```
+
+- Access in your browser at http://localhost:8082

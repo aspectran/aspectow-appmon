@@ -54,7 +54,7 @@ group: {
 }
 group: {
     name: appmon
-    title: Appmon
+    title: AppMon
     event: {
         name: request
         reader: com.aspectran.appmon.exporter.event.request.RequestEventReader
@@ -69,14 +69,14 @@ group: {
     }
     log: {
         name: app
-        title: Appmon App
+        title: AppMon App
         file: /logs/appmon.log
         lastLines: 1000
         sampleInterval: 300
     }
     log: {
         name: access
-        title: Appmon Access
+        title: AppMon Access
         file: /logs/appmon-access.log
         lastLines: 1000
         sampleInterval: 300

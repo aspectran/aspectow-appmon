@@ -19,20 +19,49 @@
 
     <parent>
         <groupId>com.aspectran</groupId>
-        <artifactId>aspectran-appmon-project</artifactId>
+        <artifactId>aspectow-appmon-project</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>aspectran-appmon-demo</artifactId>
+    <artifactId>aspectow-appmon-demo</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Aspectran Appmon Demo</name>
-    <description>Demo application form Aspectran Appmon</description>
+    <name>Aspectow AppMon Demo</name>
+    <description>Demo application for Aspectow AppMon</description>
 
     <properties>
         <main.basedir>${project.parent.basedir}</main.basedir>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>aspectran-with-logback</artifactId>
+            <version>${aspectran.version}</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>aspectran-shell-jline</artifactId>
+            <version>${aspectran.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>aspectran-daemon</artifactId>
+            <version>${aspectran.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>aspectran-with-undertow</artifactId>
+            <version>${aspectran.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>aspectow-appmon-backend</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -141,33 +170,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>aspectran-with-logback</artifactId>
-            <version>${aspectran.version}</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>aspectran-shell-jline</artifactId>
-            <version>${aspectran.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>aspectran-daemon</artifactId>
-            <version>${aspectran.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>aspectran-with-undertow</artifactId>
-            <version>${aspectran.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>aspectran-appmon</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
 </project>
