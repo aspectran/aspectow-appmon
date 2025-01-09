@@ -18,10 +18,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.aspectran</groupId>
-    <artifactId>log-relay</artifactId>
+    <artifactId>aspectran-appmon</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>Log Relay</name>
-    <description>A web application that tails log files on the server and provides an integrated view in real time.</description>
+    <name>Aspectran Appmon</name>
+    <description>Aspectran Appmon provides an integrated view to observe logs and events of Aspectran-based application servers in real time.</description>
     <inceptionYear>2020</inceptionYear>
     <contributors>
         <contributor>
@@ -137,7 +137,7 @@
                             <directory>app/work</directory>
                             <includes>
                                 <include>_resource_*/</include>
-                                <include>_webroot/</include>
+                                <include>_webapps/</include>
                             </includes>
                             <excludes>
                                 <exclude>.gitignore</exclude>

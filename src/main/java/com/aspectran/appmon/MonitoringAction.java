@@ -37,7 +37,7 @@ import java.util.Map;
 /**
  * <p>Created: 2020/02/23</p>
  */
-@Component("/appmon/monitoring")
+@Component("/monitoring")
 public class MonitoringAction {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitoringAction.class);

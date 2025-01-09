@@ -23,9 +23,9 @@ import java.io.Reader;
 
 public abstract class AppMonConfigBuilder {
 
-    private static final String APPMON_CONFIG_FILE = "com/aspectran/appmon/appmon-config.apon";
+    private static final String APPMON_CONFIG_FILE = "com/aspectran/appmon/config/appmon-config.apon";
 
-    private static final String APPMON_CONFIG_FILE_PROD = "com/aspectran/appmon/appmon-config-prod.apon";
+    private static final String APPMON_CONFIG_FILE_PROD = "com/aspectran/appmon/config/appmon-config-prod.apon";
 
     @NonNull
     public static AppMonConfig build(boolean forProd) throws IOException {

@@ -31,19 +31,7 @@
             </item>
             <item name="scratchDir">%{tow.context.root.scratchDir}</item>
             <item name="sessionManager">#{tow.context.root.sessionManager}</item>
-            <item name="servletSessionConfig">
-                <bean class="io.undertow.servlet.api.ServletSessionConfig">
-                    <properties>
-                        <item name="sessionTrackingModes" type="set">
-                            <value>#{class:jakarta.servlet.SessionTrackingMode^COOKIE}</value>
-                        </item>
-                    </properties>
-                    <properties profile="prod">
-                        <item name="domain" value="aspectran.com"/>
-                        <item name="path" value="/"/>
-                    </properties>
-                </bean>
-            </item>
+            <item name="servletSessionConfig">#{tow.context.appmon.sessionConfig}</item>
             <item name="servlets" type="array">
                 <bean class="com.aspectran.undertow.server.servlet.TowServlet">
                     <arguments>
@@ -98,10 +86,23 @@
         </properties>
     </bean>
 
+    <bean id="tow.context.root.sessionConfig"
+          class="io.undertow.servlet.api.ServletSessionConfig">
+        <properties>
+            <item name="sessionTrackingModes" type="set">
+                <value>#{class:jakarta.servlet.SessionTrackingMode^COOKIE}</value>
+            </item>
+        </properties>
+        <properties profile="prod">
+            <item name="domain" value="aspectran.com"/>
+            <item name="path" value="/"/>
+        </properties>
+    </bean>
+
     <bean id="tow.context.root.sessionManager"
           class="com.aspectran.undertow.server.session.TowSessionManager"
           scope="prototype">
-        <properties profile="dev">
+        <properties>
             <item name="sessionManagerConfig">
                 <bean class="com.aspectran.core.context.config.SessionManagerConfig">
                     <arguments>
@@ -120,35 +121,6 @@
                 <bean class="com.aspectran.core.component.session.FileSessionStoreFactoryBean">
                     <properties>
                         <item name="storeDir">/work/_sessions/%{tow.context.root.name}</item>
-                    </properties>
-                </bean>
-            </item>
-        </properties>
-        <properties profile="!dev">
-            <item name="sessionManagerConfig">
-                <bean class="com.aspectran.core.context.config.SessionManagerConfig">
-                    <arguments>
-                        <item>
-                            workerName: rn0
-                            maxActiveSessions: 9999
-                            maxIdleSeconds: 489
-                            evictionIdleSeconds: 258
-                            scavengingIntervalSeconds: 180
-                            clusterEnabled: true
-                        </item>
-                    </arguments>
-                </bean>
-            </item>
-            <item name="sessionStore">
-                <bean class="com.aspectran.core.component.session.redis.lettuce.DefaultLettuceSessionStoreFactoryBean">
-                    <properties>
-                        <item name="poolConfig">
-                            <bean class="com.aspectran.core.component.session.redis.lettuce.RedisConnectionPoolConfig">
-                                <properties>
-                                    <item name="uri">%{system:redis.uri}/10</item>
-                                </properties>
-                            </bean>
-                        </item>
                     </properties>
                 </bean>
             </item>

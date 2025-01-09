@@ -4,7 +4,7 @@ function AppMonBuilder() {
 
     this.build = function (basePath, token, currentEndpoint) {
         $.ajax({
-            url: basePath + "appmon/monitoring/endpoints/" + token,
+            url: basePath + "monitoring/endpoints/" + token,
             type: 'get',
             dataType: "json",
             success: function (data) {

@@ -14,19 +14,6 @@
     <bean id="currentTranslet" class="com.aspectran.core.support.CurrentTransletFactoryBean" scope="request"/>
     <bean id="currentActivityData" class="com.aspectran.core.support.CurrentActivityDataFactoryBean" scope="request"/>
 
-    <aspect id="activityDataAccessibility">
-        <description>
-            The activity data of each translet can be referenced with the "data" attribute.
-        </description>
-        <advice>
-            <before>
-                <echo>
-                    <item name="data">#{currentActivityData}</item>
-                </echo>
-            </before>
-        </advice>
-    </aspect>
-
     <aspect id="defaultTransletSettings">
         <description>
             Defines an aspect that injects default settings into all translets.
@@ -39,6 +26,6 @@
         </settings>
     </aspect>
 
-    <append resource="app/demo/web/demo-web.xml"/>
+    <append resource="com/aspectran/appmon/web-config.xml"/>
 
 </aspectran>

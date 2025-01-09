@@ -105,7 +105,7 @@
     <bean id="tow.context.appmon.sessionManager"
           class="com.aspectran.undertow.server.session.TowSessionManager"
           scope="prototype">
-        <properties profile="dev">
+        <properties>
             <item name="sessionManagerConfig">
                 <bean class="com.aspectran.core.context.config.SessionManagerConfig">
                     <arguments>
@@ -124,35 +124,6 @@
                 <bean class="com.aspectran.core.component.session.FileSessionStoreFactoryBean">
                     <properties>
                         <item name="storeDir">/work/_sessions/%{tow.context.appmon.name}</item>
-                    </properties>
-                </bean>
-            </item>
-        </properties>
-        <properties profile="!dev">
-            <item name="sessionManagerConfig">
-                <bean class="com.aspectran.core.context.config.SessionManagerConfig">
-                    <arguments>
-                        <item>
-                            workerName: dn0
-                            maxActiveSessions: 9999
-                            maxIdleSeconds: 489
-                            evictionIdleSeconds: 258
-                            scavengingIntervalSeconds: 180
-                            clusterEnabled: false
-                        </item>
-                    </arguments>
-                </bean>
-            </item>
-            <item name="sessionStore">
-                <bean class="com.aspectran.core.component.session.redis.lettuce.DefaultLettuceSessionStoreFactoryBean">
-                    <properties>
-                        <item name="poolConfig">
-                            <bean class="com.aspectran.core.component.session.redis.lettuce.RedisConnectionPoolConfig">
-                                <properties>
-                                    <item name="uri">%{system:redis.uri}/12</item>
-                                </properties>
-                            </bean>
-                        </item>
                     </properties>
                 </bean>
             </item>

@@ -65,7 +65,7 @@ public class PollingAppMonEndpoint implements AppMonEndpoint {
         }
     }
 
-    @RequestToPost("/appmon/endpoint/join")
+    @RequestToPost("/endpoint/join")
     @Transform(FormatType.JSON)
     public Map<String, Object> join(@NonNull Translet translet, String message) throws IOException {
         if (appMonService == null) {
@@ -92,7 +92,7 @@ public class PollingAppMonEndpoint implements AppMonEndpoint {
         );
     }
 
-    @RequestToGet("/appmon/endpoint/pull")
+    @RequestToGet("/endpoint/pull")
     @Transform(FormatType.JSON)
     public String[] pull(@NonNull Translet translet) throws IOException {
         if (appMonService == null) {
@@ -109,7 +109,7 @@ public class PollingAppMonEndpoint implements AppMonEndpoint {
         return (lines != null ? lines : new String[0]);
     }
 
-    @RequestToPost("/appmon/endpoint/pollingInterval")
+    @RequestToPost("/endpoint/pollingInterval")
     @Transform(FormatType.TEXT)
     public int pollingInterval(@NonNull Translet translet, int speed) {
         if (appMonService == null) {

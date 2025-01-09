@@ -23,20 +23,68 @@ endpoint: {
     }
 }
 group: {
-    name: jpetstore
-    title: JPetStore
+    name: root
+    title: Root
     event: {
         name: request
-        reader: request.event.exporter.com.aspectran.appmon.RequestEventReader
-        target: jpetstore
+        reader: com.aspectran.appmon.exporter.event.request.RequestEventReader
+        target: root
     }
     state: {
         name: session
-        title: JPetStore App Session Statistics
-        reader: session.state.exporter.com.aspectran.appmon.SessionStateReader
-        target: tow.server/jpetstore
+        title: Root App Session Statistics
+        reader: com.aspectran.appmon.exporter.state.session.SessionStateReader
+        target: tow.server/root
         sampleInterval: 5000
     }
+    log: {
+        name: app
+        title: Root App
+        file: /logs/root.log
+        lastLines: 1000
+        sampleInterval: 300
+    }
+    log: {
+        name: access
+        title: Root Access
+        file: /logs/root-access.log
+        lastLines: 1000
+        sampleInterval: 300
+    }
+}
+group: {
+    name: appmon
+    title: Appmon
+    event: {
+        name: request
+        reader: com.aspectran.appmon.exporter.event.request.RequestEventReader
+        target: appmon
+    }
+    state: {
+        name: session
+        title: Root App Session Statistics
+        reader: com.aspectran.appmon.exporter.state.session.SessionStateReader
+        target: tow.server/appmon
+        sampleInterval: 5000
+    }
+    log: {
+        name: app
+        title: Appmon App
+        file: /logs/appmon.log
+        lastLines: 1000
+        sampleInterval: 300
+    }
+    log: {
+        name: access
+        title: Appmon Access
+        file: /logs/appmon-access.log
+        lastLines: 1000
+        sampleInterval: 300
+    }
+}
+group: {
+    name: jpetstore
+    title: JPetStore
     log: {
         name: app
         title: JPetStore App
@@ -55,23 +103,6 @@ group: {
 group: {
     name: demo
     title: Demo
-    event: {
-        name: request
-        reader: request.event.exporter.com.aspectran.appmon.RequestEventReader
-        target: demo
-        parameters: {
-            +: /
-            +: /**
-            -: /examples/gs-rest-service/**
-        }
-    }
-    state: {
-        name: session
-        title: Demo App Session Statistics
-        reader: session.state.exporter.com.aspectran.appmon.SessionStateReader
-        target: tow.server/demo
-        sampleInterval: 5000
-    }
     log: {
         name: app
         title: Demo App
@@ -83,69 +114,6 @@ group: {
         name: access
         title: Demo Access
         file: /logs/demo-access.log
-        lastLines: 1000
-        sampleInterval: 300
-    }
-}
-group: {
-    name: demo2
-    title: RESTful Demo
-    event: {
-        name: request
-        reader: request.event.exporter.com.aspectran.appmon.RequestEventReader
-        target: demo
-        parameters: {
-            +: /examples/gs-rest-service/**
-        }
-    }
-    state: {
-        name: session
-        title: Demo App Session Statistics
-        reader: session.state.exporter.com.aspectran.appmon.SessionStateReader
-        target: tow.server/demo
-        sampleInterval: 5000
-    }
-    log: {
-        name: app
-        title: Demo App
-        file: /logs/demo2.log
-        lastLines: 1000
-        sampleInterval: 300
-    }
-    log: {
-        name: access
-        title: Demo Access
-        file: /logs/demo2-access.log
-        lastLines: 1000
-        sampleInterval: 300
-    }
-}
-group: {
-    name: root
-    title: Root
-    event: {
-        name: request
-        reader: request.event.exporter.com.aspectran.appmon.RequestEventReader
-        target: root
-    }
-    state: {
-        name: session
-        title: Root App Session Statistics
-        reader: session.state.exporter.com.aspectran.appmon.SessionStateReader
-        target: tow.server/root
-        sampleInterval: 5000
-    }
-    log: {
-        name: app
-        title: Root App
-        file: /logs/root.log
-        lastLines: 1000
-        sampleInterval: 300
-    }
-    log: {
-        name: access
-        title: Root Access
-        file: /logs/root-access.log
         lastLines: 1000
         sampleInterval: 300
     }

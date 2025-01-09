@@ -1,5 +1,5 @@
 context: {
-    name: demo
+    name: appmon
     rules: classpath:com/aspectran/appmon/root-context.xml
     resources: [
     ]
