@@ -61,14 +61,17 @@
         <developerConnection>scm:git:ssh://git@github.com/aspectran/appmon.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
+
     <issueManagement>
         <system>GitHub Issue Management</system>
         <url>https://github.com/aspectran/appmon/issues</url>
     </issueManagement>
+
     <ciManagement>
         <system>GitHub Workflows</system>
         <url>https://github.com/aspectran/appmon/actions</url>
     </ciManagement>
+
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
@@ -79,6 +82,7 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
     <repositories>
         <repository>
             <id>oss.sonatype.org-snapshot</id>
@@ -91,6 +95,11 @@
             </snapshots>
         </repository>
     </repositories>
+
+    <modules>
+        <module>appmon</module>
+        <module>demo</module>
+    </modules>
 
     <properties>
         <main.basedir>${project.basedir}</main.basedir>
@@ -108,11 +117,6 @@
         <aspectran.version>8.2.1-SNAPSHOT</aspectran.version>
         <jakarta.websocket.api.version>2.2.0</jakarta.websocket.api.version>
     </properties>
-
-    <modules>
-        <module>appmon</module>
-        <module>demo</module>
-    </modules>
 
     <dependencyManagement>
         <dependencies>
