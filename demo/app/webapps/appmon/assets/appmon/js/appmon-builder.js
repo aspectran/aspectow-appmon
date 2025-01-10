@@ -4,7 +4,7 @@ function AppMonBuilder() {
 
     this.build = function (basePath, token, currentEndpoint) {
         $.ajax({
-            url: basePath + "monitoring/endpoints/" + token,
+            url: basePath + "backend/endpoints/" + token,
             type: 'get',
             dataType: "json",
             success: function (data) {
@@ -64,7 +64,7 @@ function AppMonBuilder() {
                 if (endpoint.index === 1) {
                     clearScreen();
                 }
-                let client = new AppmonPollingClient(endpoint, onEndpointJoined, onEstablishCompleted);
+                let client = new AppMonPollingClient(endpoint, onEndpointJoined, onEstablishCompleted);
                 endpoint['client'] = client;
                 client.start();
             }, (endpoint.index - 1) * 1000);
@@ -75,8 +75,8 @@ function AppMonBuilder() {
         }
 
         let endpoint = endpoints[endpointIndex];
-        endpoint['viewer'] = new AppmonViewer(endpoint);
-        let client = new AppmonWebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErrorObserved);
+        endpoint['viewer'] = new AppMonViewer(endpoint);
+        let client = new AppMonWebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErrorObserved);
         endpoint['client'] = client;
         client.start();
     };

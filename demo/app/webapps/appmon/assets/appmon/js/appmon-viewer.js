@@ -1,4 +1,4 @@
-function AppmonViewer(endpoint) {
+function AppMonViewer(endpoint) {
     let $tracks = {};
     let $displays = {};
     let $consoles = {};

@@ -17,14 +17,10 @@ package com.aspectran.aspectow.appmon;
 
 import com.aspectran.aspectow.appmon.config.EndpointInfo;
 import com.aspectran.aspectow.appmon.manager.AppMonManager;
-import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
-import com.aspectran.core.component.bean.annotation.Dispatch;
-import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.RequestToGet;
 import com.aspectran.core.component.bean.annotation.Required;
-import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.logging.Logger;
 import com.aspectran.utils.logging.LoggerFactory;
 import com.aspectran.utils.security.InvalidPBTokenException;
@@ -32,34 +28,20 @@ import com.aspectran.web.activity.response.DefaultRestResponse;
 import com.aspectran.web.activity.response.RestResponse;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * <p>Created: 2020/02/23</p>
  */
-@Component("/monitoring")
-public class MonitoringAction {
+@Component("/backend")
+public class BackendAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(MonitoringAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(BackendAction.class);
 
     private final AppMonManager appMonManager;
 
     @Autowired
-    public MonitoringAction(AppMonManager appMonManager) {
+    public BackendAction(AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
-    }
-
-    @Request("/${endpoint}")
-    @Dispatch("templates/default")
-    @Action("page")
-    public Map<String, String> viewer(String endpoint) {
-        return Map.of(
-                "headinclude", "appmon/_endpoints",
-                "include", "appmon/appmon",
-                "style", "fluid compact",
-                "token", appMonManager.issueToken(),
-                "endpoint", StringUtils.nullToEmpty(endpoint)
-        );
     }
 
     @RequestToGet("/endpoints/${token}")

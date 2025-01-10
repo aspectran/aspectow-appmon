@@ -1,4 +1,4 @@
-function AppmonPollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
+function AppMonPollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
     this.start = function () {
         join();
     };
@@ -9,7 +9,7 @@ function AppmonPollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
 
     const join = function () {
         $.ajax({
-            url: endpoint.basePath + "endpoint/join",
+            url: endpoint.basePath + "backend/endpoint/join",
             type: 'post',
             dataType: "json",
             success: function (payload) {
@@ -38,7 +38,7 @@ function AppmonPollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
 
     const polling = function () {
         $.ajax({
-            url: endpoint.basePath + "endpoint/pull",
+            url: endpoint.basePath + "backend/endpoint/pull",
             type: 'get',
             success: function (data) {
                 if (data) {
@@ -55,7 +55,7 @@ function AppmonPollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
 
     const changePollingInterval = function (speed) {
         $.ajax({
-            url: endpoint.basePath + "endpoint/pollingInterval",
+            url: endpoint.basePath + "backend/endpoint/pollingInterval",
             type: 'post',
             dataType: "json",
             data: {
