@@ -126,11 +126,6 @@
         </properties>
     </bean>
 
-    <bean id="tow.server.handler.loggingGroupAssistHandlerWrapper"
-          class="com.aspectran.undertow.server.handler.logging.LoggingGroupAssistHandlerWrapper"
-          scope="prototype">
-    </bean>
-
     <bean id="tow.server.handler.accessLogHandlerWrapper"
           class="com.aspectran.undertow.server.handler.accesslog.AccessLogHandlerWrapper"
           scope="prototype">

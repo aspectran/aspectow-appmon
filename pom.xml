@@ -64,12 +64,12 @@
 
     <issueManagement>
         <system>GitHub Issue Management</system>
-        <url>https://github.com/aspectran/appmon/issues</url>
+        <url>https://github.com/aspectran/aspectow-appmon/issues</url>
     </issueManagement>
 
     <ciManagement>
         <system>GitHub Workflows</system>
-        <url>https://github.com/aspectran/appmon/actions</url>
+        <url>https://github.com/aspectran/aspectow-appmon/actions</url>
     </ciManagement>
 
     <distributionManagement>
