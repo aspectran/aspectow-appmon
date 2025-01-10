@@ -4,7 +4,7 @@ context: {
     resources: [
     ]
     scan: [
-        com.aspectran.appmon
+        com.aspectran.aspectow.appmon
     ]
     profiles: {
         default: [

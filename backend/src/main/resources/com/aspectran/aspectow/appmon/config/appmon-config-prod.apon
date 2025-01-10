@@ -27,13 +27,13 @@ group: {
     title: JPetStore
     event: {
         name: request
-        reader: request.event.exporter.com.aspectran.aspectow.appmon.RequestEventReader
+        reader: com.aspectran.aspectow.appmon.exporter.event.request.RequestEventReader
         target: jpetstore
     }
     state: {
         name: session
         title: JPetStore App Session Statistics
-        reader: session.state.exporter.com.aspectran.aspectow.appmon.SessionStateReader
+        reader: com.aspectran.aspectow.appmon.exporter.state.session.SessionStateReader
         target: tow.server/jpetstore
         sampleInterval: 5000
     }
@@ -57,13 +57,13 @@ group: {
     title: Demo
     event: {
         name: request
-        reader: request.event.exporter.com.aspectran.aspectow.appmon.RequestEventReader
+        reader: com.aspectran.aspectow.appmon.exporter.event.request.RequestEventReader
         target: demo
     }
     state: {
         name: session
         title: Demo App Session Statistics
-        reader: session.state.exporter.com.aspectran.aspectow.appmon.SessionStateReader
+        reader: com.aspectran.aspectow.appmon.exporter.state.session.SessionStateReader
         target: tow.server/demo
         sampleInterval: 5000
     }
@@ -87,13 +87,13 @@ group: {
     title: Root
     event: {
         name: request
-        reader: request.event.exporter.com.aspectran.aspectow.appmon.RequestEventReader
+        reader: com.aspectran.aspectow.appmon.exporter.event.request.RequestEventReader
         target: root
     }
     state: {
         name: session
         title: Root App Session Statistics
-        reader: session.state.exporter.com.aspectran.aspectow.appmon.SessionStateReader
+        reader: com.aspectran.aspectow.appmon.exporter.state.session.SessionStateReader
         target: tow.server/root
         sampleInterval: 5000
     }
