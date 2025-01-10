@@ -3,12 +3,6 @@
         "http://aspectran.github.io/dtd/aspectran-8.dtd">
 <aspectran>
 
-    <description style="apon">
-        |
-        |JPetStore is a full web application built on top of MyBatis 3, Aspectran 8.
-        |
-    </description>
-
     <bean id="basePath" class="com.aspectran.core.support.BasePathFactoryBean"/>
     <bean id="currentEnv" class="com.aspectran.core.support.CurrentEnvironmentFactoryBean"/>
     <bean id="currentTranslet" class="com.aspectran.core.support.CurrentTransletFactoryBean" scope="request"/>
@@ -16,7 +10,7 @@
 
     <aspect id="defaultTransletSettings">
         <description>
-            Defines an aspect that injects default settings into all translets.
+            Defines an aspect rule that injects default settings into all translets.
         </description>
         <settings>
             <setting name="format.indentSize" value="2"/>
@@ -26,6 +20,6 @@
         </settings>
     </aspect>
 
-    <append resource="com/aspectran/aspectow/appmon/web-config.xml"/>
+    <append resource="com/aspectran/aspectow/appmon/context/web-config.xml"/>
 
 </aspectran>

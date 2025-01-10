@@ -41,7 +41,7 @@ public class FrontAction {
     @Request("/${endpoint}")
     @Dispatch("templates/default")
     @Action("page")
-    public Map<String, String> viewer(String endpoint) {
+    public Map<String, String> front(String endpoint) {
         return Map.of(
                 "headinclude", "appmon/_endpoints",
                 "include", "appmon/appmon",

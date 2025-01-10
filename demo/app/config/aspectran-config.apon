@@ -46,14 +46,14 @@ shell: {
         |{{CYAN  }} /_____/\____/\__, /  /_/ |_|\___/_/\__,_/\__, /\___/_/
         |{{CYAN  }}============ /____/ ==================== /____/ =============
         |{{reset }}
-        |{{RED   }}Welcome To Log Relay #{class:com.aspectran.core.Aspectran^version}
+        |{{RED   }}Welcome To Aspectow AppMon Demo #{class:com.aspectran.aspectow.appmon.AboutMe^version}
         |{{reset }}
         |If you want a list of all supported built-in commands, type '{{GREEN}}help{{reset}}'.
         |To get help on a specific command, type '{{GREEN}}command_name -h{{reset}}'.
         |If you want a list of all available translets, type '{{GREEN}}translet -l{{reset}}'.
         |To run a translet, type '{{GREEN}}translet <translet_name>{{reset}}' or '{{GREEN}}translet_name{{reset}}'.
     )
-    prompt: "{{green}}log-relay>{{reset}} "
+    prompt: "{{green}}app-mon>{{reset}} "
     commands: [
         com.aspectran.undertow.shell.command.UndertowCommand
         com.aspectran.shell.command.builtins.TransletCommand

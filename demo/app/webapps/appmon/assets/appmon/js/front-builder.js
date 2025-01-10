@@ -1,4 +1,4 @@
-function AppMonBuilder() {
+function FrontBuilder() {
 
     const endpoints = [];
 
@@ -64,7 +64,7 @@ function AppMonBuilder() {
                 if (endpoint.index === 1) {
                     clearScreen();
                 }
-                let client = new AppMonPollingClient(endpoint, onEndpointJoined, onEstablishCompleted);
+                let client = new PollingClient(endpoint, onEndpointJoined, onEstablishCompleted);
                 endpoint['client'] = client;
                 client.start();
             }, (endpoint.index - 1) * 1000);
@@ -75,8 +75,8 @@ function AppMonBuilder() {
         }
 
         let endpoint = endpoints[endpointIndex];
-        endpoint['viewer'] = new AppMonViewer(endpoint);
-        let client = new AppMonWebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErrorObserved);
+        endpoint['viewer'] = new FrontViewer(endpoint);
+        let client = new WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErrorObserved);
         endpoint['client'] = client;
         client.start();
     };

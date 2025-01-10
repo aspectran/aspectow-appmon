@@ -1,4 +1,4 @@
-function AppMonViewer(endpoint) {
+function FrontViewer(endpoint) {
     let $tracks = {};
     let $displays = {};
     let $consoles = {};

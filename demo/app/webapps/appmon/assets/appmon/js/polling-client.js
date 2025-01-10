@@ -1,4 +1,4 @@
-function AppMonPollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
+function PollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
     this.start = function () {
         join();
     };

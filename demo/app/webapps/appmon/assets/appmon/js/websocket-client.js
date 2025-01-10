@@ -1,4 +1,4 @@
-function AppMonWebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErrorObserved) {
+function WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErrorObserved) {
     let socket = null;
     let heartbeatTimer = null;
     let pendingMessages = [];

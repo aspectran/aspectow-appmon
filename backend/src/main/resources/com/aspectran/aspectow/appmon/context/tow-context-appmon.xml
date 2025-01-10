@@ -33,7 +33,7 @@
             <item name="sessionManager">#{tow.context.appmon.sessionManager}</item>
             <item name="servletSessionConfig">#{tow.context.appmon.sessionConfig}</item>
             <item name="initParams" type="map">
-                <entry name="aspectran:config" value="classpath:com/aspectran/aspectow/appmon/aspectran-config.apon"/>
+                <entry name="aspectran:config" value="classpath:com/aspectran/aspectow/appmon/context/aspectran-config.apon"/>
             </item>
             <item name="servlets" type="array">
                 <bean class="com.aspectran.undertow.server.servlet.TowServlet">

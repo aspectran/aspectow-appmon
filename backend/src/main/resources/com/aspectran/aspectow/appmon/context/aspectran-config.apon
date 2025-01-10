@@ -1,6 +1,6 @@
 context: {
     name: appmon
-    rules: classpath:com/aspectran/aspectow/appmon/root-context.xml
+    rules: classpath:com/aspectran/aspectow/appmon/context/root-context.xml
     resources: [
     ]
     scan: [

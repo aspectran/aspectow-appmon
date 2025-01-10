@@ -98,6 +98,7 @@
 
     <modules>
         <module>backend</module>
+        <module>front</module>
         <module>demo</module>
     </modules>
 

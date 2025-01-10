@@ -3,10 +3,10 @@
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
 <link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20241226"/>">
 <script src="<aspectran:url value="/assets/countries/countries.js?20241217"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/appmon-builder.js?20241226"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/appmon-viewer.js?20241226"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/appmon-websocket-client.js?20241226"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/appmon-polling-client.js?20241226"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20241226"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20241226"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20241226"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20241226"/>"></script>
 <div class="grid-x endpoint-box compact horizontal">
     <div class="cell options t10 b5">
         <ul class="speed-options">
@@ -84,6 +84,6 @@
     $(function () {
         const token = "${page.token}";
         const endpoint = "${page.endpoint}";
-        new AppMonBuilder().build("<aspectran:url value="/"/>", token, endpoint);
+        new FrontBuilder().build("<aspectran:url value="/"/>", token, endpoint);
     });
 </script>
