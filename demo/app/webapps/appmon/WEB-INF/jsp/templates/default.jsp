@@ -59,6 +59,13 @@
                     </li>
                 </ul>
             </div>
+            <div class="top-bar-right">
+                <ul class="dropdown menu">
+                    <li>
+                        <a href="https://github.com/aspectran/aspectow-appmon" title="Get Involved">v${page.version}</a>
+                    </li>
+                </ul>
+            </div>
         </div>
         <div class="breadcrumbs-bar" style="display:none" data-hide-for="medium down">
             <div class="grid-container ${page.style}">
