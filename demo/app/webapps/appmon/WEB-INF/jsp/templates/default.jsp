@@ -55,7 +55,7 @@
             <div class="top-bar-left">
                 <ul class="dropdown menu">
                     <li>
-                        <a title="Sample applications built on Aspectran">AppMon</a>
+                        <a href="/" title="Sample applications built on Aspectran">AppMon</a>
                     </li>
                 </ul>
             </div>
@@ -106,7 +106,7 @@
             <div class="cell">
                 <nav role="navigation" aria-label="You are here:">
                     <ul class="breadcrumbs" itemprop="breadcrumb">
-                        <li><a href="/">AppMon</a></li>
+                        <li><a href="<aspectran:url value="/"/>">AppMon</a></li>
                     </ul>
                 </nav>
             </div>
