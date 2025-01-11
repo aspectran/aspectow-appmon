@@ -53,7 +53,7 @@
             <div class="top-bar-left">
                 <ul class="dropdown menu" data-dropdown-menu>
                     <li>
-                        <a>Log Relay</a>
+                        <a>Aspectow AppMon</a>
                     </li>
                 </ul>
             </div>

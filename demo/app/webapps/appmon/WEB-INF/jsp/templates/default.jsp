@@ -8,8 +8,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="google" content="notranslate">
-    <title>${empty page.title ? "Aspectow Demo" : page.title}</title>
-    <meta name="description" content="${empty page.description ? "Welcome to the Aspectran Demo Site" : page.description}">
+    <title>${empty page.title ? "AppMon" : page.title}</title>
+    <meta name="description" content="${empty page.description ? "Welcome to AppMon" : page.description}">
     <link rel="stylesheet" href="https://aspectran.com/assets/css/aspectran.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap">
     <script src="https://aspectran.com/assets/js/modernizr-custom.js"></script>
@@ -39,7 +39,7 @@
             <a class="logo" href="<aspectran:url value="/"/>" title="Aspectran"><img src="https://aspectran.com/assets/img/aspectran-site-logo.png" alt="Aspectran"/></a>
         </div>
         <div class="title-bar-center">
-            <a href="#top-of-page">Aspectran</a>
+            <a href="#top-of-page">AppMon</a>
         </div>
         <div class="title-bar-right" data-toggle="gnb-menu">
             <a class="menu-icon" title="Menu"></a>
@@ -53,45 +53,18 @@
                 </div>
             </div>
             <div class="top-bar-left">
-                <ul class="dropdown menu" data-dropdown-menu>
+                <ul class="dropdown menu">
                     <li>
-                        <a title="Sample applications built on Aspectran">Sample Apps</a>
-                        <ul class="submenu menu vertical" data-submenu>
-                            <li><a href="https://demo.aspectran.com">Aspectran Demo</a></li>
-                            <li><a href="https://jpetstore.aspectran.com">JPetStore Demo</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a>Get Involved</a>
-                        <ul class="submenu menu vertical" data-submenu>
-                            <li><a href="https://github.com/aspectran/appmon">GitHub</a></li>
-                        </ul>
+                        <a title="Sample applications built on Aspectran">AppMon</a>
                     </li>
                 </ul>
-            </div>
-            <div class="top-bar-right">
-                <ul class="dropdown menu" data-dropdown-menu>
-                    <li>
-                        <a href="<aspectran:url value="/appmon/front/"/>">Monitoring</a>
-                    </li>
-                </ul>
-                <div class="quick-search-box">
-                    <form name="google_quick_search">
-                        <div class="input-group">
-                            <input class="input-group-field" type="text" name="keyword" placeholder="Search">
-                            <div class="input-group-button">
-                                <button type="submit" class="button"><i class="fi-magnifying-glass"></i></button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
             </div>
         </div>
         <div class="breadcrumbs-bar" style="display:none" data-hide-for="medium down">
             <div class="grid-container ${page.style}">
                 <nav role="navigation" aria-label="You are here:">
                     <ul class="breadcrumbs" itemprop="breadcrumb">
-                        <li><a href="<aspectran:url value="/"/>">Aspectow Demo</a></li>
+                        <li><a href="<aspectran:url value="/"/>">AppMon</a></li>
                     </ul>
                 </nav>
             </div>
@@ -133,7 +106,7 @@
             <div class="cell">
                 <nav role="navigation" aria-label="You are here:">
                     <ul class="breadcrumbs" itemprop="breadcrumb">
-                        <li><a href="/">Aspectow Demo</a></li>
+                        <li><a href="/">AppMon</a></li>
                     </ul>
                 </nav>
             </div>
