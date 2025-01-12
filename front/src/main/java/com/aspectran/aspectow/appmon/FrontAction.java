@@ -24,8 +24,6 @@ import com.aspectran.core.component.bean.annotation.Dispatch;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.logging.Logger;
-import com.aspectran.utils.logging.LoggerFactory;
 import com.aspectran.utils.security.InvalidPBTokenException;
 
 import java.util.Map;
@@ -35,8 +33,6 @@ import java.util.Map;
  */
 @Component
 public class FrontAction {
-
-    private static final Logger logger = LoggerFactory.getLogger(FrontAction.class);
 
     private final AppMonManager appMonManager;
 
@@ -62,7 +58,11 @@ public class FrontAction {
         try {
             appMonManager.validateToken(token);
         } catch (InvalidPBTokenException e) {
-            translet.redirect("/../");
+            if (StringUtils.hasLength(translet.getContextPath())) {
+                translet.redirect("/../");
+            } else {
+                translet.redirect("/");
+            }
             return null;
         }
         return Map.of(
