@@ -32,16 +32,10 @@
 
     <properties>
         <main.basedir>${project.parent.basedir}</main.basedir>
+        <automatic.module.name>com.aspectran.aspectow.appmon.backend</automatic.module.name>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>aspectran-with-logback</artifactId>
-            <version>${aspectran.version}</version>
-            <type>pom</type>
-            <optional>true</optional>
-        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>aspectran-web</artifactId>

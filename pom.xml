@@ -104,6 +104,7 @@
 
     <properties>
         <main.basedir>${project.basedir}</main.basedir>
+        <automatic.module.name/>
 
         <compiler.source>17</compiler.source>
         <compiler.target>17</compiler.target>
@@ -261,9 +262,10 @@
                     <archive>
                         <index>true</index>
                         <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
+                        <manifestEntries>
+                            <Automatic-Module-Name>${automatic.module.name}</Automatic-Module-Name>
+                            <Specification-Version>1234</Specification-Version>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>

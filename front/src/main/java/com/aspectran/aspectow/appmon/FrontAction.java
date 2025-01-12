@@ -62,10 +62,7 @@ public class FrontAction {
         try {
             appMonManager.validateToken(token);
         } catch (InvalidPBTokenException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(e);
-            }
-            translet.redirect("../../../");
+            translet.redirect("/../");
             return null;
         }
         return Map.of(

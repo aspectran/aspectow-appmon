@@ -40,14 +40,14 @@ public abstract class AboutMe {
                 pkg.getImplementationVersion() != null) {
             VERSION = pkg.getImplementationVersion();
         } else {
-            VERSION = System.getProperty("appmon.version", "1.0.x(20250111)");
+            VERSION = System.getProperty("appmon.version", "1.0.x");
         }
 
         POWERED_BY = "Powered by Aspectran " + VERSION;
         POWERED_BY_LINK = "<a href=\"https://aspectran.com\">Powered by Aspectran " + VERSION + "</a>";
 
         // Show warning when RC# or M# is in version string
-        STABLE = !VERSION.matches("^.*\\.(RC|M)[0-9]+$");
+        STABLE = !VERSION.matches("^.*[.-](RC|M|SNAPSHOT)[0-9]?$");
     }
 
     public static String getVersion() {
@@ -66,9 +66,10 @@ public abstract class AboutMe {
      * Prints Aspectran information to the specified print stream.
      * @param output a {@link PrintStream} object to print
      */
-    public static void printAboutMe(PrintStream output) {
+    public static void print(PrintStream output) {
         Assert.notNull(output, "output must not be null");
-        output.println("Aspectran: " + VERSION);
+        output.println("Aspectran: " + com.aspectran.core.AboutMe.VERSION);
+        output.println("AppMon: " + VERSION);
         output.println("JVM: " + System.getProperty("java.vm.name") + " (build " +
                 System.getProperty("java.vm.version") + ", " + System.getProperty("java.vm.info") + ")");
         output.println("OS: " + System.getProperty("os.name") + " " +
@@ -79,10 +80,11 @@ public abstract class AboutMe {
      * Prints Aspectran information to the specified print stream.
      * @param output a {@link PrintStream} object to print
      */
-    public static void printPrettyAboutMe(@NonNull PrintStream output) {
+    public static void printPretty(PrintStream output) {
         Assert.notNull(output, "output must not be null");
         output.println("---------------------------------------------------------------------");
-        output.printf(" %1$-9s : %2$s%n", "Aspectran", VERSION);
+        output.printf(" %1$-9s : %2$s%n", "Aspectran", com.aspectran.core.AboutMe.VERSION);
+        output.printf(" %1$-9s : %2$s%n", "AppMon", VERSION);
         output.printf(" %1$-9s : %2$s%n", "JVM", System.getProperty("java.vm.name") + " (build " +
                 System.getProperty("java.vm.version") + ", " + System.getProperty("java.vm.info") + ")");
         output.printf(" %1$-9s : %2$s%n", "OS", System.getProperty("os.name") + " " +
@@ -95,7 +97,7 @@ public abstract class AboutMe {
      * @param args a string array containing the command line arguments
      */
     public static void main(String[] args) {
-        printPrettyAboutMe(System.out);
+        printPretty(System.out);
     }
 
 }
