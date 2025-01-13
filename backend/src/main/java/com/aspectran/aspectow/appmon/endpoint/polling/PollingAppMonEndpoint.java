@@ -29,8 +29,10 @@ import com.aspectran.core.component.bean.annotation.RequestToGet;
 import com.aspectran.core.component.bean.annotation.RequestToPost;
 import com.aspectran.core.component.bean.annotation.Transform;
 import com.aspectran.core.context.rule.type.FormatType;
-import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
+import com.aspectran.utils.logging.Logger;
+import com.aspectran.utils.logging.LoggerFactory;
+import com.aspectran.utils.security.InvalidPBTokenException;
 
 import java.io.IOException;
 import java.util.List;
@@ -38,6 +40,8 @@ import java.util.Map;
 
 @Component("/backend")
 public class PollingAppMonEndpoint implements AppMonEndpoint {
+
+    private static final Logger logger = LoggerFactory.getLogger(PollingAppMonEndpoint.class);
 
     private final AppMonManager appMonManager;
 
@@ -65,10 +69,10 @@ public class PollingAppMonEndpoint implements AppMonEndpoint {
         }
     }
 
-    @RequestToPost("/endpoint/join")
+    @RequestToPost("/endpoint/${token}/join")
     @Transform(FormatType.JSON)
-    public Map<String, Object> join(@NonNull Translet translet, String message) throws IOException {
-        if (appMonService == null) {
+    public Map<String, Object> join(@NonNull Translet translet, String token) throws IOException {
+        if (checkServiceUnavailable(token)) {
             return null;
         }
 
@@ -76,9 +80,9 @@ public class PollingAppMonEndpoint implements AppMonEndpoint {
 
         EndpointInfo endpointInfo = appMonManager.getResidentEndpointInfo();
         EndpointPollingConfig pollingConfig = endpointInfo.getPollingConfig();
-        String[] joinGroups = StringUtils.splitCommaDelimitedString(message);
+        //String[] joinGroups = StringUtils.splitCommaDelimitedString(message);
 
-        PollingAppMonSession appMonSession = appMonService.createSession(sessionId, pollingConfig, joinGroups);
+        PollingAppMonSession appMonSession = appMonService.createSession(sessionId, pollingConfig, null);
         if (!appMonManager.join(appMonSession)) {
             return null;
         }
@@ -86,57 +90,62 @@ public class PollingAppMonEndpoint implements AppMonEndpoint {
         List<GroupInfo> groups = appMonManager.getGroupInfoList(appMonSession.getJoinedGroups());
         List<String> messages = appMonManager.getLastMessages(appMonSession);
         return Map.of(
+                "token", AppMonManager.issueToken(),
                 "groups", groups,
                 "pollingInterval", appMonSession.getPollingInterval(),
                 "messages", messages
         );
     }
 
-    @RequestToGet("/endpoint/pull")
+    @RequestToGet("/endpoint/${token}/pull")
     @Transform(FormatType.JSON)
-    public String[] pull(@NonNull Translet translet) throws IOException {
-        if (appMonService == null) {
+    public Map<String, Object> pull(@NonNull Translet translet, String token) throws IOException {
+        if (checkServiceUnavailable(token)) {
             return null;
         }
 
         String sessionId = translet.getSessionAdapter().getId();
-        PollingAppMonSession session = appMonService.getSession(sessionId);
-        if (session == null || !session.isValid()) {
+        PollingAppMonSession appMonSession = appMonService.getSession(sessionId);
+        if (appMonSession == null || !appMonSession.isValid()) {
             return null;
         }
 
-        String[] lines = appMonService.pull(session);
-        return (lines != null ? lines : new String[0]);
+        String newToken = AppMonManager.issueToken(appMonSession.getPollingInterval() + 30);
+        String[] messages = appMonService.pull(appMonSession);
+        return Map.of(
+                "token", newToken,
+                "messages", (messages != null ? messages : new String[0])
+        );
     }
 
-    @RequestToPost("/endpoint/pollingInterval")
+    @RequestToPost("/endpoint/${token}/pollingInterval")
     @Transform(FormatType.TEXT)
-    public int pollingInterval(@NonNull Translet translet, int speed) {
-        if (appMonService == null) {
+    public int pollingInterval(@NonNull Translet translet, String token, int speed) {
+        if (checkServiceUnavailable(token)) {
             return -1;
         }
 
         String sessionId = translet.getSessionAdapter().getId();
-        PollingAppMonSession session = appMonService.getSession(sessionId);
-        if (session == null) {
+        PollingAppMonSession appMonSession = appMonService.getSession(sessionId);
+        if (appMonSession == null) {
             return -1;
         }
 
         if (speed == 1) {
-            session.setPollingInterval(1000);
+            appMonSession.setPollingInterval(1000);
         } else {
             EndpointInfo endpointInfo = appMonManager.getResidentEndpointInfo();
             EndpointPollingConfig pollingConfig = endpointInfo.getPollingConfig();
-            session.setPollingInterval(pollingConfig.getPollingInterval());
+            appMonSession.setPollingInterval(pollingConfig.getPollingInterval());
         }
 
-        return session.getPollingInterval();
+        return appMonSession.getPollingInterval();
     }
 
     @Override
-    public void broadcast(String line) {
+    public void broadcast(String message) {
         if (appMonService != null) {
-            appMonService.push(line);
+            appMonService.push(message);
         }
     }
 
@@ -150,6 +159,21 @@ public class PollingAppMonEndpoint implements AppMonEndpoint {
             return appMonService.isUsingGroup(group);
         } else {
             return false;
+        }
+    }
+
+    private boolean checkServiceUnavailable(String token) {
+        if (appMonService == null) {
+            return true;
+        }
+        try {
+            AppMonManager.validateToken(token);
+            return false;
+        } catch (InvalidPBTokenException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(e);
+            }
+            return true;
         }
     }
 

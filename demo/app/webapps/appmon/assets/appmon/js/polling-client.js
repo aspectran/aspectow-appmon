@@ -9,45 +9,40 @@ function PollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
 
     const join = function () {
         $.ajax({
-            url: endpoint.basePath + "backend/endpoint/join",
+            url: endpoint.basePath + "backend/endpoint/" + endpoint.token + "/join",
             type: 'post',
             dataType: "json",
-            success: function (payload) {
-                if (payload) {
+            success: function (data) {
+                if (data) {
                     endpoint['mode'] = "polling";
-                    endpoint['pollingInterval'] = payload.pollingInterval;
+                    endpoint['token'] = data.token;
+                    endpoint['pollingInterval'] = data.pollingInterval;
                     if (onEndpointJoined) {
-                        onEndpointJoined(endpoint, payload);
+                        onEndpointJoined(endpoint, data);
                     }
                     if (onEstablishCompleted) {
-                        onEstablishCompleted(endpoint, payload);
+                        onEstablishCompleted(endpoint, data);
                     }
-                    endpoint.viewer.printMessage("Polling every " + payload.pollingInterval + " milliseconds.");
+                    endpoint.viewer.printMessage("Polling every " + data.pollingInterval + " milliseconds.");
                     polling();
                 }
             }
         });
     };
 
-    const rejoin = function () {
-        endpoint.viewer.printErrorMessage("Connection lost. It will retry in 5 seconds.");
-        setTimeout(function () {
-            location.reload();
-        }, 5000)
-    };
-
     const polling = function () {
         $.ajax({
-            url: endpoint.basePath + "backend/endpoint/pull",
+            url: endpoint.basePath + "backend/endpoint/" + endpoint.token + "/pull",
             type: 'get',
             success: function (data) {
-                if (data) {
-                    for (let key in data) {
-                        endpoint.viewer.processMessage(data[key]);
+                if (data && data.token && data.messages) {
+                    endpoint['token'] = data.token;
+                    for (let key in data.messages) {
+                        endpoint.viewer.processMessage(data.messages[key]);
                     }
                     setTimeout(polling, endpoint.pollingInterval);
                 } else {
-                    rejoin();
+                    endpoint.viewer.printErrorMessage("Connection lost. Please refresh this page to try again!");
                 }
             }
         });
@@ -55,7 +50,7 @@ function PollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
 
     const changePollingInterval = function (speed) {
         $.ajax({
-            url: endpoint.basePath + "backend/endpoint/pollingInterval",
+            url: endpoint.basePath + "backend/endpoint/" + endpoint.token + "/pollingInterval",
             type: 'post',
             dataType: "json",
             data: {

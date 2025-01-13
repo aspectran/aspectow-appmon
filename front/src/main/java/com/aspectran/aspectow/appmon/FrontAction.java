@@ -18,7 +18,6 @@ package com.aspectran.aspectow.appmon;
 import com.aspectran.aspectow.appmon.manager.AppMonManager;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Action;
-import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
 import com.aspectran.core.component.bean.annotation.Request;
@@ -33,13 +32,6 @@ import java.util.Map;
  */
 @Component
 public class FrontAction {
-
-    private final AppMonManager appMonManager;
-
-    @Autowired
-    public FrontAction(AppMonManager appMonManager) {
-        this.appMonManager = appMonManager;
-    }
 
     @Request("/")
     @Dispatch("templates/default")
@@ -56,7 +48,7 @@ public class FrontAction {
     @Action("page")
     public Map<String, String> front(@NonNull Translet translet, String token, String endpoint) {
         try {
-            appMonManager.validateToken(token);
+            AppMonManager.validateToken(token);
         } catch (InvalidPBTokenException e) {
             if (StringUtils.hasLength(translet.getContextPath())) {
                 translet.redirect("/../");
@@ -70,7 +62,7 @@ public class FrontAction {
             "headinclude", "appmon/_endpoints",
             "include", "appmon/appmon",
             "style", "fluid compact",
-            "token", appMonManager.issueToken(),
+            "token", AppMonManager.issueToken(),
             "endpoint", StringUtils.nullToEmpty(endpoint)
         );
     }

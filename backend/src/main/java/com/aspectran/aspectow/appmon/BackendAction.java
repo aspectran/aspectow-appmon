@@ -28,6 +28,7 @@ import com.aspectran.web.activity.response.DefaultRestResponse;
 import com.aspectran.web.activity.response.RestResponse;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Created: 2020/02/23</p>
@@ -47,15 +48,19 @@ public class BackendAction {
     @RequestToGet("/endpoints/${token}")
     public RestResponse getEndpoints(@Required String token) {
         try {
-            appMonManager.validateToken(token);
+            AppMonManager.validateToken(token);
         } catch (InvalidPBTokenException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e);
             }
             return new DefaultRestResponse().forbidden();
         }
-        List<EndpointInfo> endpointInfoList = appMonManager.getAvailableEndpointInfoList(token);
-        return new DefaultRestResponse(endpointInfoList).ok();
+        List<EndpointInfo> endpointInfoList = appMonManager.getAvailableEndpointInfoList();
+        Map<String, Object> data = Map.of(
+                "token", AppMonManager.issueToken(),
+                "endpoints", endpointInfoList
+        );
+        return new DefaultRestResponse(data).ok();
     }
 
 }

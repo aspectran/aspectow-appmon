@@ -132,7 +132,6 @@ function FrontViewer(endpoint) {
                 }
                 if (visible) {
                     let $track = getDisplay(name);
-                    console.log("track", $track);
                     if ($track) {
                         launchBullet($track, data);
                     }

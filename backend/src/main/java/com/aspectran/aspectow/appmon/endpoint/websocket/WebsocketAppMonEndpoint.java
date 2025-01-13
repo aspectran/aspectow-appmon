@@ -85,7 +85,7 @@ public class WebsocketAppMonEndpoint implements AppMonEndpoint {
     @OnOpen
     public void onOpen(@PathParam("token") String token, Session session) throws IOException {
         try {
-            TimeLimitedPBTokenIssuer.validate(token);
+            AppMonManager.validateToken(token);
         } catch (InvalidPBTokenException e) {
             logger.error("Invalid token: " + token);
             String reason = "Invalid token";

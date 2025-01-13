@@ -89,22 +89,11 @@ public class AppMonManager extends InstantActivitySupport {
         if (endpointInfo == null) {
             throw new IllegalStateException("Resident EndpointInfo not found");
         }
-        return endpointInfo.copy();
+        return endpointInfo;
     }
 
-    public List<EndpointInfo> getAvailableEndpointInfoList(String token) {
-        List<EndpointInfo> endpointInfoList = new ArrayList<>();
-        for (EndpointInfo endpointInfo : endpointInfoHolder.getEndpointInfoList()) {
-            EndpointInfo info = endpointInfo.copy();
-            String url = info.getUrl();
-            if (!url.endsWith("/")) {
-                url += "/";
-            }
-            url += token;
-            info.setUrl(url);
-            endpointInfoList.add(info);
-        }
-        return endpointInfoList;
+    public List<EndpointInfo> getAvailableEndpointInfoList() {
+        return endpointInfoHolder.getEndpointInfoList();
     }
 
     public String[] getVerifiedGroupNames(String[] joinGroups) {
@@ -255,11 +244,15 @@ public class AppMonManager extends InstantActivitySupport {
         }
     }
 
-    public String issueToken() {
-        return TimeLimitedPBTokenIssuer.getToken(1000L * 60 * 60 * 12); // 12 hours
+    public static String issueToken() {
+        return issueToken(60); // default 60 secs.
     }
 
-    public void validateToken(String token) throws InvalidPBTokenException {
+    public static String issueToken(int expirationTimeInSeconds) {
+        return TimeLimitedPBTokenIssuer.getToken(1000L * expirationTimeInSeconds);
+    }
+
+    public static void validateToken(String token) throws InvalidPBTokenException {
         TimeLimitedPBTokenIssuer.validate(token);
     }
 

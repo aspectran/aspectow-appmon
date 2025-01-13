@@ -11,10 +11,11 @@ function FrontBuilder() {
                 if (data) {
                     endpoints.length = 0;
                     let index = 0;
-                    for (let key in data) {
-                        let endpoint = data[key];
+                    for (let key in data.endpoints) {
+                        let endpoint = data.endpoints[key];
                         endpoint['index'] = index++;
                         endpoint['basePath'] = basePath;
+                        endpoint['token'] = data.token;
                         if (!currentEndpoint || currentEndpoint === endpoint.name) {
                             endpoints.push(endpoint);
                         }

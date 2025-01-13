@@ -94,6 +94,9 @@
           scope="prototype">
         <properties profile="!prod">
             <item name="pathPatternsByGroupName" type="map">
+                <entry name="appmon">
+                    +: /appmon/**
+                </entry>
                 <entry name="jpetstore">
                     +: /jpetstore
                     +: /jpetstore/**
@@ -110,6 +113,9 @@
         </properties>
         <properties profile="prod">
             <item name="pathPatternsByGroupName" type="map">
+                <entry name="appmon">
+                    +: /appmon/**
+                </entry>
                 <entry name="jpetstore">
                     +: /jpetstore
                     +: /jpetstore/**
