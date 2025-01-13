@@ -55,7 +55,7 @@
             <div class="top-bar-left">
                 <ul class="dropdown menu">
                     <li>
-                        <a href="/" title="Sample applications built on Aspectran">AppMon</a>
+                        <a href="<aspectran:url value="/../monitoring/"/>" title="AppMon">AppMon</a>
                     </li>
                 </ul>
             </div>

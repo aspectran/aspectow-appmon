@@ -92,9 +92,6 @@
             <item name="sessionTrackingModes" type="set">
                 <value>#{class:jakarta.servlet.SessionTrackingMode^COOKIE}</value>
             </item>
-        </properties>
-        <properties profile="prod">
-            <item name="domain" value="aspectran.com"/>
             <item name="path" value="/"/>
         </properties>
     </bean>

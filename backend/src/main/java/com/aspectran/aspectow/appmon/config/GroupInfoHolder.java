@@ -36,12 +36,6 @@ public class GroupInfoHolder {
                     eventInfo.setGroup(info.getName());
                 }
             }
-            List<StateInfo> stateInfoList = info.getStateInfoList();
-            if (stateInfoList != null) {
-                for (StateInfo stateInfo : stateInfoList) {
-                    stateInfo.setGroup(info.getName());
-                }
-            }
             List<LogInfo> logInfoList = info.getLogInfoList();
             if (logInfoList != null) {
                 for (LogInfo logInfo : logInfoList) {

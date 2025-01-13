@@ -44,10 +44,10 @@ function WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErr
         };
         socket.onclose = function (event) {
             if (event.code === 1000) {
-                endpoint.viewer.printEventMessage("Socket connection closed.");
+                endpoint.viewer.printMessage("Socket connection closed.");
             } else {
                 closeSocket();
-                endpoint.viewer.printEventMessage("Socket connection closed. Please refresh this page to try again!");
+                endpoint.viewer.printMessage("Socket connection closed. Please refresh this page to try again!");
             }
         };
         socket.onerror = function (event) {
@@ -73,13 +73,13 @@ function WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErr
             onEndpointJoined(endpoint, payload);
         }
         while (pendingMessages.length) {
-            endpoint.viewer.printEventMessage(pendingMessages.shift());
+            endpoint.viewer.printMessage(pendingMessages.shift());
         }
         if (onEstablishCompleted) {
             onEstablishCompleted(endpoint, payload);
         }
         while (pendingMessages.length) {
-            endpoint.viewer.printEventMessage(pendingMessages.shift());
+            endpoint.viewer.printMessage(pendingMessages.shift());
         }
         established = true;
         socket.send("established:");

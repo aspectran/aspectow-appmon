@@ -30,8 +30,6 @@
                 </bean>
             </item>
             <item name="scratchDir">%{tow.context.appmon.scratchDir}</item>
-            <item name="sessionManager">#{tow.context.appmon.sessionManager}</item>
-            <item name="servletSessionConfig">#{tow.context.appmon.sessionConfig}</item>
             <item name="initParams" type="map">
                 <entry name="aspectran:config" value="classpath:com/aspectran/aspectow/appmon/context/aspectran-config.apon"/>
             </item>
@@ -83,47 +81,6 @@
                     <properties>
                         <item name="directBuffers" valueType="boolean">false</item>
                         <item name="bufferSize" valueType="int">1024</item>
-                    </properties>
-                </bean>
-            </item>
-        </properties>
-    </bean>
-
-    <bean id="tow.context.appmon.sessionConfig"
-          class="io.undertow.servlet.api.ServletSessionConfig">
-        <properties>
-            <item name="sessionTrackingModes" type="set">
-                <value>#{class:jakarta.servlet.SessionTrackingMode^COOKIE}</value>
-            </item>
-        </properties>
-        <properties profile="prod">
-            <item name="domain" value="aspectran.com"/>
-            <item name="path" value="/"/>
-        </properties>
-    </bean>
-
-    <bean id="tow.context.appmon.sessionManager"
-          class="com.aspectran.undertow.server.session.TowSessionManager"
-          scope="prototype">
-        <properties>
-            <item name="sessionManagerConfig">
-                <bean class="com.aspectran.core.context.config.SessionManagerConfig">
-                    <arguments>
-                        <item>
-                            workerName: amn0
-                            maxActiveSessions: 9999
-                            maxIdleSeconds: 489
-                            evictionIdleSeconds: 258
-                            scavengingIntervalSeconds: 180
-                            clusterEnabled: false
-                        </item>
-                    </arguments>
-                </bean>
-            </item>
-            <item name="sessionStore">
-                <bean class="com.aspectran.core.component.session.FileSessionStoreFactoryBean">
-                    <properties>
-                        <item name="storeDir">/work/_sessions/%{tow.context.appmon.name}</item>
                     </properties>
                 </bean>
             </item>

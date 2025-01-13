@@ -28,8 +28,8 @@ import java.util.List;
  */
 public class AppMonConfig extends AbstractParameters {
 
-    private static final ParameterKey group;
     private static final ParameterKey endpoint;
+    private static final ParameterKey group;
 
     private static final ParameterKey[] parameterKeys;
 
@@ -70,17 +70,7 @@ public class AppMonConfig extends AbstractParameters {
         return null;
     }
 
-    public List<StateInfo> getStateInfoList(String groupName) {
-        Assert.notNull(groupName, "groupName must not be null");
-        for (GroupInfo groupInfo : getGroupInfoList()) {
-            if (groupName.equals(groupInfo.getName())) {
-                return groupInfo.getStateInfoList();
-            }
-        }
-        return null;
-    }
-
-    public List<LogInfo> getLogtailInfoList(String groupName) {
+    public List<LogInfo> getLogInfoList(String groupName) {
         Assert.notNull(groupName, "groupName must not be null");
         for (GroupInfo groupInfo : getGroupInfoList()) {
             if (groupName.equals(groupInfo.getName())) {

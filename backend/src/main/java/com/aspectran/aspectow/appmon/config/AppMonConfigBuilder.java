@@ -29,12 +29,15 @@ public abstract class AppMonConfigBuilder {
 
     @NonNull
     public static AppMonConfig build(boolean forProd) throws IOException {
-        Reader reader;
         if (forProd) {
-            reader = ResourceUtils.getResourceAsReader(APPMON_CONFIG_FILE_PROD);
-        } else {
-            reader = ResourceUtils.getResourceAsReader(APPMON_CONFIG_FILE);
+            try {
+                Reader reader = ResourceUtils.getResourceAsReader(APPMON_CONFIG_FILE_PROD);
+                return new AppMonConfig(reader);
+            } catch (IOException e) {
+                // ignored
+            }
         }
+        Reader reader = ResourceUtils.getResourceAsReader(APPMON_CONFIG_FILE);
         return new AppMonConfig(reader);
     }
 

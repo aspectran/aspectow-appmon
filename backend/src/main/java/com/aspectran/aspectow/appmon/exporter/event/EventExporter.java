@@ -22,6 +22,8 @@ import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.apon.Parameters;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * <p>Created: 2024-12-18</p>
@@ -38,6 +40,10 @@ public class EventExporter extends Exporter {
 
     private final String label;
 
+    private final int sampleInterval;
+
+    private Timer timer;
+
     public EventExporter(@NonNull EventExporterManager eventExporterManager,
                          @NonNull EventInfo eventInfo,
                          @NonNull EventReader eventReader) {
@@ -45,6 +51,7 @@ public class EventExporter extends Exporter {
         this.eventInfo = eventInfo;
         this.eventReader = eventReader;
         this.label = eventInfo.getGroup() + TYPE + eventInfo.getName() + ":";
+        this.sampleInterval = eventInfo.getSampleInterval();
     }
 
     @Override
@@ -70,13 +77,42 @@ public class EventExporter extends Exporter {
         eventExporterManager.broadcast(label + message);
     }
 
+    private void broadcastIfChanged() {
+        String data = eventReader.readIfChanged();
+        if (data != null) {
+            broadcast(data);
+        }
+    }
+
     @Override
     protected void doStart() throws Exception {
-        eventReader.start();
+        if (sampleInterval > 0) {
+            eventReader.start();
+            broadcastIfChanged();
+            if (timer == null) {
+                String name = new ToStringBuilder("EventReadingTimer")
+                        .append("eventReader", eventReader)
+                        .append("sampleInterval", sampleInterval)
+                        .toString();
+                timer = new Timer(name);
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        broadcastIfChanged();
+                    }
+                }, 0, sampleInterval);
+            }
+        } else {
+            eventReader.start();
+        }
     }
 
     @Override
     protected void doStop() throws Exception {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
         eventReader.stop();
     }
 

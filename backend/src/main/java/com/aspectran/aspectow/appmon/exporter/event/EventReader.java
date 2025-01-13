@@ -26,4 +26,6 @@ public interface EventReader {
 
     String read();
 
+    String readIfChanged();
+
 }

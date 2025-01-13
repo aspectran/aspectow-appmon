@@ -28,25 +28,31 @@ public class EventInfo extends AbstractParameters {
 
     private static final ParameterKey group;
     private static final ParameterKey name;
+    private static final ParameterKey title;
     private static final ParameterKey reader;
     private static final ParameterKey target;
     private static final ParameterKey parameters;
+    private static final ParameterKey sampleInterval;
 
     private static final ParameterKey[] parameterKeys;
 
     static {
         group = new ParameterKey("group", ValueType.STRING);
         name = new ParameterKey("name", ValueType.STRING);
+        title = new ParameterKey("title", ValueType.STRING);
         reader = new ParameterKey("reader", ValueType.STRING);
         target = new ParameterKey("target", ValueType.STRING);
         parameters = new ParameterKey("parameters", ValueType.PARAMETERS);
+        sampleInterval = new ParameterKey("sampleInterval", ValueType.INT);
 
         parameterKeys = new ParameterKey[] {
                 group,
                 name,
+                title,
                 reader,
                 target,
-                parameters
+                parameters,
+                sampleInterval
         };
     }
 
@@ -68,6 +74,14 @@ public class EventInfo extends AbstractParameters {
 
     public void setName(String name) {
         putValue(EventInfo.name, name);
+    }
+
+    public String getTitle() {
+        return getString(title);
+    }
+
+    public void setTitle(String title) {
+        putValue(EventInfo.title, title);
     }
 
     public String getReader() {
@@ -96,6 +110,14 @@ public class EventInfo extends AbstractParameters {
 
     public void setParameters(Parameters parameters) {
         putValue(EventInfo.parameters, parameters);
+    }
+
+    public int getSampleInterval() {
+        return getInt(sampleInterval, 0);
+    }
+
+    public void setSampleInterval(int sampleInterval) {
+        putValue(EventInfo.sampleInterval, sampleInterval);
     }
 
     public void validateRequiredParameters() {

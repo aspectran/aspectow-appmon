@@ -22,7 +22,7 @@ function PollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
                     if (onEstablishCompleted) {
                         onEstablishCompleted(endpoint, payload);
                     }
-                    endpoint.viewer.printEventMessage("Polling every " + payload.pollingInterval + " milliseconds.");
+                    endpoint.viewer.printMessage("Polling every " + payload.pollingInterval + " milliseconds.");
                     polling();
                 }
             }
@@ -65,7 +65,7 @@ function PollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
                 console.log("pollingInterval", data);
                 if (data) {
                     endpoint.pollingInterval = data;
-                    endpoint.viewer.printEventMessage("Polling every " + data + " milliseconds.");
+                    endpoint.viewer.printMessage("Polling every " + data + " milliseconds.");
                 }
             }
         });

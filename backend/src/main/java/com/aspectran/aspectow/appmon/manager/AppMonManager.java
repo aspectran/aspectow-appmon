@@ -23,7 +23,6 @@ import com.aspectran.aspectow.appmon.endpoint.AppMonEndpoint;
 import com.aspectran.aspectow.appmon.endpoint.AppMonSession;
 import com.aspectran.aspectow.appmon.exporter.event.EventExporterManager;
 import com.aspectran.aspectow.appmon.exporter.log.LogExporterManager;
-import com.aspectran.aspectow.appmon.exporter.state.StateExporterManager;
 import com.aspectran.core.activity.InstantActivitySupport;
 import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.core.context.ActivityContext;
@@ -45,8 +44,6 @@ public class AppMonManager extends InstantActivitySupport {
     private final EndpointInfoHolder endpointInfoHolder;
 
     private final GroupInfoHolder groupInfoHolder;
-
-    private final List<StateExporterManager> stateExporterManagers = new ArrayList<>();
 
     private final List<EventExporterManager> eventExporterManagers = new ArrayList<>();
 
@@ -75,12 +72,6 @@ public class AppMonManager extends InstantActivitySupport {
         EventExporterManager eventExporterManager = new EventExporterManager(this, groupName);
         eventExporterManagers.add(eventExporterManager);
         return eventExporterManager;
-    }
-
-    StateExporterManager newStateExporterManager(String groupName) {
-        StateExporterManager stateExporterManager = new StateExporterManager(this, groupName);
-        stateExporterManagers.add(stateExporterManager);
-        return stateExporterManager;
     }
 
     LogExporterManager newLogExporterManager(String groupName) {
@@ -139,11 +130,6 @@ public class AppMonManager extends InstantActivitySupport {
                             eventExporterManager.start();
                         }
                     }
-                    for (StateExporterManager stateExporterManager : stateExporterManagers) {
-                        if (stateExporterManager.getGroupName().equals(group)) {
-                            stateExporterManager.start();
-                        }
-                    }
                     for (LogExporterManager logExporterManager : logExporterManagers) {
                         if (logExporterManager.getGroupName().equals(group)) {
                             logExporterManager.start();
@@ -153,9 +139,6 @@ public class AppMonManager extends InstantActivitySupport {
             } else {
                 for (EventExporterManager eventExporterManager : eventExporterManagers) {
                     eventExporterManager.start();
-                }
-                for (StateExporterManager stateExporterManager : stateExporterManagers) {
-                    stateExporterManager.start();
                 }
                 for (LogExporterManager logExporterManager : logExporterManagers) {
                     logExporterManager.start();
@@ -174,11 +157,6 @@ public class AppMonManager extends InstantActivitySupport {
                 for (EventExporterManager eventExporterManager : eventExporterManagers) {
                     if (eventExporterManager.getGroupName().equals(group)) {
                         eventExporterManager.stop();
-                    }
-                }
-                for (StateExporterManager stateExporterManager : stateExporterManagers) {
-                    if (stateExporterManager.getGroupName().equals(group)) {
-                        stateExporterManager.stop();
                     }
                 }
                 for (LogExporterManager logExporterManager : logExporterManagers) {
@@ -202,11 +180,6 @@ public class AppMonManager extends InstantActivitySupport {
                             eventExporterManager.collectMessages(messages);
                         }
                     }
-                    for (StateExporterManager stateExporterManager : stateExporterManagers) {
-                        if (stateExporterManager.getGroupName().equals(group)) {
-                            stateExporterManager.collectMessages(messages);
-                        }
-                    }
                     for (LogExporterManager logExporterManager : logExporterManagers) {
                         if (logExporterManager.getGroupName().equals(group)) {
                             logExporterManager.collectMessages(messages);
@@ -216,9 +189,6 @@ public class AppMonManager extends InstantActivitySupport {
             } else {
                 for (EventExporterManager eventExporterManager : eventExporterManagers) {
                     eventExporterManager.collectMessages(messages);
-                }
-                for (StateExporterManager stateExporterManager : stateExporterManagers) {
-                    stateExporterManager.collectMessages(messages);
                 }
                 for (LogExporterManager logExporterManager : logExporterManagers) {
                     logExporterManager.collectMessages(messages);

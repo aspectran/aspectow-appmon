@@ -30,10 +30,9 @@ group: {
         reader: com.aspectran.aspectow.appmon.exporter.event.request.RequestEventReader
         target: root
     }
-    state: {
+    event: {
         name: session
-        title: Root App Session Statistics
-        reader: com.aspectran.aspectow.appmon.exporter.state.session.SessionStateReader
+        reader: com.aspectran.aspectow.appmon.exporter.event.session.SessionEventReader
         target: tow.server/root
         sampleInterval: 5000
     }
@@ -59,13 +58,6 @@ group: {
         name: request
         reader: com.aspectran.aspectow.appmon.exporter.event.request.RequestEventReader
         target: appmon
-    }
-    state: {
-        name: session
-        title: Root App Session Statistics
-        reader: com.aspectran.aspectow.appmon.exporter.state.session.SessionStateReader
-        target: tow.server/appmon
-        sampleInterval: 5000
     }
     log: {
         name: app

@@ -1,29 +1,20 @@
 function FrontViewer(endpoint) {
-    let $tracks = {};
     let $displays = {};
     let $consoles = {};
     let $indicators = {};
     let visible = false;
     let prevPosition = 0;
 
-    this.putTrack = function (group, label, $track) {
-        $tracks[group + ":event:" + label] = $track;
+    this.putDisplay = function (group, label, $display) {
+        $displays[group + ":event:" + label] = $display;
     };
 
     this.putConsole = function (group, label, $console) {
         $consoles[group + ":log:" + label] = $console;
     };
 
-    this.putDisplay = function (group, label, $display) {
-        $displays[group + ":state:" + label] = $display;
-    };
-
     this.putIndicator = function (group, type, label, $indicator) {
         $indicators[group + ":" + type + ":" + label] = $indicator;
-    };
-
-    const getTrack = function (name) {
-        return ($tracks && name ? $tracks[name] : null);
     };
 
     const getDisplay = function (name) {
@@ -71,20 +62,22 @@ function FrontViewer(endpoint) {
     this.setVisible = function (flag) {
         visible = !!flag;
         if (!visible) {
-            for (let key in $tracks) {
-                $tracks[key].find(".bullet").remove();
+            for (let key in $displays) {
+                if ($displays[key].hasClass("track-box")) {
+                    $displays[key].find(".bullet").remove();
+                }
             }
         }
     };
 
-    this.printEventMessage = function (msg, name) {
+    this.printMessage = function (msg, name) {
         if (name) {
             let $console = getConsole(name);
             $("<p/>").addClass("event ellipses").html(msg).appendTo($console);
             scrollToBottom($console);
         } else {
             for (let key in $consoles) {
-                this.printEventMessage(msg, key);
+                this.printMessage(msg, key);
             }
         }
     };
@@ -117,11 +110,16 @@ function FrontViewer(endpoint) {
                 break;
             case "log":
                 indicate(group, type, label);
-                printLog(name, text);
+                printLogMessage(name, text);
                 break;
-            case "state":
-                processStateData(label, name, JSON.parse(text));
-                break;
+        }
+    };
+
+    const printLogMessage = function (name, text) {
+        let $console = getConsole(name);
+        if (!$console.data("pause")) {
+            $("<p/>").text(text).appendTo($console);
+            scrollToBottom($console);
         }
     };
 
@@ -133,11 +131,16 @@ function FrontViewer(endpoint) {
                     $reqNum.text(data.number);
                 }
                 if (visible) {
-                    let $track = getTrack(name);
+                    let $track = getDisplay(name);
+                    console.log("track", $track);
                     if ($track) {
                         launchBullet($track, data);
                     }
                 }
+                break;
+            case "session":
+                printSessionEventData(name, data);
+                break;
         }
     }
 
@@ -196,22 +199,7 @@ function FrontViewer(endpoint) {
         }
     }
 
-    const printLog = function (name, text) {
-        let $console = getConsole(name);
-        if (!$console.data("pause")) {
-            $("<p/>").text(text).appendTo($console);
-            scrollToBottom($console);
-        }
-    };
-
-    const processStateData = function (label, name, data) {
-        switch (label) {
-            case "session":
-                printSessionState(name, data);
-        }
-    };
-
-    const printSessionState = function (name, data) {
+    const printSessionEventData = function (name, data) {
         let $display = getDisplay(name);
         if ($display) {
             $display.find(".numberOfCreated").text(data.numberOfCreated);

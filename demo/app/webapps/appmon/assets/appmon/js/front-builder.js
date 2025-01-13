@@ -123,15 +123,15 @@ function FrontBuilder() {
             endpoint.viewer.putIndicator("group", "event", groupInfo.name, $indicatorGroup);
             for (let key in groupInfo.events) {
                 let eventInfo = groupInfo.events[key];
-                let $trackBox = addTrackBox($endpointBox, eventInfo);
-                let $reqNum = $trackBox.find(".req-num");
-                endpoint.viewer.putTrack(groupInfo.name, eventInfo.name, $trackBox);
-                endpoint.viewer.putIndicator(groupInfo.name, "event", eventInfo.name, $reqNum);
-            }
-            for (let key in groupInfo.states) {
-                let stateInfo = groupInfo.states[key];
-                let $displayBox = addDisplayBox($endpointBox, stateInfo);
-                endpoint.viewer.putDisplay(groupInfo.name, stateInfo.name, $displayBox);
+                if (eventInfo.name === "request") {
+                    let $trackBox = addTrackBox($endpointBox, eventInfo);
+                    let $reqNum = $trackBox.find(".req-num");
+                    endpoint.viewer.putDisplay(groupInfo.name, eventInfo.name, $trackBox);
+                    endpoint.viewer.putIndicator(groupInfo.name, "event", eventInfo.name, $reqNum);
+                } else {
+                    let $displayBox = addDisplayBox($endpointBox, eventInfo);
+                    endpoint.viewer.putDisplay(groupInfo.name, eventInfo.name, $displayBox);
+                }
             }
             for (let key in groupInfo.logs) {
                 let logInfo = groupInfo.logs[key];
@@ -329,12 +329,12 @@ function FrontBuilder() {
         return $logBox.appendTo($groupBox.find("> .grid-x")).show();
     };
 
-    const addDisplayBox = function (endpointBox, stateInfo) {
-        let $groupBox = endpointBox.find(".group-box[data-name=" + stateInfo.group + "]");
+    const addDisplayBox = function (endpointBox, eventInfo) {
+        let $groupBox = endpointBox.find(".group-box[data-name=" + eventInfo.group + "]");
         let $displayBox = $groupBox.find(".display-box").eq(0).hide().clone()
             .addClass("available")
-            .attr("data-group", stateInfo.group)
-            .attr("data-name", stateInfo.name);
+            .attr("data-group", eventInfo.group)
+            .attr("data-name", eventInfo.name);
         return $displayBox.appendTo($groupBox.find("> .grid-x")).show();
     };
 }

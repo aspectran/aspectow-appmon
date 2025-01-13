@@ -29,7 +29,6 @@ public class GroupInfo extends AbstractParameters {
     private static final ParameterKey name;
     private static final ParameterKey title;
     private static final ParameterKey event;
-    private static final ParameterKey state;
     private static final ParameterKey log;
 
     private static final ParameterKey[] parameterKeys;
@@ -37,7 +36,6 @@ public class GroupInfo extends AbstractParameters {
     static {
         name = new ParameterKey("name", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
-        state = new ParameterKey("states", new String[] {"state"}, StateInfo.class, true, true);
         event = new ParameterKey("events", new String[] {"event"}, EventInfo.class, true, true);
         log = new ParameterKey("logs", new String[] {"log"}, LogInfo.class, true, true);
 
@@ -45,7 +43,6 @@ public class GroupInfo extends AbstractParameters {
                 name,
                 title,
                 event,
-                state,
                 log
         };
     }
@@ -72,10 +69,6 @@ public class GroupInfo extends AbstractParameters {
 
     public List<EventInfo> getEventInfoList() {
         return getParametersList(event);
-    }
-
-    public List<StateInfo> getStateInfoList() {
-        return getParametersList(state);
     }
 
     public List<LogInfo> getLogInfoList() {

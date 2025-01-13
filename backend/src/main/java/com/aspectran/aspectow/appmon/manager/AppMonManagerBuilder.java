@@ -21,13 +21,10 @@ import com.aspectran.aspectow.appmon.config.EventInfo;
 import com.aspectran.aspectow.appmon.config.GroupInfo;
 import com.aspectran.aspectow.appmon.config.GroupInfoHolder;
 import com.aspectran.aspectow.appmon.config.LogInfo;
-import com.aspectran.aspectow.appmon.config.StateInfo;
 import com.aspectran.aspectow.appmon.exporter.event.EventExporterManager;
 import com.aspectran.aspectow.appmon.exporter.event.EventExporterManagerBuilder;
 import com.aspectran.aspectow.appmon.exporter.log.LogExporterManager;
 import com.aspectran.aspectow.appmon.exporter.log.LogExporterManagerBuilder;
-import com.aspectran.aspectow.appmon.exporter.state.StateExporterManager;
-import com.aspectran.aspectow.appmon.exporter.state.StateExporterManagerBuilder;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.Assert;
 import com.aspectran.utils.annotation.jsr305.NonNull;
@@ -54,12 +51,7 @@ public abstract class AppMonManagerBuilder {
                 EventExporterManager eventExporterManager = appMonManager.newEventExporterManager(groupInfo.getName());
                 EventExporterManagerBuilder.build(eventExporterManager, eventInfoList);
             }
-            List<StateInfo> stateInfoList = config.getStateInfoList(groupInfo.getName());
-            if (stateInfoList != null && !stateInfoList.isEmpty()) {
-                StateExporterManager stateExporterManager = appMonManager.newStateExporterManager(groupInfo.getName());
-                StateExporterManagerBuilder.build(stateExporterManager, stateInfoList);
-            }
-            List<LogInfo> logInfoList = config.getLogtailInfoList(groupInfo.getName());
+            List<LogInfo> logInfoList = config.getLogInfoList(groupInfo.getName());
             if (logInfoList != null && !logInfoList.isEmpty()) {
                 LogExporterManager logExporterManager = appMonManager.newLogExporterManager(groupInfo.getName());
                 LogExporterManagerBuilder.build(logExporterManager, logInfoList, context.getApplicationAdapter());

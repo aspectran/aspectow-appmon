@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.aspectow.appmon.exporter.state.session;
+package com.aspectran.aspectow.appmon.exporter.event.session;
 
-import com.aspectran.aspectow.appmon.config.StateInfo;
-import com.aspectran.aspectow.appmon.exporter.state.StateExporter;
-import com.aspectran.aspectow.appmon.exporter.state.StateExporterManager;
-import com.aspectran.aspectow.appmon.exporter.state.StateReader;
+import com.aspectran.aspectow.appmon.config.EventInfo;
+import com.aspectran.aspectow.appmon.exporter.event.EventExporter;
+import com.aspectran.aspectow.appmon.exporter.event.EventExporterManager;
+import com.aspectran.aspectow.appmon.exporter.event.EventReader;
 import com.aspectran.core.component.UnavailableException;
 import com.aspectran.core.component.bean.NoSuchBeanException;
 import com.aspectran.core.component.session.ManagedSession;
@@ -43,52 +43,52 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class SessionStateReader implements StateReader {
+public class SessionEventReader implements EventReader {
 
-    private static final Logger logger = LoggerFactory.getLogger(SessionStateReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(SessionEventReader.class);
 
     protected static final String USER_NAME = "user.name";
     private static final String USER_COUNTRY_CODE = "user.countryCode";
     private static final String USER_IP_ADDRESS = "user.ipAddress";
 
-    private final StateExporterManager stateExporterManager;
+    private final EventExporterManager eventExporterManager;
 
-    private final StateInfo stateInfo;
+    private final EventInfo eventInfo;
 
     private final String deploymentName;
 
     private final SessionHandler sessionHandler;
 
-    private SessionStateListener sessionListener;
+    private SessionEventListener sessionListener;
 
-    private volatile SessionStatePayload oldPayload;
+    private volatile SessionEventData oldData;
 
-    public SessionStateReader(@NonNull StateExporterManager stateExporterManager,
-                              @NonNull StateInfo stateInfo) {
-        this.stateExporterManager = stateExporterManager;
-        this.stateInfo = stateInfo;
+    public SessionEventReader(@NonNull EventExporterManager eventExporterManager,
+                              @NonNull EventInfo eventInfo) {
+        this.eventExporterManager = eventExporterManager;
+        this.eventInfo = eventInfo;
 
-        String[] arr = StringUtils.split(stateInfo.getTarget(), '/', 2);
+        String[] arr = StringUtils.split(eventInfo.getTarget(), '/', 2);
         String serverId = arr[0];
         String deploymentName = arr[1];
 
         try {
-            TowServer towServer = stateExporterManager.getBean(serverId);
+            TowServer towServer = eventExporterManager.getBean(serverId);
             this.sessionHandler = towServer.getSessionHandler(deploymentName);
             this.deploymentName = deploymentName;
         } catch (Exception e) {
-            throw new RuntimeException("Cannot resolve session handler with " + stateInfo.getTarget(), e);
+            throw new RuntimeException("Cannot resolve session handler with " + eventInfo.getTarget(), e);
         }
     }
 
-    public StateExporter getStateExporter() {
-        return stateExporterManager.getExporter(stateInfo.getName());
+    public EventExporter getEventExporter() {
+        return eventExporterManager.getExporter(eventInfo.getName());
     }
 
     @Override
     public void start() {
         if (sessionHandler != null) {
-            sessionListener = new SessionStateListener(this);
+            sessionListener = new SessionEventListener(this);
             getSessionListenerRegistration().register(sessionListener, deploymentName);
         }
     }
@@ -96,7 +96,7 @@ public class SessionStateReader implements StateReader {
     @Override
     public void stop() {
         if (sessionHandler != null) {
-            oldPayload = null;
+            oldData = null;
             if (sessionListener != null) {
                 try {
                     getSessionListenerRegistration().remove(sessionListener, deploymentName);
@@ -110,7 +110,7 @@ public class SessionStateReader implements StateReader {
     @NonNull
     private SessionListenerRegistration getSessionListenerRegistration() {
         try {
-            return stateExporterManager.getBean(SessionListenerRegistration.class);
+            return eventExporterManager.getBean(SessionListenerRegistration.class);
         } catch (NoSuchBeanException e) {
             throw new IllegalStateException("Bean for SessionListenerRegistration must be defined", e);
         }
@@ -122,9 +122,9 @@ public class SessionStateReader implements StateReader {
             return null;
         }
         try {
-            SessionStatePayload payload = loadWithActiveSessions();
-            oldPayload = payload;
-            return payload.toJson();
+            SessionEventData data = loadWithActiveSessions();
+            oldData = data;
+            return data.toJson();
         } catch (Exception e) {
             logger.error(e);
             return null;
@@ -137,10 +137,10 @@ public class SessionStateReader implements StateReader {
             return null;
         }
         try {
-            SessionStatePayload payload = load();
-            if (!payload.equals(oldPayload)) {
-                oldPayload = payload;
-                return payload.toJson();
+            SessionEventData data = load();
+            if (!data.equals(oldData)) {
+                oldData = data;
+                return data.toJson();
             } else {
                 return null;
             }
@@ -151,51 +151,51 @@ public class SessionStateReader implements StateReader {
     }
 
     String readWithCreatedSession(Session session) {
-        SessionStatePayload payload = load();
-        oldPayload = payload;
-        payload.setCreatedSessions(new JsonString[] { serialize(session) });
-        return payload.toJson();
+        SessionEventData data = load();
+        oldData = data;
+        data.setCreatedSessions(new JsonString[] { serialize(session) });
+        return data.toJson();
     }
 
     String readWithDestroyedSession(String sessionId) {
-        SessionStatePayload payload = load();
-        oldPayload = payload;
-        payload.setDestroyedSessions(new String[] { sessionId });
-        return payload.toJson();
+        SessionEventData data = load();
+        oldData = data;
+        data.setDestroyedSessions(new String[] { sessionId });
+        return data.toJson();
     }
 
     String readWithEvictedSession(String sessionId) {
-        SessionStatePayload payload = load();
-        oldPayload = payload;
-        payload.setEvictedSessions(new String[] { sessionId });
-        return payload.toJson();
+        SessionEventData data = load();
+        oldData = data;
+        data.setEvictedSessions(new String[] { sessionId });
+        return data.toJson();
     }
 
     String readWithResidedSession(Session session) {
-        SessionStatePayload payload = load();
-        oldPayload = payload;
-        payload.setResidedSessions(new JsonString[] { serialize(session) });
-        return payload.toJson();
+        SessionEventData data = load();
+        oldData = data;
+        data.setResidedSessions(new JsonString[] { serialize(session) });
+        return data.toJson();
     }
 
-    SessionStatePayload loadWithActiveSessions() {
-        SessionStatePayload payload = load();
-        payload.setCreatedSessions(getAllActiveSessions());
-        return payload;
+    SessionEventData loadWithActiveSessions() {
+        SessionEventData data = load();
+        data.setCreatedSessions(getAllActiveSessions());
+        return data;
     }
 
     @NonNull
-    private SessionStatePayload load() {
+    private SessionEventData load() {
         SessionStatistics statistics = sessionHandler.getStatistics();
-        SessionStatePayload payload = new SessionStatePayload();
-        payload.setNumberOfCreated(statistics.getNumberOfCreated());
-        payload.setNumberOfExpired(statistics.getNumberOfExpired());
-        payload.setNumberOfActives(statistics.getNumberOfActives());
-        payload.setHighestNumberOfActives(statistics.getHighestNumberOfActives());
-        payload.setNumberOfUnmanaged(Math.abs(statistics.getNumberOfUnmanaged()));
-        payload.setNumberOfRejected(statistics.getNumberOfRejected());
-        payload.setElapsedTime(formatDuration(statistics.getStartTime()));
-        return payload;
+        SessionEventData data = new SessionEventData();
+        data.setNumberOfCreated(statistics.getNumberOfCreated());
+        data.setNumberOfExpired(statistics.getNumberOfExpired());
+        data.setNumberOfActives(statistics.getNumberOfActives());
+        data.setHighestNumberOfActives(statistics.getHighestNumberOfActives());
+        data.setNumberOfUnmanaged(Math.abs(statistics.getNumberOfUnmanaged()));
+        data.setNumberOfRejected(statistics.getNumberOfRejected());
+        data.setElapsedTime(formatDuration(statistics.getStartTime()));
+        return data;
     }
 
     @NonNull

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.aspectow.appmon.exporter.state.session;
+package com.aspectran.aspectow.appmon.exporter.event.session;
 
 import com.aspectran.utils.json.JsonBuilder;
 import com.aspectran.utils.json.JsonString;
@@ -21,7 +21,7 @@ import com.aspectran.utils.json.JsonString;
 /**
  * <p>Created: 2020/01/11</p>
  */
-public class SessionStatePayload {
+public class SessionEventData {
 
     private long numberOfCreated;
 
@@ -138,7 +138,7 @@ public class SessionStatePayload {
         if (this == other) {
             return true;
         }
-        if (!(other instanceof SessionStatePayload that)) {
+        if (!(other instanceof SessionEventData that)) {
             return false;
         }
         return that.numberOfCreated == numberOfCreated &&

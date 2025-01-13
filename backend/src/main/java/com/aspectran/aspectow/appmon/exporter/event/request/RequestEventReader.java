@@ -121,12 +121,17 @@ public class RequestEventReader implements EventReader {
     @Override
     public String read() {
         return new JsonBuilder()
-                .prettyPrint(false)
-                .nullWritable(false)
-                .object()
-                    .put("number", counter.longValue())
-                .endObject()
-                .toString();
+            .prettyPrint(false)
+            .nullWritable(false)
+            .object()
+            .put("number", counter.longValue())
+            .endObject()
+            .toString();
+    }
+
+    @Override
+    public String readIfChanged() {
+        return null;
     }
 
 }
