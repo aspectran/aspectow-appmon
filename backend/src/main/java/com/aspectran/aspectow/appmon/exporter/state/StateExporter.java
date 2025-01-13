@@ -86,8 +86,8 @@ public class StateExporter extends Exporter {
         stateReader.start();
         broadcastIfChanged();
         if (sampleInterval > 0 && timer == null) {
-            String name = new ToStringBuilder("StatusReadingTimer")
-                    .append("statusReader", stateReader)
+            String name = new ToStringBuilder("StateReadingTimer")
+                    .append("stateReader", stateReader)
                     .append("sampleInterval", sampleInterval)
                     .toString();
             timer = new Timer(name);

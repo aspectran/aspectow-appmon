@@ -47,7 +47,9 @@ public class SessionStateReader implements StateReader {
 
     private static final Logger logger = LoggerFactory.getLogger(SessionStateReader.class);
 
-    public static final String USER_SESSION_KEY = "user";
+    protected static final String USER_NAME = "user.name";
+    private static final String USER_COUNTRY_CODE = "user.countryCode";
+    private static final String USER_IP_ADDRESS = "user.ipAddress";
 
     private final StateExporterManager stateExporterManager;
 
@@ -216,9 +218,9 @@ public class SessionStateReader implements StateReader {
                 .prettyPrint(false)
                 .object()
                     .put("sessionId", session.getId())
-                    .put("username", session.getAttribute("user.name"))
-                    .put("countryCode", session.getAttribute("user.countryCode"))
-                    .put("ipAddress", session.getAttribute("user.ipAddress"))
+                    .put("username", session.getAttribute(USER_NAME))
+                    .put("countryCode", session.getAttribute(USER_COUNTRY_CODE))
+                    .put("ipAddress", session.getAttribute(USER_IP_ADDRESS))
                     .put("createAt", formatTime(session.getCreationTime()))
                 .endObject()
                 .toJsonString();

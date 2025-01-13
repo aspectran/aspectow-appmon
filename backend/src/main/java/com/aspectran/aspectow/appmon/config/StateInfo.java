@@ -106,8 +106,8 @@ public class StateInfo extends AbstractParameters {
 
     public void validateRequiredParameters() {
         Assert.hasLength(getString(name), "Missing value of required parameter: " + getQualifiedName(name));
-        Assert.hasLength(getString(target), "Missing value of required parameter: " + getQualifiedName(target));
         Assert.hasLength(getString(reader), "Missing value of required parameter: " + getQualifiedName(reader));
+        Assert.hasLength(getString(target), "Missing value of required parameter: " + getQualifiedName(target));
     }
 
 }

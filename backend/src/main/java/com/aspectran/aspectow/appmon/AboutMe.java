@@ -16,7 +16,6 @@
 package com.aspectran.aspectow.appmon;
 
 import com.aspectran.utils.Assert;
-import com.aspectran.utils.annotation.jsr305.NonNull;
 
 import java.io.PrintStream;
 

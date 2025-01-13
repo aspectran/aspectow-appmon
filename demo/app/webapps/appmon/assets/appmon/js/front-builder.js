@@ -30,7 +30,6 @@ function FrontBuilder() {
     const establishEndpoint = function (endpointIndex) {
         console.log('endpointIndex', endpointIndex);
         function onEndpointJoined(endpoint, payload) {
-            console.log('endpoint', endpoint);
             buildEndpoint(endpoint, payload);
         }
         function onEstablishCompleted(endpoint, payload) {
@@ -75,6 +74,7 @@ function FrontBuilder() {
         }
 
         let endpoint = endpoints[endpointIndex];
+        console.log('endpoint', endpoint);
         endpoint['viewer'] = new FrontViewer(endpoint);
         let client = new WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErrorObserved);
         endpoint['client'] = client;

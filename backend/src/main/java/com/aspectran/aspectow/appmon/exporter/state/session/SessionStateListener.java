@@ -19,48 +19,48 @@ import com.aspectran.core.component.session.Session;
 import com.aspectran.core.component.session.SessionListener;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 
-import static com.aspectran.aspectow.appmon.exporter.state.session.SessionStateReader.USER_SESSION_KEY;
+import static com.aspectran.aspectow.appmon.exporter.state.session.SessionStateReader.USER_NAME;
 
 /**
  * <p>Created: 2024-12-13</p>
  */
 public class SessionStateListener implements SessionListener {
 
-    private final SessionStateReader statusReader;
+    private final SessionStateReader stateReader;
 
-    public SessionStateListener(SessionStateReader statusReader) {
-        this.statusReader = statusReader;
+    public SessionStateListener(SessionStateReader stateReader) {
+        this.stateReader = stateReader;
     }
 
     @Override
     public void sessionCreated(@NonNull Session session) {
-        String json = statusReader.readWithCreatedSession(session);
-        statusReader.getStateExporter().broadcast(json);
+        String json = stateReader.readWithCreatedSession(session);
+        stateReader.getStateExporter().broadcast(json);
     }
 
     @Override
     public void sessionDestroyed(@NonNull Session session) {
-        String json = statusReader.readWithDestroyedSession(session.getId());
-        statusReader.getStateExporter().broadcast(json);
+        String json = stateReader.readWithDestroyedSession(session.getId());
+        stateReader.getStateExporter().broadcast(json);
     }
 
     @Override
     public void sessionEvicted(@NonNull Session session) {
-        String json = statusReader.readWithEvictedSession(session.getId());
-        statusReader.getStateExporter().broadcast(json);
+        String json = stateReader.readWithEvictedSession(session.getId());
+        stateReader.getStateExporter().broadcast(json);
     }
 
     @Override
     public void sessionResided(@NonNull Session session) {
-        String json = statusReader.readWithResidedSession(session);
-        statusReader.getStateExporter().broadcast(json);
+        String json = stateReader.readWithResidedSession(session);
+        stateReader.getStateExporter().broadcast(json);
     }
 
     @Override
     public void attributeUpdated(Session session, String name, Object newValue, Object oldValue) {
-        if (USER_SESSION_KEY.equals(name)) {
-            String json = statusReader.readWithCreatedSession(session);
-            statusReader.getStateExporter().broadcast(json);
+        if (USER_NAME.equals(name)) {
+            String json = stateReader.readWithCreatedSession(session);
+            stateReader.getStateExporter().broadcast(json);
         }
     }
 

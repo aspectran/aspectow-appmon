@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * <p>Created: 2024-12-18</p>
  */
-public class EventExporterManagerBuilder {
+public abstract class EventExporterManagerBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(EventExporterManagerBuilder.class);
 
