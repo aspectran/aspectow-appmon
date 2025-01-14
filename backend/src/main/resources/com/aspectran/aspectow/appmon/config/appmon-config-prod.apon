@@ -90,7 +90,7 @@ group: {
     }
     event: {
         name: session
-        reader: com.aspectran.aspectow.appmon.exporter.state.session.SessionEventReader
+        reader: com.aspectran.aspectow.appmon.exporter.event.session.SessionEventReader
         target: tow.server/root
         sampleInterval: 5000
     }
