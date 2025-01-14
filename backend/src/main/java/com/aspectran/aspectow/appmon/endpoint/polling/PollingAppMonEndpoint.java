@@ -29,6 +29,7 @@ import com.aspectran.core.component.bean.annotation.RequestToGet;
 import com.aspectran.core.component.bean.annotation.RequestToPost;
 import com.aspectran.core.component.bean.annotation.Transform;
 import com.aspectran.core.context.rule.type.FormatType;
+import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.logging.Logger;
 import com.aspectran.utils.logging.LoggerFactory;
@@ -42,6 +43,7 @@ import java.util.Map;
 public class PollingAppMonEndpoint implements AppMonEndpoint {
 
     private static final Logger logger = LoggerFactory.getLogger(PollingAppMonEndpoint.class);
+
 
     private final AppMonManager appMonManager;
 
@@ -76,13 +78,13 @@ public class PollingAppMonEndpoint implements AppMonEndpoint {
             return null;
         }
 
-        String sessionId = translet.getSessionAdapter().getId();
-
         EndpointInfo endpointInfo = appMonManager.getResidentEndpointInfo();
         EndpointPollingConfig pollingConfig = endpointInfo.getPollingConfig();
-        //String[] joinGroups = StringUtils.splitCommaDelimitedString(message);
 
-        PollingAppMonSession appMonSession = appMonService.createSession(sessionId, pollingConfig, null);
+        String joinGroups = translet.getParameter("joinGroups");
+        String[] joinGroupNames = appMonManager.getVerifiedGroupNames(StringUtils.splitCommaDelimitedString(joinGroups));
+
+        PollingAppMonSession appMonSession = appMonService.createSession(translet, pollingConfig, joinGroupNames);
         if (!appMonManager.join(appMonSession)) {
             return null;
         }
@@ -104,8 +106,7 @@ public class PollingAppMonEndpoint implements AppMonEndpoint {
             return null;
         }
 
-        String sessionId = translet.getSessionAdapter().getId();
-        PollingAppMonSession appMonSession = appMonService.getSession(sessionId);
+        PollingAppMonSession appMonSession = appMonService.getSession(translet);
         if (appMonSession == null || !appMonSession.isValid()) {
             return null;
         }
@@ -125,8 +126,7 @@ public class PollingAppMonEndpoint implements AppMonEndpoint {
             return -1;
         }
 
-        String sessionId = translet.getSessionAdapter().getId();
-        PollingAppMonSession appMonSession = appMonService.getSession(sessionId);
+        PollingAppMonSession appMonSession = appMonService.getSession(translet);
         if (appMonSession == null) {
             return -1;
         }

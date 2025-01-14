@@ -96,8 +96,8 @@ public class AppMonManager extends InstantActivitySupport {
         return endpointInfoHolder.getEndpointInfoList();
     }
 
-    public String[] getVerifiedGroupNames(String[] joinGroups) {
-        List<GroupInfo> groups = getGroupInfoList(joinGroups);
+    public String[] getVerifiedGroupNames(String[] joinGroupNames) {
+        List<GroupInfo> groups = getGroupInfoList(joinGroupNames);
         if (!groups.isEmpty()) {
             return GroupInfoHolder.extractGroupNames(groups);
         } else {
@@ -105,8 +105,8 @@ public class AppMonManager extends InstantActivitySupport {
         }
     }
 
-    public List<GroupInfo> getGroupInfoList(String[] joinGroups) {
-        return groupInfoHolder.getGroupInfoList(joinGroups);
+    public List<GroupInfo> getGroupInfoList(String[] joinGroupNames) {
+        return groupInfoHolder.getGroupInfoList(joinGroupNames);
     }
 
     public synchronized boolean join(@NonNull AppMonSession session) {

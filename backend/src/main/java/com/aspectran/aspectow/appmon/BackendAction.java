@@ -55,7 +55,9 @@ public class BackendAction {
             }
             return new DefaultRestResponse().forbidden();
         }
+
         List<EndpointInfo> endpointInfoList = appMonManager.getAvailableEndpointInfoList();
+
         Map<String, Object> data = Map.of(
                 "token", AppMonManager.issueToken(),
                 "endpoints", endpointInfoList

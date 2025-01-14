@@ -1,17 +1,20 @@
 function PollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
-    this.start = function () {
-        join();
+    this.start = function (joinGroups) {
+        join(joinGroups);
     };
 
     this.speed = function (speed) {
         changePollingInterval(speed);
     };
 
-    const join = function () {
+    const join = function (joinGroups) {
         $.ajax({
             url: endpoint.basePath + "backend/endpoint/" + endpoint.token + "/join",
             type: 'post',
             dataType: "json",
+            data: {
+                joinGroups: joinGroups
+            },
             success: function (data) {
                 if (data) {
                     endpoint['mode'] = "polling";

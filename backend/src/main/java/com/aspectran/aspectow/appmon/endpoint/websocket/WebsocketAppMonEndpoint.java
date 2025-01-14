@@ -29,7 +29,6 @@ import com.aspectran.utils.json.JsonBuilder;
 import com.aspectran.utils.logging.Logger;
 import com.aspectran.utils.logging.LoggerFactory;
 import com.aspectran.utils.security.InvalidPBTokenException;
-import com.aspectran.utils.security.TimeLimitedPBTokenIssuer;
 import com.aspectran.web.websocket.jsr356.AspectranConfigurator;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.OnClose;
@@ -131,12 +130,12 @@ public class WebsocketAppMonEndpoint implements AppMonEndpoint {
         }
     }
 
-    private void addSession(Session session, String message) {
+    private void addSession(Session session, String joinGroups) {
         WebsocketAppMonSession appMonSession = new WebsocketAppMonSession(session);
         synchronized (sessions) {
             if (sessions.add(appMonSession)) {
-                String[] joinGroups = appMonManager.getVerifiedGroupNames(StringUtils.splitCommaDelimitedString(message));
-                appMonSession.saveJoinedGroups(joinGroups);
+                String[] joinGroupNames = appMonManager.getVerifiedGroupNames(StringUtils.splitCommaDelimitedString(joinGroups));
+                appMonSession.saveJoinedGroups(joinGroupNames);
                 sendJoined(appMonSession);
             }
         }

@@ -4,18 +4,18 @@ function WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErr
     let pendingMessages = [];
     let established = false;
 
-    this.start = function () {
-        openSocket();
+    this.start = function (joinGroups) {
+        openSocket(joinGroups);
     };
 
     this.stop = function () {
         closeSocket();
     };
 
-    const openSocket = function () {
+    const openSocket = function (joinGroups) {
         // For test
-        // onErrorObserved(endpoint);
-        // return;
+        //onErrorObserved(endpoint);
+        //return;
         closeSocket();
         let url = new URL(endpoint.url + '/' + endpoint.token, location.href);
         url.protocol = url.protocol.replace('https:', 'wss:');
@@ -23,7 +23,7 @@ function WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErr
         socket = new WebSocket(url.href);
         socket.onopen = function (event) {
             pendingMessages.push("Socket connection successful");
-            socket.send("join:");
+            socket.send("join:" + (joinGroups||""));
             heartbeatPing();
         };
         socket.onmessage = function (event) {

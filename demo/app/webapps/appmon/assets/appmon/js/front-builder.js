@@ -2,7 +2,7 @@ function FrontBuilder() {
 
     const endpoints = [];
 
-    this.build = function (basePath, token, currentEndpoint) {
+    this.build = function (basePath, token, currentEndpoint, joinGroups) {
         $.ajax({
             url: basePath + "backend/endpoints/" + token,
             type: 'get',
@@ -21,21 +21,21 @@ function FrontBuilder() {
                         }
                     }
                     if (endpoints.length) {
-                        establishEndpoint(0);
+                        establishEndpoint(0, joinGroups);
                     }
                 }
             }
         });
     };
 
-    const establishEndpoint = function (endpointIndex) {
+    const establishEndpoint = function (endpointIndex, joinGroups) {
         console.log('endpointIndex', endpointIndex);
         function onEndpointJoined(endpoint, payload) {
             buildEndpoint(endpoint, payload);
         }
         function onEstablishCompleted(endpoint, payload) {
             if (endpointIndex < endpoints.length - 1) {
-                establishEndpoint(endpointIndex + 1);
+                establishEndpoint(endpointIndex + 1, joinGroups);
             } else if (endpointIndex === endpoints.length - 1) {
                 buildGroups();
                 for (let key in payload.messages) {
@@ -61,12 +61,12 @@ function FrontBuilder() {
         }
         function onErrorObserved(endpoint) {
             setTimeout(function () {
-                if (endpoint.index === 1) {
+                if (endpoint.index === 0) {
                     clearScreen();
                 }
                 let client = new PollingClient(endpoint, onEndpointJoined, onEstablishCompleted);
                 endpoint['client'] = client;
-                client.start();
+                client.start(joinGroups);
             }, (endpoint.index - 1) * 1000);
         }
 
@@ -79,7 +79,7 @@ function FrontBuilder() {
         endpoint['viewer'] = new FrontViewer(endpoint);
         let client = new WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErrorObserved);
         endpoint['client'] = client;
-        client.start();
+        client.start(joinGroups);
     };
 
     const clearScreen = function () {

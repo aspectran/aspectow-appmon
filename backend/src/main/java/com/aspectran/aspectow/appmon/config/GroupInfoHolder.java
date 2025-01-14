@@ -45,10 +45,10 @@ public class GroupInfoHolder {
         }
     }
 
-    public List<GroupInfo> getGroupInfoList(String[] joinGroups) {
+    public List<GroupInfo> getGroupInfoList(String[] joinGroupNames) {
         List<GroupInfo> infoList = new ArrayList<>(groupInfos.size());
-        if (joinGroups != null && joinGroups.length > 0) {
-            for (String name : joinGroups) {
+        if (joinGroupNames != null && joinGroupNames.length > 0) {
+            for (String name : joinGroupNames) {
                 for (GroupInfo info : groupInfos.values()) {
                     if (info.getName().equals(name)) {
                         infoList.add(info);
