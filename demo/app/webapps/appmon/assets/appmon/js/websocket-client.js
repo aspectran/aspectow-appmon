@@ -14,8 +14,8 @@ function WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErr
 
     const openSocket = function (joinGroups) {
         // For test
-        //onErrorObserved(endpoint);
-        //return;
+        // onErrorObserved(endpoint);
+        // return;
         closeSocket();
         let url = new URL(endpoint.url + '/' + endpoint.token, location.href);
         url.protocol = url.protocol.replace('https:', 'wss:');
@@ -76,7 +76,7 @@ function WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErr
             endpoint.viewer.printMessage(pendingMessages.shift());
         }
         if (onEstablishCompleted) {
-            onEstablishCompleted(endpoint, payload);
+            onEstablishCompleted(endpoint);
         }
         while (pendingMessages.length) {
             endpoint.viewer.printMessage(pendingMessages.shift());

@@ -83,6 +83,9 @@ public class PollingAppMonEndpoint implements AppMonEndpoint {
 
         String joinGroups = translet.getParameter("joinGroups");
         String[] joinGroupNames = appMonManager.getVerifiedGroupNames(StringUtils.splitCommaDelimitedString(joinGroups));
+        if (StringUtils.hasText(joinGroups) && joinGroupNames.length == 0) {
+            return null;
+        }
 
         PollingAppMonSession appMonSession = appMonService.createSession(translet, pollingConfig, joinGroupNames);
         if (!appMonManager.join(appMonSession)) {

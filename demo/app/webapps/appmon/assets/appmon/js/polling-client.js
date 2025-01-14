@@ -24,7 +24,7 @@ function PollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
                         onEndpointJoined(endpoint, data);
                     }
                     if (onEstablishCompleted) {
-                        onEstablishCompleted(endpoint, data);
+                        onEstablishCompleted(endpoint);
                     }
                     endpoint.viewer.printMessage("Polling every " + data.pollingInterval + " milliseconds.");
                     polling();

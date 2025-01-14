@@ -72,8 +72,8 @@ public class PollingAppMonSession implements AppMonSession {
     }
 
     @Override
-    public void saveJoinedGroups(String[] joinGroups) {
-        this.joinedGroups = joinGroups;
+    public void saveJoinedGroups(String[] joinGroupNames) {
+        this.joinedGroups = joinGroupNames;
     }
 
     @Override

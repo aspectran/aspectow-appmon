@@ -75,7 +75,9 @@ public class PollingAppMonService extends AbstractComponent {
                 sessionTimeout = pollingInterval * 2;
             }
             PollingAppMonSession session = new PollingAppMonSession(this, sessionTimeout, pollingInterval);
-            session.saveJoinedGroups(joinGroupNames);
+            if (joinGroupNames != null) {
+                session.saveJoinedGroups(joinGroupNames);
+            }
             sessions.put(sessionId, session);
             session.access(true);
             return session;

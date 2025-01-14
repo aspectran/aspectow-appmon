@@ -135,21 +135,26 @@ public class WebsocketAppMonEndpoint implements AppMonEndpoint {
         synchronized (sessions) {
             if (sessions.add(appMonSession)) {
                 String[] joinGroupNames = appMonManager.getVerifiedGroupNames(StringUtils.splitCommaDelimitedString(joinGroups));
-                appMonSession.saveJoinedGroups(joinGroupNames);
+                if (!StringUtils.hasText(joinGroups) || joinGroupNames.length > 0) {
+                    appMonSession.saveJoinedGroups(joinGroupNames);
+                }
                 sendJoined(appMonSession);
             }
         }
     }
 
     private void sendJoined(@NonNull AppMonSession appMonSession) {
-        List<GroupInfo> groups = appMonManager.getGroupInfoList(appMonSession.getJoinedGroups());
-        String json = new JsonBuilder()
+        String[] joinGroupNames = appMonSession.getJoinedGroups();
+        if (joinGroupNames != null) {
+            List<GroupInfo> groups = appMonManager.getGroupInfoList(appMonSession.getJoinedGroups());
+            String json = new JsonBuilder()
                 .nullWritable(false)
                 .object()
                     .put("groups", groups)
                 .endObject()
                 .toString();
-        broadcast(appMonSession, MESSAGE_JOINED + json);
+            broadcast(appMonSession, MESSAGE_JOINED + json);
+        }
     }
 
     private void establishComplete(@NonNull Session session) {

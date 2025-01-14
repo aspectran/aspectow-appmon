@@ -19,7 +19,7 @@ public interface AppMonSession {
 
     String[] getJoinedGroups();
 
-    void saveJoinedGroups(String[] joinGroups);
+    void saveJoinedGroups(String[] joinGroupNames);
 
     void removeJoinedGroups();
 
