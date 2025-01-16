@@ -5,6 +5,4 @@
     <include file="${aspectran.basePath:-app}/config/logging/included/logback-scheduler.xml"/>
     <include file="${aspectran.basePath:-app}/config/logging/included/logback-undertow.xml"/>
 
-    <logger name="app.logrelay" level="debug"/>
-
 </configuration>

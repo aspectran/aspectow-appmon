@@ -23,8 +23,8 @@ import com.aspectran.core.component.UnavailableException;
 import com.aspectran.core.component.bean.NoSuchBeanException;
 import com.aspectran.core.component.session.ManagedSession;
 import com.aspectran.core.component.session.Session;
-import com.aspectran.core.component.session.SessionHandler;
 import com.aspectran.core.component.session.SessionListenerRegistration;
+import com.aspectran.core.component.session.SessionManager;
 import com.aspectran.core.component.session.SessionStatistics;
 import com.aspectran.undertow.server.TowServer;
 import com.aspectran.utils.Assert;
@@ -57,7 +57,7 @@ public class SessionEventReader implements EventReader {
 
     private final String deploymentName;
 
-    private final SessionHandler sessionHandler;
+    private final SessionManager sessionManager;
 
     private SessionEventListener sessionListener;
 
@@ -74,7 +74,7 @@ public class SessionEventReader implements EventReader {
 
         try {
             TowServer towServer = eventExporterManager.getBean(serverId);
-            this.sessionHandler = towServer.getSessionHandler(deploymentName);
+            this.sessionManager = towServer.getSessionManager(deploymentName);
             this.deploymentName = deploymentName;
         } catch (Exception e) {
             throw new RuntimeException("Cannot resolve session handler with " + eventInfo.getTarget(), e);
@@ -87,7 +87,7 @@ public class SessionEventReader implements EventReader {
 
     @Override
     public void start() {
-        if (sessionHandler != null) {
+        if (sessionManager != null) {
             sessionListener = new SessionEventListener(this);
             getSessionListenerRegistration().register(sessionListener, deploymentName);
         }
@@ -95,7 +95,7 @@ public class SessionEventReader implements EventReader {
 
     @Override
     public void stop() {
-        if (sessionHandler != null) {
+        if (sessionManager != null) {
             oldData = null;
             if (sessionListener != null) {
                 try {
@@ -186,7 +186,7 @@ public class SessionEventReader implements EventReader {
 
     @NonNull
     private SessionEventData load() {
-        SessionStatistics statistics = sessionHandler.getStatistics();
+        SessionStatistics statistics = sessionManager.getStatistics();
         SessionEventData data = new SessionEventData();
         data.setNumberOfCreated(statistics.getNumberOfCreated());
         data.setNumberOfExpired(statistics.getNumberOfExpired());
@@ -200,10 +200,10 @@ public class SessionEventReader implements EventReader {
 
     @NonNull
     private JsonString[] getAllActiveSessions() {
-        Set<String> sessionIds = sessionHandler.getActiveSessions();
+        Set<String> sessionIds = sessionManager.getActiveSessions();
         List<JsonString> list = new ArrayList<>(sessionIds.size());
         for (String sessionId : sessionIds) {
-            ManagedSession session = sessionHandler.getSession(sessionId);
+            ManagedSession session = sessionManager.getSession(sessionId);
             if (session != null) {
                 list.add(serialize(session));
             }
