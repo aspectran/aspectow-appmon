@@ -31,7 +31,7 @@
             </item>
             <item name="scratchDir">%{tow.context.root.scratchDir}</item>
             <item name="sessionManager">#{tow.context.root.sessionManager}</item>
-            <item name="servletSessionConfig">#{tow.context.appmon.sessionConfig}</item>
+            <item name="servletSessionConfig">#{tow.context.root.sessionConfig}</item>
             <item name="servlets" type="array">
                 <bean class="com.aspectran.undertow.server.servlet.TowServlet">
                     <arguments>
