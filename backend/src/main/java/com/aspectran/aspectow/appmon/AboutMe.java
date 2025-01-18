@@ -20,7 +20,7 @@ import com.aspectran.utils.Assert;
 import java.io.PrintStream;
 
 /**
- * Class that exposes the build information of Aspectran.
+ * Class that exposes the build information of AppMon.
  * Fetches the "Implementation-Version" manifest attribute from the jar file.
  */
 public abstract class AboutMe {
@@ -45,7 +45,7 @@ public abstract class AboutMe {
         POWERED_BY = "Powered by Aspectran " + VERSION;
         POWERED_BY_LINK = "<a href=\"https://aspectran.com\">Powered by Aspectran " + VERSION + "</a>";
 
-        // Show warning when RC# or M# is in version string
+        // Show warning when RC# or M# or -SNAPSHOT is in version string
         STABLE = !VERSION.matches("^.*[.-](RC|M|SNAPSHOT)[0-9]?$");
     }
 
