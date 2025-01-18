@@ -43,8 +43,8 @@ shell: {
         |{{GREEN }}     /_\  _ __  _ __   /\/\   ___  _ __
         |{{GREEN }}    //_\\| '_ \| '_ \ /    \ / _ \| '_ \
         |{{GREEN }}   /  _  \ |_) | |_) / /\/\ \ (_) | | | |
-        |{{CYAN  }}   \_/ \_/ .__/| .__/\/    \/\___/|_| |_|  for Aspectow
-        |{{CYAN  }}=========|_|===|_|=======================================
+        |{{CYAN  }}   \_/ \_/ .__/| .__/\/    \/\___/|_| |_|   for Aspectow
+        |{{CYAN  }}=========|_|===|_|=========================================
         |{{reset }}
         |{{RED   }}Welcome To Aspectow AppMon Demo #{class:com.aspectran.aspectow.appmon.AboutMe^version}
         |{{reset }}
@@ -71,7 +71,7 @@ shell: {
         com.aspectran.shell.command.builtins.QuitCommand
     ]
     session: {
-        enabled: true
+        enabled: false
     }
     historyFile: /logs/history.log
     verbose: true
@@ -99,7 +99,7 @@ daemon: {
         com.aspectran.daemon.command.builtins.QuitCommand
     ]
     session: {
-        enabled: true
+        enabled: false
     }
     acceptable: {
         -: /**

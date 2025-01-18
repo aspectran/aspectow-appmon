@@ -55,9 +55,11 @@ public class SessionEventReader implements EventReader {
 
     private final EventInfo eventInfo;
 
+    private final String serverId;
+
     private final String deploymentName;
 
-    private final SessionManager sessionManager;
+    private SessionManager sessionManager;
 
     private SessionEventListener sessionListener;
 
@@ -69,16 +71,8 @@ public class SessionEventReader implements EventReader {
         this.eventInfo = eventInfo;
 
         String[] arr = StringUtils.split(eventInfo.getTarget(), '/', 2);
-        String serverId = arr[0];
-        String deploymentName = arr[1];
-
-        try {
-            TowServer towServer = eventExporterManager.getBean(serverId);
-            this.sessionManager = towServer.getSessionManager(deploymentName);
-            this.deploymentName = deploymentName;
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot resolve session handler with " + eventInfo.getTarget(), e);
-        }
+        this.serverId = arr[0];
+        this.deploymentName = arr[1];
     }
 
     public EventExporter getEventExporter() {
@@ -87,6 +81,12 @@ public class SessionEventReader implements EventReader {
 
     @Override
     public void start() {
+        try {
+            TowServer towServer = eventExporterManager.getBean(serverId);
+            sessionManager = towServer.getSessionManager(deploymentName);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot resolve session handler with " + eventInfo.getTarget(), e);
+        }
         if (sessionManager != null) {
             sessionListener = new SessionEventListener(this);
             getSessionListenerRegistration().register(sessionListener, deploymentName);
