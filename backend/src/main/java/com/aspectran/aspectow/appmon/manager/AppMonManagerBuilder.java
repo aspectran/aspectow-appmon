@@ -37,21 +37,21 @@ import java.util.List;
 public abstract class AppMonManagerBuilder {
 
     @NonNull
-    public static AppMonManager build(ActivityContext context, AppMonConfig config) throws Exception {
+    public static AppMonManager build(ActivityContext context, AppMonConfig appMonConfig) throws Exception {
         Assert.notNull(context, "ActivityContext is not set");
-        Assert.notNull(config, "AppMonConfig is not set");
+        Assert.notNull(appMonConfig, "AppMonConfig is not set");
 
-        EndpointInfoHolder endpointInfoHolder = new EndpointInfoHolder(config.getEndpointInfoList());
-        GroupInfoHolder groupInfoHolder = new GroupInfoHolder(config.getGroupInfoList());
+        EndpointInfoHolder endpointInfoHolder = new EndpointInfoHolder(appMonConfig.getEndpointInfoList());
+        GroupInfoHolder groupInfoHolder = new GroupInfoHolder(appMonConfig.getGroupInfoList());
         AppMonManager appMonManager = new AppMonManager(endpointInfoHolder, groupInfoHolder);
         appMonManager.setActivityContext(context);
-        for (GroupInfo groupInfo : config.getGroupInfoList()) {
-            List<EventInfo> eventInfoList = config.getEventInfoList(groupInfo.getName());
+        for (GroupInfo groupInfo : appMonConfig.getGroupInfoList()) {
+            List<EventInfo> eventInfoList = appMonConfig.getEventInfoList(groupInfo.getName());
             if (eventInfoList != null && !eventInfoList.isEmpty()) {
                 EventExporterManager eventExporterManager = appMonManager.newEventExporterManager(groupInfo.getName());
                 EventExporterManagerBuilder.build(eventExporterManager, eventInfoList);
             }
-            List<LogInfo> logInfoList = config.getLogInfoList(groupInfo.getName());
+            List<LogInfo> logInfoList = appMonConfig.getLogInfoList(groupInfo.getName());
             if (logInfoList != null && !logInfoList.isEmpty()) {
                 LogExporterManager logExporterManager = appMonManager.newLogExporterManager(groupInfo.getName());
                 LogExporterManagerBuilder.build(logExporterManager, logInfoList, context.getApplicationAdapter());

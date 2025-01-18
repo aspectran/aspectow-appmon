@@ -19,6 +19,7 @@ import com.aspectran.utils.Assert;
 import com.aspectran.utils.apon.AbstractParameters;
 import com.aspectran.utils.apon.ParameterKey;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
@@ -50,6 +51,11 @@ public class AppMonConfig extends AbstractParameters {
     public AppMonConfig(Reader reader) throws IOException {
         this();
         readFrom(reader);
+    }
+
+    public AppMonConfig(File configFile) throws IOException {
+        this();
+        readFrom(configFile);
     }
 
     public List<EndpointInfo> getEndpointInfoList() {
