@@ -15,12 +15,14 @@
  */
 package com.aspectran.aspectow.appmon.config;
 
+import com.aspectran.utils.Assert;
 import com.aspectran.utils.ResourceUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URI;
 
 public abstract class AppMonConfigBuilder {
 
@@ -29,6 +31,13 @@ public abstract class AppMonConfigBuilder {
     @NonNull
     public static AppMonConfig build() throws IOException {
         Reader reader = ResourceUtils.getResourceAsReader(DEFAULT_APPMON_CONFIG_RESOURCE);
+        return new AppMonConfig(reader);
+    }
+
+    @NonNull
+    public static AppMonConfig build(URI configLocation) throws IOException {
+        Assert.notNull(configLocation, "configLocation must not be null");
+        Reader reader = ResourceUtils.getReader(configLocation.toURL(), null);
         return new AppMonConfig(reader);
     }
 

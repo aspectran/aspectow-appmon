@@ -22,8 +22,9 @@ import com.aspectran.core.component.bean.aware.ApplicationAdapterAware;
 import com.aspectran.utils.Assert;
 import com.aspectran.utils.StringUtils;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * <p>Created: 2025. 1. 18.</p>
@@ -48,10 +49,10 @@ public class AppMonConfigResolver implements ApplicationAdapterAware {
         this.configLocation = configLocation;
     }
 
-    public AppMonConfig resolveConfig() throws IOException {
+    public AppMonConfig resolveConfig() throws IOException, URISyntaxException {
         if (StringUtils.hasLength(configLocation)) {
-            File configFile = getApplicationAdapter().toRealPathAsFile(configLocation);
-            return AppMonConfigBuilder.build(configFile);
+            URI uri = applicationAdapter.toRealPathAsURI(configLocation);
+            return AppMonConfigBuilder.build(uri);
         } else {
             return AppMonConfigBuilder.build();
         }
