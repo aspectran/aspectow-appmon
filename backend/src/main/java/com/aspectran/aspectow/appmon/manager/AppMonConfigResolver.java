@@ -35,6 +35,8 @@ public class AppMonConfigResolver implements ApplicationAdapterAware {
 
     private String configLocation;
 
+    private String encoding;
+
     public ApplicationAdapter getApplicationAdapter() {
         Assert.state(applicationAdapter != null, "ApplicationAdapter is not set");
         return applicationAdapter;
@@ -49,10 +51,14 @@ public class AppMonConfigResolver implements ApplicationAdapterAware {
         this.configLocation = configLocation;
     }
 
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+
     public AppMonConfig resolveConfig() throws IOException, URISyntaxException {
         if (StringUtils.hasLength(configLocation)) {
             URI uri = applicationAdapter.toRealPathAsURI(configLocation);
-            return AppMonConfigBuilder.build(uri);
+            return AppMonConfigBuilder.build(uri, encoding);
         } else {
             return AppMonConfigBuilder.build();
         }

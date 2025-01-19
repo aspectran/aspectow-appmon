@@ -43,8 +43,7 @@ public abstract class LogExporterManagerBuilder {
 
             File logFile = null;
             try {
-                String file = applicationAdapter.toRealPath(logInfo.getFile());
-                logFile = new File(file).getCanonicalFile();
+                logFile = applicationAdapter.toRealPathAsFile(logInfo.getFile());
             } catch (IOException e) {
                 logger.error("Failed to resolve absolute path to log file " + logInfo.getFile(), e);
             }

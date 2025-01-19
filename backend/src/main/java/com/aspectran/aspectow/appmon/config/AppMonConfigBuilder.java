@@ -35,9 +35,9 @@ public abstract class AppMonConfigBuilder {
     }
 
     @NonNull
-    public static AppMonConfig build(URI configLocation) throws IOException {
+    public static AppMonConfig build(URI configLocation, String encoding) throws IOException {
         Assert.notNull(configLocation, "configLocation must not be null");
-        Reader reader = ResourceUtils.getReader(configLocation.toURL(), null);
+        Reader reader = ResourceUtils.getReader(configLocation.toURL(), encoding);
         return new AppMonConfig(reader);
     }
 
