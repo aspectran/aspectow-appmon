@@ -20,11 +20,14 @@ import com.aspectran.aspectow.appmon.config.AppMonConfigBuilder;
 import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.core.component.bean.aware.ApplicationAdapterAware;
 import com.aspectran.utils.Assert;
+import com.aspectran.utils.ResourceUtils;
 import com.aspectran.utils.StringUtils;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import static com.aspectran.utils.ResourceUtils.CLASSPATH_URL_PREFIX;
 
 /**
  * <p>Created: 2025. 1. 18.</p>
@@ -57,7 +60,12 @@ public class AppMonConfigResolver implements ApplicationAdapterAware {
 
     public AppMonConfig resolveConfig() throws IOException, URISyntaxException {
         if (StringUtils.hasLength(configLocation)) {
-            URI uri = applicationAdapter.toRealPathAsURI(configLocation);
+            URI uri;
+            if (configLocation.startsWith(CLASSPATH_URL_PREFIX)) {
+                uri = ResourceUtils.getResource(configLocation.substring(CLASSPATH_URL_PREFIX.length())).toURI();
+            } else {
+                uri = getApplicationAdapter().getRealPath(configLocation).toUri();
+            }
             return AppMonConfigBuilder.build(uri, encoding);
         } else {
             return AppMonConfigBuilder.build();

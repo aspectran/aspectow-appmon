@@ -23,7 +23,6 @@ import com.aspectran.utils.logging.Logger;
 import com.aspectran.utils.logging.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 public abstract class LogExporterManagerBuilder {
@@ -33,7 +32,7 @@ public abstract class LogExporterManagerBuilder {
     @NonNull
     public static void build(@NonNull LogExporterManager logExporterManager,
                              @NonNull List<LogInfo> logInfoList,
-                             @NonNull ApplicationAdapter applicationAdapter) throws IOException {
+                             @NonNull ApplicationAdapter applicationAdapter) throws Exception {
         for (LogInfo logInfo : logInfoList) {
             if (logger.isDebugEnabled()) {
                 logger.debug(ToStringBuilder.toString("Create LogExporter", logInfo));
@@ -41,15 +40,12 @@ public abstract class LogExporterManagerBuilder {
 
             logInfo.validateRequiredParameters();
 
-            File logFile = null;
             try {
-                logFile = applicationAdapter.toRealPathAsFile(logInfo.getFile());
-            } catch (IOException e) {
-                logger.error("Failed to resolve absolute path to log file " + logInfo.getFile(), e);
-            }
-            if (logFile != null) {
+                File logFile = applicationAdapter.getRealPath(logInfo.getFile()).toFile();
                 LogExporter logExporter = new LogExporter(logExporterManager, logInfo, logFile);
                 logExporterManager.addExporter(logExporter);
+            } catch (Exception e) {
+                throw new Exception(ToStringBuilder.toString("Failed to create log reader", logInfo), e);
             }
         }
     }
