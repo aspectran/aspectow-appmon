@@ -10,9 +10,6 @@
     <environment>
         <properties>
             <item name="tow.context.appmon.name">appmon</item>
-            <item name="tow.context.appmon.path">/appmon</item>
-            <item name="tow.context.appmon.baseDir">/webapps/appmon</item>
-            <item name="tow.context.appmon.scratchDir">/work/_webapps/appmon</item>
         </properties>
     </environment>
 
@@ -21,15 +18,15 @@
           scope="prototype">
         <properties>
             <item name="deploymentName">%{tow.context.appmon.name}</item>
-            <item name="contextPath">%{tow.context.appmon.path}</item>
+            <item name="contextPath">/%{tow.context.appmon.name}</item>
             <item name="resourceManager">
                 <bean class="com.aspectran.undertow.server.handler.resource.TowResourceManager">
                     <properties>
-                        <item name="base">%{tow.context.appmon.baseDir}</item>
+                        <item name="base">/webapps/%{tow.context.appmon.name}</item>
                     </properties>
                 </bean>
             </item>
-            <item name="scratchDir">%{tow.context.appmon.scratchDir}</item>
+            <item name="scratchDir">/work/_webapps/%{tow.context.appmon.name}</item>
             <item name="initParams" type="map">
                 <entry name="aspectran:config" value="classpath:com/aspectran/aspectow/appmon/context/aspectran-config.apon"/>
             </item>
@@ -71,7 +68,7 @@
                     <properties>
                         <item name="tldResources" type="array">
                             <value>classpath:com/aspectran/web/support/tags/aspectran.tld</value>
-                            <value>%{tow.context.appmon.baseDir}/WEB-INF/taglibs/</value>
+                            <value>/webapps/%{tow.context.appmon.name}/WEB-INF/taglibs/</value>
                         </item>
                     </properties>
                 </bean>
