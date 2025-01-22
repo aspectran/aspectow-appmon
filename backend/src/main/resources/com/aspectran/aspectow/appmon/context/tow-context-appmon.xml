@@ -10,6 +10,7 @@
     <environment>
         <properties>
             <item name="tow.context.appmon.name">appmon</item>
+            <item name="tow.context.appmon.config">classpath:com/aspectran/aspectow/appmon/context/aspectran-config.apon</item>
         </properties>
     </environment>
 
@@ -28,7 +29,7 @@
             </item>
             <item name="scratchDir">/work/_webapps/%{tow.context.appmon.name}</item>
             <item name="initParams" type="map">
-                <entry name="aspectran:config" value="classpath:com/aspectran/aspectow/appmon/context/aspectran-config.apon"/>
+                <entry name="aspectran:config">%{tow.context.appmon.config}</entry>
             </item>
             <item name="servlets" type="array">
                 <bean class="com.aspectran.undertow.server.servlet.TowServlet">
