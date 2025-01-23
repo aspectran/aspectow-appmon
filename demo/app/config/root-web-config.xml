@@ -36,10 +36,10 @@
 
     <bean class="com.aspectran.aspectow.appmon.manager.AppMonConfigResolver">
         <properties profile="!prod">
-            <item name="configLocation">classpath:com/aspectran/aspectow/appmon/config/appmon-config.apon</item>
+            <item name="configLocation">/config/appmon/appmon-config.apon</item>
         </properties>
         <properties profile="prod">
-            <item name="configLocation">classpath:com/aspectran/aspectow/appmon/config/appmon-config-prod.apon</item>
+            <item name="configLocation">/config/appmon/appmon-config-prod.apon</item>
         </properties>
     </bean>
 
