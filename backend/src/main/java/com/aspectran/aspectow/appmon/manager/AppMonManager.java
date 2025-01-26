@@ -114,24 +114,10 @@ public class AppMonManager extends InstantActivitySupport {
             String[] joinGroups = session.getJoinedGroups();
             if (joinGroups != null && joinGroups.length > 0) {
                 for (String group : joinGroups) {
-                    for (EventExporterManager eventExporterManager : eventExporterManagers) {
-                        if (eventExporterManager.getGroupName().equals(group)) {
-                            eventExporterManager.start();
-                        }
-                    }
-                    for (LogExporterManager logExporterManager : logExporterManagers) {
-                        if (logExporterManager.getGroupName().equals(group)) {
-                            logExporterManager.start();
-                        }
-                    }
+                    startExporters(group);
                 }
             } else {
-                for (EventExporterManager eventExporterManager : eventExporterManagers) {
-                    eventExporterManager.start();
-                }
-                for (LogExporterManager logExporterManager : logExporterManagers) {
-                    logExporterManager.start();
-                }
+                startExporters(null);
             }
             return true;
         } else {
@@ -139,23 +125,40 @@ public class AppMonManager extends InstantActivitySupport {
         }
     }
 
+    private void startExporters(String groupName) {
+        for (EventExporterManager eventExporterManager : eventExporterManagers) {
+            if (groupName == null || eventExporterManager.getGroupName().equals(groupName)) {
+                eventExporterManager.start();
+            }
+        }
+        for (LogExporterManager logExporterManager : logExporterManagers) {
+            if (groupName == null || logExporterManager.getGroupName().equals(groupName)) {
+                logExporterManager.start();
+            }
+        }
+    }
+
     public synchronized void release(AppMonSession session) {
         String[] unusedGroups = getUnusedGroups(session);
         if (unusedGroups != null) {
             for (String group : unusedGroups) {
-                for (EventExporterManager eventExporterManager : eventExporterManagers) {
-                    if (eventExporterManager.getGroupName().equals(group)) {
-                        eventExporterManager.stop();
-                    }
-                }
-                for (LogExporterManager logExporterManager : logExporterManagers) {
-                    if (logExporterManager.getGroupName().equals(group)) {
-                        logExporterManager.stop();
-                    }
-                }
+                stopExporters(group);
             }
         }
         session.removeJoinedGroups();
+    }
+
+    private void stopExporters(String groupName) {
+        for (EventExporterManager eventExporterManager : eventExporterManagers) {
+            if (groupName == null || eventExporterManager.getGroupName().equals(groupName)) {
+                eventExporterManager.stop();
+            }
+        }
+        for (LogExporterManager logExporterManager : logExporterManagers) {
+            if (groupName == null || logExporterManager.getGroupName().equals(groupName)) {
+                logExporterManager.stop();
+            }
+        }
     }
 
     public List<String> getLastMessages(@NonNull AppMonSession session) {
@@ -164,27 +167,26 @@ public class AppMonManager extends InstantActivitySupport {
             String[] joinGroups = session.getJoinedGroups();
             if (joinGroups != null && joinGroups.length > 0) {
                 for (String group : joinGroups) {
-                    for (EventExporterManager eventExporterManager : eventExporterManagers) {
-                        if (eventExporterManager.getGroupName().equals(group)) {
-                            eventExporterManager.collectMessages(messages);
-                        }
-                    }
-                    for (LogExporterManager logExporterManager : logExporterManagers) {
-                        if (logExporterManager.getGroupName().equals(group)) {
-                            logExporterManager.collectMessages(messages);
-                        }
-                    }
+                    collectLastMessages(group, messages);
                 }
             } else {
-                for (EventExporterManager eventExporterManager : eventExporterManagers) {
-                    eventExporterManager.collectMessages(messages);
-                }
-                for (LogExporterManager logExporterManager : logExporterManagers) {
-                    logExporterManager.collectMessages(messages);
-                }
+                collectLastMessages(null, messages);
             }
         }
         return messages;
+    }
+
+    private void collectLastMessages(String groupName, List<String> messages) {
+        for (EventExporterManager eventExporterManager : eventExporterManagers) {
+            if (groupName == null || eventExporterManager.getGroupName().equals(groupName)) {
+                eventExporterManager.collectMessages(messages);
+            }
+        }
+        for (LogExporterManager logExporterManager : logExporterManagers) {
+            if (groupName == null || logExporterManager.getGroupName().equals(groupName)) {
+                logExporterManager.collectMessages(messages);
+            }
+        }
     }
 
     public void broadcast(String message) {

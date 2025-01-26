@@ -137,7 +137,7 @@ public class SessionEventReader implements EventReader {
             return null;
         }
         try {
-            SessionEventData data = load();
+            SessionEventData data = (oldData == null ? loadWithActiveSessions() : load());
             if (!data.equals(oldData)) {
                 oldData = data;
                 return data.toJson();
