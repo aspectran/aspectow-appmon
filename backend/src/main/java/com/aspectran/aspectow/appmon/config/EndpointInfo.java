@@ -88,7 +88,7 @@ public class EndpointInfo extends AbstractParameters {
         return getParameters(pollingConfig);
     }
 
-    public void setPolling(EndpointPollingConfig pollingConfig) {
+    public void setPollingConfig(EndpointPollingConfig pollingConfig) {
         putValue(EndpointInfo.pollingConfig, pollingConfig);
     }
 

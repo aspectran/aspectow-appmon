@@ -21,11 +21,11 @@ import com.aspectran.aspectow.appmon.config.GroupInfo;
 import com.aspectran.aspectow.appmon.config.GroupInfoHolder;
 import com.aspectran.aspectow.appmon.endpoint.AppMonEndpoint;
 import com.aspectran.aspectow.appmon.endpoint.AppMonSession;
-import com.aspectran.aspectow.appmon.exporter.event.EventExporterManager;
-import com.aspectran.aspectow.appmon.exporter.log.LogExporterManager;
+import com.aspectran.aspectow.appmon.exporter.ExporterManager;
 import com.aspectran.core.activity.InstantActivitySupport;
 import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.core.context.ActivityContext;
+import com.aspectran.utils.Assert;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.annotation.jsr305.Nullable;
 import com.aspectran.utils.security.InvalidPBTokenException;
@@ -45,9 +45,7 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final GroupInfoHolder groupInfoHolder;
 
-    private final List<EventExporterManager> eventExporterManagers = new ArrayList<>();
-
-    private final List<LogExporterManager> logExporterManagers = new ArrayList<>();
+    private final List<ExporterManager> exporterManagers = new ArrayList<>();
 
     private final Set<AppMonEndpoint> endpoints = new HashSet<>();
 
@@ -68,16 +66,8 @@ public class AppMonManager extends InstantActivitySupport {
         return super.getApplicationAdapter();
     }
 
-    EventExporterManager newEventExporterManager(String groupName) {
-        EventExporterManager eventExporterManager = new EventExporterManager(this, groupName);
-        eventExporterManagers.add(eventExporterManager);
-        return eventExporterManager;
-    }
-
-    LogExporterManager newLogExporterManager(String groupName) {
-        LogExporterManager logExporterManager = new LogExporterManager(this, groupName);
-        logExporterManagers.add(logExporterManager);
-        return logExporterManager;
+    void addExporterManager(ExporterManager exporterManager) {
+        exporterManagers.add(exporterManager);
     }
 
     public void addEndpoint(AppMonEndpoint endpoint) {
@@ -86,9 +76,7 @@ public class AppMonManager extends InstantActivitySupport {
 
     public EndpointInfo getResidentEndpointInfo() {
         EndpointInfo endpointInfo = endpointInfoHolder.getResidentEndpointInfo();
-        if (endpointInfo == null) {
-            throw new IllegalStateException("Resident EndpointInfo not found");
-        }
+        Assert.state(endpointInfo != null, "Resident EndpointInfo not found");
         return endpointInfo;
     }
 
@@ -111,10 +99,10 @@ public class AppMonManager extends InstantActivitySupport {
 
     public synchronized boolean join(@NonNull AppMonSession session) {
         if (session.isValid()) {
-            String[] joinGroups = session.getJoinedGroups();
-            if (joinGroups != null && joinGroups.length > 0) {
-                for (String group : joinGroups) {
-                    startExporters(group);
+            String[] joinedGroups = session.getJoinedGroups();
+            if (joinedGroups != null && joinedGroups.length > 0) {
+                for (String groupName : joinedGroups) {
+                    startExporters(groupName);
                 }
             } else {
                 startExporters(null);
@@ -126,14 +114,9 @@ public class AppMonManager extends InstantActivitySupport {
     }
 
     private void startExporters(String groupName) {
-        for (EventExporterManager eventExporterManager : eventExporterManagers) {
-            if (groupName == null || eventExporterManager.getGroupName().equals(groupName)) {
-                eventExporterManager.start();
-            }
-        }
-        for (LogExporterManager logExporterManager : logExporterManagers) {
-            if (groupName == null || logExporterManager.getGroupName().equals(groupName)) {
-                logExporterManager.start();
+        for (ExporterManager exporterManager : exporterManagers) {
+            if (groupName == null || exporterManager.getGroupName().equals(groupName)) {
+                exporterManager.start();
             }
         }
     }
@@ -141,22 +124,17 @@ public class AppMonManager extends InstantActivitySupport {
     public synchronized void release(AppMonSession session) {
         String[] unusedGroups = getUnusedGroups(session);
         if (unusedGroups != null) {
-            for (String group : unusedGroups) {
-                stopExporters(group);
+            for (String groupName : unusedGroups) {
+                stopExporters(groupName);
             }
         }
         session.removeJoinedGroups();
     }
 
     private void stopExporters(String groupName) {
-        for (EventExporterManager eventExporterManager : eventExporterManagers) {
-            if (groupName == null || eventExporterManager.getGroupName().equals(groupName)) {
-                eventExporterManager.stop();
-            }
-        }
-        for (LogExporterManager logExporterManager : logExporterManagers) {
-            if (groupName == null || logExporterManager.getGroupName().equals(groupName)) {
-                logExporterManager.stop();
+        for (ExporterManager exporterManager : exporterManagers) {
+            if (groupName == null || exporterManager.getGroupName().equals(groupName)) {
+                exporterManager.stop();
             }
         }
     }
@@ -177,14 +155,9 @@ public class AppMonManager extends InstantActivitySupport {
     }
 
     private void collectLastMessages(String groupName, List<String> messages) {
-        for (EventExporterManager eventExporterManager : eventExporterManagers) {
-            if (groupName == null || eventExporterManager.getGroupName().equals(groupName)) {
-                eventExporterManager.collectMessages(messages);
-            }
-        }
-        for (LogExporterManager logExporterManager : logExporterManagers) {
-            if (groupName == null || logExporterManager.getGroupName().equals(groupName)) {
-                logExporterManager.collectMessages(messages);
+        for (ExporterManager exporterManager : exporterManagers) {
+            if (groupName == null || exporterManager.getGroupName().equals(groupName)) {
+                exporterManager.collectMessages(messages);
             }
         }
     }
@@ -229,18 +202,18 @@ public class AppMonManager extends InstantActivitySupport {
 
     @Nullable
     private String[] getJoinedGroups(@NonNull AppMonSession session) {
-        String[] savedGroups = session.getJoinedGroups();
-        if (savedGroups == null) {
+        String[] joinedGroups = session.getJoinedGroups();
+        if (joinedGroups == null) {
             return null;
         }
-        Set<String> joinedGroups = new HashSet<>();
-        for (String name : savedGroups) {
+        Set<String> validJoinedGroups = new HashSet<>();
+        for (String name : joinedGroups) {
             if (groupInfoHolder.containsGroup(name)) {
-                joinedGroups.add(name);
+                validJoinedGroups.add(name);
             }
         }
-        if (!joinedGroups.isEmpty()) {
-            return joinedGroups.toArray(new String[0]);
+        if (!validJoinedGroups.isEmpty()) {
+            return validJoinedGroups.toArray(new String[0]);
         } else {
             return null;
         }

@@ -26,6 +26,12 @@ group: {
     name: root
     title: Root
     event: {
+        name: activity
+        reader: com.aspectran.aspectow.appmon.exporter.event.activity.ActivityEventReader
+        target: root
+        sampleInterval: 5000
+    }
+    event: {
         name: request
         reader: com.aspectran.aspectow.appmon.exporter.event.request.RequestEventReader
         target: root
@@ -34,21 +40,18 @@ group: {
         name: session
         reader: com.aspectran.aspectow.appmon.exporter.event.session.SessionEventReader
         target: tow.server/root
-        sampleInterval: 5000
     }
     log: {
         name: app
-        title: Root App
         file: /logs/root.log
-        lastLines: 1000
         sampleInterval: 300
+        lastLines: 1000
     }
     log: {
         name: access
-        title: Root Access
         file: /logs/root-access.log
-        lastLines: 1000
         sampleInterval: 300
+        lastLines: 1000
     }
 }
 group: {
@@ -61,17 +64,15 @@ group: {
     }
     log: {
         name: app
-        title: AppMon App
         file: /logs/appmon.log
-        lastLines: 1000
         sampleInterval: 300
+        lastLines: 1000
     }
     log: {
         name: access
-        title: AppMon Access
         file: /logs/appmon-access.log
-        lastLines: 1000
         sampleInterval: 300
+        lastLines: 1000
     }
 }
 group: {
@@ -79,17 +80,15 @@ group: {
     title: JPetStore
     log: {
         name: app
-        title: JPetStore App
         file: /logs/jpetstore.log
-        lastLines: 1000
         sampleInterval: 300
+        lastLines: 1000
     }
     log: {
         name: access
-        title: JPetStore Access
         file: /logs/jpetstore-access.log
-        lastLines: 1000
         sampleInterval: 300
+        lastLines: 1000
     }
 }
 group: {
@@ -97,16 +96,14 @@ group: {
     title: Demo
     log: {
         name: app
-        title: Demo App
         file: /logs/demo.log
-        lastLines: 1000
         sampleInterval: 300
+        lastLines: 1000
     }
     log: {
         name: access
-        title: Demo Access
         file: /logs/demo-access.log
-        lastLines: 1000
         sampleInterval: 300
+        lastLines: 1000
     }
 }

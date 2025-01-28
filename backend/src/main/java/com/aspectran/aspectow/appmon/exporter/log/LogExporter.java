@@ -19,7 +19,6 @@ import com.aspectran.aspectow.appmon.config.LogInfo;
 import com.aspectran.aspectow.appmon.exporter.Exporter;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.apon.Parameters;
 import com.aspectran.utils.logging.Logger;
 import com.aspectran.utils.logging.LoggerFactory;
 import org.apache.commons.io.input.ReversedLinesFileReader;
@@ -77,11 +76,6 @@ public class LogExporter extends Exporter {
     @Override
     public String getName() {
         return logInfo.getName();
-    }
-
-    @SuppressWarnings("unchecked")
-    public <V extends Parameters> V getExporterInfo() {
-        return (V) logInfo;
     }
 
     public void read(@NonNull List<String> messages) {

@@ -240,7 +240,7 @@ function FrontBuilder() {
                     let $reqNum = $trackBox.find(".req-num");
                     endpoint.viewer.putDisplay(groupInfo.name, eventInfo.name, $trackBox);
                     endpoint.viewer.putIndicator(groupInfo.name, "event", eventInfo.name, $reqNum);
-                } else {
+                } else if (eventInfo.name === "session") {
                     let $displayBox = addDisplayBox($endpointBox, eventInfo);
                     endpoint.viewer.putDisplay(groupInfo.name, eventInfo.name, $displayBox);
                 }

@@ -105,8 +105,10 @@ function FrontViewer(endpoint) {
         let text = msg.substring(idx3 + 1);
         switch (type) {
             case "event":
-                indicate(group, type, label);
-                processEventData(label, name, JSON.parse(text));
+                if (text.length) {
+                    indicate(group, type, label);
+                    processEventData(label, name, JSON.parse(text));
+                }
                 break;
             case "log":
                 indicate(group, type, label);

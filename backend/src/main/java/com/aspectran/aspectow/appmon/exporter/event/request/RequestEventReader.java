@@ -16,9 +16,9 @@
 package com.aspectran.aspectow.appmon.exporter.event.request;
 
 import com.aspectran.aspectow.appmon.config.EventInfo;
+import com.aspectran.aspectow.appmon.exporter.event.AbstractEventReader;
 import com.aspectran.aspectow.appmon.exporter.event.EventExporter;
 import com.aspectran.aspectow.appmon.exporter.event.EventExporterManager;
-import com.aspectran.aspectow.appmon.exporter.event.EventReader;
 import com.aspectran.core.component.UnavailableException;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.core.context.rule.AspectAdviceRule;
@@ -38,36 +38,28 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * <p>Created: 2024-12-18</p>
  */
-public class RequestEventReader implements EventReader {
+public class RequestEventReader extends AbstractEventReader {
 
     private static final Logger logger = LoggerFactory.getLogger(RequestEventReader.class);
 
     private final AtomicLong counter = new AtomicLong();
 
-    private final EventExporterManager eventExporterManager;
-
-    private final EventInfo eventInfo;
-
-    private final String target;
-
     private final String aspectId;
 
     public RequestEventReader(@NonNull EventExporterManager eventExporterManager, @NonNull EventInfo eventInfo) {
-        this.eventExporterManager = eventExporterManager;
-        this.eventInfo = eventInfo;
-        this.target = eventInfo.getTarget();
+        super(eventExporterManager, eventInfo);
         this.aspectId = getClass().getName() + ".ASPECT-" + hashCode();
     }
 
     public EventExporter getEventExporter() {
-        return eventExporterManager.getExporter(eventInfo.getName());
+        return getEventExporterManager().getExporter(getEventInfo().getName());
     }
 
     @Override
     public void start() throws Exception {
-        ActivityContext context = CoreServiceHolder.findActivityContext(target);
+        ActivityContext context = CoreServiceHolder.findActivityContext(getTarget());
         if (context == null) {
-            throw new Exception("Could not find ActivityContext named '" + target + "'");
+            throw new Exception("Could not find ActivityContext named '" + getTarget() + "'");
         }
 
         AspectRule aspectRule = new AspectRule();
@@ -77,8 +69,8 @@ public class RequestEventReader implements EventReader {
 
         JoinpointRule joinpointRule = new JoinpointRule();
         joinpointRule.setJoinpointTargetType(JoinpointTargetType.ACTIVITY);
-        if (eventInfo.hasParameters()) {
-            PointcutParameters pointcutParameters = new PointcutParameters(eventInfo.getParameters().toString());
+        if (getEventInfo().hasParameters()) {
+            PointcutParameters pointcutParameters = new PointcutParameters(getEventInfo().getParameters().toString());
             JoinpointRule.updatePointcutRule(joinpointRule, pointcutParameters);
         }
         aspectRule.setJoinpointRule(joinpointRule);
@@ -105,7 +97,7 @@ public class RequestEventReader implements EventReader {
     @Override
     public void stop() {
         try {
-            ActivityContext context = CoreServiceHolder.findActivityContext(target);
+            ActivityContext context = CoreServiceHolder.findActivityContext(getTarget());
             if (context != null) {
                 try {
                     context.getAspectRuleRegistry().removeAspectRule(aspectId);
@@ -124,7 +116,7 @@ public class RequestEventReader implements EventReader {
             .prettyPrint(false)
             .nullWritable(false)
             .object()
-            .put("number", counter.longValue())
+                .put("number", counter.longValue())
             .endObject()
             .toString();
     }

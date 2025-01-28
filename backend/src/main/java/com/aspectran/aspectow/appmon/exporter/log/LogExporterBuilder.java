@@ -25,9 +25,9 @@ import com.aspectran.utils.logging.LoggerFactory;
 import java.io.File;
 import java.util.List;
 
-public abstract class LogExporterManagerBuilder {
+public abstract class LogExporterBuilder {
 
-    private static final Logger logger = LoggerFactory.getLogger(LogExporterManagerBuilder.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogExporterBuilder.class);
 
     @NonNull
     public static void build(@NonNull LogExporterManager logExporterManager,
@@ -45,7 +45,7 @@ public abstract class LogExporterManagerBuilder {
                 LogExporter logExporter = new LogExporter(logExporterManager, logInfo, logFile);
                 logExporterManager.addExporter(logExporter);
             } catch (Exception e) {
-                throw new Exception(ToStringBuilder.toString("Failed to create log reader", logInfo), e);
+                throw new Exception(ToStringBuilder.toString("Failed to create log exporter", logInfo), e);
             }
         }
     }

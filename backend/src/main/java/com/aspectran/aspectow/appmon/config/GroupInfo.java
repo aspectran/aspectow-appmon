@@ -71,8 +71,16 @@ public class GroupInfo extends AbstractParameters {
         return getParametersList(event);
     }
 
+    public void setEventInfoList(List<EventInfo> eventInfoList) {
+        putValue(GroupInfo.event, eventInfoList);
+    }
+
     public List<LogInfo> getLogInfoList() {
         return getParametersList(log);
+    }
+
+    public void setLogInfoList(List<LogInfo> logInfoList) {
+        putValue(GroupInfo.log, logInfoList);
     }
 
 }

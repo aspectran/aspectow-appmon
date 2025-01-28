@@ -159,11 +159,11 @@ public class WebsocketAppMonEndpoint implements AppMonEndpoint {
 
     private void establishComplete(@NonNull Session session) {
         AppMonSession appMonSession = new WebsocketAppMonSession(session);
+        appMonManager.join(appMonSession);
         List<String> messages = appMonManager.getLastMessages(appMonSession);
         for (String message : messages) {
             broadcast(appMonSession, message);
         }
-        appMonManager.join(appMonSession);
     }
 
     private void removeSession(Session session) {
@@ -198,14 +198,14 @@ public class WebsocketAppMonEndpoint implements AppMonEndpoint {
     }
 
     @Override
-    public boolean isUsingGroup(String group) {
-        if (StringUtils.hasLength(group)) {
+    public boolean isUsingGroup(String groupName) {
+        if (StringUtils.hasLength(groupName)) {
             synchronized (sessions) {
                 for (WebsocketAppMonSession appMonSession : sessions) {
-                    String[] savedGroups = appMonSession.getJoinedGroups();
-                    if (savedGroups != null) {
-                        for (String saved : savedGroups) {
-                            if (group.equals(saved)) {
+                    String[] joinedGroups = appMonSession.getJoinedGroups();
+                    if (joinedGroups != null) {
+                        for (String name : joinedGroups) {
+                            if (groupName.equals(name)) {
                                 return true;
                             }
                         }

@@ -157,9 +157,9 @@ public class PollingAppMonEndpoint implements AppMonEndpoint {
     }
 
     @Override
-    public boolean isUsingGroup(String group) {
+    public boolean isUsingGroup(String groupName) {
         if (appMonService != null) {
-            return appMonService.isUsingGroup(group);
+            return appMonService.isUsingGroup(groupName);
         } else {
             return false;
         }

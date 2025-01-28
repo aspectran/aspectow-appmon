@@ -147,14 +147,14 @@ public class PollingAppMonService extends AbstractComponent {
         return minLineIndex;
     }
 
-    protected boolean isUsingGroup(String group) {
-        if (StringUtils.hasLength(group)) {
+    protected boolean isUsingGroup(String groupName) {
+        if (StringUtils.hasLength(groupName)) {
             for (PollingAppMonSession session : sessions.values()) {
                 if (session.isValid()) {
-                    String[] savedGroups = session.getJoinedGroups();
-                    if (savedGroups != null) {
-                        for (String saved : savedGroups) {
-                            if (group.equals(saved)) {
+                    String[] joinedGroups = session.getJoinedGroups();
+                    if (joinedGroups != null) {
+                        for (String name : joinedGroups) {
+                            if (groupName.equals(name)) {
                                 return true;
                             }
                         }

@@ -21,10 +21,10 @@ import com.aspectran.aspectow.appmon.config.EventInfo;
 import com.aspectran.aspectow.appmon.config.GroupInfo;
 import com.aspectran.aspectow.appmon.config.GroupInfoHolder;
 import com.aspectran.aspectow.appmon.config.LogInfo;
+import com.aspectran.aspectow.appmon.exporter.event.EventExporterBuilder;
 import com.aspectran.aspectow.appmon.exporter.event.EventExporterManager;
-import com.aspectran.aspectow.appmon.exporter.event.EventExporterManagerBuilder;
+import com.aspectran.aspectow.appmon.exporter.log.LogExporterBuilder;
 import com.aspectran.aspectow.appmon.exporter.log.LogExporterManager;
-import com.aspectran.aspectow.appmon.exporter.log.LogExporterManagerBuilder;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.Assert;
 import com.aspectran.utils.annotation.jsr305.NonNull;
@@ -38,23 +38,27 @@ public abstract class AppMonManagerBuilder {
 
     @NonNull
     public static AppMonManager build(ActivityContext context, AppMonConfig appMonConfig) throws Exception {
-        Assert.notNull(context, "ActivityContext is not set");
-        Assert.notNull(appMonConfig, "AppMonConfig is not set");
+        Assert.notNull(context, "context must not be null");
+        Assert.notNull(appMonConfig, "appMonConfig must not be null");
 
         EndpointInfoHolder endpointInfoHolder = new EndpointInfoHolder(appMonConfig.getEndpointInfoList());
         GroupInfoHolder groupInfoHolder = new GroupInfoHolder(appMonConfig.getGroupInfoList());
+
         AppMonManager appMonManager = new AppMonManager(endpointInfoHolder, groupInfoHolder);
         appMonManager.setActivityContext(context);
+
         for (GroupInfo groupInfo : appMonConfig.getGroupInfoList()) {
             List<EventInfo> eventInfoList = appMonConfig.getEventInfoList(groupInfo.getName());
             if (eventInfoList != null && !eventInfoList.isEmpty()) {
-                EventExporterManager eventExporterManager = appMonManager.newEventExporterManager(groupInfo.getName());
-                EventExporterManagerBuilder.build(eventExporterManager, eventInfoList);
+                EventExporterManager eventExporterManager = new EventExporterManager(appMonManager, groupInfo.getName());
+                appMonManager.addExporterManager(eventExporterManager);
+                EventExporterBuilder.build(eventExporterManager, eventInfoList);
             }
             List<LogInfo> logInfoList = appMonConfig.getLogInfoList(groupInfo.getName());
             if (logInfoList != null && !logInfoList.isEmpty()) {
-                LogExporterManager logExporterManager = appMonManager.newLogExporterManager(groupInfo.getName());
-                LogExporterManagerBuilder.build(logExporterManager, logInfoList, context.getApplicationAdapter());
+                LogExporterManager logExporterManager = new LogExporterManager(appMonManager, groupInfo.getName());
+                appMonManager.addExporterManager(logExporterManager);
+                LogExporterBuilder.build(logExporterManager, logInfoList, context.getApplicationAdapter());
             }
         }
         return appMonManager;

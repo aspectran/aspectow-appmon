@@ -19,7 +19,6 @@ import com.aspectran.aspectow.appmon.config.EventInfo;
 import com.aspectran.aspectow.appmon.exporter.Exporter;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.apon.Parameters;
 
 import java.util.List;
 import java.util.Timer;
@@ -59,11 +58,6 @@ public class EventExporter extends Exporter {
         return eventInfo.getName();
     }
 
-    @SuppressWarnings("unchecked")
-    public <V extends Parameters> V getExporterInfo() {
-        return (V)eventInfo;
-    }
-
     @Override
     public void read(@NonNull List<String> messages) {
         String json = eventReader.read();
@@ -88,7 +82,6 @@ public class EventExporter extends Exporter {
     protected void doStart() throws Exception {
         if (sampleInterval > 0) {
             eventReader.start();
-            broadcastIfChanged();
             if (timer == null) {
                 String name = new ToStringBuilder("EventReadingTimer")
                         .append("eventReader", eventReader)
