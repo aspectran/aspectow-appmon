@@ -15,8 +15,9 @@
  */
 package com.aspectran.aspectow.appmon.manager;
 
-import com.aspectran.aspectow.appmon.config.AppMonConfig;
-import com.aspectran.aspectow.appmon.config.AppMonConfigBuilder;
+import com.aspectran.aspectow.appmon.backend.config.BackendConfig;
+import com.aspectran.aspectow.appmon.backend.config.BackendConfigBuilder;
+import com.aspectran.aspectow.appmon.backend.config.BackendConfigResolver;
 import com.aspectran.core.component.bean.ablility.FactoryBean;
 import com.aspectran.core.component.bean.annotation.AvoidAdvice;
 import com.aspectran.core.component.bean.annotation.Bean;
@@ -45,14 +46,14 @@ public class AppMonManagerFactoryBean implements ActivityContextAware, FactoryBe
 
     @Initialize
     public void createAppMonManager() throws Exception {
-        AppMonConfig appMonConfig;
-        if (context.getBeanRegistry().containsBean(AppMonConfigResolver.class)) {
-            AppMonConfigResolver appMonConfigResolver = context.getBeanRegistry().getBean(AppMonConfigResolver.class);
-            appMonConfig = appMonConfigResolver.resolveConfig();
+        BackendConfig backendConfig;
+        if (context.getBeanRegistry().containsBean(BackendConfigResolver.class)) {
+            BackendConfigResolver backendConfigResolver = context.getBeanRegistry().getBean(BackendConfigResolver.class);
+            backendConfig = backendConfigResolver.resolveConfig();
         } else {
-            appMonConfig = AppMonConfigBuilder.build();
+            backendConfig = BackendConfigBuilder.build();
         }
-        appMonManager = AppMonManagerBuilder.build(context, appMonConfig);
+        appMonManager = AppMonManagerBuilder.build(context, backendConfig);
     }
 
     @Override

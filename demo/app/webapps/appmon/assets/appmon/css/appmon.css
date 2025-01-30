@@ -71,8 +71,7 @@
     right: 0;
     width: 220px;
     height: 120px;
-    background-color: red;
-    opacity: .15;
+    background-color: #3e132d;
 }
 @keyframes bulletAnimation {
     from {
@@ -106,15 +105,26 @@
     margin: 2px 0;
     opacity: .3;
 }
-.track-stack .req-num {
+.track-stack .activities {
     position: absolute;
-    top: 20px;
+    top: 10px;
     left: 0;
     right: 0;
     bottom: 0;
-    color: #0cf418;
-    font-size: 3em;
+    color: #535866;
+    font-size: 3.4em;
     text-align: center;
+}
+.track-stack .activities p {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
+.track-stack .activities p.current {
+    font-weight: bold;
+}
+.track-stack .activities p.total {
+    font-size: .7em;
 }
 
 .log-box .status-bar {

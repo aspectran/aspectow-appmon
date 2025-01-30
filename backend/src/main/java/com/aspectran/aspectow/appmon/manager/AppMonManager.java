@@ -15,13 +15,13 @@
  */
 package com.aspectran.aspectow.appmon.manager;
 
-import com.aspectran.aspectow.appmon.config.EndpointInfo;
-import com.aspectran.aspectow.appmon.config.EndpointInfoHolder;
-import com.aspectran.aspectow.appmon.config.GroupInfo;
-import com.aspectran.aspectow.appmon.config.GroupInfoHolder;
-import com.aspectran.aspectow.appmon.endpoint.AppMonEndpoint;
-import com.aspectran.aspectow.appmon.endpoint.AppMonSession;
-import com.aspectran.aspectow.appmon.exporter.ExporterManager;
+import com.aspectran.aspectow.appmon.backend.config.EndpointInfo;
+import com.aspectran.aspectow.appmon.backend.config.EndpointInfoHolder;
+import com.aspectran.aspectow.appmon.backend.config.GroupInfo;
+import com.aspectran.aspectow.appmon.backend.config.GroupInfoHolder;
+import com.aspectran.aspectow.appmon.backend.exporter.ExporterManager;
+import com.aspectran.aspectow.appmon.backend.service.BackendService;
+import com.aspectran.aspectow.appmon.backend.service.BackendSession;
 import com.aspectran.core.activity.InstantActivitySupport;
 import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.core.context.ActivityContext;
@@ -47,7 +47,7 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final List<ExporterManager> exporterManagers = new ArrayList<>();
 
-    private final Set<AppMonEndpoint> endpoints = new HashSet<>();
+    private final Set<BackendService> backendServices = new HashSet<>();
 
     public AppMonManager(EndpointInfoHolder endpointInfoHolder, GroupInfoHolder groupInfoHolder) {
         this.endpointInfoHolder = endpointInfoHolder;
@@ -70,8 +70,8 @@ public class AppMonManager extends InstantActivitySupport {
         exporterManagers.add(exporterManager);
     }
 
-    public void addEndpoint(AppMonEndpoint endpoint) {
-        endpoints.add(endpoint);
+    public void addBackendService(BackendService backendService) {
+        backendServices.add(backendService);
     }
 
     public EndpointInfo getResidentEndpointInfo() {
@@ -97,7 +97,7 @@ public class AppMonManager extends InstantActivitySupport {
         return groupInfoHolder.getGroupInfoList(joinGroupNames);
     }
 
-    public synchronized boolean join(@NonNull AppMonSession session) {
+    public synchronized boolean join(@NonNull BackendSession session) {
         if (session.isValid()) {
             String[] joinedGroups = session.getJoinedGroups();
             if (joinedGroups != null && joinedGroups.length > 0) {
@@ -121,7 +121,7 @@ public class AppMonManager extends InstantActivitySupport {
         }
     }
 
-    public synchronized void release(AppMonSession session) {
+    public synchronized void release(BackendSession session) {
         String[] unusedGroups = getUnusedGroups(session);
         if (unusedGroups != null) {
             for (String groupName : unusedGroups) {
@@ -139,7 +139,7 @@ public class AppMonManager extends InstantActivitySupport {
         }
     }
 
-    public List<String> getLastMessages(@NonNull AppMonSession session) {
+    public List<String> getLastMessages(@NonNull BackendSession session) {
         List<String> messages = new ArrayList<>();
         if (session.isValid()) {
             String[] joinGroups = session.getJoinedGroups();
@@ -163,19 +163,19 @@ public class AppMonManager extends InstantActivitySupport {
     }
 
     public void broadcast(String message) {
-        for (AppMonEndpoint endpoint : endpoints) {
-            endpoint.broadcast(message);
+        for (BackendService backendService : backendServices) {
+            backendService.broadcast(message);
         }
     }
 
-    public void broadcast(AppMonSession session, String message) {
-        for (AppMonEndpoint endpoint : endpoints) {
-            endpoint.broadcast(session, message);
+    public void broadcast(BackendSession session, String message) {
+        for (BackendService backendService : backendServices) {
+            backendService.broadcast(session, message);
         }
     }
 
     @Nullable
-    private String[] getUnusedGroups(AppMonSession session) {
+    private String[] getUnusedGroups(BackendSession session) {
         String[] joinedGroups = getJoinedGroups(session);
         if (joinedGroups == null || joinedGroups.length == 0) {
             return null;
@@ -183,8 +183,8 @@ public class AppMonManager extends InstantActivitySupport {
         List<String> unusedGroups = new ArrayList<>(joinedGroups.length);
         for (String name : joinedGroups) {
             boolean using = false;
-            for (AppMonEndpoint endpoint : endpoints) {
-                if (endpoint.isUsingGroup(name)) {
+            for (BackendService backendService : backendServices) {
+                if (backendService.isUsingGroup(name)) {
                     using = true;
                     break;
                 }
@@ -201,7 +201,7 @@ public class AppMonManager extends InstantActivitySupport {
     }
 
     @Nullable
-    private String[] getJoinedGroups(@NonNull AppMonSession session) {
+    private String[] getJoinedGroups(@NonNull BackendSession session) {
         String[] joinedGroups = session.getJoinedGroups();
         if (joinedGroups == null) {
             return null;

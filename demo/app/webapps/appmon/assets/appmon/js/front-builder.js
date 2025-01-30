@@ -235,9 +235,9 @@ function FrontBuilder() {
             endpoint.viewer.putIndicator("group", "event", groupInfo.name, $indicatorGroup);
             for (let key in groupInfo.events) {
                 let eventInfo = groupInfo.events[key];
-                if (eventInfo.name === "request") {
+                if (eventInfo.name === "activity") {
                     let $trackBox = addTrackBox($endpointBox, eventInfo);
-                    let $reqNum = $trackBox.find(".req-num");
+                    let $reqNum = $trackBox.find(".activities");
                     endpoint.viewer.putDisplay(groupInfo.name, eventInfo.name, $trackBox);
                     endpoint.viewer.putIndicator(groupInfo.name, "event", eventInfo.name, $reqNum);
                 } else if (eventInfo.name === "session") {

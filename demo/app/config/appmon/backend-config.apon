@@ -1,0 +1,100 @@
+endpoint: {
+    name: endpoint-1
+    title: Server-1
+    url: /appmon/server/endpoint
+    resident: true
+    polling: {
+        pollingInterval: 3000
+        sessionTimeout: 10000
+        initialBufferSize: 9999
+        enabled: true
+    }
+}
+endpoint: {
+    name: endpoint-2
+    title: Server-2(Same as Server-1)
+    url: /appmon/server/endpoint
+    resident: false
+    polling: {
+        pollingInterval: 3000
+        sessionTimeout: 10000
+        initialBufferSize: 9999
+        enabled: true
+    }
+}
+group: {
+    name: root
+    title: Root
+    event: {
+        name: activity
+        target: root
+    }
+    event: {
+        name: session
+        target: tow.server/root
+    }
+    log: {
+        name: app
+        file: /logs/root.log
+        sampleInterval: 300
+        lastLines: 1000
+    }
+    log: {
+        name: access
+        file: /logs/root-access.log
+        sampleInterval: 300
+        lastLines: 1000
+    }
+}
+group: {
+    name: appmon
+    title: AppMon
+    event: {
+        name: activity
+        target: appmon
+    }
+    log: {
+        name: app
+        file: /logs/appmon.log
+        sampleInterval: 300
+        lastLines: 1000
+    }
+    log: {
+        name: access
+        file: /logs/appmon-access.log
+        sampleInterval: 300
+        lastLines: 1000
+    }
+}
+group: {
+    name: jpetstore
+    title: JPetStore
+    log: {
+        name: app
+        file: /logs/jpetstore.log
+        sampleInterval: 300
+        lastLines: 1000
+    }
+    log: {
+        name: access
+        file: /logs/jpetstore-access.log
+        sampleInterval: 300
+        lastLines: 1000
+    }
+}
+group: {
+    name: demo
+    title: Demo
+    log: {
+        name: app
+        file: /logs/demo.log
+        sampleInterval: 300
+        lastLines: 1000
+    }
+    log: {
+        name: access
+        file: /logs/demo-access.log
+        sampleInterval: 300
+        lastLines: 1000
+    }
+}

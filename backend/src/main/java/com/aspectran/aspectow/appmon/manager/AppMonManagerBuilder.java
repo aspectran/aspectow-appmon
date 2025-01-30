@@ -15,16 +15,16 @@
  */
 package com.aspectran.aspectow.appmon.manager;
 
-import com.aspectran.aspectow.appmon.config.AppMonConfig;
-import com.aspectran.aspectow.appmon.config.EndpointInfoHolder;
-import com.aspectran.aspectow.appmon.config.EventInfo;
-import com.aspectran.aspectow.appmon.config.GroupInfo;
-import com.aspectran.aspectow.appmon.config.GroupInfoHolder;
-import com.aspectran.aspectow.appmon.config.LogInfo;
-import com.aspectran.aspectow.appmon.exporter.event.EventExporterBuilder;
-import com.aspectran.aspectow.appmon.exporter.event.EventExporterManager;
-import com.aspectran.aspectow.appmon.exporter.log.LogExporterBuilder;
-import com.aspectran.aspectow.appmon.exporter.log.LogExporterManager;
+import com.aspectran.aspectow.appmon.backend.config.BackendConfig;
+import com.aspectran.aspectow.appmon.backend.config.EndpointInfoHolder;
+import com.aspectran.aspectow.appmon.backend.config.EventInfo;
+import com.aspectran.aspectow.appmon.backend.config.GroupInfo;
+import com.aspectran.aspectow.appmon.backend.config.GroupInfoHolder;
+import com.aspectran.aspectow.appmon.backend.config.LogInfo;
+import com.aspectran.aspectow.appmon.backend.exporter.event.EventExporterBuilder;
+import com.aspectran.aspectow.appmon.backend.exporter.event.EventExporterManager;
+import com.aspectran.aspectow.appmon.backend.exporter.log.LogExporterBuilder;
+import com.aspectran.aspectow.appmon.backend.exporter.log.LogExporterManager;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.Assert;
 import com.aspectran.utils.annotation.jsr305.NonNull;
@@ -37,24 +37,24 @@ import java.util.List;
 public abstract class AppMonManagerBuilder {
 
     @NonNull
-    public static AppMonManager build(ActivityContext context, AppMonConfig appMonConfig) throws Exception {
+    public static AppMonManager build(ActivityContext context, BackendConfig backendConfig) throws Exception {
         Assert.notNull(context, "context must not be null");
-        Assert.notNull(appMonConfig, "appMonConfig must not be null");
+        Assert.notNull(backendConfig, "appMonConfig must not be null");
 
-        EndpointInfoHolder endpointInfoHolder = new EndpointInfoHolder(appMonConfig.getEndpointInfoList());
-        GroupInfoHolder groupInfoHolder = new GroupInfoHolder(appMonConfig.getGroupInfoList());
+        EndpointInfoHolder endpointInfoHolder = new EndpointInfoHolder(backendConfig.getEndpointInfoList());
+        GroupInfoHolder groupInfoHolder = new GroupInfoHolder(backendConfig.getGroupInfoList());
 
         AppMonManager appMonManager = new AppMonManager(endpointInfoHolder, groupInfoHolder);
         appMonManager.setActivityContext(context);
 
-        for (GroupInfo groupInfo : appMonConfig.getGroupInfoList()) {
-            List<EventInfo> eventInfoList = appMonConfig.getEventInfoList(groupInfo.getName());
+        for (GroupInfo groupInfo : backendConfig.getGroupInfoList()) {
+            List<EventInfo> eventInfoList = backendConfig.getEventInfoList(groupInfo.getName());
             if (eventInfoList != null && !eventInfoList.isEmpty()) {
                 EventExporterManager eventExporterManager = new EventExporterManager(appMonManager, groupInfo.getName());
                 appMonManager.addExporterManager(eventExporterManager);
                 EventExporterBuilder.build(eventExporterManager, eventInfoList);
             }
-            List<LogInfo> logInfoList = appMonConfig.getLogInfoList(groupInfo.getName());
+            List<LogInfo> logInfoList = backendConfig.getLogInfoList(groupInfo.getName());
             if (logInfoList != null && !logInfoList.isEmpty()) {
                 LogExporterManager logExporterManager = new LogExporterManager(appMonManager, groupInfo.getName());
                 appMonManager.addExporterManager(logExporterManager);
