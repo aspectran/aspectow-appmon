@@ -39,15 +39,15 @@ shell: {
     }
     greetings: (
         |
-        |{{GREEN }}      _
-        |{{GREEN }}     /_\  _ __  _ __   /\/\   ___  _ __
-        |{{GREEN }}    //_\\| '_ \| '_ \ /    \ / _ \| '_ \
-        |{{GREEN }}   /  _  \ |_) | |_) / /\/\ \ (_) | | | |
-        |{{CYAN  }}   \_/ \_/ .__/| .__/\/    \/\___/|_| |_|   for Aspectow
-        |{{CYAN  }}=========|_|===|_|=========================================
-        |{{reset }}
-        |{{RED   }}Welcome To Aspectow AppMon Demo #{class:com.aspectran.aspectow.appmon.AboutMe^version}
-        |{{reset }}
+        |{{GREEN  }}      _
+        |{{GREEN  }}     /_\  _ __  _ __   /\/\   ___  _ __
+        |{{GREEN  }}    //_\\| '_ \| '_ \ /    \ / _ \| '_ \
+        |{{GREEN  }}   /  _  \ |_) | |_) / /\/\ \ (_) | | | |
+        |{{CYAN   }}   \_/ \_/ .__/| .__/\/    \/\___/|_| |_|   for Aspectow
+        |{{CYAN   }}=========|_|===|_|=========================================
+        |{{reset  }}
+        |{{MAGENTA}}Welcome To Aspectow AppMon Demo #{class:com.aspectran.aspectow.appmon.AboutMe^version}
+        |{{reset  }}
         |If you want a list of all supported built-in commands, type '{{GREEN}}help{{reset}}'.
         |To get help on a specific command, type '{{GREEN}}command_name -h{{reset}}'.
         |If you want a list of all available translets, type '{{GREEN}}translet -l{{reset}}'.
