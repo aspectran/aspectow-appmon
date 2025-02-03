@@ -1,4 +1,4 @@
-function WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErrorObserved) {
+function WebsocketClient(endpoint, viewer, onEndpointJoined, onEstablishCompleted, onErrorObserved) {
     let socket = null;
     let heartbeatTimer = null;
     let pendingMessages = [];
@@ -34,7 +34,7 @@ function WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErr
                 }
                 let msg = event.data;
                 if (established) {
-                    endpoint.viewer.processMessage(msg);
+                    viewer.processMessage(msg);
                 } else if (msg.startsWith("joined:")) {
                     console.log(msg);
                     let payload = JSON.parse(msg.substring(7));
@@ -44,10 +44,10 @@ function WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErr
         };
         socket.onclose = function (event) {
             if (event.code === 1000) {
-                endpoint.viewer.printMessage("Socket connection closed.");
+                viewer.printMessage("Socket connection closed.");
             } else {
                 closeSocket();
-                endpoint.viewer.printMessage("Socket connection closed. Please refresh this page to try again!");
+                viewer.printMessage("Socket connection closed. Please refresh this page to try again!");
             }
         };
         socket.onerror = function (event) {
@@ -55,7 +55,7 @@ function WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErr
             if (!endpoint.mode && onErrorObserved) {
                 onErrorObserved(endpoint);
             } else {
-                endpoint.viewer.printErrorMessage("Could not connect to WebSocket server.");
+                viewer.printErrorMessage("Could not connect to WebSocket server.");
             }
         };
     };
@@ -73,13 +73,13 @@ function WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErr
             onEndpointJoined(endpoint, payload);
         }
         while (pendingMessages.length) {
-            endpoint.viewer.printMessage(pendingMessages.shift());
+            viewer.printMessage(pendingMessages.shift());
         }
         if (onEstablishCompleted) {
             onEstablishCompleted(endpoint);
         }
         while (pendingMessages.length) {
-            endpoint.viewer.printMessage(pendingMessages.shift());
+            viewer.printMessage(pendingMessages.shift());
         }
         established = true;
         socket.send("established:");

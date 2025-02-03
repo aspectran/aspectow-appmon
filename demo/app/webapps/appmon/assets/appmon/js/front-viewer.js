@@ -1,4 +1,4 @@
-function FrontViewer(endpoint) {
+function FrontViewer() {
     let $displays = {};
     let $consoles = {};
     let $indicators = {};
@@ -199,7 +199,7 @@ function FrontViewer(endpoint) {
     };
 
     const indicate = function (instance, type, label) {
-        let $indicator1 = $indicators["endpoint:event:" + endpoint.index];
+        let $indicator1 = $indicators["endpoint:event:"];
         blink($indicator1);
         if (visible) {
             if (type === "log") {

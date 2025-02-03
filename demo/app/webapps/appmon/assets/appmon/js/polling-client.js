@@ -1,4 +1,4 @@
-function PollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
+function PollingClient(endpoint, viewer, onEndpointJoined, onEstablishCompleted) {
     this.start = function (joinGroups) {
         join(joinGroups);
     };
@@ -26,7 +26,7 @@ function PollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
                     if (onEstablishCompleted) {
                         onEstablishCompleted(endpoint);
                     }
-                    endpoint.viewer.printMessage("Polling every " + data.pollingInterval + " milliseconds.");
+                    viewer.printMessage("Polling every " + data.pollingInterval + " milliseconds.");
                     polling();
                 }
             }
@@ -41,11 +41,11 @@ function PollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
                 if (data && data.token && data.messages) {
                     endpoint['token'] = data.token;
                     for (let key in data.messages) {
-                        endpoint.viewer.processMessage(data.messages[key]);
+                        viewer.processMessage(data.messages[key]);
                     }
                     setTimeout(polling, endpoint.pollingInterval);
                 } else {
-                    endpoint.viewer.printErrorMessage("Connection lost. Please refresh this page to try again!");
+                    viewer.printErrorMessage("Connection lost. Please refresh this page to try again!");
                 }
             }
         });
@@ -63,7 +63,7 @@ function PollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
                 console.log("pollingInterval", data);
                 if (data) {
                     endpoint.pollingInterval = data;
-                    endpoint.viewer.printMessage("Polling every " + data + " milliseconds.");
+                    viewer.printMessage("Polling every " + data + " milliseconds.");
                 }
             }
         });
