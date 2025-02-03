@@ -6,16 +6,16 @@ function FrontViewer(endpoint) {
     let prevPosition = 0;
     let currentActivities = [];
 
-    this.putDisplay = function (group, label, $display) {
-        $displays[group + ":event:" + label] = $display;
+    this.putDisplay = function (instance, label, $display) {
+        $displays[instance + ":event:" + label] = $display;
     };
 
-    this.putConsole = function (group, label, $console) {
-        $consoles[group + ":log:" + label] = $console;
+    this.putConsole = function (instance, label, $console) {
+        $consoles[instance + ":log:" + label] = $console;
     };
 
-    this.putIndicator = function (group, type, label, $indicator) {
-        $indicators[group + ":" + type + ":" + label] = $indicator;
+    this.putIndicator = function (instance, type, label, $indicator) {
+        $indicators[instance + ":" + type + ":" + label] = $indicator;
     };
 
     const getDisplay = function (name) {
@@ -99,7 +99,7 @@ function FrontViewer(endpoint) {
         let idx1 = msg.indexOf(":");
         let idx2 = msg.indexOf(":", idx1 + 1);
         let idx3 = msg.indexOf(":", idx2 + 1);
-        let group = msg.substring(0, idx1);
+        let instance = msg.substring(0, idx1);
         let type = msg.substring(idx1 + 1, idx2);
         let label = msg.substring(idx2 + 1, idx3);
         let name = msg.substring(0, idx3);
@@ -107,12 +107,12 @@ function FrontViewer(endpoint) {
         switch (type) {
             case "event":
                 if (text.length) {
-                    indicate(group, type, label);
+                    indicate(instance, type, label);
                     processEventData(label, name, JSON.parse(text));
                 }
                 break;
             case "log":
-                indicate(group, type, label);
+                indicate(instance, type, label);
                 printLogMessage(name, text);
                 break;
         }
@@ -198,15 +198,15 @@ function FrontViewer(endpoint) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     };
 
-    const indicate = function (group, type, label) {
+    const indicate = function (instance, type, label) {
         let $indicator1 = $indicators["endpoint:event:" + endpoint.index];
         blink($indicator1);
         if (visible) {
             if (type === "log") {
-                let $indicator3 = $indicators[group + ":log:" + label];
+                let $indicator3 = $indicators[instance + ":log:" + label];
                 blink($indicator3);
             } else {
-                let $indicator2 = $indicators["group:event:" + group];
+                let $indicator2 = $indicators["instance:event:" + instance];
                 blink($indicator2);
             }
         }

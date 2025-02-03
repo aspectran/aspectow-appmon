@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * <p>Created: 2020/02/12</p>
  */
-public class GroupInfo extends AbstractParameters {
+public class InstanceInfo extends AbstractParameters {
 
     private static final ParameterKey name;
     private static final ParameterKey title;
@@ -47,7 +47,7 @@ public class GroupInfo extends AbstractParameters {
         };
     }
 
-    public GroupInfo() {
+    public InstanceInfo() {
         super(parameterKeys);
     }
 
@@ -56,7 +56,7 @@ public class GroupInfo extends AbstractParameters {
     }
 
     public void setName(String name) {
-        putValue(GroupInfo.name, name);
+        putValue(InstanceInfo.name, name);
     }
 
     public String getTitle() {
@@ -64,7 +64,7 @@ public class GroupInfo extends AbstractParameters {
     }
 
     public void setTitle(String name) {
-        putValue(GroupInfo.title, name);
+        putValue(InstanceInfo.title, name);
     }
 
     public List<EventInfo> getEventInfoList() {
@@ -72,7 +72,7 @@ public class GroupInfo extends AbstractParameters {
     }
 
     public void setEventInfoList(List<EventInfo> eventInfoList) {
-        putValue(GroupInfo.event, eventInfoList);
+        putValue(InstanceInfo.event, eventInfoList);
     }
 
     public List<LogInfo> getLogInfoList() {
@@ -80,7 +80,7 @@ public class GroupInfo extends AbstractParameters {
     }
 
     public void setLogInfoList(List<LogInfo> logInfoList) {
-        putValue(GroupInfo.log, logInfoList);
+        putValue(InstanceInfo.log, logInfoList);
     }
 
 }

@@ -35,19 +35,19 @@ public abstract class ExporterManager {
 
     private final AppMonManager appMonManager;
 
-    private final String groupName;
+    private final String instanceName;
 
-    public ExporterManager(AppMonManager appMonManager, String groupName) {
+    public ExporterManager(AppMonManager appMonManager, String instanceName) {
         this.appMonManager = appMonManager;
-        this.groupName = groupName;
+        this.instanceName = instanceName;
     }
 
     public AppMonManager getAppMonManager() {
         return appMonManager;
     }
 
-    public String getGroupName() {
-        return groupName;
+    public String getInstanceName() {
+        return instanceName;
     }
 
     public void addExporter(Exporter exporter) {

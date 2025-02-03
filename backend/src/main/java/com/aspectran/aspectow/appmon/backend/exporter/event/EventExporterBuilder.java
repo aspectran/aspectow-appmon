@@ -58,7 +58,7 @@ public abstract class EventExporterBuilder {
             } else if ("session".equals(eventInfo.getName())) {
                 return new SessionEventReader(eventExporterManager, eventInfo);
             } else {
-                throw new IllegalArgumentException("No event reader specified for event " + eventInfo);
+                throw new IllegalArgumentException("No event reader specified for " + eventInfo.getName() + " " + eventInfo);
             }
         }
         try {

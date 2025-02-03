@@ -7,13 +7,13 @@ function PollingClient(endpoint, onEndpointJoined, onEstablishCompleted) {
         changePollingInterval(speed);
     };
 
-    const join = function (joinGroups) {
+    const join = function (joinInstances) {
         $.ajax({
             url: endpoint.basePath + "backend/endpoint/" + endpoint.token + "/join",
             type: 'post',
             dataType: "json",
             data: {
-                joinGroups: joinGroups
+                joinInstances: joinInstances
             },
             success: function (data) {
                 if (data) {

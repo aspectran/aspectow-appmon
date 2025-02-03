@@ -55,16 +55,18 @@ public class LogInfo extends AbstractParameters {
         };
     }
 
+    private String instanceName;
+
     public LogInfo() {
         super(parameterKeys);
     }
 
-    public String getGroup() {
-        return getString(group);
+    public String getInstanceName() {
+        return instanceName;
     }
 
-    void setGroup(String group) {
-        putValue(LogInfo.group, group);
+    void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
     }
 
     public String getName() {

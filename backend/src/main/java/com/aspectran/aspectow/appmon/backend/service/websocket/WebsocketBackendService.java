@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.appmon.backend.service.websocket;
 
-import com.aspectran.aspectow.appmon.backend.config.GroupInfo;
+import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.backend.service.BackendService;
 import com.aspectran.aspectow.appmon.backend.service.BackendSession;
 import com.aspectran.aspectow.appmon.manager.AppMonManager;
@@ -135,13 +135,13 @@ public class WebsocketBackendService implements BackendService {
         }
     }
 
-    private void addSession(Session session, String joinGroups) {
+    private void addSession(Session session, String joinInstances) {
         WebsocketBackendSession appMonSession = new WebsocketBackendSession(session);
         synchronized (sessions) {
             if (sessions.add(appMonSession)) {
-                String[] joinGroupNames = appMonManager.getVerifiedGroupNames(StringUtils.splitCommaDelimitedString(joinGroups));
-                if (!StringUtils.hasText(joinGroups) || joinGroupNames.length > 0) {
-                    appMonSession.saveJoinedGroups(joinGroupNames);
+                String[] instanceNames = appMonManager.getVerifiedInstanceNames(StringUtils.splitCommaDelimitedString(joinInstances));
+                if (!StringUtils.hasText(joinInstances) || instanceNames.length > 0) {
+                    appMonSession.setJoinedInstances(instanceNames);
                 }
                 sendJoined(appMonSession);
             }
@@ -149,13 +149,13 @@ public class WebsocketBackendService implements BackendService {
     }
 
     private void sendJoined(@NonNull BackendSession backendSession) {
-        String[] joinGroupNames = backendSession.getJoinedGroups();
-        if (joinGroupNames != null) {
-            List<GroupInfo> groups = appMonManager.getGroupInfoList(backendSession.getJoinedGroups());
+        String[] instanceNames = backendSession.getJoinedInstances();
+        if (instanceNames != null) {
+            List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(instanceNames);
             String json = new JsonBuilder()
                 .nullWritable(false)
                 .object()
-                    .put("groups", groups)
+                    .put("instances", instanceInfoList)
                 .endObject()
                 .toString();
             broadcast(backendSession, MESSAGE_JOINED + json);
@@ -203,14 +203,14 @@ public class WebsocketBackendService implements BackendService {
     }
 
     @Override
-    public boolean isUsingGroup(String groupName) {
-        if (StringUtils.hasLength(groupName)) {
+    public boolean isUsingInstance(String instanceName) {
+        if (StringUtils.hasLength(instanceName)) {
             synchronized (sessions) {
                 for (WebsocketBackendSession appMonSession : sessions) {
-                    String[] joinedGroups = appMonSession.getJoinedGroups();
-                    if (joinedGroups != null) {
-                        for (String name : joinedGroups) {
-                            if (groupName.equals(name)) {
+                    String[] instanceNames = appMonSession.getJoinedInstances();
+                    if (instanceNames != null) {
+                        for (String name : instanceNames) {
+                            if (instanceName.equals(name)) {
                                 return true;
                             }
                         }

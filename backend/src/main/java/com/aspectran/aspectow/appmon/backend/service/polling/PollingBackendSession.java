@@ -41,7 +41,7 @@ public class PollingBackendSession implements BackendSession {
 
     private boolean expired;
 
-    private String[] joinedGroups;
+    private String[] joinedInstances;
 
     public PollingBackendSession(PollingBackendSessionManager backendSessionManager, int sessionTimeout, int pollingInterval) {
         this.backendSessionManager = backendSessionManager;
@@ -67,18 +67,18 @@ public class PollingBackendSession implements BackendSession {
     }
 
     @Override
-    public String[] getJoinedGroups() {
-        return joinedGroups;
+    public String[] getJoinedInstances() {
+        return joinedInstances;
     }
 
     @Override
-    public void saveJoinedGroups(String[] joinGroupNames) {
-        this.joinedGroups = joinGroupNames;
+    public void setJoinedInstances(String[] instanceNames) {
+        this.joinedInstances = instanceNames;
     }
 
     @Override
-    public void removeJoinedGroups() {
-        this.joinedGroups = null;
+    public void removeJoinedInstances() {
+        this.joinedInstances = null;
     }
 
     @Override

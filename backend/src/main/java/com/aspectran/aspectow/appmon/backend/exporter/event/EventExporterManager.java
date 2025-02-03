@@ -23,8 +23,8 @@ import com.aspectran.aspectow.appmon.manager.AppMonManager;
  */
 public class EventExporterManager extends ExporterManager {
 
-    public EventExporterManager(AppMonManager appMonManager, String groupName) {
-        super(appMonManager, groupName);
+    public EventExporterManager(AppMonManager appMonManager, String instanceName) {
+        super(appMonManager, instanceName);
     }
 
 }

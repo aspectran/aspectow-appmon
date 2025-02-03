@@ -18,8 +18,8 @@ package com.aspectran.aspectow.appmon.manager;
 import com.aspectran.aspectow.appmon.backend.config.BackendConfig;
 import com.aspectran.aspectow.appmon.backend.config.EndpointInfoHolder;
 import com.aspectran.aspectow.appmon.backend.config.EventInfo;
-import com.aspectran.aspectow.appmon.backend.config.GroupInfo;
-import com.aspectran.aspectow.appmon.backend.config.GroupInfoHolder;
+import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
+import com.aspectran.aspectow.appmon.backend.config.InstanceInfoHolder;
 import com.aspectran.aspectow.appmon.backend.config.LogInfo;
 import com.aspectran.aspectow.appmon.backend.exporter.event.EventExporterBuilder;
 import com.aspectran.aspectow.appmon.backend.exporter.event.EventExporterManager;
@@ -39,24 +39,24 @@ public abstract class AppMonManagerBuilder {
     @NonNull
     public static AppMonManager build(ActivityContext context, BackendConfig backendConfig) throws Exception {
         Assert.notNull(context, "context must not be null");
-        Assert.notNull(backendConfig, "appMonConfig must not be null");
+        Assert.notNull(backendConfig, "backendConfig must not be null");
 
         EndpointInfoHolder endpointInfoHolder = new EndpointInfoHolder(backendConfig.getEndpointInfoList());
-        GroupInfoHolder groupInfoHolder = new GroupInfoHolder(backendConfig.getGroupInfoList());
+        InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(backendConfig.getInstanceInfoList());
 
-        AppMonManager appMonManager = new AppMonManager(endpointInfoHolder, groupInfoHolder);
+        AppMonManager appMonManager = new AppMonManager(endpointInfoHolder, instanceInfoHolder);
         appMonManager.setActivityContext(context);
 
-        for (GroupInfo groupInfo : backendConfig.getGroupInfoList()) {
-            List<EventInfo> eventInfoList = backendConfig.getEventInfoList(groupInfo.getName());
+        for (InstanceInfo instanceInfo : backendConfig.getInstanceInfoList()) {
+            List<EventInfo> eventInfoList = backendConfig.getEventInfoList(instanceInfo.getName());
             if (eventInfoList != null && !eventInfoList.isEmpty()) {
-                EventExporterManager eventExporterManager = new EventExporterManager(appMonManager, groupInfo.getName());
+                EventExporterManager eventExporterManager = new EventExporterManager(appMonManager, instanceInfo.getName());
                 appMonManager.addExporterManager(eventExporterManager);
                 EventExporterBuilder.build(eventExporterManager, eventInfoList);
             }
-            List<LogInfo> logInfoList = backendConfig.getLogInfoList(groupInfo.getName());
+            List<LogInfo> logInfoList = backendConfig.getLogInfoList(instanceInfo.getName());
             if (logInfoList != null && !logInfoList.isEmpty()) {
-                LogExporterManager logExporterManager = new LogExporterManager(appMonManager, groupInfo.getName());
+                LogExporterManager logExporterManager = new LogExporterManager(appMonManager, instanceInfo.getName());
                 appMonManager.addExporterManager(logExporterManager);
                 LogExporterBuilder.build(logExporterManager, logInfoList, context.getApplicationAdapter());
             }

@@ -30,17 +30,17 @@ import java.util.List;
 public class BackendConfig extends AbstractParameters {
 
     private static final ParameterKey endpoint;
-    private static final ParameterKey group;
+    private static final ParameterKey instance;
 
     private static final ParameterKey[] parameterKeys;
 
     static {
         endpoint = new ParameterKey("endpoints", new String[] {"endpoint"}, EndpointInfo.class, true, true);
-        group = new ParameterKey("groups", new String[] {"group"}, GroupInfo.class, true, true);
+        instance = new ParameterKey("instances", new String[] {"instance"}, InstanceInfo.class, true, true);
 
         parameterKeys = new ParameterKey[] {
                 endpoint,
-                group
+                instance
         };
     }
 
@@ -62,25 +62,25 @@ public class BackendConfig extends AbstractParameters {
         return getParametersList(endpoint);
     }
 
-    public List<GroupInfo> getGroupInfoList() {
-        return getParametersList(group);
+    public List<InstanceInfo> getInstanceInfoList() {
+        return getParametersList(instance);
     }
 
-    public List<EventInfo> getEventInfoList(String groupName) {
-        Assert.notNull(groupName, "groupName must not be null");
-        for (GroupInfo groupInfo : getGroupInfoList()) {
-            if (groupName.equals(groupInfo.getName())) {
-                return groupInfo.getEventInfoList();
+    public List<EventInfo> getEventInfoList(String instanceName) {
+        Assert.notNull(instanceName, "instanceName must not be null");
+        for (InstanceInfo instanceInfo : getInstanceInfoList()) {
+            if (instanceName.equals(instanceInfo.getName())) {
+                return instanceInfo.getEventInfoList();
             }
         }
         return null;
     }
 
-    public List<LogInfo> getLogInfoList(String groupName) {
-        Assert.notNull(groupName, "groupName must not be null");
-        for (GroupInfo groupInfo : getGroupInfoList()) {
-            if (groupName.equals(groupInfo.getName())) {
-                return groupInfo.getLogInfoList();
+    public List<LogInfo> getLogInfoList(String instanceName) {
+        Assert.notNull(instanceName, "instanceName must not be null");
+        for (InstanceInfo instanceInfo : getInstanceInfoList()) {
+            if (instanceName.equals(instanceInfo.getName())) {
+                return instanceInfo.getLogInfoList();
             }
         }
         return null;

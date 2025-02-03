@@ -18,12 +18,12 @@
             <li class="fi-layout compact on horizontal hide-for-small-only"><a> Compact</a></li>
         </ul>
     </div>
-    <dl class="cell group tabs b0">
+    <dl class="cell instance tabs b0">
         <dd class="tabs-title"><a><span class="bullet fi-list-bullet"></span>
             <span class="title"> </span> <span class="indicator fi-loop"></span></a>
         </dd>
     </dl>
-    <div class="cell group-box">
+    <div class="cell instance-box">
         <div class="grid-x">
             <dl class="cell tabs b0">
                 <dd class="tabs-title"><a><span class="bullet fi-list-bullet"></span>

@@ -22,7 +22,7 @@ endpoint: {
         enabled: true
     }
 }
-group: {
+instance: {
     name: jpetstore
     title: JPetStore
     event: {
@@ -50,7 +50,7 @@ group: {
         sampleInterval: 300
     }
 }
-group: {
+instance: {
     name: demo
     title: Demo
     event: {
@@ -78,7 +78,7 @@ group: {
         sampleInterval: 300
     }
 }
-group: {
+instance: {
     name: root
     title: Root
     event: {

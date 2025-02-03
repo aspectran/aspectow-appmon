@@ -21,6 +21,6 @@ public interface BackendService {
 
     void broadcast(BackendSession session, String message);
 
-    boolean isUsingGroup(String group);
+    boolean isUsingInstance(String instanceName);
 
 }

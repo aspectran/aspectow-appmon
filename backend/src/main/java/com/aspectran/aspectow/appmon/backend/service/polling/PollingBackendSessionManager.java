@@ -58,7 +58,7 @@ public class PollingBackendSessionManager extends AbstractComponent {
     }
 
     public PollingBackendSession createSession(
-            @NonNull Translet translet, @Nullable EndpointPollingConfig pollingConfig, String[] joinGroupNames) {
+            @NonNull Translet translet, @Nullable EndpointPollingConfig pollingConfig, String[] instanceNames) {
         String sessionId = getSessionId(translet, true);
         PollingBackendSession existingSession = sessions.get(sessionId);
         if (existingSession != null) {
@@ -75,8 +75,8 @@ public class PollingBackendSessionManager extends AbstractComponent {
                 sessionTimeout = pollingInterval * 2;
             }
             PollingBackendSession session = new PollingBackendSession(this, sessionTimeout, pollingInterval);
-            if (joinGroupNames != null) {
-                session.saveJoinedGroups(joinGroupNames);
+            if (instanceNames != null) {
+                session.setJoinedInstances(instanceNames);
             }
             sessions.put(sessionId, session);
             session.access(true);
@@ -147,14 +147,14 @@ public class PollingBackendSessionManager extends AbstractComponent {
         return minLineIndex;
     }
 
-    protected boolean isUsingGroup(String groupName) {
-        if (StringUtils.hasLength(groupName)) {
+    protected boolean isUsingInstance(String instanceName) {
+        if (StringUtils.hasLength(instanceName)) {
             for (PollingBackendSession session : sessions.values()) {
                 if (session.isValid()) {
-                    String[] joinedGroups = session.getJoinedGroups();
-                    if (joinedGroups != null) {
-                        for (String name : joinedGroups) {
-                            if (groupName.equals(name)) {
+                    String[] instanceNames = session.getJoinedInstances();
+                    if (instanceNames != null) {
+                        for (String name : instanceNames) {
+                            if (instanceName.equals(name)) {
                                 return true;
                             }
                         }

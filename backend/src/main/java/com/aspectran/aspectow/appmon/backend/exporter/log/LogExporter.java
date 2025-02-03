@@ -66,7 +66,7 @@ public class LogExporter extends Exporter {
                        @NonNull File logFile) {
         this.logExporterManager = logExporterManager;
         this.logInfo = logInfo;
-        this.label = logInfo.getGroup() + TYPE + logInfo.getName() + ":";
+        this.label = logInfo.getInstanceName() + TYPE + logInfo.getName() + ":";
         this.charset = (logInfo.getCharset() != null ? Charset.forName(logInfo.getCharset()): DEFAULT_CHARSET);
         this.sampleInterval = (logInfo.getSampleInterval() > 0 ? logInfo.getSampleInterval() : DEFAULT_SAMPLE_INTERVAL);
         this.lastLines = logInfo.getLastLines();

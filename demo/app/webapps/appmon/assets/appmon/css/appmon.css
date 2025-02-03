@@ -1,13 +1,13 @@
-.endpoint-box.stacked .group.tabs {
+.endpoint-box.stacked .instance.tabs {
     display: none;
 }
-.endpoint-box .group-box .tabs {
+.endpoint-box .instance-box .tabs {
     display: none;
 }
-.endpoint-box.stacked .group-box .tabs {
+.endpoint-box.stacked .instance-box .tabs {
     display: block;
 }
-.endpoint-box.stacked .group-box.available {
+.endpoint-box.stacked .instance-box.available {
     display: block !important;
     margin-bottom: 30px;
 }

@@ -4,15 +4,15 @@ function WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErr
     let pendingMessages = [];
     let established = false;
 
-    this.start = function (joinGroups) {
-        openSocket(joinGroups);
+    this.start = function (joinInstances) {
+        openSocket(joinInstances);
     };
 
     this.stop = function () {
         closeSocket();
     };
 
-    const openSocket = function (joinGroups) {
+    const openSocket = function (joinInstances) {
         // For test
         // onErrorObserved(endpoint);
         // return;
@@ -23,7 +23,7 @@ function WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErr
         socket = new WebSocket(url.href);
         socket.onopen = function (event) {
             pendingMessages.push("Socket connection successful");
-            socket.send("join:" + (joinGroups||""));
+            socket.send("join:" + (joinInstances||""));
             heartbeatPing();
         };
         socket.onmessage = function (event) {

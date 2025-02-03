@@ -22,7 +22,7 @@ endpoint: {
         enabled: true
     }
 }
-group: {
+instance: {
     name: root
     title: Root
     event: {
@@ -46,7 +46,7 @@ group: {
         lastLines: 1000
     }
 }
-group: {
+instance: {
     name: appmon
     title: AppMon
     event: {
@@ -66,7 +66,7 @@ group: {
         lastLines: 1000
     }
 }
-group: {
+instance: {
     name: jpetstore
     title: JPetStore
     log: {
@@ -82,7 +82,7 @@ group: {
         lastLines: 1000
     }
 }
-group: {
+instance: {
     name: demo
     title: Demo
     log: {

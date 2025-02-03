@@ -17,8 +17,8 @@ package com.aspectran.aspectow.appmon.manager;
 
 import com.aspectran.aspectow.appmon.backend.config.EndpointInfo;
 import com.aspectran.aspectow.appmon.backend.config.EndpointInfoHolder;
-import com.aspectran.aspectow.appmon.backend.config.GroupInfo;
-import com.aspectran.aspectow.appmon.backend.config.GroupInfoHolder;
+import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
+import com.aspectran.aspectow.appmon.backend.config.InstanceInfoHolder;
 import com.aspectran.aspectow.appmon.backend.exporter.ExporterManager;
 import com.aspectran.aspectow.appmon.backend.service.BackendService;
 import com.aspectran.aspectow.appmon.backend.service.BackendSession;
@@ -43,15 +43,15 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final EndpointInfoHolder endpointInfoHolder;
 
-    private final GroupInfoHolder groupInfoHolder;
+    private final InstanceInfoHolder instanceInfoHolder;
 
     private final List<ExporterManager> exporterManagers = new ArrayList<>();
 
     private final Set<BackendService> backendServices = new HashSet<>();
 
-    public AppMonManager(EndpointInfoHolder endpointInfoHolder, GroupInfoHolder groupInfoHolder) {
+    public AppMonManager(EndpointInfoHolder endpointInfoHolder, InstanceInfoHolder instanceInfoHolder) {
         this.endpointInfoHolder = endpointInfoHolder;
-        this.groupInfoHolder = groupInfoHolder;
+        this.instanceInfoHolder = instanceInfoHolder;
     }
 
     @Override
@@ -84,25 +84,25 @@ public class AppMonManager extends InstantActivitySupport {
         return endpointInfoHolder.getEndpointInfoList();
     }
 
-    public String[] getVerifiedGroupNames(String[] joinGroupNames) {
-        List<GroupInfo> groups = getGroupInfoList(joinGroupNames);
-        if (!groups.isEmpty()) {
-            return GroupInfoHolder.extractGroupNames(groups);
+    public String[] getVerifiedInstanceNames(String[] instanceNames) {
+        List<InstanceInfo> infoList = getInstanceInfoList(instanceNames);
+        if (!infoList.isEmpty()) {
+            return InstanceInfoHolder.extractInstanceNames(infoList);
         } else {
             return new String[0];
         }
     }
 
-    public List<GroupInfo> getGroupInfoList(String[] joinGroupNames) {
-        return groupInfoHolder.getGroupInfoList(joinGroupNames);
+    public List<InstanceInfo> getInstanceInfoList(String[] instanceNames) {
+        return instanceInfoHolder.getInstanceInfoList(instanceNames);
     }
 
     public synchronized boolean join(@NonNull BackendSession session) {
         if (session.isValid()) {
-            String[] joinedGroups = session.getJoinedGroups();
-            if (joinedGroups != null && joinedGroups.length > 0) {
-                for (String groupName : joinedGroups) {
-                    startExporters(groupName);
+            String[] instanceNames = session.getJoinedInstances();
+            if (instanceNames != null && instanceNames.length > 0) {
+                for (String instanceName : instanceNames) {
+                    startExporters(instanceName);
                 }
             } else {
                 startExporters(null);
@@ -113,9 +113,9 @@ public class AppMonManager extends InstantActivitySupport {
         }
     }
 
-    private void startExporters(String groupName) {
+    private void startExporters(String instanceName) {
         for (ExporterManager exporterManager : exporterManagers) {
-            if (groupName == null || exporterManager.getGroupName().equals(groupName)) {
+            if (instanceName == null || exporterManager.getInstanceName().equals(instanceName)) {
                 exporterManager.start();
             }
         }
@@ -128,12 +128,12 @@ public class AppMonManager extends InstantActivitySupport {
                 stopExporters(groupName);
             }
         }
-        session.removeJoinedGroups();
+        session.removeJoinedInstances();
     }
 
     private void stopExporters(String groupName) {
         for (ExporterManager exporterManager : exporterManagers) {
-            if (groupName == null || exporterManager.getGroupName().equals(groupName)) {
+            if (groupName == null || exporterManager.getInstanceName().equals(groupName)) {
                 exporterManager.stop();
             }
         }
@@ -142,7 +142,7 @@ public class AppMonManager extends InstantActivitySupport {
     public List<String> getLastMessages(@NonNull BackendSession session) {
         List<String> messages = new ArrayList<>();
         if (session.isValid()) {
-            String[] joinGroups = session.getJoinedGroups();
+            String[] joinGroups = session.getJoinedInstances();
             if (joinGroups != null && joinGroups.length > 0) {
                 for (String group : joinGroups) {
                     collectLastMessages(group, messages);
@@ -156,7 +156,7 @@ public class AppMonManager extends InstantActivitySupport {
 
     private void collectLastMessages(String groupName, List<String> messages) {
         for (ExporterManager exporterManager : exporterManagers) {
-            if (groupName == null || exporterManager.getGroupName().equals(groupName)) {
+            if (groupName == null || exporterManager.getInstanceName().equals(groupName)) {
                 exporterManager.collectMessages(messages);
             }
         }
@@ -184,7 +184,7 @@ public class AppMonManager extends InstantActivitySupport {
         for (String name : joinedGroups) {
             boolean using = false;
             for (BackendService backendService : backendServices) {
-                if (backendService.isUsingGroup(name)) {
+                if (backendService.isUsingInstance(name)) {
                     using = true;
                     break;
                 }
@@ -202,13 +202,13 @@ public class AppMonManager extends InstantActivitySupport {
 
     @Nullable
     private String[] getJoinedGroups(@NonNull BackendSession session) {
-        String[] joinedGroups = session.getJoinedGroups();
+        String[] joinedGroups = session.getJoinedInstances();
         if (joinedGroups == null) {
             return null;
         }
         Set<String> validJoinedGroups = new HashSet<>();
         for (String name : joinedGroups) {
-            if (groupInfoHolder.containsGroup(name)) {
+            if (instanceInfoHolder.containsInstance(name)) {
                 validJoinedGroups.add(name);
             }
         }

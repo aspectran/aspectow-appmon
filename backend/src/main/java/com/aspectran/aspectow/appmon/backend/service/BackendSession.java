@@ -17,11 +17,11 @@ package com.aspectran.aspectow.appmon.backend.service;
 
 public interface BackendSession {
 
-    String[] getJoinedGroups();
+    String[] getJoinedInstances();
 
-    void saveJoinedGroups(String[] joinGroupNames);
+    void setJoinedInstances(String[] instanceNames);
 
-    void removeJoinedGroups();
+    void removeJoinedInstances();
 
     boolean isTwoWay();
 

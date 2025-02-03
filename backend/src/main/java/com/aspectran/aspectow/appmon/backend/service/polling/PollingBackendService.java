@@ -17,7 +17,7 @@ package com.aspectran.aspectow.appmon.backend.service.polling;
 
 import com.aspectran.aspectow.appmon.backend.config.EndpointInfo;
 import com.aspectran.aspectow.appmon.backend.config.EndpointPollingConfig;
-import com.aspectran.aspectow.appmon.backend.config.GroupInfo;
+import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.backend.service.BackendService;
 import com.aspectran.aspectow.appmon.backend.service.BackendSession;
 import com.aspectran.aspectow.appmon.manager.AppMonManager;
@@ -80,22 +80,22 @@ public class PollingBackendService implements BackendService {
         EndpointInfo endpointInfo = appMonManager.getResidentEndpointInfo();
         EndpointPollingConfig pollingConfig = endpointInfo.getPollingConfig();
 
-        String joinGroups = translet.getParameter("joinGroups");
-        String[] joinGroupNames = appMonManager.getVerifiedGroupNames(StringUtils.splitCommaDelimitedString(joinGroups));
-        if (StringUtils.hasText(joinGroups) && joinGroupNames.length == 0) {
+        String joinInstances = translet.getParameter("joinInstances");
+        String[] instanceNames = appMonManager.getVerifiedInstanceNames(StringUtils.splitCommaDelimitedString(joinInstances));
+        if (StringUtils.hasText(joinInstances) && instanceNames.length == 0) {
             return null;
         }
 
-        PollingBackendSession endpointSession = endpointSessionManager.createSession(translet, pollingConfig, joinGroupNames);
+        PollingBackendSession endpointSession = endpointSessionManager.createSession(translet, pollingConfig, instanceNames);
         if (!appMonManager.join(endpointSession)) {
             return null;
         }
 
-        List<GroupInfo> groups = appMonManager.getGroupInfoList(endpointSession.getJoinedGroups());
+        List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(endpointSession.getJoinedInstances());
         List<String> messages = appMonManager.getLastMessages(endpointSession);
         return Map.of(
                 "token", AppMonManager.issueToken(),
-                "groups", groups,
+                "instances", instanceInfoList,
                 "pollingInterval", endpointSession.getPollingInterval(),
                 "messages", messages
         );
@@ -156,9 +156,9 @@ public class PollingBackendService implements BackendService {
     }
 
     @Override
-    public boolean isUsingGroup(String groupName) {
+    public boolean isUsingInstance(String instanceName) {
         if (endpointSessionManager != null) {
-            return endpointSessionManager.isUsingGroup(groupName);
+            return endpointSessionManager.isUsingInstance(instanceName);
         } else {
             return false;
         }

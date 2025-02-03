@@ -22,7 +22,7 @@ import jakarta.websocket.Session;
 
 public class WebsocketBackendSession implements BackendSession {
 
-    private static final String JOINED_GROUPS_PROPERTY = "appmon:JoinedGroups";
+    private static final String JOINED_INSTANCES_PROPERTY = "appmon:JoinedInstances";
 
     private final Session session;
 
@@ -35,19 +35,19 @@ public class WebsocketBackendSession implements BackendSession {
     }
 
     @Override
-    public String[] getJoinedGroups() {
-        return (String[])session.getUserProperties().get(JOINED_GROUPS_PROPERTY);
+    public String[] getJoinedInstances() {
+        return (String[])session.getUserProperties().get(JOINED_INSTANCES_PROPERTY);
     }
 
     @Override
-    public void saveJoinedGroups(String[] joinGroupNames) {
-        Assert.notNull(joinGroupNames, "joinGroupNames must not be null");
-        session.getUserProperties().put(JOINED_GROUPS_PROPERTY, joinGroupNames);
+    public void setJoinedInstances(String[] instanceNames) {
+        Assert.notNull(instanceNames, "instanceNames must not be null");
+        session.getUserProperties().put(JOINED_INSTANCES_PROPERTY, instanceNames);
     }
 
     @Override
-    public void removeJoinedGroups() {
-        session.getUserProperties().remove(JOINED_GROUPS_PROPERTY);
+    public void removeJoinedInstances() {
+        session.getUserProperties().remove(JOINED_INSTANCES_PROPERTY);
     }
 
     @Override

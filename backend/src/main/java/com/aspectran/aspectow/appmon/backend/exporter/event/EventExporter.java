@@ -49,7 +49,7 @@ public class EventExporter extends Exporter {
         this.eventExporterManager = eventExporterManager;
         this.eventInfo = eventInfo;
         this.eventReader = eventReader;
-        this.label = eventInfo.getGroup() + TYPE + eventInfo.getName() + ":";
+        this.label = eventInfo.getInstanceName() + TYPE + eventInfo.getName() + ":";
         this.sampleInterval = eventInfo.getSampleInterval();
     }
 

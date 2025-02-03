@@ -26,7 +26,7 @@ import com.aspectran.utils.apon.ValueType;
  */
 public class EventInfo extends AbstractParameters {
 
-    private static final ParameterKey group;
+    private static final ParameterKey instance;
     private static final ParameterKey name;
     private static final ParameterKey title;
     private static final ParameterKey reader;
@@ -37,7 +37,7 @@ public class EventInfo extends AbstractParameters {
     private static final ParameterKey[] parameterKeys;
 
     static {
-        group = new ParameterKey("group", ValueType.STRING);
+        instance = new ParameterKey("instance", ValueType.STRING);
         name = new ParameterKey("name", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
         reader = new ParameterKey("reader", ValueType.STRING);
@@ -46,7 +46,7 @@ public class EventInfo extends AbstractParameters {
         sampleInterval = new ParameterKey("sampleInterval", ValueType.INT);
 
         parameterKeys = new ParameterKey[] {
-                group,
+            instance,
                 name,
                 title,
                 reader,
@@ -56,16 +56,18 @@ public class EventInfo extends AbstractParameters {
         };
     }
 
+    private String instanceName;
+
     public EventInfo() {
         super(parameterKeys);
     }
 
-    public String getGroup() {
-        return getString(group);
+    public String getInstanceName() {
+        return instanceName;
     }
 
-    void setGroup(String group) {
-        putValue(EventInfo.group, group);
+    void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
     }
 
     public String getName() {

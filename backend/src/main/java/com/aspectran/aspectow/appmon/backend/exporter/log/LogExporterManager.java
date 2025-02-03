@@ -20,8 +20,8 @@ import com.aspectran.aspectow.appmon.manager.AppMonManager;
 
 public class LogExporterManager extends ExporterManager {
 
-    public LogExporterManager(AppMonManager appMonManager, String groupName) {
-        super(appMonManager, groupName);
+    public LogExporterManager(AppMonManager appMonManager, String instanceName) {
+        super(appMonManager, instanceName);
     }
 
 }

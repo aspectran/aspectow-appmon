@@ -2,7 +2,7 @@ function FrontBuilder() {
 
     const endpoints = [];
 
-    this.build = function (basePath, token, currentEndpoint, joinGroups) {
+    this.build = function (basePath, token, currentEndpoint, joinInstances) {
         $.ajax({
             url: basePath + "backend/endpoints/" + token,
             type: 'get',
@@ -21,14 +21,14 @@ function FrontBuilder() {
                         }
                     }
                     if (endpoints.length) {
-                        establishEndpoint(0, joinGroups);
+                        establishEndpoint(0, joinInstances);
                     }
                 }
             }
         });
     };
 
-    const establishEndpoint = function (endpointIndex, joinGroups) {
+    const establishEndpoint = function (endpointIndex, joinInstances) {
         console.log('endpointIndex', endpointIndex);
         function onEndpointJoined(endpoint, payload) {
             buildEndpointView(endpoint, payload);
@@ -39,15 +39,15 @@ function FrontBuilder() {
         }
         function onEstablishCompleted(endpoint) {
             if (endpoint.index < endpoints.length - 1) {
-                establishEndpoint(endpoint.index + 1, joinGroups);
+                establishEndpoint(endpoint.index + 1, joinInstances);
             } else if (endpoint.index === endpoints.length - 1) {
                 initEndpointViews();
                 if (endpoints.length) {
                     changeEndpoint(0);
-                    changeGroup();
+                    changeInstance();
                     if (location.hash) {
-                        let groupName = location.hash.substring(1);
-                        changeGroup(groupName);
+                        let instanceName = location.hash.substring(1);
+                        changeInstance(instanceName);
                     }
                 }
             }
@@ -59,7 +59,7 @@ function FrontBuilder() {
                 }
                 let client = new PollingClient(endpoint, onEndpointJoined, onEstablishCompleted);
                 endpoint['client'] = client;
-                client.start(joinGroups);
+                client.start(joinInstances);
             }, (endpoint.index - 1) * 1000);
         }
 
@@ -72,7 +72,7 @@ function FrontBuilder() {
         endpoint['viewer'] = new FrontViewer(endpoint);
         let client = new WebsocketClient(endpoint, onEndpointJoined, onEstablishCompleted, onErrorObserved);
         endpoint['client'] = client;
-        client.start(joinGroups);
+        client.start(joinInstances);
     };
 
     const clearScreen = function () {
@@ -91,18 +91,18 @@ function FrontBuilder() {
         endpoints[endpointIndex].viewer.refreshConsole();
     };
 
-    const changeGroup = function (groupName) {
+    const changeInstance = function (instanceName) {
         let exists = false;
         $(".endpoint-box.available").each(function () {
             let $endpointBox = $(this);
             $endpointBox.find(".tabs-title.available").each(function () {
-                if (!groupName) {
-                    groupName = $(this).data("name");
+                if (!instanceName) {
+                    instanceName = $(this).data("name");
                 }
-                if ($(this).data("name") === groupName) {
+                if ($(this).data("name") === instanceName) {
                     if (!$(this).hasClass("is-active")) {
                         $(this).addClass("is-active");
-                        changeEndpointGroup($endpointBox, groupName);
+                        changeEndpointInstance($endpointBox, instanceName);
                     }
                     exists = true;
                 } else {
@@ -110,18 +110,18 @@ function FrontBuilder() {
                 }
             });
         });
-        if (!exists && groupName) {
-            changeGroup();
+        if (!exists && instanceName) {
+            changeInstance();
         }
     }
 
-    const changeEndpointGroup = function ($endpointBox, groupName) {
-        let $groupBox = $endpointBox.find(".group-box[data-name=" + groupName + "]");
-        if ($groupBox.length) {
-            $endpointBox.find(".group-box").hide();
-            $groupBox.show();
-            $groupBox.find(".track-box .bullet").remove();
-            $groupBox.find(".log-box.available .log-console").each(function () {
+    const changeEndpointInstance = function ($endpointBox, instanceName) {
+        let $instanceBox = $endpointBox.find(".instance-box[data-name=" + instanceName + "]");
+        if ($instanceBox.length) {
+            $endpointBox.find(".instance-box").hide();
+            $instanceBox.show();
+            $instanceBox.find(".track-box .bullet").remove();
+            $instanceBox.find(".log-box.available .log-console").each(function () {
                 let $console = $(this);
                 if (!$console.data("pause")) {
                     let endpointIndex = $endpointBox.data("index");
@@ -139,10 +139,10 @@ function FrontBuilder() {
             let endpointIndex = $tab.data("index");
             changeEndpoint(endpointIndex);
         });
-        $(".endpoint-box.available .group.tabs .tabs-title.available a").click(function() {
-            let $groupTab = $(this).closest(".tabs-title");
-            let groupName = $groupTab.data("name");
-            changeGroup(groupName);
+        $(".endpoint-box.available .instance.tabs .tabs-title.available a").click(function() {
+            let $instanceTab = $(this).closest(".tabs-title");
+            let instanceName = $instanceTab.data("name");
+            changeInstance(instanceName);
         });
         $(".log-box .tailing-switch").click(function() {
             let $console = $(this).closest(".log-box").find(".log-console");
@@ -226,33 +226,33 @@ function FrontBuilder() {
         let $endpointBox = addEndpointBox(endpoint);
         let indicatorEndpoint = $(".endpoint.tabs .tabs-title.available .indicator").eq(endpoint.index);
         endpoint.viewer.putIndicator("endpoint", "event", endpoint.index, indicatorEndpoint);
-        for (let key in payload.groups) {
-            let groupInfo = payload.groups[key];
-            addGroupBox($endpointBox, groupInfo);
-            let $indicatorGroup = $endpointBox
-                .find(".group.tabs .tabs-title[data-name=" + groupInfo.name + "], .group-box[data-name=" + groupInfo.name + "] .tabs-title")
+        for (let key in payload.instances) {
+            let instanceInfo = payload.instances[key];
+            addInstanceBox($endpointBox, instanceInfo);
+            let $instanceIndicator = $endpointBox
+                .find(".instance.tabs .tabs-title[data-name=" + instanceInfo.name + "], .instance-box[data-name=" + instanceInfo.name + "] .tabs-title")
                 .find(".indicator");
-            endpoint.viewer.putIndicator("group", "event", groupInfo.name, $indicatorGroup);
-            for (let key in groupInfo.events) {
-                let eventInfo = groupInfo.events[key];
+            endpoint.viewer.putIndicator("instance", "event", instanceInfo.name, $instanceIndicator);
+            for (let key in instanceInfo.events) {
+                let eventInfo = instanceInfo.events[key];
                 if (eventInfo.name === "activity") {
-                    let $trackBox = addTrackBox($endpointBox, eventInfo);
-                    let $reqNum = $trackBox.find(".activities");
-                    endpoint.viewer.putDisplay(groupInfo.name, eventInfo.name, $trackBox);
-                    endpoint.viewer.putIndicator(groupInfo.name, "event", eventInfo.name, $reqNum);
+                    let $trackBox = addTrackBox($endpointBox, instanceInfo.name, eventInfo);
+                    let $activities = $trackBox.find(".activities");
+                    endpoint.viewer.putDisplay(instanceInfo.name, eventInfo.name, $trackBox);
+                    endpoint.viewer.putIndicator(instanceInfo.name, "event", eventInfo.name, $activities);
                 } else if (eventInfo.name === "session") {
-                    let $displayBox = addDisplayBox($endpointBox, eventInfo);
-                    endpoint.viewer.putDisplay(groupInfo.name, eventInfo.name, $displayBox);
+                    let $displayBox = addDisplayBox($endpointBox, instanceInfo.name, eventInfo);
+                    endpoint.viewer.putDisplay(instanceInfo.name, eventInfo.name, $displayBox);
                 }
             }
-            for (let key in groupInfo.logs) {
-                let logInfo = groupInfo.logs[key];
-                let $logBox = addLogBox($endpointBox, logInfo);
+            for (let key in instanceInfo.logs) {
+                let logInfo = instanceInfo.logs[key];
+                let $logBox = addLogBox($endpointBox, instanceInfo.name, logInfo);
                 let $console = $logBox.find(".log-console").data("tailing", true);
                 $logBox.find(".tailing-status").addClass("on");
-                endpoint.viewer.putConsole(groupInfo.name, logInfo.name, $console);
-                let $indicatorLog = $logBox.find(".status-bar");
-                endpoint.viewer.putIndicator(groupInfo.name, "log", logInfo.name, $indicatorLog);
+                endpoint.viewer.putConsole(instanceInfo.name, logInfo.name, $console);
+                let $logIndicator = $logBox.find(".status-bar");
+                endpoint.viewer.putIndicator(instanceInfo.name, "log", logInfo.name, $logIndicator);
             }
         }
         if (endpoint.mode === "polling") {
@@ -280,46 +280,46 @@ function FrontBuilder() {
             .insertAfter($endpointBox.last()).show();
     };
 
-    const addGroupBox = function ($endpointBox, groupInfo) {
+    const addInstanceBox = function ($endpointBox, instanceInfo) {
         let endpointTitle = $endpointBox.data("title");
-        let $tabs = $endpointBox.find(".group.tabs");
+        let $tabs = $endpointBox.find(".instance.tabs");
         let $tab0 = $tabs.find(".tabs-title").eq(0);
         let index = $tabs.find(".tabs-title").length - 1;
         let $tab = $tab0.hide().clone()
             .addClass("available")
             .attr("data-index", index)
-            .attr("data-name", groupInfo.name)
-            .attr("title", endpointTitle + " ›› " + groupInfo.title);
-        $tab.find("a .title").text(" " + groupInfo.title + " ");
+            .attr("data-name", instanceInfo.name)
+            .attr("title", endpointTitle + " ›› " + instanceInfo.title);
+        $tab.find("a .title").text(" " + instanceInfo.title + " ");
         $tab.show().appendTo($tabs);
-        let $groupBox = $endpointBox.find(".group-box").eq(0).hide().clone();
-        $groupBox.addClass("available")
-            .attr("data-name", groupInfo.name)
-            .attr("data-title", groupInfo.title)
+        let $instanceBox = $endpointBox.find(".instance-box").eq(0).hide().clone();
+        $instanceBox.addClass("available")
+            .attr("data-name", instanceInfo.name)
+            .attr("data-title", instanceInfo.title)
             .appendTo($endpointBox);
-        $groupBox.find(".tabs .tabs-title")
+        $instanceBox.find(".tabs .tabs-title")
             .addClass("is-active")
             .find("a .title")
-                .text(" " + groupInfo.title + " ");
-        return $groupBox;
+                .text(" " + instanceInfo.title + " ");
+        return $instanceBox;
     };
 
-    const addTrackBox = function ($endpointBox, eventInfo) {
-        let $groupBox = $endpointBox.find(".group-box[data-name=" + eventInfo.group + "]");
-        let $trackBox = $groupBox.find(".track-box").eq(0).hide().clone()
+    const addTrackBox = function ($endpointBox, instanceName, eventInfo) {
+        let $instanceBox = $endpointBox.find(".instance-box[data-name=" + instanceName + "]");
+        let $trackBox = $instanceBox.find(".track-box").eq(0).hide().clone()
             .addClass("available")
-            .attr("data-group", eventInfo.group)
+            .attr("data-instance", instanceName)
             .attr("data-name", eventInfo.name);
-        return $trackBox.appendTo($groupBox.find("> .grid-x")).show();
+        return $trackBox.appendTo($instanceBox.find("> .grid-x")).show();
     };
 
-    const addLogBox = function ($endpointBox, logInfo) {
+    const addLogBox = function ($endpointBox, instanceName, logInfo) {
         let endpointIndex = $endpointBox.data("index");
         let endpointTitle = $endpointBox.data("title");
-        let $groupBox = $endpointBox.find(".group-box[data-name=" + logInfo.group + "]");
-        let $logBox = $groupBox.find(".log-box").eq(0).hide().clone()
+        let $instanceBox = $endpointBox.find(".instance-box[data-name=" + instanceName + "]");
+        let $logBox = $instanceBox.find(".log-box").eq(0).hide().clone()
             .addClass("large-6 available")
-            .attr("data-group", logInfo.group)
+            .attr("data-instance", instanceName)
             .attr("data-name", logInfo.name);
         $logBox.find(".status-bar h4")
             .text(endpointTitle + " ›› " + logInfo.file);
@@ -327,15 +327,15 @@ function FrontBuilder() {
             .attr("data-endpoint-index", endpointIndex)
             .attr("data-endpoint-name", endpointTitle)
             .attr("data-log-name", logInfo.name);
-        return $logBox.appendTo($groupBox.find("> .grid-x")).show();
+        return $logBox.appendTo($instanceBox.find("> .grid-x")).show();
     };
 
-    const addDisplayBox = function (endpointBox, eventInfo) {
-        let $groupBox = endpointBox.find(".group-box[data-name=" + eventInfo.group + "]");
-        let $displayBox = $groupBox.find(".display-box").eq(0).hide().clone()
+    const addDisplayBox = function (endpointBox, instanceName, eventInfo) {
+        let $instanceBox = endpointBox.find(".instance-box[data-name=" + instanceName + "]");
+        let $displayBox = $instanceBox.find(".display-box").eq(0).hide().clone()
             .addClass("available")
-            .attr("data-group", eventInfo.group)
+            .attr("data-instance", instanceName)
             .attr("data-name", eventInfo.name);
-        return $displayBox.appendTo($groupBox.find("> .grid-x")).show();
+        return $displayBox.appendTo($instanceBox.find("> .grid-x")).show();
     };
 }

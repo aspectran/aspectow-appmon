@@ -22,56 +22,56 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GroupInfoHolder {
+public class InstanceInfoHolder {
 
-    private final Map<String, GroupInfo> groupInfos = new LinkedHashMap<>();
+    private final Map<String, InstanceInfo> instanceInfos = new LinkedHashMap<>();
 
-    public GroupInfoHolder(@NonNull List<GroupInfo> groupInfoList) {
-        for (GroupInfo info : groupInfoList) {
-            groupInfos.put(info.getName(), info);
+    public InstanceInfoHolder(@NonNull List<InstanceInfo> instanceInfoList) {
+        for (InstanceInfo instanceInfo : instanceInfoList) {
+            instanceInfos.put(instanceInfo.getName(), instanceInfo);
 
-            List<EventInfo> eventInfoList = info.getEventInfoList();
+            List<EventInfo> eventInfoList = instanceInfo.getEventInfoList();
             if (eventInfoList != null) {
                 for (EventInfo eventInfo : eventInfoList) {
-                    eventInfo.setGroup(info.getName());
+                    eventInfo.setInstanceName(instanceInfo.getName());
                 }
             }
-            List<LogInfo> logInfoList = info.getLogInfoList();
+            List<LogInfo> logInfoList = instanceInfo.getLogInfoList();
             if (logInfoList != null) {
                 for (LogInfo logInfo : logInfoList) {
-                    logInfo.setGroup(info.getName());
+                    logInfo.setInstanceName(instanceInfo.getName());
                 }
             }
         }
     }
 
-    public List<GroupInfo> getGroupInfoList(String[] joinGroupNames) {
-        List<GroupInfo> infoList = new ArrayList<>(groupInfos.size());
+    public List<InstanceInfo> getInstanceInfoList(String[] joinGroupNames) {
+        List<InstanceInfo> infoList = new ArrayList<>(instanceInfos.size());
         if (joinGroupNames != null && joinGroupNames.length > 0) {
             for (String name : joinGroupNames) {
-                for (GroupInfo info : groupInfos.values()) {
+                for (InstanceInfo info : instanceInfos.values()) {
                     if (info.getName().equals(name)) {
                         infoList.add(info);
                     }
                 }
             }
         } else {
-            infoList.addAll(groupInfos.values());
+            infoList.addAll(instanceInfos.values());
         }
         return infoList;
     }
 
-    public boolean containsGroup(String groupName) {
-        return groupInfos.containsKey(groupName);
+    public boolean containsInstance(String instanceName) {
+        return instanceInfos.containsKey(instanceName);
     }
 
     @NonNull
-    public static String[] extractGroupNames(@NonNull List<GroupInfo> groupInfoList) {
-        List<String> groupNames = new ArrayList<>(groupInfoList.size());
-        for (GroupInfo groupInfo : groupInfoList) {
-            groupNames.add(groupInfo.getName());
+    public static String[] extractInstanceNames(@NonNull List<InstanceInfo> instanceInfoList) {
+        List<String> instanceNames = new ArrayList<>(instanceInfoList.size());
+        for (InstanceInfo instanceInfo : instanceInfoList) {
+            instanceNames.add(instanceInfo.getName());
         }
-        return groupNames.toArray(new String[0]);
+        return instanceNames.toArray(new String[0]);
     }
 
 }
