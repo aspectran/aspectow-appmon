@@ -1,8 +1,11 @@
 function WebsocketClient(endpoint, viewer, onEndpointJoined, onEstablishCompleted, onErrorObserved) {
+
+    const MODE = "websocket";
     let socket = null;
     let heartbeatTimer = null;
     let pendingMessages = [];
     let established = false;
+    let retryCount = 0;
 
     this.start = function (joinInstances) {
         openSocket(joinInstances);
@@ -28,16 +31,17 @@ function WebsocketClient(endpoint, viewer, onEndpointJoined, onEstablishComplete
         };
         socket.onmessage = function (event) {
             if (typeof event.data === "string") {
-                if (event.data === "--pong--") {
-                    heartbeatPing();
-                    return;
-                }
                 let msg = event.data;
                 if (established) {
-                    viewer.processMessage(msg);
+                    if (msg.startsWith("pong:")) {
+                        endpoint.token = msg.substring(5);
+                        heartbeatPing();
+                    } else {
+                        viewer.processMessage(msg);
+                    }
                 } else if (msg.startsWith("joined:")) {
                     console.log(msg);
-                    let payload = JSON.parse(msg.substring(7));
+                    let payload = (msg.length > 7 ? JSON.parse(msg.substring(7)) : null);
                     establish(payload);
                 }
             }
@@ -47,15 +51,20 @@ function WebsocketClient(endpoint, viewer, onEndpointJoined, onEstablishComplete
                 viewer.printMessage("Socket connection closed.");
             } else {
                 closeSocket();
-                viewer.printMessage("Socket connection closed. Please refresh this page to try again!");
+                if (retryCount++ < 10) {
+                    viewer.printMessage("Socket connection closed. Trying to reconnect...");
+                    setTimeout(function () {
+                        openSocket();
+                    }, 5000);
+                }
             }
         };
         socket.onerror = function (event) {
-            console.error("WebSocket error observed:", event);
-            if (!endpoint.mode && onErrorObserved) {
-                onErrorObserved(endpoint);
-            } else {
+            if (endpoint.mode === "websocket") {
+                console.error("WebSocket error observed:", event);
                 viewer.printErrorMessage("Could not connect to WebSocket server.");
+            } else if (onErrorObserved) {
+                onErrorObserved(endpoint);
             }
         };
     };
@@ -69,7 +78,7 @@ function WebsocketClient(endpoint, viewer, onEndpointJoined, onEstablishComplete
 
     const establish = function (payload) {
         if (onEndpointJoined) {
-            endpoint['mode'] = "websocket";
+            endpoint['mode'] = MODE;
             onEndpointJoined(endpoint, payload);
         }
         while (pendingMessages.length) {
@@ -91,8 +100,8 @@ function WebsocketClient(endpoint, viewer, onEndpointJoined, onEstablishComplete
         }
         heartbeatTimer = setTimeout(function () {
             if (socket) {
-                socket.send("--ping--");
+                socket.send("ping:");
             }
-        }, 57000);
+        }, 50000);
     };
 }

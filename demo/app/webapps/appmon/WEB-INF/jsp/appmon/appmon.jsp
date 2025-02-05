@@ -12,10 +12,8 @@
         <ul class="speed-options">
             <li class="fi-fast-forward fast" title="Set to poll every second. Turn this option on only when absolutely necessary."></li>
         </ul>
-        <ul class="layout-options">
-            <li class="fi-layout tabbed on" data-columns="0"><a> Tabbed</a></li>
-            <li class="fi-layout stacked" data-columns="0"><a> Stacked</a></li>
-            <li class="fi-layout compact on horizontal hide-for-small-only"><a> Compact</a></li>
+        <ul class="layout-options hide-for-small-only">
+            <li class="fi-layout compact on horizontal"><a> Compact</a></li>
         </ul>
     </div>
     <dl class="cell instance tabs b0">
@@ -23,61 +21,59 @@
             <span class="title"> </span> <span class="indicator fi-loop"></span></a>
         </dd>
     </dl>
-    <div class="cell instance-box">
+    <div class="cell display-box">
         <div class="grid-x">
-            <dl class="cell tabs b0">
-                <dd class="tabs-title"><a><span class="bullet fi-list-bullet"></span>
-                    <span class="title"> </span> <span class="indicator fi-loop"></span></a>
-                </dd>
-            </dl>
+            <div class="cell status-bar">
+                <h4 class="ellipses"></h4>
+            </div>
             <div class="cell track-box">
                 <div class="track-stack"><div class="activities"><p class="current"></p><p class="total"></p></div></div>
             </div>
-            <div class="cell display-box">
+            <div class="cell sessions-box">
                 <div class="grid-x">
-                    <div class="cell small-12 large-4">
+                    <div class="cell small-12 medium-6 large-4">
                         <div class="panel">
                             <dl class="session-statistics">
-                                <dt title="The number of active sessions">Current Active Sessions</dt>
+                                <dt class="ellipses" title="The number of active sessions">Current Active Sessions</dt>
                                 <dd><span class="number numberOfActives">0</span></dd>
-                                <dt title="The highest number of sessions that have been active at a single time">Highest Active Sessions</dt>
+                                <dt class="ellipses" title="The highest number of sessions that have been active at a single time">Highest Active Sessions</dt>
                                 <dd><span class="number highestNumberOfActives">0</span></dd>
-                                <dt title="The number of sessions created since system bootup">Created Sessions</dt>
+                                <dt class="ellipses" title="The number of sessions created since system bootup">Created Sessions</dt>
                                 <dd><span class="number numberOfCreated">0</span></dd>
-                                <dt title="The number of expired sessions">Expired Sessions</dt>
+                                <dt class="ellipses" title="The number of expired sessions">Expired Sessions</dt>
                                 <dd><span class="number numberOfExpired">0</span></dd>
-                                <dt title="This number of sessions includes sessions that are inactive or have been transferred to a session manager on another clustered server">Unmanaged Sessions</dt>
+                                <dt class="ellipses" title="This number of sessions includes sessions that are inactive or have been transferred to a session manager on another clustered server">Unmanaged Sessions</dt>
                                 <dd><span class="number numberOfUnmanaged">0</span></dd>
-                                <dt title="The number of rejected sessions">Rejected Sessions</dt>
+                                <dt class="ellipses" title="The number of rejected sessions">Rejected Sessions</dt>
                                 <dd><span class="number numberOfRejected">0</span></dd>
                             </dl>
                             <p class="text-right"><i>Elapsed <span class="elapsed"></span></i></p>
                         </div>
                     </div>
-                    <div class="cell small-12 large-8">
-                        <div class="panel sessions-box">
+                    <div class="cell small-12 medium-6 large-8">
+                        <div class="panel">
                             <ul class="sessions">
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="cell log-box">
-                <div class="status-bar">
-                    <h4 class="ellipses"></h4>
-                    <a href="#" class="tailing-switch" title="Scroll to End of Log">
-                        <span class="tailing-status"></span>
-                    </a>
-                    <a href="#" class="clear-screen" title="Clear screen">
-                        <span class="icon fi-x"></span>
-                    </a>
-                    <a href="#" class="pause-switch" title="Pause log output">
-                        <span class="icon fi-pause"></span>
-                    </a>
-                </div>
-                <pre class="log-console"></pre>
-            </div>
         </div>
+    </div>
+    <div class="cell console-box">
+        <div class="status-bar">
+            <h4 class="ellipses"></h4>
+            <a href="#" class="tailing-switch" title="Scroll to End of Log">
+                <span class="tailing-status"></span>
+            </a>
+            <a href="#" class="clear-screen" title="Clear screen">
+                <span class="icon fi-x"></span>
+            </a>
+            <a href="#" class="pause-switch" title="Pause log output">
+                <span class="icon fi-pause"></span>
+            </a>
+        </div>
+        <pre class="console"></pre>
     </div>
 </div>
 <script>

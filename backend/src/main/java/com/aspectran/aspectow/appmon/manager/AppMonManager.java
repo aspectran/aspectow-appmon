@@ -20,8 +20,8 @@ import com.aspectran.aspectow.appmon.backend.config.EndpointInfoHolder;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfoHolder;
 import com.aspectran.aspectow.appmon.backend.exporter.ExporterManager;
-import com.aspectran.aspectow.appmon.backend.service.BackendService;
 import com.aspectran.aspectow.appmon.backend.service.BackendSession;
+import com.aspectran.aspectow.appmon.backend.service.ExportService;
 import com.aspectran.core.activity.InstantActivitySupport;
 import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.core.context.ActivityContext;
@@ -47,7 +47,7 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final List<ExporterManager> exporterManagers = new ArrayList<>();
 
-    private final Set<BackendService> backendServices = new HashSet<>();
+    private final Set<ExportService> exportServices = new HashSet<>();
 
     public AppMonManager(EndpointInfoHolder endpointInfoHolder, InstanceInfoHolder instanceInfoHolder) {
         this.endpointInfoHolder = endpointInfoHolder;
@@ -70,8 +70,8 @@ public class AppMonManager extends InstantActivitySupport {
         exporterManagers.add(exporterManager);
     }
 
-    public void addBackendService(BackendService backendService) {
-        backendServices.add(backendService);
+    public void addExportService(ExportService exportService) {
+        exportServices.add(exportService);
     }
 
     public EndpointInfo getResidentEndpointInfo() {
@@ -91,6 +91,10 @@ public class AppMonManager extends InstantActivitySupport {
         } else {
             return new String[0];
         }
+    }
+
+    public List<InstanceInfo> getInstanceInfoList() {
+        return instanceInfoHolder.getInstanceInfoList();
     }
 
     public List<InstanceInfo> getInstanceInfoList(String[] instanceNames) {
@@ -122,18 +126,18 @@ public class AppMonManager extends InstantActivitySupport {
     }
 
     public synchronized void release(BackendSession session) {
-        String[] unusedGroups = getUnusedGroups(session);
-        if (unusedGroups != null) {
-            for (String groupName : unusedGroups) {
-                stopExporters(groupName);
+        String[] instanceNames = getUnusedInstances(session);
+        if (instanceNames != null) {
+            for (String name : instanceNames) {
+                stopExporters(name);
             }
         }
         session.removeJoinedInstances();
     }
 
-    private void stopExporters(String groupName) {
+    private void stopExporters(String instanceName) {
         for (ExporterManager exporterManager : exporterManagers) {
-            if (groupName == null || exporterManager.getInstanceName().equals(groupName)) {
+            if (instanceName == null || exporterManager.getInstanceName().equals(instanceName)) {
                 exporterManager.stop();
             }
         }
@@ -142,10 +146,10 @@ public class AppMonManager extends InstantActivitySupport {
     public List<String> getLastMessages(@NonNull BackendSession session) {
         List<String> messages = new ArrayList<>();
         if (session.isValid()) {
-            String[] joinGroups = session.getJoinedInstances();
-            if (joinGroups != null && joinGroups.length > 0) {
-                for (String group : joinGroups) {
-                    collectLastMessages(group, messages);
+            String[] instanceNames = session.getJoinedInstances();
+            if (instanceNames != null && instanceNames.length > 0) {
+                for (String name : instanceNames) {
+                    collectLastMessages(name, messages);
                 }
             } else {
                 collectLastMessages(null, messages);
@@ -154,66 +158,66 @@ public class AppMonManager extends InstantActivitySupport {
         return messages;
     }
 
-    private void collectLastMessages(String groupName, List<String> messages) {
+    private void collectLastMessages(String instanceName, List<String> messages) {
         for (ExporterManager exporterManager : exporterManagers) {
-            if (groupName == null || exporterManager.getInstanceName().equals(groupName)) {
+            if (instanceName == null || exporterManager.getInstanceName().equals(instanceName)) {
                 exporterManager.collectMessages(messages);
             }
         }
     }
 
     public void broadcast(String message) {
-        for (BackendService backendService : backendServices) {
-            backendService.broadcast(message);
+        for (ExportService exportService : exportServices) {
+            exportService.broadcast(message);
         }
     }
 
     public void broadcast(BackendSession session, String message) {
-        for (BackendService backendService : backendServices) {
-            backendService.broadcast(session, message);
+        for (ExportService exportService : exportServices) {
+            exportService.broadcast(session, message);
         }
     }
 
     @Nullable
-    private String[] getUnusedGroups(BackendSession session) {
-        String[] joinedGroups = getJoinedGroups(session);
-        if (joinedGroups == null || joinedGroups.length == 0) {
+    private String[] getUnusedInstances(BackendSession session) {
+        String[] instanceNames = getJoinedInstances(session);
+        if (instanceNames == null || instanceNames.length == 0) {
             return null;
         }
-        List<String> unusedGroups = new ArrayList<>(joinedGroups.length);
-        for (String name : joinedGroups) {
+        List<String> unusedInstances = new ArrayList<>(instanceNames.length);
+        for (String name : instanceNames) {
             boolean using = false;
-            for (BackendService backendService : backendServices) {
-                if (backendService.isUsingInstance(name)) {
+            for (ExportService exportService : exportServices) {
+                if (exportService.isUsingInstance(name)) {
                     using = true;
                     break;
                 }
             }
             if (!using) {
-                unusedGroups.add(name);
+                unusedInstances.add(name);
             }
         }
-        if (!unusedGroups.isEmpty()) {
-            return unusedGroups.toArray(new String[0]);
+        if (!unusedInstances.isEmpty()) {
+            return unusedInstances.toArray(new String[0]);
         } else {
             return null;
         }
     }
 
     @Nullable
-    private String[] getJoinedGroups(@NonNull BackendSession session) {
-        String[] joinedGroups = session.getJoinedInstances();
-        if (joinedGroups == null) {
+    private String[] getJoinedInstances(@NonNull BackendSession session) {
+        String[] instanceNames = session.getJoinedInstances();
+        if (instanceNames == null) {
             return null;
         }
-        Set<String> validJoinedGroups = new HashSet<>();
-        for (String name : joinedGroups) {
+        Set<String> validJoinedInstances = new HashSet<>();
+        for (String name : instanceNames) {
             if (instanceInfoHolder.containsInstance(name)) {
-                validJoinedGroups.add(name);
+                validJoinedInstances.add(name);
             }
         }
-        if (!validJoinedGroups.isEmpty()) {
-            return validJoinedGroups.toArray(new String[0]);
+        if (!validJoinedInstances.isEmpty()) {
+            return validJoinedInstances.toArray(new String[0]);
         } else {
             return null;
         }

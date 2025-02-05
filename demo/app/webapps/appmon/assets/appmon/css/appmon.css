@@ -1,26 +1,13 @@
-.endpoint-box.stacked .instance.tabs {
-    display: none;
-}
-.endpoint-box .instance-box .tabs {
-    display: none;
-}
-.endpoint-box.stacked .instance-box .tabs {
-    display: block;
-}
-.endpoint-box.stacked .instance-box.available {
-    display: block !important;
-    margin-bottom: 30px;
-}
-.endpoint-box .options {
+.options {
     font-size: 90%;
     text-align: right;
 }
-.endpoint-box ul.layout-options {
+.options ul.layout-options {
     float: right;
     list-style-type: none;
     margin: 0;
 }
-.endpoint-box ul.layout-options li {
+.options ul.layout-options li {
     float: left;
     margin-left: .3em;
     border: 1px solid #ccc;
@@ -28,23 +15,23 @@
     border-radius: 5px;
     color: #777;
 }
-.endpoint-box ul.layout-options li a {
+.options ul.layout-options li a {
     color: #777;
 }
-.endpoint-box ul.layout-options li.on {
+.options ul.layout-options li.on {
     background-color: #748fa0;
     color: #fff;
 }
-.endpoint-box ul.layout-options li.on a {
+.options ul.layout-options li.on a {
     color: #fff;
 }
-.endpoint-box ul.speed-options {
+.options ul.speed-options {
     float: right;
     list-style-type: none;
     margin: 0;
     display: none;
 }
-.endpoint-box ul.speed-options li {
+.options ul.speed-options li {
     float: left;
     margin-left: .3em;
     border: 1px solid #ccc;
@@ -53,9 +40,32 @@
     color: #777;
     cursor: pointer;
 }
-.endpoint-box ul.speed-options li.on {
+.options ul.speed-options li.on {
     background-color: #748fa0;
     color: #fff;
+}
+
+.display-box {
+    display: none;
+}
+.display-box .status-bar {
+    background-color: #242c43;
+    color: #eee;
+    overflow: auto;
+    padding : 0 7px 0 10px;
+    height: 29px;
+}
+.display-box .status-bar.on {
+    background-color: #709185;
+}
+.display-box .status-bar h4 {
+    float: left;
+    width: 70%;
+    height: 29px;
+    line-height: 29px;
+    font-size: .9em;
+    font-weight: normal;
+    margin: 0;
 }
 
 .track-box {
@@ -114,6 +124,7 @@
     color: #535866;
     font-size: 3.4em;
     text-align: center;
+    z-index: 101;
 }
 .track-stack .activities p {
     margin: 0;
@@ -127,115 +138,20 @@
     font-size: .7em;
 }
 
-.log-box .status-bar {
-    background-color: #677278;
-    color: #eee;
-    overflow: auto;
-    padding : 0 7px 0 10px;
-    height: 29px;
-    box-shadow: -20px 20px 20px -20px #394e59 inset;
-}
-.log-box .status-bar.on {
-    background-color: #709185;
-}
-.log-box .status-bar h4 {
-    float: left;
-    width: 70%;
-    height: 29px;
-    line-height: 29px;
-    font-size: .9em;
-    font-weight: normal;
-    margin: 0;
-}
-.log-box .status-bar a {
-    float: right;
-    line-height: 29px;
-    margin-left: 10px;
-    color: #fff;
-}
-.log-box .status-bar a:hover {
-    color: red;
-}
-.log-box .status-bar a.on {
-    color: #980000;
-}
-.log-box .status-bar .tailing-switch {
-    line-height: 26px;
-}
-.log-box .status-bar .tailing-switch .tailing-status {
-    display: inline-block;
-    height: 20px;
-    width: 20px;
-    vertical-align: middle;
-    border-radius: 50%;
-    position: relative;
-}
-.log-box .status-bar .tailing-switch .tailing-status::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    margin: auto;
-    display: block;
-    height: 10px;
-    width: 10px;
-    background: #f1f1f1;
-    border-radius: 50%;
-}
-.log-box .status-bar .tailing-switch .tailing-status.on {
-    background-color: #39aa56;
-}
-.log-box .log-console {
-    clear: both;
-    margin: 0;
-    padding: 10px;
-    overflow: auto;
-    height: 500px;
-    color: #f1f1f1;
-    background-color: #222;
-    border: none;
-    border-radius: 0;
-    box-shadow: -20px 20px 60px -20px #0d1939 inset;
-}
-.log-box .log-console p {
-    font-size: 12px;
-    line-height: 16px;
-    white-space: nowrap;
-    color: #f1f1f1;
-    margin: 0;
-    padding: 0;
-}
-.log-box .log-console p:hover {
-    color: #fafafa;
-    background-color: #333;
-}
-.log-box .log-console p.event {
-    border-radius: 20px;
-    text-align: center;
-    border: 1px solid rgba(186, 254, 230, 0.53);
-    padding: 3px 6px;
-    margin: 4px 0;
-    color: #fff;
-    background-color: #333;
-}
-.log-box .log-console p.event.error {
-    background-color: palevioletred;
-    border: 1px solid palevioletred;
-    color: yellow;
-}
-
-.display-box {
+.sessions-box {
     display: none;
 }
-.display-box .panel {
+.sessions-box .panel {
     border: 1px solid #ccc;
     border-bottom: 2px solid #ccc;
     border-radius: 0;
     height: 260px;
+    overflow-y: auto;
 }
-.display-box dl.session-statistics dt {
+.sessions-box .panel p {
+    margin: 0;
+}
+.sessions-box dl.session-statistics dt {
     float: left;
     clear: left;
     padding: 0;
@@ -243,17 +159,14 @@
     height: 30px;
     font-size: 1em;
 }
-.display-box dl.session-statistics dd {
+.sessions-box dl.session-statistics dd {
     text-align: right;
     font-weight: bold;
     font-size: 1em;
     padding: 0;
     margin: 0;
     height: 30px;
-}
-.sessions-box {
-    overflow-y: auto;
-    list-style-type: none;
+    white-space: nowrap;
 }
 .sessions-box ul.sessions {
     margin-left: 0;
@@ -285,4 +198,103 @@
     border-radius: 0;
     vertical-align: middle;
     margin-right: 3px;
+}
+
+.console-box .status-bar {
+    background-color: #677278;
+    color: #eee;
+    overflow: auto;
+    padding : 0 7px 0 10px;
+    height: 29px;
+    box-shadow: -20px 20px 20px -20px #394e59 inset;
+}
+.console-box .status-bar.on {
+    background-color: #709185;
+}
+.console-box .status-bar h4 {
+    float: left;
+    width: 70%;
+    height: 29px;
+    line-height: 29px;
+    font-size: .9em;
+    font-weight: normal;
+    margin: 0;
+}
+.console-box .status-bar a {
+    float: right;
+    line-height: 29px;
+    margin-left: 10px;
+    color: #fff;
+}
+.console-box .status-bar a:hover {
+    color: red;
+}
+.console-box .status-bar a.on {
+    color: #980000;
+}
+.console-box .status-bar .tailing-switch {
+    line-height: 26px;
+}
+.console-box .status-bar .tailing-switch .tailing-status {
+    display: inline-block;
+    height: 20px;
+    width: 20px;
+    vertical-align: middle;
+    border-radius: 50%;
+    position: relative;
+}
+.console-box .status-bar .tailing-switch .tailing-status::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    margin: auto;
+    display: block;
+    height: 10px;
+    width: 10px;
+    background: #f1f1f1;
+    border-radius: 50%;
+}
+.console-box .status-bar .tailing-switch .tailing-status.on {
+    background-color: #39aa56;
+}
+.console-box .console {
+    clear: both;
+    margin: 0;
+    padding: 10px;
+    overflow: auto;
+    height: 500px;
+    color: #f1f1f1;
+    background-color: #222;
+    border: none;
+    border-radius: 0;
+    box-shadow: -20px 20px 60px -20px #0d1939 inset;
+}
+.console-box .console p {
+    font-size: 12px;
+    line-height: 16px;
+    white-space: nowrap;
+    color: #f1f1f1;
+    margin: 0;
+    padding: 0;
+}
+.console-box .console p:hover {
+    color: #fafafa;
+    background-color: #333;
+}
+.console-box .console p.event {
+    border-radius: 20px;
+    text-align: center;
+    border: 1px solid rgba(186, 254, 230, 0.53);
+    padding: 3px 6px;
+    margin: 4px 0;
+    color: #fff;
+    background-color: #333;
+}
+.console-box .console p.event.error {
+    background-color: palevioletred;
+    border: 1px solid palevioletred;
+    color: yellow;
 }

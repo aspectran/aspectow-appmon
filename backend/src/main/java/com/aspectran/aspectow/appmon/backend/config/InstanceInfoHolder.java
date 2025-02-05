@@ -45,6 +45,10 @@ public class InstanceInfoHolder {
         }
     }
 
+    public List<InstanceInfo> getInstanceInfoList() {
+        return new ArrayList<>(instanceInfos.values());
+    }
+
     public List<InstanceInfo> getInstanceInfoList(String[] joinGroupNames) {
         List<InstanceInfo> infoList = new ArrayList<>(instanceInfos.size());
         if (joinGroupNames != null && joinGroupNames.length > 0) {

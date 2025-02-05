@@ -16,11 +16,13 @@
 package com.aspectran.aspectow.appmon.backend;
 
 import com.aspectran.aspectow.appmon.backend.config.EndpointInfo;
+import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.manager.AppMonManager;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.RequestToGet;
 import com.aspectran.core.component.bean.annotation.Required;
+import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.logging.Logger;
 import com.aspectran.utils.logging.LoggerFactory;
 import com.aspectran.utils.security.InvalidPBTokenException;
@@ -45,8 +47,8 @@ public class BackendAction {
         this.appMonManager = appMonManager;
     }
 
-    @RequestToGet("/endpoints/${token}")
-    public RestResponse getEndpoints(@Required String token) {
+    @RequestToGet("/${token}/config")
+    public RestResponse getConfigData(@Required String token, String joinInstances) {
         try {
             AppMonManager.validateToken(token);
         } catch (InvalidPBTokenException e) {
@@ -58,9 +60,13 @@ public class BackendAction {
 
         List<EndpointInfo> endpointInfoList = appMonManager.getAvailableEndpointInfoList();
 
+        String[] instanceNames = appMonManager.getVerifiedInstanceNames(StringUtils.splitCommaDelimitedString(joinInstances));
+        List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(instanceNames);
+
         Map<String, Object> data = Map.of(
                 "token", AppMonManager.issueToken(),
-                "endpoints", endpointInfoList
+                "endpoints", endpointInfoList,
+                "instances", instanceInfoList
         );
         return new DefaultRestResponse(data).ok();
     }

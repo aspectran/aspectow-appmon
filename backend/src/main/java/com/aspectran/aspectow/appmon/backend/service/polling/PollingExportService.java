@@ -18,8 +18,8 @@ package com.aspectran.aspectow.appmon.backend.service.polling;
 import com.aspectran.aspectow.appmon.backend.config.EndpointInfo;
 import com.aspectran.aspectow.appmon.backend.config.EndpointPollingConfig;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
-import com.aspectran.aspectow.appmon.backend.service.BackendService;
 import com.aspectran.aspectow.appmon.backend.service.BackendSession;
+import com.aspectran.aspectow.appmon.backend.service.ExportService;
 import com.aspectran.aspectow.appmon.manager.AppMonManager;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Autowired;
@@ -39,17 +39,17 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-@Component("/backend")
-public class PollingBackendService implements BackendService {
+@Component("/backend/polling")
+public class PollingExportService implements ExportService {
 
-    private static final Logger logger = LoggerFactory.getLogger(PollingBackendService.class);
+    private static final Logger logger = LoggerFactory.getLogger(PollingExportService.class);
 
     private final AppMonManager appMonManager;
 
     private final PollingBackendSessionManager endpointSessionManager;
 
     @Autowired
-    public PollingBackendService(@NonNull AppMonManager appMonManager) throws Exception {
+    public PollingExportService(@NonNull AppMonManager appMonManager) throws Exception {
         this.appMonManager = appMonManager;
 
         EndpointInfo endpointInfo = appMonManager.getResidentEndpointInfo();
@@ -57,7 +57,7 @@ public class PollingBackendService implements BackendService {
         if (pollingConfig != null && pollingConfig.isEnabled()) {
             this.endpointSessionManager = new PollingBackendSessionManager(appMonManager, pollingConfig.getInitialBufferSize());
             this.endpointSessionManager.initialize();
-            appMonManager.addBackendService(this);
+            appMonManager.addExportService(this);
         } else {
             this.endpointSessionManager = null;
         }
@@ -70,7 +70,7 @@ public class PollingBackendService implements BackendService {
         }
     }
 
-    @RequestToPost("/endpoint/${token}/join")
+    @RequestToPost("/${token}/join")
     @Transform(FormatType.JSON)
     public Map<String, Object> join(@NonNull Translet translet, String token) throws IOException {
         if (checkServiceUnavailable(token)) {
@@ -101,7 +101,7 @@ public class PollingBackendService implements BackendService {
         );
     }
 
-    @RequestToGet("/endpoint/${token}/pull")
+    @RequestToGet("/${token}/pull")
     @Transform(FormatType.JSON)
     public Map<String, Object> pull(@NonNull Translet translet, String token) throws IOException {
         if (checkServiceUnavailable(token)) {
@@ -121,7 +121,7 @@ public class PollingBackendService implements BackendService {
         );
     }
 
-    @RequestToPost("/endpoint/${token}/pollingInterval")
+    @RequestToPost("/${token}/pollingInterval")
     @Transform(FormatType.TEXT)
     public int pollingInterval(@NonNull Translet translet, String token, int speed) {
         if (checkServiceUnavailable(token)) {

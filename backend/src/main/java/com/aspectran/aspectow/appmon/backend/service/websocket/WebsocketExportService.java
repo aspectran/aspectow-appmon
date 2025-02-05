@@ -15,9 +15,8 @@
  */
 package com.aspectran.aspectow.appmon.backend.service.websocket;
 
-import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
-import com.aspectran.aspectow.appmon.backend.service.BackendService;
 import com.aspectran.aspectow.appmon.backend.service.BackendSession;
+import com.aspectran.aspectow.appmon.backend.service.ExportService;
 import com.aspectran.aspectow.appmon.manager.AppMonManager;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.AvoidAdvice;
@@ -26,7 +25,6 @@ import com.aspectran.core.component.bean.annotation.Initialize;
 import com.aspectran.utils.ExceptionUtils;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.json.JsonBuilder;
 import com.aspectran.utils.logging.Logger;
 import com.aspectran.utils.logging.LoggerFactory;
 import com.aspectran.utils.security.InvalidPBTokenException;
@@ -54,13 +52,13 @@ import java.util.concurrent.TimeoutException;
         configurator = AspectranConfigurator.class
 )
 @AvoidAdvice
-public class WebsocketBackendService implements BackendService {
+public class WebsocketExportService implements ExportService {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebsocketBackendService.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebsocketExportService.class);
 
-    private static final String HEARTBEAT_PING_MSG = "--ping--";
+    private static final String MESSAGE_PING = "ping:";
 
-    private static final String HEARTBEAT_PONG_MSG = "--pong--";
+    private static final String MESSAGE_PONG = "pong:";
 
     private static final String MESSAGE_JOIN = "join:";
 
@@ -75,13 +73,13 @@ public class WebsocketBackendService implements BackendService {
     private final AppMonManager appMonManager;
 
     @Autowired
-    public WebsocketBackendService(AppMonManager appMonManager) {
+    public WebsocketExportService(AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
     }
 
     @Initialize
-    public void registerBackendService() {
-        appMonManager.addBackendService(this);
+    public void registerExportService() {
+        appMonManager.addExportService(this);
     }
 
     @OnOpen
@@ -101,11 +99,9 @@ public class WebsocketBackendService implements BackendService {
 
     @OnMessage
     public void onMessage(Session session, String message) {
-        if (HEARTBEAT_PING_MSG.equals(message)) {
-            session.getAsyncRemote().sendText(HEARTBEAT_PONG_MSG);
-            return;
-        }
-        if (message != null && message.startsWith(MESSAGE_JOIN)) {
+        if (MESSAGE_PING.equals(message)) {
+            broadcast(session, MESSAGE_PONG + AppMonManager.issueToken(80));
+        } else if (message != null && message.startsWith(MESSAGE_JOIN)) {
             addSession(session, message.substring(MESSAGE_JOIN.length()));
         } else if (MESSAGE_ESTABLISHED.equals(message)) {
             establishComplete(session);
@@ -151,14 +147,7 @@ public class WebsocketBackendService implements BackendService {
     private void sendJoined(@NonNull BackendSession backendSession) {
         String[] instanceNames = backendSession.getJoinedInstances();
         if (instanceNames != null) {
-            List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(instanceNames);
-            String json = new JsonBuilder()
-                .nullWritable(false)
-                .object()
-                    .put("instances", instanceInfoList)
-                .endObject()
-                .toString();
-            broadcast(backendSession, MESSAGE_JOINED + json);
+            broadcast(backendSession, MESSAGE_JOINED);
         }
     }
 

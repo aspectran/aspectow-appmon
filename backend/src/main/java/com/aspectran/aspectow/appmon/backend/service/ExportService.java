@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.appmon.backend.service;
 
-public interface BackendService {
+public interface ExportService {
 
     void broadcast(String message);
 

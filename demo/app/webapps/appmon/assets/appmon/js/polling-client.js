@@ -1,4 +1,7 @@
 function PollingClient(endpoint, viewer, onEndpointJoined, onEstablishCompleted) {
+
+    const MODE = "polling";
+
     this.start = function (joinGroups) {
         join(joinGroups);
     };
@@ -9,7 +12,7 @@ function PollingClient(endpoint, viewer, onEndpointJoined, onEstablishCompleted)
 
     const join = function (joinInstances) {
         $.ajax({
-            url: endpoint.basePath + "backend/endpoint/" + endpoint.token + "/join",
+            url: endpoint.basePath + "backend/polling/" + endpoint.token + "/join",
             type: 'post',
             dataType: "json",
             data: {
@@ -17,7 +20,7 @@ function PollingClient(endpoint, viewer, onEndpointJoined, onEstablishCompleted)
             },
             success: function (data) {
                 if (data) {
-                    endpoint['mode'] = "polling";
+                    endpoint['mode'] = MODE;
                     endpoint['token'] = data.token;
                     endpoint['pollingInterval'] = data.pollingInterval;
                     if (onEndpointJoined) {
@@ -35,7 +38,7 @@ function PollingClient(endpoint, viewer, onEndpointJoined, onEstablishCompleted)
 
     const polling = function () {
         $.ajax({
-            url: endpoint.basePath + "backend/endpoint/" + endpoint.token + "/pull",
+            url: endpoint.basePath + "backend/polling/" + endpoint.token + "/pull",
             type: 'get',
             success: function (data) {
                 if (data && data.token && data.messages) {
@@ -53,7 +56,7 @@ function PollingClient(endpoint, viewer, onEndpointJoined, onEstablishCompleted)
 
     const changePollingInterval = function (speed) {
         $.ajax({
-            url: endpoint.basePath + "backend/endpoint/" + endpoint.token + "/pollingInterval",
+            url: endpoint.basePath + "backend/polling/" + endpoint.token + "/pollingInterval",
             type: 'post',
             dataType: "json",
             data: {
