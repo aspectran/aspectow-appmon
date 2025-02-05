@@ -49,7 +49,11 @@ function FrontBuilder() {
 
     const establish = function (endpointIndex, joinInstances) {
         console.log('endpointIndex', endpointIndex);
-        function onEndpointJoined(endpoint, payload) {
+        function onJoined(endpoint, payload) {
+            if (endpoint.established) {
+                clearConsole(endpoint.index);
+                return;
+            }
             if (payload) {
                 for (let key in payload.messages) {
                     let msg = payload.messages[key];
@@ -57,7 +61,13 @@ function FrontBuilder() {
                 }
             }
         }
-        function onEstablishCompleted(endpoint) {
+        function onEstablished(endpoint) {
+            if (endpoint.established) {
+                console.log("Reconnection established");
+                return;
+            }
+            console.log("Connection established");
+            endpoint['established'] = true;
             if (endpoint.index < endpoints.length - 1) {
                 establish(endpoint.index + 1, joinInstances);
             } else if (endpoint.index === endpoints.length - 1) {
@@ -71,9 +81,9 @@ function FrontBuilder() {
                 }
             }
         }
-        function onErrorObserved(endpoint) {
+        function onFailed(endpoint) {
             setTimeout(function () {
-                let client = new PollingClient(endpoint, viewers[endpoint.index], onEndpointJoined, onEstablishCompleted);
+                let client = new PollingClient(endpoint, viewers[endpoint.index], onJoined, onEstablished);
                 clients[endpoint.index] = client;
                 client.start(joinInstances);
             }, (endpoint.index - 1) * 1000);
@@ -81,7 +91,7 @@ function FrontBuilder() {
 
         let endpoint = endpoints[endpointIndex];
         let viewer = viewers[endpointIndex];
-        let client = new WebsocketClient(endpoint, viewer, onEndpointJoined, onEstablishCompleted, onErrorObserved);
+        let client = new WebsocketClient(endpoint, viewer, onJoined, onEstablished, onFailed);
         clients[endpointIndex] = client;
         client.start(joinInstances);
     };
@@ -93,6 +103,10 @@ function FrontBuilder() {
         $(".track-box-box.available").remove();
         $(".sessions-box-box.available").remove();
         $(".console-box.available").remove();
+    };
+
+    const clearConsole = function (endpointIndex) {
+        $(".console-box[data-endpoint-index=" + endpointIndex + "] .console").empty();
     };
 
     const changeEndpoint = function (endpointIndex) {

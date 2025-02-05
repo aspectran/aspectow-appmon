@@ -1,4 +1,4 @@
-function PollingClient(endpoint, viewer, onEndpointJoined, onEstablishCompleted) {
+function PollingClient(endpoint, viewer, onJoined, onEstablished) {
 
     const MODE = "polling";
 
@@ -23,11 +23,11 @@ function PollingClient(endpoint, viewer, onEndpointJoined, onEstablishCompleted)
                     endpoint['mode'] = MODE;
                     endpoint['token'] = data.token;
                     endpoint['pollingInterval'] = data.pollingInterval;
-                    if (onEndpointJoined) {
-                        onEndpointJoined(endpoint, data);
+                    if (onJoined) {
+                        onJoined(endpoint, data);
                     }
-                    if (onEstablishCompleted) {
-                        onEstablishCompleted(endpoint);
+                    if (onEstablished) {
+                        onEstablished(endpoint);
                     }
                     viewer.printMessage("Polling every " + data.pollingInterval + " milliseconds.");
                     polling();

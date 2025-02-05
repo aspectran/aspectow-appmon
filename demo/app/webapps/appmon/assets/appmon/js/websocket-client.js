@@ -1,4 +1,4 @@
-function WebsocketClient(endpoint, viewer, onEndpointJoined, onEstablishCompleted, onErrorObserved) {
+function WebsocketClient(endpoint, viewer, onJoined, onEstablished, onFailed) {
 
     const MODE = "websocket";
     let socket = null;
@@ -25,9 +25,11 @@ function WebsocketClient(endpoint, viewer, onEndpointJoined, onEstablishComplete
         url.protocol = url.protocol.replace('http:', 'ws:');
         socket = new WebSocket(url.href);
         socket.onopen = function (event) {
+            console.log("Socket connected:", endpoint.url);
             pendingMessages.push("Socket connection successful");
             socket.send("join:" + (joinInstances||""));
             heartbeatPing();
+            retryCount = 0;
         };
         socket.onmessage = function (event) {
             if (typeof event.data === "string") {
@@ -40,52 +42,56 @@ function WebsocketClient(endpoint, viewer, onEndpointJoined, onEstablishComplete
                         viewer.processMessage(msg);
                     }
                 } else if (msg.startsWith("joined:")) {
-                    console.log(msg);
+                    console.log(msg, endpoint.token);
                     let payload = (msg.length > 7 ? JSON.parse(msg.substring(7)) : null);
                     establish(payload);
                 }
             }
         };
         socket.onclose = function (event) {
+            console.log("Socket closed: ", event.code);
             if (event.code === 1000) {
                 viewer.printMessage("Socket connection closed.");
             } else {
                 closeSocket();
                 if (retryCount++ < 10) {
-                    viewer.printMessage("Socket connection closed. Trying to reconnect...");
+                    viewer.printMessage("Socket connection closed. Trying to reconnect... (" + retryCount + "/10)");
                     setTimeout(function () {
-                        openSocket();
+                        openSocket(joinInstances);
                     }, 5000);
+                } else {
+                    viewer.printMessage("Socket reconnection failed.");
                 }
             }
         };
         socket.onerror = function (event) {
-            if (endpoint.mode === "websocket") {
+            if (endpoint.mode === MODE) {
                 console.error("WebSocket error observed:", event);
-                viewer.printErrorMessage("Could not connect to WebSocket server.");
-            } else if (onErrorObserved) {
-                onErrorObserved(endpoint);
+                viewer.printErrorMessage("Could not connect to the WebSocket server.");
+            } else if (onFailed) {
+                onFailed(endpoint);
             }
         };
     };
 
     const closeSocket = function () {
         if (socket) {
+            established = false;
             socket.close();
             socket = null;
         }
     };
 
     const establish = function (payload) {
-        if (onEndpointJoined) {
+        if (onJoined) {
             endpoint['mode'] = MODE;
-            onEndpointJoined(endpoint, payload);
+            onJoined(endpoint, payload);
         }
         while (pendingMessages.length) {
             viewer.printMessage(pendingMessages.shift());
         }
-        if (onEstablishCompleted) {
-            onEstablishCompleted(endpoint);
+        if (onEstablished) {
+            onEstablished(endpoint);
         }
         while (pendingMessages.length) {
             viewer.printMessage(pendingMessages.shift());

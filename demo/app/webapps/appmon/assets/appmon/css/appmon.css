@@ -107,13 +107,13 @@
     display: none;
 }
 .track-box .bullet.arrive {
-    background: #29bf9c;
-    border: 1px solid #fff;
+    background-color: #0d7aaa;
+    border: 1px solid #086893;
     border-radius: 3px;
     width: 200px;
     height: 10px;
     margin: 2px 0;
-    opacity: .3;
+    opacity: .4;
 }
 .track-stack .activities {
     position: absolute;
@@ -121,7 +121,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    color: #535866;
+    color: #a5aecf;
     font-size: 3.4em;
     text-align: center;
     z-index: 101;
@@ -265,7 +265,7 @@
     margin: 0;
     padding: 10px;
     overflow: auto;
-    height: 500px;
+    height: 450px;
     color: #f1f1f1;
     background-color: #222;
     border: none;

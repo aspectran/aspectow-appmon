@@ -100,7 +100,7 @@ public class WebsocketExportService implements ExportService {
     @OnMessage
     public void onMessage(Session session, String message) {
         if (MESSAGE_PING.equals(message)) {
-            broadcast(session, MESSAGE_PONG + AppMonManager.issueToken(80));
+            broadcast(session, MESSAGE_PONG + AppMonManager.issueToken(100));
         } else if (message != null && message.startsWith(MESSAGE_JOIN)) {
             addSession(session, message.substring(MESSAGE_JOIN.length()));
         } else if (MESSAGE_ESTABLISHED.equals(message)) {
@@ -132,14 +132,14 @@ public class WebsocketExportService implements ExportService {
     }
 
     private void addSession(Session session, String joinInstances) {
-        WebsocketBackendSession appMonSession = new WebsocketBackendSession(session);
+        WebsocketBackendSession backendSession = new WebsocketBackendSession(session);
         synchronized (sessions) {
-            if (sessions.add(appMonSession)) {
+            if (sessions.add(backendSession)) {
                 String[] instanceNames = appMonManager.getVerifiedInstanceNames(StringUtils.splitCommaDelimitedString(joinInstances));
                 if (!StringUtils.hasText(joinInstances) || instanceNames.length > 0) {
-                    appMonSession.setJoinedInstances(instanceNames);
+                    backendSession.setJoinedInstances(instanceNames);
                 }
-                sendJoined(appMonSession);
+                sendJoined(backendSession);
             }
         }
     }
@@ -161,10 +161,10 @@ public class WebsocketExportService implements ExportService {
     }
 
     private void removeSession(Session session) {
-        WebsocketBackendSession appMonSession = new WebsocketBackendSession(session);
+        WebsocketBackendSession backendSession = new WebsocketBackendSession(session);
         synchronized (sessions) {
-            if (sessions.remove(appMonSession)) {
-                appMonManager.release(appMonSession);
+            if (sessions.remove(backendSession)) {
+                appMonManager.release(backendSession);
             }
         }
     }
@@ -172,16 +172,16 @@ public class WebsocketExportService implements ExportService {
     @Override
     public void broadcast(String message) {
         synchronized (sessions) {
-            for (WebsocketBackendSession websocketEndpointSession : sessions) {
-                broadcast(websocketEndpointSession.getSession(), message);
+            for (WebsocketBackendSession backendSession : sessions) {
+                broadcast(backendSession.getSession(), message);
             }
         }
     }
 
     @Override
     public void broadcast(@NonNull BackendSession session, String message) {
-        if (session instanceof WebsocketBackendSession websocketEndpointSession) {
-            broadcast(websocketEndpointSession.getSession(), message);
+        if (session instanceof WebsocketBackendSession backendSession) {
+            broadcast(backendSession.getSession(), message);
         }
     }
 
