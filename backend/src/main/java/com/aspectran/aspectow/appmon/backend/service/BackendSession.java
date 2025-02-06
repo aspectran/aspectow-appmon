@@ -23,8 +23,6 @@ public interface BackendSession {
 
     void removeJoinedInstances();
 
-    boolean isTwoWay();
-
     boolean isValid();
 
 }

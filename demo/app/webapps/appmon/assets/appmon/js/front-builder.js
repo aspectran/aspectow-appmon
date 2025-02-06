@@ -48,7 +48,6 @@ function FrontBuilder() {
     };
 
     const establish = function (endpointIndex, joinInstances) {
-        console.log('endpointIndex', endpointIndex);
         function onJoined(endpoint, payload) {
             if (endpoint.established) {
                 clearConsole(endpoint.index);
@@ -57,16 +56,16 @@ function FrontBuilder() {
             if (payload) {
                 for (let key in payload.messages) {
                     let msg = payload.messages[key];
-                    viewers[endpointIndex].processMessage(msg);
+                    viewers[endpoint.index].processMessage(msg);
                 }
             }
         }
         function onEstablished(endpoint) {
             if (endpoint.established) {
-                console.log("Reconnection established");
+                console.log(endpoint.name, "reconnection established");
                 return;
             }
-            console.log("Connection established");
+            console.log(endpoint.name, "connection established");
             endpoint['established'] = true;
             if (endpoint.index < endpoints.length - 1) {
                 establish(endpoint.index + 1, joinInstances);
@@ -89,6 +88,7 @@ function FrontBuilder() {
             }, (endpoint.index - 1) * 1000);
         }
 
+        console.log('endpointIndex', endpointIndex);
         let endpoint = endpoints[endpointIndex];
         let viewer = viewers[endpointIndex];
         let client = new WebsocketClient(endpoint, viewer, onJoined, onEstablished, onFailed);

@@ -48,6 +48,7 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
                     }
                     setTimeout(polling, endpoint.pollingInterval);
                 } else {
+                    console.error(endpoint.name, "connection lost");
                     viewer.printErrorMessage("Connection lost. Please refresh this page to try again!");
                 }
             }
@@ -63,7 +64,7 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
                 speed: speed
             },
             success: function (data) {
-                console.log("pollingInterval", data);
+                console.log(endpoint.name, "pollingInterval", data);
                 if (data) {
                     endpoint.pollingInterval = data;
                     viewer.printMessage("Polling every " + data + " milliseconds.");

@@ -51,11 +51,6 @@ public class WebsocketBackendSession implements BackendSession {
     }
 
     @Override
-    public boolean isTwoWay() {
-        return true;
-    }
-
-    @Override
     public boolean isValid() {
         return session.isOpen();
     }

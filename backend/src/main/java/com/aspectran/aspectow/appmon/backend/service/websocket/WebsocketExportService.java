@@ -100,7 +100,7 @@ public class WebsocketExportService implements ExportService {
     @OnMessage
     public void onMessage(Session session, String message) {
         if (MESSAGE_PING.equals(message)) {
-            broadcast(session, MESSAGE_PONG + AppMonManager.issueToken(100));
+            broadcast(session, MESSAGE_PONG + AppMonManager.issueToken(1800)); // 30 min.
         } else if (message != null && message.startsWith(MESSAGE_JOIN)) {
             addSession(session, message.substring(MESSAGE_JOIN.length()));
         } else if (MESSAGE_ESTABLISHED.equals(message)) {

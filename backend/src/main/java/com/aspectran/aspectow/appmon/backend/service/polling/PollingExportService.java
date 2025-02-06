@@ -86,17 +86,17 @@ public class PollingExportService implements ExportService {
             return null;
         }
 
-        PollingBackendSession endpointSession = endpointSessionManager.createSession(translet, pollingConfig, instanceNames);
-        if (!appMonManager.join(endpointSession)) {
+        PollingBackendSession backendSession = endpointSessionManager.createSession(translet, pollingConfig, instanceNames);
+        if (!appMonManager.join(backendSession)) {
             return null;
         }
 
-        List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(endpointSession.getJoinedInstances());
-        List<String> messages = appMonManager.getLastMessages(endpointSession);
+        List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(backendSession.getJoinedInstances());
+        List<String> messages = appMonManager.getLastMessages(backendSession);
         return Map.of(
                 "token", AppMonManager.issueToken(),
                 "instances", instanceInfoList,
-                "pollingInterval", endpointSession.getPollingInterval(),
+                "pollingInterval", backendSession.getPollingInterval(),
                 "messages", messages
         );
     }
@@ -108,13 +108,13 @@ public class PollingExportService implements ExportService {
             return null;
         }
 
-        PollingBackendSession endpointSession = endpointSessionManager.getSession(translet);
-        if (endpointSession == null || !endpointSession.isValid()) {
+        PollingBackendSession backendSession = endpointSessionManager.getSession(translet);
+        if (backendSession == null || !backendSession.isValid()) {
             return null;
         }
 
-        String newToken = AppMonManager.issueToken(endpointSession.getPollingInterval() + 30);
-        String[] messages = endpointSessionManager.pull(endpointSession);
+        String newToken = AppMonManager.issueToken(backendSession.getPollingInterval() + 30);
+        String[] messages = endpointSessionManager.pull(backendSession);
         return Map.of(
                 "token", newToken,
                 "messages", (messages != null ? messages : new String[0])
@@ -128,20 +128,20 @@ public class PollingExportService implements ExportService {
             return -1;
         }
 
-        PollingBackendSession endpointSession = endpointSessionManager.getSession(translet);
-        if (endpointSession == null) {
+        PollingBackendSession backendSession = endpointSessionManager.getSession(translet);
+        if (backendSession == null) {
             return -1;
         }
 
         if (speed == 1) {
-            endpointSession.setPollingInterval(1000);
+            backendSession.setPollingInterval(1000);
         } else {
             EndpointInfo endpointInfo = appMonManager.getResidentEndpointInfo();
             EndpointPollingConfig pollingConfig = endpointInfo.getPollingConfig();
-            endpointSession.setPollingInterval(pollingConfig.getPollingInterval());
+            backendSession.setPollingInterval(pollingConfig.getPollingInterval());
         }
 
-        return endpointSession.getPollingInterval();
+        return backendSession.getPollingInterval();
     }
 
     @Override

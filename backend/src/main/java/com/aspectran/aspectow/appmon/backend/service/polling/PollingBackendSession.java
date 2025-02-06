@@ -45,9 +45,9 @@ public class PollingBackendSession implements BackendSession {
 
     public PollingBackendSession(PollingBackendSessionManager backendSessionManager, int sessionTimeout, int pollingInterval) {
         this.backendSessionManager = backendSessionManager;
-        this.sessionTimeout = sessionTimeout;
         this.pollingInterval = pollingInterval;
         this.expiryTimer = new SessionExpiryTimer();
+        setSessionTimeout(sessionTimeout);
     }
 
     public int getSessionTimeout() {
@@ -79,11 +79,6 @@ public class PollingBackendSession implements BackendSession {
     @Override
     public void removeJoinedInstances() {
         this.joinedInstances = null;
-    }
-
-    @Override
-    public boolean isTwoWay() {
-        return false;
     }
 
     public int getLastLineIndex() {
