@@ -58,7 +58,7 @@ public class BackendAction {
             return new DefaultRestResponse().forbidden();
         }
 
-        List<EndpointInfo> endpointInfoList = appMonManager.getAvailableEndpointInfoList();
+        List<EndpointInfo> endpointInfoList = appMonManager.getEndpointInfoList();
 
         String[] instanceNames = appMonManager.getVerifiedInstanceNames(StringUtils.splitCommaDelimitedString(joinInstances));
         List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(instanceNames);

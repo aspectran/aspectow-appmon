@@ -24,32 +24,37 @@ import com.aspectran.utils.apon.ValueType;
  */
 public class EndpointInfo extends AbstractParameters {
 
+    private static final ParameterKey mode;
     private static final ParameterKey name;
     private static final ParameterKey title;
     private static final ParameterKey url;
-    private static final ParameterKey resident;
-    private static final ParameterKey pollingConfig;
 
     private static final ParameterKey[] parameterKeys;
 
     static {
+        mode = new ParameterKey("mode", ValueType.STRING);
         name = new ParameterKey("name", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
         url = new ParameterKey("url", ValueType.STRING);
-        resident = new ParameterKey("resident", ValueType.BOOLEAN);
-        pollingConfig = new ParameterKey("polling", EndpointPollingConfig.class);
 
         parameterKeys = new ParameterKey[] {
+                mode,
                 name,
                 title,
-                url,
-                resident,
-                pollingConfig
+                url
         };
     }
 
     public EndpointInfo() {
         super(parameterKeys);
+    }
+
+    public String getMode() {
+        return getString(EndpointInfo.mode);
+    }
+
+    public void setMode(String mode) {
+        putValue(EndpointInfo.mode, mode);
     }
 
     public String getName() {
@@ -74,22 +79,6 @@ public class EndpointInfo extends AbstractParameters {
 
     public void setUrl(String url) {
         putValue(EndpointInfo.url, url);
-    }
-
-    public boolean isResident() {
-        return getBoolean(resident, false);
-    }
-
-    public void setResident(boolean resident) {
-        putValue(EndpointInfo.resident, resident);
-    }
-
-    public EndpointPollingConfig getPollingConfig() {
-        return getParameters(pollingConfig);
-    }
-
-    public void setPollingConfig(EndpointPollingConfig pollingConfig) {
-        putValue(EndpointInfo.pollingConfig, pollingConfig);
     }
 
 }

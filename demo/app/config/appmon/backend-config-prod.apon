@@ -1,26 +1,19 @@
-endpoint: {
-    name: endpoint-1
-    title: Server-1
-    url: /appmon/server1/endpoint
-    resident: true
-    polling: {
-        pollingInterval: 3000
-        sessionTimeout: 10000
-        initialBufferSize: 9999
-        enabled: true
-    }
+pollingConfig: {
+    pollingInterval: 3000
+    sessionTimeout: 10000
+    initialBufferSize: 9999
 }
 endpoint: {
+    mode: auto
+    name: endpoint-1
+    title: Server-1
+    url: /appmon/backend1
+}
+endpoint: {
+    mode: auto
     name: endpoint-2
     title: Server-2
-    url: /appmon/server2/endpoint
-    resident: false
-    polling: {
-        pollingInterval: 3000
-        sessionTimeout: 10000
-        initialBufferSize: 9999
-        enabled: true
-    }
+    url: /appmon/backend2
 }
 instance: {
     name: jpetstore

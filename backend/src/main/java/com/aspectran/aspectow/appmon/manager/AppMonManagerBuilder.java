@@ -21,6 +21,7 @@ import com.aspectran.aspectow.appmon.backend.config.EventInfo;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfoHolder;
 import com.aspectran.aspectow.appmon.backend.config.LogInfo;
+import com.aspectran.aspectow.appmon.backend.config.PollingConfig;
 import com.aspectran.aspectow.appmon.backend.exporter.event.EventExporterBuilder;
 import com.aspectran.aspectow.appmon.backend.exporter.event.EventExporterManager;
 import com.aspectran.aspectow.appmon.backend.exporter.log.LogExporterBuilder;
@@ -41,11 +42,7 @@ public abstract class AppMonManagerBuilder {
         Assert.notNull(context, "context must not be null");
         Assert.notNull(backendConfig, "backendConfig must not be null");
 
-        EndpointInfoHolder endpointInfoHolder = new EndpointInfoHolder(backendConfig.getEndpointInfoList());
-        InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(backendConfig.getInstanceInfoList());
-
-        AppMonManager appMonManager = new AppMonManager(endpointInfoHolder, instanceInfoHolder);
-        appMonManager.setActivityContext(context);
+        AppMonManager appMonManager = createAppMonManager(context, backendConfig);
 
         for (InstanceInfo instanceInfo : backendConfig.getInstanceInfoList()) {
             List<EventInfo> eventInfoList = backendConfig.getEventInfoList(instanceInfo.getName());
@@ -61,6 +58,22 @@ public abstract class AppMonManagerBuilder {
                 LogExporterBuilder.build(logExporterManager, logInfoList, context.getApplicationAdapter());
             }
         }
+
+        return appMonManager;
+    }
+
+    @NonNull
+    private static AppMonManager createAppMonManager(ActivityContext context, @NonNull BackendConfig backendConfig) {
+        PollingConfig pollingConfig = backendConfig.getPollingConfig();
+        if (pollingConfig == null) {
+            pollingConfig = new PollingConfig();
+        }
+
+        EndpointInfoHolder endpointInfoHolder = new EndpointInfoHolder(backendConfig.getEndpointInfoList());
+        InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(backendConfig.getInstanceInfoList());
+
+        AppMonManager appMonManager = new AppMonManager(pollingConfig, endpointInfoHolder, instanceInfoHolder);
+        appMonManager.setActivityContext(context);
         return appMonManager;
     }
 

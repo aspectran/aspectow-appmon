@@ -15,9 +15,8 @@
  */
 package com.aspectran.aspectow.appmon.backend.service.polling;
 
-import com.aspectran.aspectow.appmon.backend.config.EndpointInfo;
-import com.aspectran.aspectow.appmon.backend.config.EndpointPollingConfig;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
+import com.aspectran.aspectow.appmon.backend.config.PollingConfig;
 import com.aspectran.aspectow.appmon.backend.service.BackendSession;
 import com.aspectran.aspectow.appmon.backend.service.ExportService;
 import com.aspectran.aspectow.appmon.manager.AppMonManager;
@@ -40,7 +39,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-@Component("/backend/polling")
+@Component("/backend")
 public class PollingExportService implements ExportService {
 
     private static final Logger logger = LoggerFactory.getLogger(PollingExportService.class);
@@ -50,40 +49,32 @@ public class PollingExportService implements ExportService {
     private final PollingBackendSessionManager endpointSessionManager;
 
     @Autowired
-    public PollingExportService(@NonNull AppMonManager appMonManager) throws Exception {
+    public PollingExportService(@NonNull AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
 
-        EndpointInfo endpointInfo = appMonManager.getResidentEndpointInfo();
-        EndpointPollingConfig pollingConfig = endpointInfo.getPollingConfig();
-        if (pollingConfig != null && pollingConfig.isEnabled()) {
-            this.endpointSessionManager = new PollingBackendSessionManager(appMonManager, pollingConfig.getInitialBufferSize());
-            this.endpointSessionManager.initialize();
-        } else {
-            this.endpointSessionManager = null;
-        }
+        PollingConfig pollingConfig = appMonManager.getPollingConfig();
+        this.endpointSessionManager = new PollingBackendSessionManager(appMonManager, pollingConfig.getInitialBufferSize());
     }
 
     @Initialize
-    public void registerExportService() {
+    public void registerExportService() throws Exception {
+        endpointSessionManager.initialize();
         appMonManager.addExportService(this);
     }
 
     @Destroy
     public void destroy() throws Exception {
-        if (endpointSessionManager != null) {
-            endpointSessionManager.destroy();
-        }
+        endpointSessionManager.destroy();
     }
 
-    @RequestToPost("/${token}/join")
+    @RequestToPost("/${token}/polling/join")
     @Transform(FormatType.JSON)
     public Map<String, Object> join(@NonNull Translet translet, String token) throws IOException {
         if (checkServiceUnavailable(token)) {
             return null;
         }
 
-        EndpointInfo endpointInfo = appMonManager.getResidentEndpointInfo();
-        EndpointPollingConfig pollingConfig = endpointInfo.getPollingConfig();
+        PollingConfig pollingConfig = appMonManager.getPollingConfig();
 
         String joinInstances = translet.getParameter("joinInstances");
         String[] instanceNames = appMonManager.getVerifiedInstanceNames(StringUtils.splitCommaDelimitedString(joinInstances));
@@ -106,7 +97,7 @@ public class PollingExportService implements ExportService {
         );
     }
 
-    @RequestToGet("/${token}/pull")
+    @RequestToGet("/${token}/polling/pull")
     @Transform(FormatType.JSON)
     public Map<String, Object> pull(@NonNull Translet translet, String token) throws IOException {
         if (checkServiceUnavailable(token)) {
@@ -141,8 +132,7 @@ public class PollingExportService implements ExportService {
         if (speed == 1) {
             backendSession.setPollingInterval(1000);
         } else {
-            EndpointInfo endpointInfo = appMonManager.getResidentEndpointInfo();
-            EndpointPollingConfig pollingConfig = endpointInfo.getPollingConfig();
+            PollingConfig pollingConfig = appMonManager.getPollingConfig();
             backendSession.setPollingInterval(pollingConfig.getPollingInterval());
         }
 
@@ -151,9 +141,7 @@ public class PollingExportService implements ExportService {
 
     @Override
     public void broadcast(String message) {
-        if (endpointSessionManager != null) {
-            endpointSessionManager.push(message);
-        }
+        endpointSessionManager.push(message);
     }
 
     @Override
@@ -162,17 +150,10 @@ public class PollingExportService implements ExportService {
 
     @Override
     public boolean isUsingInstance(String instanceName) {
-        if (endpointSessionManager != null) {
-            return endpointSessionManager.isUsingInstance(instanceName);
-        } else {
-            return false;
-        }
+        return endpointSessionManager.isUsingInstance(instanceName);
     }
 
     private boolean checkServiceUnavailable(String token) {
-        if (endpointSessionManager == null) {
-            return true;
-        }
         try {
             AppMonManager.validateToken(token);
             return false;

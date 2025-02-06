@@ -19,13 +19,13 @@ import com.aspectran.aspectow.appmon.backend.config.EndpointInfo;
 import com.aspectran.aspectow.appmon.backend.config.EndpointInfoHolder;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfoHolder;
+import com.aspectran.aspectow.appmon.backend.config.PollingConfig;
 import com.aspectran.aspectow.appmon.backend.exporter.ExporterManager;
 import com.aspectran.aspectow.appmon.backend.service.BackendSession;
 import com.aspectran.aspectow.appmon.backend.service.ExportService;
 import com.aspectran.core.activity.InstantActivitySupport;
 import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.core.context.ActivityContext;
-import com.aspectran.utils.Assert;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.annotation.jsr305.Nullable;
 import com.aspectran.utils.security.InvalidPBTokenException;
@@ -41,6 +41,8 @@ import java.util.Set;
  */
 public class AppMonManager extends InstantActivitySupport {
 
+    private final PollingConfig pollingConfig;
+
     private final EndpointInfoHolder endpointInfoHolder;
 
     private final InstanceInfoHolder instanceInfoHolder;
@@ -49,7 +51,10 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final Set<ExportService> exportServices = new HashSet<>();
 
-    public AppMonManager(EndpointInfoHolder endpointInfoHolder, InstanceInfoHolder instanceInfoHolder) {
+    public AppMonManager(PollingConfig pollingConfig,
+                         EndpointInfoHolder endpointInfoHolder,
+                         InstanceInfoHolder instanceInfoHolder) {
+        this.pollingConfig = pollingConfig;
         this.endpointInfoHolder = endpointInfoHolder;
         this.instanceInfoHolder = instanceInfoHolder;
     }
@@ -74,13 +79,11 @@ public class AppMonManager extends InstantActivitySupport {
         exportServices.add(exportService);
     }
 
-    public EndpointInfo getResidentEndpointInfo() {
-        EndpointInfo endpointInfo = endpointInfoHolder.getResidentEndpointInfo();
-        Assert.state(endpointInfo != null, "Resident EndpointInfo not found");
-        return endpointInfo;
+    public PollingConfig getPollingConfig() {
+        return pollingConfig;
     }
 
-    public List<EndpointInfo> getAvailableEndpointInfoList() {
+    public List<EndpointInfo> getEndpointInfoList() {
         return endpointInfoHolder.getEndpointInfoList();
     }
 

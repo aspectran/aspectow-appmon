@@ -48,7 +48,7 @@ import java.util.concurrent.TimeoutException;
 
 @Component
 @ServerEndpoint(
-        value = "/server/endpoint/{token}",
+        value = "/backend/{token}/websocket",
         configurator = AspectranConfigurator.class
 )
 @AvoidAdvice

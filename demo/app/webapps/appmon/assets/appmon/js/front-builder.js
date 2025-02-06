@@ -5,10 +5,10 @@ function FrontBuilder() {
     const viewers = [];
     const clients = [];
 
-    this.build = function (basePath, token, currentEndpoint, joinInstances) {
+    this.build = function (basePath, token, endpointName, joinInstances) {
         $.ajax({
             url: basePath + "backend/" + token + "/config",
-            type: 'get',
+            type: "get",
             dataType: "json",
             data: {
                 joinInstances: joinInstances
@@ -23,20 +23,19 @@ function FrontBuilder() {
                     for (let key in data.endpoints) {
                         let endpoint = data.endpoints[key];
                         endpoint['index'] = index;
-                        endpoint['basePath'] = basePath;
                         endpoint['token'] = data.token;
-                        if (!currentEndpoint || currentEndpoint === endpoint.name) {
+                        if (!endpointName || endpointName === endpoint.name) {
                             endpoint.active = true;
                             endpoints.push(endpoint);
                             viewers[index] = new FrontViewer();
                         }
                         index++;
-                        console.log('endpoint', endpoint);
+                        console.log("endpoint", endpoint);
                     }
                     for (let key in data.instances) {
                         let instance = data.instances[key];
                         instances.push(instance);
-                        console.log('instance', instance);
+                        console.log("instance", instance);
                     }
                     buildView();
                     if (endpoints.length) {
@@ -88,10 +87,15 @@ function FrontBuilder() {
             }, (endpoint.index - 1) * 1000);
         }
 
-        console.log('endpointIndex', endpointIndex);
+        console.log("endpointIndex", endpointIndex);
         let endpoint = endpoints[endpointIndex];
         let viewer = viewers[endpointIndex];
-        let client = new WebsocketClient(endpoint, viewer, onJoined, onEstablished, onFailed);
+        let client;
+        if (endpoint.mode === "polling") {
+            client = new PollingClient(endpoint, viewer, onJoined, onEstablished);
+        } else {
+            client = new WebsocketClient(endpoint, viewer, onJoined, onEstablished, onFailed);
+        }
         clients[endpointIndex] = client;
         client.start(joinInstances);
     };

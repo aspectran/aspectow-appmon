@@ -15,14 +15,13 @@
  */
 package com.aspectran.aspectow.appmon.backend.service.polling;
 
-import com.aspectran.aspectow.appmon.backend.config.EndpointPollingConfig;
+import com.aspectran.aspectow.appmon.backend.config.PollingConfig;
 import com.aspectran.aspectow.appmon.manager.AppMonManager;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.AbstractComponent;
 import com.aspectran.core.component.session.SessionIdGenerator;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.annotation.jsr305.Nullable;
 import com.aspectran.utils.thread.ScheduledExecutorScheduler;
 import com.aspectran.utils.thread.Scheduler;
 import com.aspectran.web.support.util.CookieGenerator;
@@ -58,13 +57,9 @@ public class PollingBackendSessionManager extends AbstractComponent {
     }
 
     public PollingBackendSession createSession(
-            @NonNull Translet translet, @Nullable EndpointPollingConfig pollingConfig, String[] instanceNames) {
-        int pollingInterval = 0;
-        int sessionTimeout = 0;
-        if (pollingConfig != null) {
-            pollingInterval = pollingConfig.getPollingInterval();
-            sessionTimeout = pollingConfig.getSessionTimeout();
-        }
+            @NonNull Translet translet, @NonNull PollingConfig pollingConfig, String[] instanceNames) {
+        int pollingInterval = pollingConfig.getPollingInterval();
+        int sessionTimeout = pollingConfig.getSessionTimeout();
         if (pollingInterval > 0 && sessionTimeout <= 0) {
             sessionTimeout = pollingInterval * 2;
         }

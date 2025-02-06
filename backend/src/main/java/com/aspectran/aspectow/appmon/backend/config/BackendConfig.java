@@ -29,16 +29,19 @@ import java.util.List;
  */
 public class BackendConfig extends AbstractParameters {
 
+    private static final ParameterKey pollingConfig;
     private static final ParameterKey endpoint;
     private static final ParameterKey instance;
 
     private static final ParameterKey[] parameterKeys;
 
     static {
+        pollingConfig = new ParameterKey("pollingConfig", PollingConfig.class);
         endpoint = new ParameterKey("endpoints", new String[] {"endpoint"}, EndpointInfo.class, true, true);
         instance = new ParameterKey("instances", new String[] {"instance"}, InstanceInfo.class, true, true);
 
         parameterKeys = new ParameterKey[] {
+                pollingConfig,
                 endpoint,
                 instance
         };
@@ -56,6 +59,14 @@ public class BackendConfig extends AbstractParameters {
     public BackendConfig(File configFile) throws IOException {
         this();
         readFrom(configFile);
+    }
+
+    public PollingConfig getPollingConfig() {
+        return getParameters(pollingConfig);
+    }
+
+    public void setPollingConfig(PollingConfig pollingConfig) {
+        putValue(BackendConfig.pollingConfig, pollingConfig);
     }
 
     public List<EndpointInfo> getEndpointInfoList() {

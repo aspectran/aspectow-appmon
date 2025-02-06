@@ -21,10 +21,10 @@ function WebsocketClient(endpoint, viewer, onJoined, onEstablished, onFailed) {
 
     const openSocket = function (joinInstances) {
         // For test
-        onFailed(endpoint);
-        return;
+        // onFailed(endpoint);
+        // return;
         closeSocket(false);
-        let url = new URL(endpoint.url + "/" + endpoint.token, location.href);
+        let url = new URL(endpoint.url + "/" + endpoint.token + "/websocket", location.href);
         url.protocol = url.protocol.replace("https:", "wss:");
         url.protocol = url.protocol.replace("http:", "ws:");
         socket = new WebSocket(url.href);

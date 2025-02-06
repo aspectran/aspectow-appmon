@@ -36,13 +36,4 @@ public class EndpointInfoHolder {
         return new ArrayList<>(endpointInfos.values());
     }
 
-    public EndpointInfo getResidentEndpointInfo() {
-        for (EndpointInfo info : endpointInfos.values()) {
-            if (info.isResident()) {
-                return info;
-            }
-        }
-        return null;
-    }
-
 }

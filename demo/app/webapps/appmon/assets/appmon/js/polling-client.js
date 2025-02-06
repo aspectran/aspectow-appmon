@@ -16,8 +16,8 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
 
     const join = function (joinInstances) {
         $.ajax({
-            url: endpoint.basePath + "backend/polling/" + endpoint.token + "/join",
-            type: 'post',
+            url: endpoint.url + "/" + endpoint.token + "/polling/join",
+            type: "post",
             dataType: "json",
             data: {
                 joinInstances: joinInstances
@@ -66,8 +66,8 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
 
     const polling = function (joinInstances) {
         $.ajax({
-            url: endpoint.basePath + "backend/polling/" + endpoint.token + "/pull",
-            type: 'get',
+            url: endpoint.url + "/" + endpoint.token + "/polling/pull",
+            type: "get",
             success: function (data) {
                 if (data && data.token && data.messages) {
                     endpoint['token'] = data.token;
