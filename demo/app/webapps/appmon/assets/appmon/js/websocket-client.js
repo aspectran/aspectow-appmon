@@ -73,7 +73,7 @@ function WebsocketClient(endpoint, viewer, onJoined, onEstablished, onFailed) {
                         openSocket(joinInstances);
                     }, retryInterval);
                 } else {
-                    viewer.printMessage("Max connection attempts exceeded");
+                    viewer.printMessage("Max connection attempts exceeded.");
                 }
             }
         };
