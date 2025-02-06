@@ -59,21 +59,24 @@ public class PollingBackendSessionManager extends AbstractComponent {
 
     public PollingBackendSession createSession(
             @NonNull Translet translet, @Nullable EndpointPollingConfig pollingConfig, String[] instanceNames) {
+        int pollingInterval = 0;
+        int sessionTimeout = 0;
+        if (pollingConfig != null) {
+            pollingInterval = pollingConfig.getPollingInterval();
+            sessionTimeout = pollingConfig.getSessionTimeout();
+        }
+        if (pollingInterval > 0 && sessionTimeout <= 0) {
+            sessionTimeout = pollingInterval * 2;
+        }
+
         String sessionId = getSessionId(translet, true);
         PollingBackendSession existingSession = sessions.get(sessionId);
         if (existingSession != null) {
             existingSession.access(false);
+            existingSession.setSessionTimeout(sessionTimeout);
+            existingSession.setPollingInterval(pollingInterval);
             return existingSession;
         } else {
-            int pollingInterval = 0;
-            int sessionTimeout = 0;
-            if (pollingConfig != null) {
-                pollingInterval = pollingConfig.getPollingInterval();
-                sessionTimeout = pollingConfig.getSessionTimeout();
-            }
-            if (pollingInterval > 0 && sessionTimeout <= 0) {
-                sessionTimeout = pollingInterval * 2;
-            }
             PollingBackendSession session = new PollingBackendSession(this, sessionTimeout, pollingInterval);
             if (instanceNames != null) {
                 session.setJoinedInstances(instanceNames);

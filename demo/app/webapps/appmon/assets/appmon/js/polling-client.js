@@ -1,9 +1,13 @@
 function PollingClient(endpoint, viewer, onJoined, onEstablished) {
 
     const MODE = "polling";
+    const MAX_RETRIES = 10;
+    const RETRY_INTERVAL = 5000;
 
-    this.start = function (joinGroups) {
-        join(joinGroups);
+    let retryCount = 0;
+
+    this.start = function (joinInstances) {
+        join(joinInstances);
     };
 
     this.speed = function (speed) {
@@ -20,6 +24,7 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
             },
             success: function (data) {
                 if (data) {
+                    retryCount = 0;
                     endpoint['mode'] = MODE;
                     endpoint['token'] = data.token;
                     endpoint['pollingInterval'] = data.pollingInterval;
@@ -30,13 +35,36 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
                         onEstablished(endpoint);
                     }
                     viewer.printMessage("Polling every " + data.pollingInterval + " milliseconds.");
-                    polling();
+                    polling(joinInstances);
+                } else {
+                    console.log(endpoint.name, "connection failed");
+                    viewer.printErrorMessage("Connection failed.");
+                    rejoin(joinInstances);
                 }
+            },
+            error: function () {
+                console.log(endpoint.name, "connection failed");
+                viewer.printErrorMessage("Connection failed.");
+                rejoin(joinInstances);
             }
         });
     };
 
-    const polling = function () {
+    const rejoin = function (joinInstances) {
+        if (retryCount++ < MAX_RETRIES) {
+            let retryInterval = RETRY_INTERVAL * retryCount + random(1, 1000);
+            let status = "(" + retryCount + "/" + MAX_RETRIES + ", interval=" + retryInterval + ")";
+            console.log(endpoint.name, "reconnect", status);
+            viewer.printMessage("Trying to reconnect... " + status);
+            setTimeout(function () {
+                join(joinInstances);
+            }, retryInterval);
+        } else {
+            viewer.printMessage("Max connection attempts exceeded.");
+        }
+    };
+
+    const polling = function (joinInstances) {
         $.ajax({
             url: endpoint.basePath + "backend/polling/" + endpoint.token + "/pull",
             type: 'get',
@@ -46,11 +74,19 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
                     for (let key in data.messages) {
                         viewer.processMessage(data.messages[key]);
                     }
-                    setTimeout(polling, endpoint.pollingInterval);
+                    setTimeout(function () {
+                        polling(joinInstances);
+                    }, endpoint.pollingInterval);
                 } else {
-                    console.error(endpoint.name, "connection lost");
-                    viewer.printErrorMessage("Connection lost. Please refresh this page to try again!");
+                    console.log(endpoint.name, "connection lost");
+                    viewer.printErrorMessage("Connection lost.");
+                    rejoin(joinInstances);
                 }
+            },
+            error: function () {
+                console.log(endpoint.name, "connection lost");
+                viewer.printErrorMessage("Connection lost.");
+                rejoin(joinInstances);
             }
         });
     };
@@ -71,5 +107,9 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
                 }
             }
         });
+    };
+
+    const random = function(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     };
 }

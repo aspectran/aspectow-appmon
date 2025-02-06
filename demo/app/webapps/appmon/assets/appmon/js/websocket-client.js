@@ -6,10 +6,10 @@ function WebsocketClient(endpoint, viewer, onJoined, onEstablished, onFailed) {
     const HEARTBEAT_INTERVAL = 5000;
 
     let socket = null;
+    let retryCount = 0;
     let heartbeatTimer = null;
     let pendingMessages = [];
     let established = false;
-    let retryCount = 0;
 
     this.start = function (joinInstances) {
         openSocket(joinInstances);
@@ -21,8 +21,8 @@ function WebsocketClient(endpoint, viewer, onJoined, onEstablished, onFailed) {
 
     const openSocket = function (joinInstances) {
         // For test
-        // onFailed(endpoint);
-        // return;
+        onFailed(endpoint);
+        return;
         closeSocket(false);
         let url = new URL(endpoint.url + "/" + endpoint.token, location.href);
         url.protocol = url.protocol.replace("https:", "wss:");
@@ -56,7 +56,7 @@ function WebsocketClient(endpoint, viewer, onJoined, onEstablished, onFailed) {
             closeSocket(true);
             if (event.code === 1003) {
                 console.log(endpoint.name, "socket connection refused: ", event.code);
-                viewer.printMessage("Socket connection refused by server.");
+                viewer.printErrorMessage("Socket connection refused by server.");
                 return;
             }
             if (event.code === 1000 || retryCount === 0) {
@@ -67,7 +67,7 @@ function WebsocketClient(endpoint, viewer, onJoined, onEstablished, onFailed) {
                 if (retryCount++ < MAX_RETRIES) {
                     let retryInterval = RETRY_INTERVAL * retryCount + random(1, 1000);
                     let status = "(" + retryCount + "/" + MAX_RETRIES + ", interval=" + retryInterval + ")";
-                    console.log(endpoint.name, "reconnect " + status);
+                    console.log(endpoint.name, "reconnect", status);
                     viewer.printMessage("Trying to reconnect... " + status);
                     setTimeout(function () {
                         openSocket(joinInstances);
@@ -79,7 +79,7 @@ function WebsocketClient(endpoint, viewer, onJoined, onEstablished, onFailed) {
         };
         socket.onerror = function (event) {
             if (endpoint.mode === MODE) {
-                console.error(endpoint.name, "webSocket error:", event);
+                console.log(endpoint.name, "webSocket error:", event);
                 viewer.printErrorMessage("Could not connect to the WebSocket server.");
             } else if (onFailed) {
                 onFailed(endpoint);
@@ -98,8 +98,8 @@ function WebsocketClient(endpoint, viewer, onJoined, onEstablished, onFailed) {
     };
 
     const establish = function (payload) {
+        endpoint['mode'] = MODE;
         if (onJoined) {
-            endpoint['mode'] = MODE;
             onJoined(endpoint, payload);
         }
         while (pendingMessages.length) {

@@ -113,7 +113,7 @@ public class PollingExportService implements ExportService {
             return null;
         }
 
-        String newToken = AppMonManager.issueToken(backendSession.getPollingInterval() + 30);
+        String newToken = AppMonManager.issueToken(1800);
         String[] messages = endpointSessionManager.pull(backendSession);
         return Map.of(
                 "token", newToken,

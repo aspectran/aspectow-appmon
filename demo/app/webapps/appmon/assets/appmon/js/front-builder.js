@@ -344,18 +344,21 @@ function FrontBuilder() {
             }
         });
         $(".speed-options li").on("click", function() {
+            let $liFast = $(".speed-options li.fast");
+            let faster = !$liFast.hasClass("on");
+            if (!faster) {
+                $liFast.removeClass("on");
+            } else {
+                $liFast.addClass("on");
+            }
             for (let key in endpoints) {
                 let endpoint = endpoints[key];
                 if (endpoint.mode === "polling") {
-                    let $liFast = $(".speed-options li.fast");
-                    if ($liFast.hasClass("on")) {
-                        $liFast.removeClass("on");
-                        clients[endpoint.index].speed(0);
-                    } else {
-                        $liFast.addClass("on");
+                    if (faster) {
                         clients[endpoint.index].speed(1);
+                    } else {
+                        clients[endpoint.index].speed(0);
                     }
-                    break;
                 }
             }
         });

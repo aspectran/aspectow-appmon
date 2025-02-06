@@ -45,9 +45,9 @@ public class PollingBackendSession implements BackendSession {
 
     public PollingBackendSession(PollingBackendSessionManager backendSessionManager, int sessionTimeout, int pollingInterval) {
         this.backendSessionManager = backendSessionManager;
-        this.pollingInterval = pollingInterval;
         this.expiryTimer = new SessionExpiryTimer();
         setSessionTimeout(sessionTimeout);
+        setPollingInterval(pollingInterval);
     }
 
     public int getSessionTimeout() {
