@@ -25,6 +25,7 @@ import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Destroy;
+import com.aspectran.core.component.bean.annotation.Initialize;
 import com.aspectran.core.component.bean.annotation.RequestToGet;
 import com.aspectran.core.component.bean.annotation.RequestToPost;
 import com.aspectran.core.component.bean.annotation.Transform;
@@ -57,10 +58,14 @@ public class PollingExportService implements ExportService {
         if (pollingConfig != null && pollingConfig.isEnabled()) {
             this.endpointSessionManager = new PollingBackendSessionManager(appMonManager, pollingConfig.getInitialBufferSize());
             this.endpointSessionManager.initialize();
-            appMonManager.addExportService(this);
         } else {
             this.endpointSessionManager = null;
         }
+    }
+
+    @Initialize
+    public void registerExportService() {
+        appMonManager.addExportService(this);
     }
 
     @Destroy
