@@ -54,6 +54,7 @@
     overflow: auto;
     padding : 0 7px 0 10px;
     height: 29px;
+    box-shadow: -20px 20px 20px -20px #394e59 inset;
 }
 .display-box .status-bar.on {
     background-color: #709185;

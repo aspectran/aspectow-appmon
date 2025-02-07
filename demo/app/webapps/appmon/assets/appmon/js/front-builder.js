@@ -6,6 +6,7 @@ function FrontBuilder() {
     const clients = [];
 
     this.build = function (basePath, token, endpointName, joinInstances) {
+        clearView();
         $.ajax({
             url: basePath + "backend/" + token + "/config",
             type: "get",
@@ -38,6 +39,7 @@ function FrontBuilder() {
                         console.log("instance", instance);
                     }
                     buildView();
+                    bindEvents();
                     if (endpoints.length) {
                         establish(0, joinInstances);
                     }
@@ -98,19 +100,6 @@ function FrontBuilder() {
         }
         clients[endpointIndex] = client;
         client.start(joinInstances);
-    };
-
-    const clearView = function () {
-        $(".endpoint.tabs .tabs-title.available").remove();
-        $(".endpoint.tabs .tabs-title").show();
-        $(".display-box.available").remove();
-        $(".track-box-box.available").remove();
-        $(".sessions-box-box.available").remove();
-        $(".console-box.available").remove();
-    };
-
-    const clearConsole = function (endpointIndex) {
-        $(".console-box[data-endpoint-index=" + endpointIndex + "] .console").empty();
     };
 
     const changeEndpoint = function (endpointIndex) {
@@ -197,10 +186,10 @@ function FrontBuilder() {
             }
             let $tabTitle = $(".instance.tabs .tabs-title[data-instance-name=" + instance.name + "]");
             if (instance.name === instanceName) {
-                if (!!!instance.active) {
-                    instance.active = true;
+                instance.active = true;
+                viewEndpointInstance(instanceName);
+                if (!$tabTitle.hasClass("is-active")) {
                     $tabTitle.addClass("is-active");
-                    viewEndpointInstance(instanceName);
                 }
                 exists = true;
             } else {
@@ -256,8 +245,94 @@ function FrontBuilder() {
         }
     };
 
+    const bindEvents = function () {
+        $(".endpoint.tabs .tabs-title.available a").off().on("click", function() {
+            let endpointIndex = $(this).closest(".tabs-title").data("endpoint-index");
+            changeEndpoint(endpointIndex);
+        });
+        $(".instance.tabs .tabs-title.available a").off().on("click", function() {
+            let instanceName = $(this).closest(".tabs-title").data("instance-name");
+            changeInstance(instanceName);
+        });
+        $(".console-box .tailing-switch").off().on("click", function() {
+            let $consoleBox = $(this).closest(".console-box");
+            let $console = $consoleBox.find(".console");
+            let endpointIndex = $consoleBox.data("endpoint-index");
+            if ($console.data("tailing")) {
+                $console.data("tailing", false);
+                $consoleBox.find(".tailing-status").removeClass("on");
+            } else {
+                $console.data("tailing", true);
+                $(this).find(".tailing-status").addClass("on");
+                viewers[endpointIndex].refreshConsole($console);
+            }
+        });
+        $(".console-box .pause-switch").off().on("click", function() {
+            let $console = $(this).closest(".console-box").find(".console");
+            if ($console.data("pause")) {
+                $console.data("pause", false);
+                $(this).removeClass("on");
+            } else {
+                $console.data("pause", true);
+                $(this).addClass("on");
+            }
+        });
+        $(".console-box .clear-screen").off().on("click", function() {
+            let $consoleBox = $(this).closest(".console-box");
+            let $console = $consoleBox.find(".console");
+            let endpointIndex = $consoleBox.data("endpoint-index");
+            viewers[endpointIndex].clearConsole($console);
+        });
+        $(".layout-options li a").off().on("click", function() {
+            let $li = $(this).parent();
+            if (!$li.hasClass("on")) {
+                if ($li.hasClass("compact")) {
+                    $li.addClass("on");
+                    $(".console-box.available").addClass("large-6");
+                }
+            } else {
+                if ($li.hasClass("compact")) {
+                    $li.removeClass("on");
+                    $(".console-box.available").removeClass("large-6");
+                }
+            }
+        });
+        $(".speed-options li").off().on("click", function() {
+            let $liFast = $(".speed-options li.fast");
+            let faster = !$liFast.hasClass("on");
+            if (!faster) {
+                $liFast.removeClass("on");
+            } else {
+                $liFast.addClass("on");
+            }
+            for (let key in endpoints) {
+                let endpoint = endpoints[key];
+                if (endpoint.mode === "polling") {
+                    if (faster) {
+                        clients[endpoint.index].speed(1);
+                    } else {
+                        clients[endpoint.index].speed(0);
+                    }
+                }
+            }
+        });
+    };
+
+    const clearView = function () {
+        $(".endpoint.tabs .tabs-title.available").remove();
+        $(".endpoint.tabs .tabs-title").show();
+        $(".instance.tabs .tabs-title.available").remove();
+        $(".instance.tabs .tabs-title").show();
+        $(".display-box.available").remove();
+        $(".console-box.available").remove();
+        $(".console-box").show();
+    };
+
+    const clearConsole = function (endpointIndex) {
+        $(".console-box[data-endpoint-index=" + endpointIndex + "] .console").empty();
+    };
+
     const buildView = function () {
-        clearView();
         for (let key in endpoints) {
             let endpoint = endpoints[key];
             let $titleTab = addEndpointTab(endpoint);
@@ -297,76 +372,6 @@ function FrontBuilder() {
                 }
             }
         }
-        $(".endpoint.tabs .tabs-title.available a").on("click", function() {
-            let endpointIndex = $(this).closest(".tabs-title").data("endpoint-index");
-            changeEndpoint(endpointIndex);
-        });
-        $(".instance.tabs .tabs-title.available a").on("click", function() {
-            let instanceName = $(this).closest(".tabs-title").data("instance-name");
-            changeInstance(instanceName);
-        });
-        $(".console-box .tailing-switch").on("click", function() {
-            let $consoleBox = $(this).closest(".console-box");
-            let $console = $consoleBox.find(".console");
-            let endpointIndex = $consoleBox.data("endpoint-index");
-            if ($console.data("tailing")) {
-                $console.data("tailing", false);
-                $consoleBox.find(".tailing-status").removeClass("on");
-            } else {
-                $console.data("tailing", true);
-                $(this).find(".tailing-status").addClass("on");
-                viewers[endpointIndex].refreshConsole($console);
-            }
-        });
-        $(".console-box .pause-switch").on("click", function() {
-            let $console = $(this).closest(".console-box").find(".console");
-            if ($console.data("pause")) {
-                $console.data("pause", false);
-                $(this).removeClass("on");
-            } else {
-                $console.data("pause", true);
-                $(this).addClass("on");
-            }
-        });
-        $(".console-box .clear-screen").on("click", function() {
-            let $consoleBox = $(this).closest(".console-box");
-            let $console = $consoleBox.find(".console");
-            let endpointIndex = $consoleBox.data("endpoint-index");
-            viewers[endpointIndex].clearConsole($console);
-        });
-        $(".layout-options li a").on("click", function() {
-            let $li = $(this).parent();
-            if (!$li.hasClass("on")) {
-                if ($li.hasClass("compact")) {
-                    $li.addClass("on");
-                    $(".console-box.available").addClass("large-6");
-                }
-            } else {
-                if ($li.hasClass("compact")) {
-                    $li.removeClass("on");
-                    $(".console-box.available").removeClass("large-6");
-                }
-            }
-        });
-        $(".speed-options li").on("click", function() {
-            let $liFast = $(".speed-options li.fast");
-            let faster = !$liFast.hasClass("on");
-            if (!faster) {
-                $liFast.removeClass("on");
-            } else {
-                $liFast.addClass("on");
-            }
-            for (let key in endpoints) {
-                let endpoint = endpoints[key];
-                if (endpoint.mode === "polling") {
-                    if (faster) {
-                        clients[endpoint.index].speed(1);
-                    } else {
-                        clients[endpoint.index].speed(0);
-                    }
-                }
-            }
-        });
     };
 
     const addEndpointTab = function (endpointInfo) {

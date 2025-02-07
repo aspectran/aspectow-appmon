@@ -20,9 +20,6 @@ function WebsocketClient(endpoint, viewer, onJoined, onEstablished, onFailed) {
     };
 
     const openSocket = function (joinInstances) {
-        // For test
-        // onFailed(endpoint);
-        // return;
         closeSocket(false);
         let url = new URL(endpoint.url + "/" + endpoint.token + "/websocket", location.href);
         url.protocol = url.protocol.replace("https:", "wss:");
