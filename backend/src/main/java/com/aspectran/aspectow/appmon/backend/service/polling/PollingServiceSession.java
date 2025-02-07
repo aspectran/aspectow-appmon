@@ -15,13 +15,13 @@
  */
 package com.aspectran.aspectow.appmon.backend.service.polling;
 
-import com.aspectran.aspectow.appmon.backend.service.BackendSession;
+import com.aspectran.aspectow.appmon.backend.service.ServiceSession;
 import com.aspectran.utils.thread.AutoLock;
 import com.aspectran.utils.timer.CyclicTimeout;
 
 import java.util.concurrent.TimeUnit;
 
-public class PollingBackendSession implements BackendSession {
+public class PollingServiceSession implements ServiceSession {
 
     private static final int MIN_POLLING_INTERVAL = 500;
 
@@ -29,7 +29,7 @@ public class PollingBackendSession implements BackendSession {
 
     private final AutoLock autoLock = new AutoLock();
 
-    private final PollingBackendSessionManager backendSessionManager;
+    private final PollingServiceSessionManager sessionManager;
 
     private final SessionExpiryTimer expiryTimer;
 
@@ -43,11 +43,9 @@ public class PollingBackendSession implements BackendSession {
 
     private String[] joinedInstances;
 
-    public PollingBackendSession(PollingBackendSessionManager backendSessionManager, int sessionTimeout, int pollingInterval) {
-        this.backendSessionManager = backendSessionManager;
+    public PollingServiceSession(PollingServiceSessionManager sessionManager) {
+        this.sessionManager = sessionManager;
         this.expiryTimer = new SessionExpiryTimer();
-        setSessionTimeout(sessionTimeout);
-        setPollingInterval(pollingInterval);
     }
 
     public int getSessionTimeout() {
@@ -125,7 +123,7 @@ public class PollingBackendSession implements BackendSession {
         try (AutoLock ignored = lock()) {
             if (!expired) {
                 expired = true;
-                backendSessionManager.scavenge();
+                sessionManager.scavenge();
             }
         }
     }
@@ -135,7 +133,7 @@ public class PollingBackendSession implements BackendSession {
         private final CyclicTimeout timer;
 
         SessionExpiryTimer() {
-            timer = new CyclicTimeout(backendSessionManager.getScheduler()) {
+            timer = new CyclicTimeout(sessionManager.getScheduler()) {
                 @Override
                 public void onTimeoutExpired() {
                     doExpiry();

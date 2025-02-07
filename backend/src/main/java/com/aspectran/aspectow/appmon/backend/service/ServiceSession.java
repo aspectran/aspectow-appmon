@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.appmon.backend.service;
 
-public interface BackendSession {
+public interface ServiceSession {
 
     String[] getJoinedInstances();
 

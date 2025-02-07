@@ -41,9 +41,9 @@ public class ActivityEventReader extends AbstractEventReader {
 
     private static final Logger logger = LoggerFactory.getLogger(ActivityEventReader.class);
 
-    private CounterStatistic activityCounter;
-
     private final String aspectId;
+
+    private CounterStatistic activityCounter;
 
     public ActivityEventReader(@NonNull EventExporterManager eventExporterManager, @NonNull EventInfo eventInfo) {
         super(eventExporterManager, eventInfo);
@@ -60,6 +60,7 @@ public class ActivityEventReader extends AbstractEventReader {
         if (context == null) {
             throw new Exception("Could not find ActivityContext named '" + getTarget() + "'");
         }
+
         activityCounter = context.getActivityCounter();
 
         AspectRule aspectRule = new AspectRule();

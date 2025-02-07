@@ -17,8 +17,8 @@ package com.aspectran.aspectow.appmon.backend.service.polling;
 
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.backend.config.PollingConfig;
-import com.aspectran.aspectow.appmon.backend.service.BackendSession;
 import com.aspectran.aspectow.appmon.backend.service.ExportService;
+import com.aspectran.aspectow.appmon.backend.service.ServiceSession;
 import com.aspectran.aspectow.appmon.manager.AppMonManager;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Autowired;
@@ -46,31 +46,30 @@ public class PollingExportService implements ExportService {
 
     private final AppMonManager appMonManager;
 
-    private final PollingBackendSessionManager endpointSessionManager;
+    private final PollingServiceSessionManager sessionManager;
 
     @Autowired
     public PollingExportService(@NonNull AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
-
-        PollingConfig pollingConfig = appMonManager.getPollingConfig();
-        this.endpointSessionManager = new PollingBackendSessionManager(appMonManager, pollingConfig.getInitialBufferSize());
+        this.sessionManager = new PollingServiceSessionManager(appMonManager);
     }
 
     @Initialize
     public void registerExportService() throws Exception {
-        endpointSessionManager.initialize();
+        sessionManager.initialize();
         appMonManager.addExportService(this);
     }
 
     @Destroy
     public void destroy() throws Exception {
-        endpointSessionManager.destroy();
+        sessionManager.destroy();
+        appMonManager.removeExportService(this);
     }
 
     @RequestToPost("/${token}/polling/join")
     @Transform(FormatType.JSON)
     public Map<String, Object> join(@NonNull Translet translet, String token) throws IOException {
-        if (checkServiceUnavailable(token)) {
+        if (checkServiceAvailable(token)) {
             return null;
         }
 
@@ -82,17 +81,17 @@ public class PollingExportService implements ExportService {
             return null;
         }
 
-        PollingBackendSession backendSession = endpointSessionManager.createSession(translet, pollingConfig, instanceNames);
-        if (!appMonManager.join(backendSession)) {
+        PollingServiceSession serviceSession = sessionManager.createSession(translet, pollingConfig, instanceNames);
+        if (!appMonManager.join(serviceSession)) {
             return null;
         }
 
-        List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(backendSession.getJoinedInstances());
-        List<String> messages = appMonManager.getLastMessages(backendSession);
+        List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(serviceSession.getJoinedInstances());
+        List<String> messages = appMonManager.getLastMessages(serviceSession);
         return Map.of(
                 "token", AppMonManager.issueToken(),
                 "instances", instanceInfoList,
-                "pollingInterval", backendSession.getPollingInterval(),
+                "pollingInterval", serviceSession.getPollingInterval(),
                 "messages", messages
         );
     }
@@ -100,60 +99,62 @@ public class PollingExportService implements ExportService {
     @RequestToGet("/${token}/polling/pull")
     @Transform(FormatType.JSON)
     public Map<String, Object> pull(@NonNull Translet translet, String token) throws IOException {
-        if (checkServiceUnavailable(token)) {
+        if (checkServiceAvailable(token)) {
             return null;
         }
 
-        PollingBackendSession backendSession = endpointSessionManager.getSession(translet);
-        if (backendSession == null || !backendSession.isValid()) {
+        PollingServiceSession serviceSession = sessionManager.getSession(translet);
+        if (serviceSession == null || !serviceSession.isValid()) {
             return null;
         }
 
-        String newToken = AppMonManager.issueToken(1800);
-        String[] messages = endpointSessionManager.pull(backendSession);
+        String newToken = AppMonManager.issueToken(1800); // 30 min.
+        String[] messages = sessionManager.pull(serviceSession);
         return Map.of(
                 "token", newToken,
                 "messages", (messages != null ? messages : new String[0])
         );
     }
 
-    @RequestToPost("/${token}/pollingInterval")
+    @RequestToPost("/${token}/polling/interval")
     @Transform(FormatType.TEXT)
-    public int pollingInterval(@NonNull Translet translet, String token, int speed) {
-        if (checkServiceUnavailable(token)) {
-            return -1;
+    public Map<String, Object> pollingInterval(@NonNull Translet translet, String token, int speed) {
+        if (checkServiceAvailable(token)) {
+            return null;
         }
 
-        PollingBackendSession backendSession = endpointSessionManager.getSession(translet);
-        if (backendSession == null) {
-            return -1;
+        PollingServiceSession serviceSession = sessionManager.getSession(translet);
+        if (serviceSession == null) {
+            return null;
         }
 
         if (speed == 1) {
-            backendSession.setPollingInterval(1000);
+            serviceSession.setPollingInterval(1000);
         } else {
             PollingConfig pollingConfig = appMonManager.getPollingConfig();
-            backendSession.setPollingInterval(pollingConfig.getPollingInterval());
+            serviceSession.setPollingInterval(pollingConfig.getPollingInterval());
         }
 
-        return backendSession.getPollingInterval();
+        return Map.of(
+            "pollingInterval", serviceSession.getPollingInterval()
+        );
     }
 
     @Override
     public void broadcast(String message) {
-        endpointSessionManager.push(message);
+        sessionManager.push(message);
     }
 
     @Override
-    public void broadcast(BackendSession session, String message) {
+    public void broadcast(ServiceSession serviceSession, String message) {
     }
 
     @Override
     public boolean isUsingInstance(String instanceName) {
-        return endpointSessionManager.isUsingInstance(instanceName);
+        return sessionManager.isUsingInstance(instanceName);
     }
 
-    private boolean checkServiceUnavailable(String token) {
+    private boolean checkServiceAvailable(String token) {
         try {
             AppMonManager.validateToken(token);
             return false;

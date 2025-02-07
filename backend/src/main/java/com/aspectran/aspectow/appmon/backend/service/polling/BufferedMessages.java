@@ -44,7 +44,7 @@ public class BufferedMessages {
     }
 
     @Nullable
-    public String[] pop(@NonNull PollingBackendSession session) {
+    public String[] pop(@NonNull PollingServiceSession session) {
         synchronized (buffer) {
             int maxLineIndex = lineCounter.get() - 1;
             int lineIndex = session.getLastLineIndex();

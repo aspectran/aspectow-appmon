@@ -19,7 +19,7 @@ public interface ExportService {
 
     void broadcast(String message);
 
-    void broadcast(BackendSession session, String message);
+    void broadcast(ServiceSession serviceSession, String message);
 
     boolean isUsingInstance(String instanceName);
 

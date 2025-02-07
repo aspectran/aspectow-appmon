@@ -15,12 +15,13 @@
  */
 package com.aspectran.aspectow.appmon.backend.service.websocket;
 
-import com.aspectran.aspectow.appmon.backend.service.BackendSession;
 import com.aspectran.aspectow.appmon.backend.service.ExportService;
+import com.aspectran.aspectow.appmon.backend.service.ServiceSession;
 import com.aspectran.aspectow.appmon.manager.AppMonManager;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.AvoidAdvice;
 import com.aspectran.core.component.bean.annotation.Component;
+import com.aspectran.core.component.bean.annotation.Destroy;
 import com.aspectran.core.component.bean.annotation.Initialize;
 import com.aspectran.utils.ExceptionUtils;
 import com.aspectran.utils.StringUtils;
@@ -68,7 +69,7 @@ public class WebsocketExportService implements ExportService {
 
     private static final String MESSAGE_ESTABLISHED = "established:";
 
-    private static final Set<WebsocketBackendSession> sessions = new HashSet<>();
+    private static final Set<WebsocketServiceSession> sessions = new HashSet<>();
 
     private final AppMonManager appMonManager;
 
@@ -80,6 +81,11 @@ public class WebsocketExportService implements ExportService {
     @Initialize
     public void registerExportService() {
         appMonManager.addExportService(this);
+    }
+
+    @Destroy
+    public void destroy() throws Exception {
+        appMonManager.removeExportService(this);
     }
 
     @OnOpen
@@ -100,7 +106,8 @@ public class WebsocketExportService implements ExportService {
     @OnMessage
     public void onMessage(Session session, String message) {
         if (MESSAGE_PING.equals(message)) {
-            broadcast(session, MESSAGE_PONG + AppMonManager.issueToken(1800)); // 30 min.
+            String newToken = AppMonManager.issueToken(1800); // 30 min.
+            broadcast(session, MESSAGE_PONG + newToken);
         } else if (message != null && message.startsWith(MESSAGE_JOIN)) {
             addSession(session, message.substring(MESSAGE_JOIN.length()));
         } else if (MESSAGE_ESTABLISHED.equals(message)) {
@@ -132,39 +139,40 @@ public class WebsocketExportService implements ExportService {
     }
 
     private void addSession(Session session, String joinInstances) {
-        WebsocketBackendSession backendSession = new WebsocketBackendSession(session);
+        WebsocketServiceSession serviceSession = new WebsocketServiceSession(session);
         synchronized (sessions) {
-            if (sessions.add(backendSession)) {
-                String[] instanceNames = appMonManager.getVerifiedInstanceNames(StringUtils.splitCommaDelimitedString(joinInstances));
+            if (sessions.add(serviceSession)) {
+                String[] instanceNames = StringUtils.splitCommaDelimitedString(joinInstances);
+                instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
                 if (!StringUtils.hasText(joinInstances) || instanceNames.length > 0) {
-                    backendSession.setJoinedInstances(instanceNames);
+                    serviceSession.setJoinedInstances(instanceNames);
                 }
-                sendJoined(backendSession);
+                sendJoined(serviceSession);
             }
         }
     }
 
-    private void sendJoined(@NonNull BackendSession backendSession) {
-        String[] instanceNames = backendSession.getJoinedInstances();
+    private void sendJoined(@NonNull ServiceSession serviceSession) {
+        String[] instanceNames = serviceSession.getJoinedInstances();
         if (instanceNames != null) {
-            broadcast(backendSession, MESSAGE_JOINED);
+            broadcast(serviceSession, MESSAGE_JOINED);
         }
     }
 
     private void establishComplete(@NonNull Session session) {
-        BackendSession backendSession = new WebsocketBackendSession(session);
-        appMonManager.join(backendSession);
-        List<String> messages = appMonManager.getLastMessages(backendSession);
+        ServiceSession serviceSession = new WebsocketServiceSession(session);
+        appMonManager.join(serviceSession);
+        List<String> messages = appMonManager.getLastMessages(serviceSession);
         for (String message : messages) {
-            broadcast(backendSession, message);
+            broadcast(serviceSession, message);
         }
     }
 
     private void removeSession(Session session) {
-        WebsocketBackendSession backendSession = new WebsocketBackendSession(session);
+        WebsocketServiceSession serviceSession = new WebsocketServiceSession(session);
         synchronized (sessions) {
-            if (sessions.remove(backendSession)) {
-                appMonManager.release(backendSession);
+            if (sessions.remove(serviceSession)) {
+                appMonManager.release(serviceSession);
             }
         }
     }
@@ -172,16 +180,16 @@ public class WebsocketExportService implements ExportService {
     @Override
     public void broadcast(String message) {
         synchronized (sessions) {
-            for (WebsocketBackendSession backendSession : sessions) {
-                broadcast(backendSession.getSession(), message);
+            for (WebsocketServiceSession serviceSession : sessions) {
+                broadcast(serviceSession.getSession(), message);
             }
         }
     }
 
     @Override
-    public void broadcast(@NonNull BackendSession session, String message) {
-        if (session instanceof WebsocketBackendSession backendSession) {
-            broadcast(backendSession.getSession(), message);
+    public void broadcast(@NonNull ServiceSession serviceSession, String message) {
+        if (serviceSession instanceof WebsocketServiceSession session) {
+            broadcast(session.getSession(), message);
         }
     }
 
@@ -195,8 +203,8 @@ public class WebsocketExportService implements ExportService {
     public boolean isUsingInstance(String instanceName) {
         if (StringUtils.hasLength(instanceName)) {
             synchronized (sessions) {
-                for (WebsocketBackendSession appMonSession : sessions) {
-                    String[] instanceNames = appMonSession.getJoinedInstances();
+                for (WebsocketServiceSession serviceSession : sessions) {
+                    String[] instanceNames = serviceSession.getJoinedInstances();
                     if (instanceNames != null) {
                         for (String name : instanceNames) {
                             if (instanceName.equals(name)) {

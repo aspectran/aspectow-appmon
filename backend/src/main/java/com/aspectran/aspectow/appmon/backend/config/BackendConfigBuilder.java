@@ -26,11 +26,11 @@ import java.net.URI;
 
 public abstract class BackendConfigBuilder {
 
-    private static final String DEFAULT_APPMON_CONFIG_RESOURCE = "com/aspectran/aspectow/appmon/backend/config/backend-config.apon";
+    private static final String DEFAULT_BACKEND_CONFIG_RESOURCE = "com/aspectran/aspectow/appmon/backend/config/backend-config.apon";
 
     @NonNull
     public static BackendConfig build() throws IOException {
-        Reader reader = ResourceUtils.getResourceAsReader(DEFAULT_APPMON_CONFIG_RESOURCE);
+        Reader reader = ResourceUtils.getResourceAsReader(DEFAULT_BACKEND_CONFIG_RESOURCE);
         return new BackendConfig(reader);
     }
 

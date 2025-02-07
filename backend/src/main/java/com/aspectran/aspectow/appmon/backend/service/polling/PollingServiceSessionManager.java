@@ -35,28 +35,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PollingBackendSessionManager extends AbstractComponent {
+public class PollingServiceSessionManager extends AbstractComponent {
 
-    private static final String SESSION_ID_COOKIE_NAME = PollingBackendSessionManager.class.getName() + ".SESSION_ID";
+    private static final String SESSION_ID_COOKIE_NAME = PollingServiceSessionManager.class.getName() + ".SESSION_ID";
 
     private final CookieGenerator sessionIdCookieGenerator = new CookieGenerator(SESSION_ID_COOKIE_NAME);
 
     private final SessionIdGenerator sessionIdGenerator = new SessionIdGenerator();
 
-    private final Scheduler scheduler = new ScheduledExecutorScheduler("PollingEndpointSessionScheduler", false);
+    private final Scheduler scheduler = new ScheduledExecutorScheduler("PSSM-Scheduler", false);
 
-    private final Map<String, PollingBackendSession> sessions = new ConcurrentHashMap<>();
+    private final Map<String, PollingServiceSession> sessions = new ConcurrentHashMap<>();
 
     private final AppMonManager appMonManager;
 
     private final BufferedMessages bufferedMessages;
 
-    public PollingBackendSessionManager(AppMonManager appMonManager, int initialBufferSize) {
+    public PollingServiceSessionManager(@NonNull AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
-        this.bufferedMessages = new BufferedMessages(initialBufferSize);
+
+        PollingConfig pollingConfig = appMonManager.getPollingConfig();
+        this.bufferedMessages = new BufferedMessages(pollingConfig.getInitialBufferSize());
     }
 
-    public PollingBackendSession createSession(
+    public PollingServiceSession createSession(
             @NonNull Translet translet, @NonNull PollingConfig pollingConfig, String[] instanceNames) {
         int pollingInterval = pollingConfig.getPollingInterval();
         int sessionTimeout = pollingConfig.getSessionTimeout();
@@ -65,32 +67,34 @@ public class PollingBackendSessionManager extends AbstractComponent {
         }
 
         String sessionId = getSessionId(translet, true);
-        PollingBackendSession existingSession = sessions.get(sessionId);
+        PollingServiceSession existingSession = sessions.get(sessionId);
         if (existingSession != null) {
             existingSession.access(false);
             existingSession.setSessionTimeout(sessionTimeout);
             existingSession.setPollingInterval(pollingInterval);
             return existingSession;
         } else {
-            PollingBackendSession session = new PollingBackendSession(this, sessionTimeout, pollingInterval);
+            PollingServiceSession newSession = new PollingServiceSession(this);
+            newSession.setSessionTimeout(sessionTimeout);
+            newSession.setPollingInterval(pollingInterval);
             if (instanceNames != null) {
-                session.setJoinedInstances(instanceNames);
+                newSession.setJoinedInstances(instanceNames);
             }
-            sessions.put(sessionId, session);
-            session.access(true);
-            return session;
+            sessions.put(sessionId, newSession);
+            newSession.access(true);
+            return newSession;
         }
     }
 
-    public PollingBackendSession getSession(@NonNull Translet translet) {
+    public PollingServiceSession getSession(@NonNull Translet translet) {
         String sessionId = getSessionId(translet, false);
         if (sessionId == null) {
             return null;
         }
-        PollingBackendSession session = sessions.get(sessionId);
-        if (session != null) {
-            session.access(false);
-            return session;
+        PollingServiceSession serviceSession = sessions.get(sessionId);
+        if (serviceSession != null) {
+            serviceSession.access(false);
+            return serviceSession;
         } else {
             return null;
         }
@@ -118,7 +122,7 @@ public class PollingBackendSessionManager extends AbstractComponent {
         }
     }
 
-    public String[] pull(PollingBackendSession session) {
+    public String[] pull(PollingServiceSession session) {
         String[] messages = bufferedMessages.pop(session);
         if (messages != null && messages.length > 0) {
             shrinkBuffer();
@@ -135,11 +139,11 @@ public class PollingBackendSessionManager extends AbstractComponent {
 
     private int getMinLineIndex() {
         int minLineIndex = -1;
-        for (PollingBackendSession session : sessions.values()) {
+        for (PollingServiceSession serviceSession : sessions.values()) {
             if (minLineIndex == -1) {
-                minLineIndex = session.getLastLineIndex();
-            } else if (session.getLastLineIndex() < minLineIndex) {
-                minLineIndex = session.getLastLineIndex();
+                minLineIndex = serviceSession.getLastLineIndex();
+            } else if (serviceSession.getLastLineIndex() < minLineIndex) {
+                minLineIndex = serviceSession.getLastLineIndex();
             }
         }
         return minLineIndex;
@@ -147,9 +151,9 @@ public class PollingBackendSessionManager extends AbstractComponent {
 
     protected boolean isUsingInstance(String instanceName) {
         if (StringUtils.hasLength(instanceName)) {
-            for (PollingBackendSession session : sessions.values()) {
-                if (session.isValid()) {
-                    String[] instanceNames = session.getJoinedInstances();
+            for (PollingServiceSession serviceSession : sessions.values()) {
+                if (serviceSession.isValid()) {
+                    String[] instanceNames = serviceSession.getJoinedInstances();
                     if (instanceNames != null) {
                         for (String name : instanceNames) {
                             if (instanceName.equals(name)) {
@@ -165,9 +169,9 @@ public class PollingBackendSessionManager extends AbstractComponent {
 
     protected void scavenge() {
         List<String> expiredSessions = new ArrayList<>();
-        for (Map.Entry<String, PollingBackendSession> entry : sessions.entrySet()) {
+        for (Map.Entry<String, PollingServiceSession> entry : sessions.entrySet()) {
             String id = entry.getKey();
-            PollingBackendSession session = entry.getValue();
+            PollingServiceSession session = entry.getValue();
             if (session.isExpired()) {
                 appMonManager.release(session);
                 session.destroy();

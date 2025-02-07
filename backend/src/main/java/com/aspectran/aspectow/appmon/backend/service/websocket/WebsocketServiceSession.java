@@ -15,18 +15,18 @@
  */
 package com.aspectran.aspectow.appmon.backend.service.websocket;
 
-import com.aspectran.aspectow.appmon.backend.service.BackendSession;
+import com.aspectran.aspectow.appmon.backend.service.ServiceSession;
 import com.aspectran.utils.Assert;
 import com.aspectran.utils.annotation.jsr305.Nullable;
 import jakarta.websocket.Session;
 
-public class WebsocketBackendSession implements BackendSession {
+public class WebsocketServiceSession implements ServiceSession {
 
     private static final String JOINED_INSTANCES_PROPERTY = "appmon:JoinedInstances";
 
     private final Session session;
 
-    public WebsocketBackendSession(Session session) {
+    public WebsocketServiceSession(Session session) {
         this.session = session;
     }
 
@@ -60,7 +60,7 @@ public class WebsocketBackendSession implements BackendSession {
         if (this == other || session == other) {
             return true;
         }
-        if (other instanceof WebsocketBackendSession that) {
+        if (other instanceof WebsocketServiceSession that) {
             return session.equals(that.getSession());
         }
         return false;

@@ -21,8 +21,8 @@ import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfoHolder;
 import com.aspectran.aspectow.appmon.backend.config.PollingConfig;
 import com.aspectran.aspectow.appmon.backend.exporter.ExporterManager;
-import com.aspectran.aspectow.appmon.backend.service.BackendSession;
 import com.aspectran.aspectow.appmon.backend.service.ExportService;
+import com.aspectran.aspectow.appmon.backend.service.ServiceSession;
 import com.aspectran.core.activity.InstantActivitySupport;
 import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.core.context.ActivityContext;
@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * <p>Created: 4/3/2024</p>
@@ -49,7 +50,7 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final List<ExporterManager> exporterManagers = new ArrayList<>();
 
-    private final Set<ExportService> exportServices = new HashSet<>();
+    private final Set<ExportService> exportServices = new CopyOnWriteArraySet<>();
 
     public AppMonManager(PollingConfig pollingConfig,
                          EndpointInfoHolder endpointInfoHolder,
@@ -79,6 +80,10 @@ public class AppMonManager extends InstantActivitySupport {
         exportServices.add(exportService);
     }
 
+    public void removeExportService(ExportService exportService) {
+        exportServices.remove(exportService);
+    }
+
     public PollingConfig getPollingConfig() {
         return pollingConfig;
     }
@@ -104,7 +109,7 @@ public class AppMonManager extends InstantActivitySupport {
         return instanceInfoHolder.getInstanceInfoList(instanceNames);
     }
 
-    public synchronized boolean join(@NonNull BackendSession session) {
+    public synchronized boolean join(@NonNull ServiceSession session) {
         if (session.isValid()) {
             String[] instanceNames = session.getJoinedInstances();
             if (instanceNames != null && instanceNames.length > 0) {
@@ -128,7 +133,7 @@ public class AppMonManager extends InstantActivitySupport {
         }
     }
 
-    public synchronized void release(BackendSession session) {
+    public synchronized void release(ServiceSession session) {
         String[] instanceNames = getUnusedInstances(session);
         if (instanceNames != null) {
             for (String name : instanceNames) {
@@ -146,7 +151,7 @@ public class AppMonManager extends InstantActivitySupport {
         }
     }
 
-    public List<String> getLastMessages(@NonNull BackendSession session) {
+    public List<String> getLastMessages(@NonNull ServiceSession session) {
         List<String> messages = new ArrayList<>();
         if (session.isValid()) {
             String[] instanceNames = session.getJoinedInstances();
@@ -175,14 +180,14 @@ public class AppMonManager extends InstantActivitySupport {
         }
     }
 
-    public void broadcast(BackendSession session, String message) {
+    public void broadcast(ServiceSession session, String message) {
         for (ExportService exportService : exportServices) {
             exportService.broadcast(session, message);
         }
     }
 
     @Nullable
-    private String[] getUnusedInstances(BackendSession session) {
+    private String[] getUnusedInstances(ServiceSession session) {
         String[] instanceNames = getJoinedInstances(session);
         if (instanceNames == null || instanceNames.length == 0) {
             return null;
@@ -208,7 +213,7 @@ public class AppMonManager extends InstantActivitySupport {
     }
 
     @Nullable
-    private String[] getJoinedInstances(@NonNull BackendSession session) {
+    private String[] getJoinedInstances(@NonNull ServiceSession session) {
         String[] instanceNames = session.getJoinedInstances();
         if (instanceNames == null) {
             return null;
