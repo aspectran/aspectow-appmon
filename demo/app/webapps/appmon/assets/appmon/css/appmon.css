@@ -296,5 +296,5 @@
 .console-box .console p.event.error {
     background-color: #3e132d;
     border: 1px solid #db7093;
-    color: yellow;
+    color: #fff;
 }

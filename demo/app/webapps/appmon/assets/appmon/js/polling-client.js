@@ -42,8 +42,8 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
                     rejoin(joinInstances);
                 }
             },
-            error: function () {
-                console.log(endpoint.name, "connection failed");
+            error: function (xhr, status, error) {
+                console.log(endpoint.name, "connection failed", error);
                 viewer.printErrorMessage("Connection failed.");
                 rejoin(joinInstances);
             }
@@ -83,8 +83,8 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
                     rejoin(joinInstances);
                 }
             },
-            error: function () {
-                console.log(endpoint.name, "connection lost");
+            error: function (xhr, status, error) {
+                console.log(endpoint.name, "connection lost", error);
                 viewer.printErrorMessage("Connection lost.");
                 rejoin(joinInstances);
             }
@@ -93,18 +93,25 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
 
     const changePollingInterval = function (speed) {
         $.ajax({
-            url: endpoint.basePath + "backend/polling/" + endpoint.token + "/pollingInterval",
-            type: 'post',
+            url: endpoint.url + "/" + endpoint.token + "/polling/interval",
+            type: "post",
             dataType: "json",
             data: {
                 speed: speed
             },
             success: function (data) {
-                console.log(endpoint.name, "pollingInterval", data);
-                if (data) {
-                    endpoint.pollingInterval = data;
+                if (data && data.pollingInterval) {
+                    endpoint.pollingInterval = data.pollingInterval;
+                    console.log(endpoint.name, "pollingInterval", data.pollingInterval);
                     viewer.printMessage("Polling every " + data + " milliseconds.");
+                } else {
+                    console.log(endpoint.name, "failed to change polling interval");
+                    viewer.printMessage("Failed to change polling interval.");
                 }
+            },
+            error: function (xhr, status, error) {
+                console.log(endpoint.name, "failed to change polling interval", error);
+                viewer.printMessage("Failed to change polling interval.");
             }
         });
     };

@@ -5,14 +5,14 @@ pollingConfig: {
 }
 endpoint: {
     mode: auto
-    name: endpoint-1
-    title: Server-1
+    name: backend1
+    title: Localhost(Websocket Mode)
     url: /appmon/backend
 }
 endpoint: {
-    mode: auto
-    name: endpoint-2
-    title: Server-2(Same as Server-1)
+    mode: polling
+    name: backend2
+    title: Localhost(Polling Mode)
     url: /appmon/backend
 }
 instance: {

@@ -5,13 +5,13 @@ pollingConfig: {
 }
 endpoint: {
     mode: auto
-    name: endpoint-1
+    name: backend1
     title: Server-1
     url: /appmon/backend1
 }
 endpoint: {
     mode: auto
-    name: endpoint-2
+    name: backend2
     title: Server-2
     url: /appmon/backend2
 }
@@ -20,12 +20,10 @@ instance: {
     title: JPetStore
     event: {
         name: request
-        reader: com.aspectran.aspectow.appmon.backend.exporter.event.request.RequestEventReader
         target: jpetstore
     }
     event: {
         name: session
-        reader: com.aspectran.aspectow.appmon.backend.exporter.event.session.SessionEventReader
         target: tow.server/jpetstore
     }
     log: {
@@ -48,12 +46,10 @@ instance: {
     title: Demo
     event: {
         name: request
-        reader: com.aspectran.aspectow.appmon.backend.exporter.event.request.RequestEventReader
         target: demo
     }
     event: {
         name: session
-        reader: com.aspectran.aspectow.appmon.backend.exporter.event.session.SessionEventReader
         target: tow.server/demo
     }
     log: {
@@ -76,12 +72,10 @@ instance: {
     title: Root
     event: {
         name: request
-        reader: com.aspectran.aspectow.appmon.backend.exporter.event.request.RequestEventReader
         target: root
     }
     event: {
         name: session
-        reader: com.aspectran.aspectow.appmon.backend.exporter.event.session.SessionEventReader
         target: tow.server/root
     }
     log: {

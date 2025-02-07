@@ -246,6 +246,7 @@ function FrontBuilder() {
             let endpoint = endpoints[key];
             if (endpoint.mode === "polling") {
                 pollingMode = true;
+                break;
             }
         }
         if (pollingMode) {
