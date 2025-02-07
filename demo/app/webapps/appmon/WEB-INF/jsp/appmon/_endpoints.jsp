@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <dl class="endpoint tabs">
     <dd class="tabs-title"><a><span class="bullet fi-thumbnails"></span> <span class="title"> </span> <span class="indicator fi-loop"></span></a></dd>
 </dl>

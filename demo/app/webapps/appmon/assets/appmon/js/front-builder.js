@@ -8,7 +8,7 @@ function FrontBuilder() {
     this.build = function (basePath, token, endpointName, joinInstances) {
         clearView();
         $.ajax({
-            url: basePath + "backend/" + token + "/config",
+            url: basePath + "/backend/" + token + "/config",
             type: "get",
             dataType: "json",
             data: {

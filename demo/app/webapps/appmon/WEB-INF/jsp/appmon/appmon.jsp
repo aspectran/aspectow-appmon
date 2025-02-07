@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
 <link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250207"/>">
@@ -78,7 +78,7 @@
 </div>
 <script>
     $(function () {
-        const basePath = "<aspectran:url value="/"/>";
+        const basePath = "${pageContext.request.contextPath}";
         const token = "${page.token}";
         const endpoint = "${page.endpoint}";
         new FrontBuilder().build(basePath, token, endpoint);
