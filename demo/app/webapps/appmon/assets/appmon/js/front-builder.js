@@ -407,7 +407,7 @@ function FrontBuilder() {
             .attr("data-instance-name", instanceInfo.name)
         $newBox.find(".status-bar h4")
             .text(endpointInfo.title);
-        return $newBox.insertAfter($displayBox.last()).show();
+        return $newBox.insertAfter($displayBox.last());
     };
 
     const addTrackBox = function ($displayBox, endpointInfo, instanceInfo, eventInfo) {
@@ -439,6 +439,6 @@ function FrontBuilder() {
             .attr("data-log-name", logInfo.name);
         $newBox.find(".status-bar h4")
             .text(endpointInfo.title + " ›› " + logInfo.file);
-        return $newBox.insertAfter($consoleBox.last()).show();
+        return $newBox.insertAfter($consoleBox.last());
     };
 }
