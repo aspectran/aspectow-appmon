@@ -31,6 +31,19 @@
             <item name="initParams" type="map">
                 <entry name="aspectran:config">%{tow.context.appmon.config}</entry>
             </item>
+            <item name="filters" type="array">
+                <bean class="com.aspectran.undertow.server.servlet.TowFilter">
+                    <arguments>
+                        <item>urlSessionTrackingFilter</item>
+                        <item>com.aspectran.web.servlet.filter.URLSessionTrackingFilter</item>
+                    </arguments>
+                    <properties>
+                        <item name="mappingUrls" type="array">
+                            <value>/*</value>
+                        </item>
+                    </properties>
+                </bean>
+            </item>
             <item name="servlets" type="array">
                 <bean class="com.aspectran.undertow.server.servlet.DefaultJspServlet">
                     <properties>

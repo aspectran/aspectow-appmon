@@ -159,9 +159,7 @@ public class PollingExportService implements ExportService {
             AppMonManager.validateToken(token);
             return false;
         } catch (InvalidPBTokenException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(e);
-            }
+            logger.error("Invalid token: " + token);
             return true;
         }
     }

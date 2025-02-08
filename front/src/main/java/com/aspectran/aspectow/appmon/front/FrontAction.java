@@ -24,6 +24,8 @@ import com.aspectran.core.component.bean.annotation.Dispatch;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
+import com.aspectran.utils.logging.Logger;
+import com.aspectran.utils.logging.LoggerFactory;
 import com.aspectran.utils.security.InvalidPBTokenException;
 
 import java.util.Map;
@@ -34,23 +36,47 @@ import java.util.Map;
 @Component
 public class FrontAction {
 
+    private static final Logger logger = LoggerFactory.getLogger(FrontAction.class);
+
     @Request("/")
     @Dispatch("templates/default")
     @Action("page")
     public Map<String, String> home() {
         return Map.of(
+            "version", AboutMe.getVersion(),
             "include", "home/main",
             "style", "fluid compact"
         );
     }
 
+    @Request("/${ignore}")
+    @Dispatch("templates/default")
+    @Action("page")
+    public Map<String, String> home2() {
+        return home();
+    }
+
+    @Request("/front/${token}")
+    @Dispatch("templates/default")
+    @Action("page")
+    public Map<String, String> front(@NonNull Translet translet, String token) {
+        return front2(translet, token, null);
+    }
+
     @Request("/front/${token}/${endpoint}")
     @Dispatch("templates/default")
     @Action("page")
-    public Map<String, String> front(@NonNull Translet translet, String token, String endpoint) {
+    public Map<String, String> front2(@NonNull Translet translet, String token, String endpoint) {
+        if (token == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Required token");
+            }
+            return home();
+        }
         try {
             AppMonManager.validateToken(token);
         } catch (InvalidPBTokenException e) {
+            logger.error("Invalid token: " + token);
             if (StringUtils.hasLength(translet.getContextPath())) {
                 translet.redirect("/../");
             } else {

@@ -65,7 +65,7 @@ public class ActivityEventReader extends AbstractEventReader {
 
         AspectRule aspectRule = new AspectRule();
         aspectRule.setId(aspectId);
-        aspectRule.setOrder(-1);
+        aspectRule.setOrder(0);
         aspectRule.setIsolated(true);
 
         JoinpointRule joinpointRule = new JoinpointRule();
