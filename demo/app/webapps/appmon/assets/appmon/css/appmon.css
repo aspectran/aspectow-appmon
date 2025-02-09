@@ -1,3 +1,9 @@
+.endpoint.tabs .tabs-title .indicator.disconnected {
+    color: #ff9900;
+}
+.endpoint.tabs .tabs-title .indicator.error {
+    color: #a01f27;
+}
 .options {
     font-size: 90%;
     text-align: right;

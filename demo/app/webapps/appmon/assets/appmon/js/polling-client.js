@@ -52,9 +52,9 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
 
     const rejoin = function (joinInstances) {
         if (retryCount++ < MAX_RETRIES) {
-            let retryInterval = RETRY_INTERVAL * retryCount + random(1, 1000);
+            let retryInterval = (RETRY_INTERVAL * retryCount) + (endpoint.index * 200) + endpoint.random1000;
             let status = "(" + retryCount + "/" + MAX_RETRIES + ", interval=" + retryInterval + ")";
-            console.log(endpoint.name, "reconnect", status);
+            console.log(endpoint.name, "trying to reconnect", status);
             viewer.printMessage("Trying to reconnect... " + status);
             setTimeout(function () {
                 join(joinInstances);
@@ -114,9 +114,5 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
                 viewer.printMessage("Failed to change polling interval.");
             }
         });
-    };
-
-    const random = function(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
     };
 }
