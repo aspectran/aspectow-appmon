@@ -55,9 +55,7 @@ public class InstanceInfoHolder {
             for (String name : instanceNames) {
                 for (InstanceInfo info : instanceInfos.values()) {
                     if (info.getName().equals(name)) {
-                        if (!info.isHidden()) {
-                            infoList.add(info);
-                        }
+                        infoList.add(info);
                     }
                 }
             }

@@ -11,15 +11,15 @@ function WebsocketClient(endpoint, viewer, onJoined, onEstablished, onClosed, on
     let pendingMessages = [];
     let established = false;
 
-    this.start = function (joinInstances) {
-        openSocket(joinInstances);
+    this.start = function (specificInstances) {
+        openSocket(specificInstances);
     };
 
     this.stop = function () {
         closeSocket();
     };
 
-    const openSocket = function (joinInstances) {
+    const openSocket = function (specificInstances) {
         closeSocket(false);
         let url = new URL(endpoint.url + "/" + endpoint.token + "/websocket", location.href);
         url.protocol = url.protocol.replace("https:", "wss:");
@@ -28,7 +28,7 @@ function WebsocketClient(endpoint, viewer, onJoined, onEstablished, onClosed, on
         socket.onopen = function () {
             console.log(endpoint.name, "socket connected:", endpoint.url);
             pendingMessages.push("Socket connection successful");
-            socket.send("join:" + (joinInstances||""));
+            socket.send("join:" + (specificInstances||""));
             heartbeatPing();
             retryCount = 0;
         };
@@ -70,7 +70,7 @@ function WebsocketClient(endpoint, viewer, onJoined, onEstablished, onClosed, on
                     console.log(endpoint.name, "trying to reconnect", status);
                     viewer.printMessage("Trying to reconnect... " + status);
                     setTimeout(function () {
-                        openSocket(joinInstances);
+                        openSocket(specificInstances);
                     }, retryInterval);
                 } else {
                     console.log(endpoint.name, "abort reconnect attempt");

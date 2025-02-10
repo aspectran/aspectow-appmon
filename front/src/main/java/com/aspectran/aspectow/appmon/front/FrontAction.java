@@ -83,9 +83,9 @@ public class FrontAction {
                 logger.error(e);
             }
             if (StringUtils.hasLength(translet.getContextPath())) {
-                translet.redirect("/../${instances}");
+                translet.redirect("/../");
             } else {
-                translet.redirect("/${instances}");
+                translet.redirect("/");
             }
             return null;
         }

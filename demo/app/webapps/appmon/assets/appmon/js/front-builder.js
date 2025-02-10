@@ -5,14 +5,14 @@ function FrontBuilder() {
     const viewers = [];
     const clients = [];
 
-    this.build = function (basePath, token, endpointName, joinInstances) {
+    this.build = function (basePath, token, specificInstances) {
         clearView();
         $.ajax({
             url: basePath + "/backend/" + token + "/config",
             type: "get",
             dataType: "json",
             data: {
-                joinInstances: joinInstances
+                instances: specificInstances
             },
             success: function (data) {
                 if (data) {
@@ -24,28 +24,26 @@ function FrontBuilder() {
                     let random1000 = random(1, 1000);
                     for (let key in data.endpoints) {
                         let endpoint = data.endpoints[key];
-                        endpoint['index'] = index;
+                        endpoint['index'] = index++;
                         endpoint['token'] = data.token;
                         endpoint['established'] = false;
                         endpoint['establishCount'] = 0;
                         endpoint['random1000'] = random1000;
-                        if (!endpointName || endpointName === endpoint.name) {
-                            endpoint.active = true;
-                            endpoints.push(endpoint);
-                            viewers[index] = new FrontViewer();
-                        }
-                        index++;
+                        endpoint['active'] = true;
+                        endpoints.push(endpoint);
+                        viewers[endpoint.index] = new FrontViewer();
                         console.log("endpoint", endpoint);
                     }
                     for (let key in data.instances) {
                         let instance = data.instances[key];
+                        instance['active'] = false;
                         instances.push(instance);
                         console.log("instance", instance);
                     }
                     buildView();
                     bindEvents();
                     if (endpoints.length) {
-                        establish(0, joinInstances);
+                        establish(0, specificInstances);
                     }
                 }
             }
@@ -56,7 +54,7 @@ function FrontBuilder() {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     };
 
-    const establish = function (endpointIndex, joinInstances) {
+    const establish = function (endpointIndex, specificInstances) {
         function onJoined(endpoint, payload) {
             clearConsole(endpoint.index);
             if (payload) {
@@ -71,12 +69,15 @@ function FrontBuilder() {
             endpoint.establishCount++;
             console.log(endpoint.name, "connection established", endpoint.establishCount);
             changeEndpointState(endpoint);
-            if (endpoint.establishCount + endpoint.index < endpoints.length) {
-                establish(endpoint.index + 1, joinInstances);
+            if (endpoint.active) {
+                viewers[endpoint.index].setVisible(true);
             }
-            if (endpoint.index === endpoints.length - 1) {
+            if (endpoint.establishCount === 1) {
                 console.log(endpoint.name, "init view");
                 initView();
+            }
+            if (endpoint.establishCount + endpoint.index < endpoints.length) {
+                establish(endpoint.index + 1, specificInstances);
             }
         }
         function onClosed(endpoint) {
@@ -89,7 +90,7 @@ function FrontBuilder() {
                 setTimeout(function () {
                     let client = new PollingClient(endpoint, viewers[endpoint.index], onJoined, onEstablished);
                     clients[endpoint.index] = client;
-                    client.start(joinInstances);
+                    client.start(specificInstances);
                 }, (endpoint.index - 1) * 1000);
             }
         }
@@ -104,7 +105,7 @@ function FrontBuilder() {
             client = new WebsocketClient(endpoint, viewer, onJoined, onEstablished, onClosed, onFailed);
         }
         clients[endpointIndex] = client;
-        client.start(joinInstances);
+        client.start(specificInstances);
     };
 
     const changeEndpoint = function (endpointIndex) {
@@ -243,12 +244,6 @@ function FrontBuilder() {
     };
 
     const initView = function () {
-        for (let key in endpoints) {
-            let endpoint = endpoints[key];
-            if (endpoint.active) {
-                viewers[endpoint.index].setVisible(true);
-            }
-        }
         $("ul.speed-options").hide();
         let pollingMode = false;
         for (let key in endpoints) {
