@@ -26,7 +26,6 @@ import com.aspectran.utils.apon.ValueType;
  */
 public class EventInfo extends AbstractParameters {
 
-    private static final ParameterKey instance;
     private static final ParameterKey name;
     private static final ParameterKey title;
     private static final ParameterKey reader;
@@ -37,7 +36,6 @@ public class EventInfo extends AbstractParameters {
     private static final ParameterKey[] parameterKeys;
 
     static {
-        instance = new ParameterKey("instance", ValueType.STRING);
         name = new ParameterKey("name", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
         reader = new ParameterKey("reader", ValueType.STRING);
@@ -46,7 +44,6 @@ public class EventInfo extends AbstractParameters {
         sampleInterval = new ParameterKey("sampleInterval", ValueType.INT);
 
         parameterKeys = new ParameterKey[] {
-            instance,
                 name,
                 title,
                 reader,

@@ -18,6 +18,7 @@ package com.aspectran.aspectow.appmon.backend;
 import com.aspectran.aspectow.appmon.backend.config.EndpointInfo;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.manager.AppMonManager;
+import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.RequestToGet;
@@ -48,7 +49,7 @@ public class BackendAction {
     }
 
     @RequestToGet("/${token}/config")
-    public RestResponse getConfigData(@Required String token, String joinInstances) {
+    public RestResponse getConfigData(Translet translet, @Required String token, String instances) {
         try {
             AppMonManager.validateToken(token);
         } catch (InvalidPBTokenException e) {
@@ -60,7 +61,8 @@ public class BackendAction {
 
         List<EndpointInfo> endpointInfoList = appMonManager.getEndpointInfoList();
 
-        String[] instanceNames = appMonManager.getVerifiedInstanceNames(StringUtils.splitCommaDelimitedString(joinInstances));
+        String[] instanceNames = StringUtils.splitCommaDelimitedString(instances);
+        instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
         List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(instanceNames);
 
         Map<String, Object> data = Map.of(

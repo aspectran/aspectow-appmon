@@ -46,21 +46,27 @@ public class InstanceInfoHolder {
     }
 
     public List<InstanceInfo> getInstanceInfoList() {
-        return new ArrayList<>(instanceInfos.values());
+        return getInstanceInfoList(null);
     }
 
-    public List<InstanceInfo> getInstanceInfoList(String[] joinGroupNames) {
+    public List<InstanceInfo> getInstanceInfoList(String[] instanceNames) {
         List<InstanceInfo> infoList = new ArrayList<>(instanceInfos.size());
-        if (joinGroupNames != null && joinGroupNames.length > 0) {
-            for (String name : joinGroupNames) {
+        if (instanceNames != null && instanceNames.length > 0) {
+            for (String name : instanceNames) {
                 for (InstanceInfo info : instanceInfos.values()) {
                     if (info.getName().equals(name)) {
-                        infoList.add(info);
+                        if (!info.isHidden()) {
+                            infoList.add(info);
+                        }
                     }
                 }
             }
         } else {
-            infoList.addAll(instanceInfos.values());
+            for (InstanceInfo info : instanceInfos.values()) {
+                if (!info.isHidden()) {
+                    infoList.add(info);
+                }
+            }
         }
         return infoList;
     }

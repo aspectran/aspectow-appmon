@@ -43,10 +43,10 @@ public class FrontAction {
     @Action("page")
     public Map<String, String> home() {
         return Map.of(
-            "version", AboutMe.getVersion(),
             "include", "home/main",
-            "style", "fluid compact"
-        );
+            "style", "fluid compact",
+            "version", AboutMe.getVersion()
+            );
     }
 
     @Request("/${ignore}")
@@ -56,17 +56,10 @@ public class FrontAction {
         return home();
     }
 
-    @Request("/front/${token}")
+    @Request("/front/${token}/${instances}")
     @Dispatch("templates/default")
     @Action("page")
-    public Map<String, String> front(@NonNull Translet translet, String token) {
-        return front2(translet, token, null);
-    }
-
-    @Request("/front/${token}/${endpoint}")
-    @Dispatch("templates/default")
-    @Action("page")
-    public Map<String, String> front2(@NonNull Translet translet, String token, String endpoint) {
+    public Map<String, String> front(@NonNull Translet translet, String token, String instances) {
         if (token == null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Required token");
@@ -75,23 +68,27 @@ public class FrontAction {
         }
         try {
             AppMonManager.validateToken(token);
-        } catch (InvalidPBTokenException e) {
-            logger.error("Invalid token: " + token);
-            if (StringUtils.hasLength(translet.getContextPath())) {
-                translet.redirect("/../");
+            return Map.of(
+                "headinclude", "appmon/_endpoints",
+                "include", "appmon/appmon",
+                "style", "fluid compact",
+                "version", AboutMe.getVersion(),
+                "token", AppMonManager.issueToken(),
+                "instances", StringUtils.nullToEmpty(instances)
+            );
+        } catch (Exception e) {
+            if (e instanceof InvalidPBTokenException) {
+                logger.error("Invalid token: " + token);
             } else {
-                translet.redirect("/");
+                logger.error(e);
+            }
+            if (StringUtils.hasLength(translet.getContextPath())) {
+                translet.redirect("/../${instances}");
+            } else {
+                translet.redirect("/${instances}");
             }
             return null;
         }
-        return Map.of(
-            "version", AboutMe.getVersion(),
-            "headinclude", "appmon/_endpoints",
-            "include", "appmon/appmon",
-            "style", "fluid compact",
-            "token", AppMonManager.issueToken(),
-            "endpoint", StringUtils.nullToEmpty(endpoint)
-        );
     }
 
 }

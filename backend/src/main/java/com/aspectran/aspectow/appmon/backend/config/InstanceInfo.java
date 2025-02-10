@@ -28,6 +28,7 @@ public class InstanceInfo extends AbstractParameters {
 
     private static final ParameterKey name;
     private static final ParameterKey title;
+    private static final ParameterKey hidden;
     private static final ParameterKey event;
     private static final ParameterKey log;
 
@@ -36,12 +37,14 @@ public class InstanceInfo extends AbstractParameters {
     static {
         name = new ParameterKey("name", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
+        hidden = new ParameterKey("hidden", ValueType.BOOLEAN);
         event = new ParameterKey("events", new String[] {"event"}, EventInfo.class, true, true);
         log = new ParameterKey("logs", new String[] {"log"}, LogInfo.class, true, true);
 
         parameterKeys = new ParameterKey[] {
                 name,
                 title,
+                hidden,
                 event,
                 log
         };
@@ -65,6 +68,14 @@ public class InstanceInfo extends AbstractParameters {
 
     public void setTitle(String name) {
         putValue(InstanceInfo.title, name);
+    }
+
+    public boolean isHidden() {
+        return getBoolean(hidden, false);
+    }
+
+    public void setHidden(boolean hidden) {
+        putValue(InstanceInfo.hidden, hidden);
     }
 
     public List<EventInfo> getEventInfoList() {

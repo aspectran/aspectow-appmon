@@ -75,9 +75,10 @@ public class PollingExportService implements ExportService {
 
         PollingConfig pollingConfig = appMonManager.getPollingConfig();
 
-        String joinInstances = translet.getParameter("joinInstances");
-        String[] instanceNames = appMonManager.getVerifiedInstanceNames(StringUtils.splitCommaDelimitedString(joinInstances));
-        if (StringUtils.hasText(joinInstances) && instanceNames.length == 0) {
+        String specificInstances = translet.getParameter("instances");
+        String[] instanceNames = StringUtils.splitCommaDelimitedString(specificInstances);
+        instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
+        if (StringUtils.hasText(specificInstances) && instanceNames.length == 0) {
             return null;
         }
 
