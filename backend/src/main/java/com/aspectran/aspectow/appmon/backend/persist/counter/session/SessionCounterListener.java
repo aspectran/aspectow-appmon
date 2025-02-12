@@ -13,29 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.aspectow.appmon.backend.persist.counter;
+package com.aspectran.aspectow.appmon.backend.persist.counter.session;
+
+import com.aspectran.core.component.session.Session;
+import com.aspectran.core.component.session.SessionListener;
+import com.aspectran.utils.annotation.jsr305.NonNull;
 
 /**
- * <p>Created: 2025-02-12</p>
+ * <p>Created: 2024-12-13</p>
  */
-public class CounterPersist {
+public class SessionCounterListener implements SessionListener {
 
-    private final CounterReader counterReader;
+    private final SessionCounterReader counterReader;
 
-    public CounterPersist(CounterReader counterReader) {
+    public SessionCounterListener(SessionCounterReader counterReader) {
         this.counterReader = counterReader;
     }
 
-    public CounterReader getCounterReader() {
-        return counterReader;
-    }
-
-    public CounterData getCounterData() {
-        return counterReader.getCounterData();
-    }
-
-    public void saveCounterData() {
-
+    @Override
+    public void sessionCreated(@NonNull Session session) {
+        counterReader.sessionCreated(session);
     }
 
 }

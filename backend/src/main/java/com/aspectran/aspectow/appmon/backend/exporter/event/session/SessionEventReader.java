@@ -85,7 +85,7 @@ public class SessionEventReader extends AbstractEventReader {
             TowServer towServer = getEventExporterManager().getBean(serverId);
             sessionManager = towServer.getSessionManager(deploymentName);
         } catch (Exception e) {
-            throw new RuntimeException("Cannot resolve session handler with " + getEventInfo().getTarget(), e);
+            throw new RuntimeException("Cannot resolve session manager with " + getEventInfo().getTarget(), e);
         }
         if (sessionManager != null) {
             sessionListener = new SessionEventListener(this);
@@ -100,6 +100,7 @@ public class SessionEventReader extends AbstractEventReader {
             if (sessionListener != null) {
                 try {
                     getSessionListenerRegistration().remove(sessionListener, deploymentName);
+                    sessionListener = null;
                 } catch (UnavailableException e) {
                     // ignored
                 }
