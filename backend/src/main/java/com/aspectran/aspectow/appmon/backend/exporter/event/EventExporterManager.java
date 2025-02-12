@@ -16,15 +16,16 @@
 package com.aspectran.aspectow.appmon.backend.exporter.event;
 
 import com.aspectran.aspectow.appmon.backend.exporter.ExporterManager;
-import com.aspectran.aspectow.appmon.manager.AppMonManager;
+import com.aspectran.aspectow.appmon.backend.service.ExportServiceManager;
 
 /**
  * <p>Created: 2024-12-18</p>
  */
 public class EventExporterManager extends ExporterManager {
 
-    public EventExporterManager(AppMonManager appMonManager, String instanceName) {
-        super(appMonManager, instanceName);
+    public EventExporterManager(ExportServiceManager exportServiceManager, String instanceName) {
+        super(exportServiceManager, instanceName);
+        exportServiceManager.addExporterManager(this);
     }
 
 }

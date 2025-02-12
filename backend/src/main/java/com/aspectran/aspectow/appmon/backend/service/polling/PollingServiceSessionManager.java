@@ -173,7 +173,7 @@ public class PollingServiceSessionManager extends AbstractComponent {
             String id = entry.getKey();
             PollingServiceSession session = entry.getValue();
             if (session.isExpired()) {
-                appMonManager.release(session);
+                appMonManager.getExportServiceManager().release(session);
                 session.destroy();
                 expiredSessions.add(id);
             }

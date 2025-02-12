@@ -16,9 +16,9 @@
 package com.aspectran.aspectow.appmon.backend.exporter.event.session;
 
 import com.aspectran.aspectow.appmon.backend.config.EventInfo;
+import com.aspectran.aspectow.appmon.backend.exporter.event.AbstractEventReader;
 import com.aspectran.aspectow.appmon.backend.exporter.event.EventExporter;
 import com.aspectran.aspectow.appmon.backend.exporter.event.EventExporterManager;
-import com.aspectran.aspectow.appmon.backend.exporter.event.EventReader;
 import com.aspectran.core.component.UnavailableException;
 import com.aspectran.core.component.bean.NoSuchBeanException;
 import com.aspectran.core.component.session.ManagedSession;
@@ -43,21 +43,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class SessionEventReader implements EventReader {
+public class SessionEventReader extends AbstractEventReader {
 
     private static final Logger logger = LoggerFactory.getLogger(SessionEventReader.class);
 
-    protected static final String USER_NAME = "user.name";
+    private static final String USER_NAME = "user.name";
     private static final String USER_COUNTRY_CODE = "user.countryCode";
     private static final String USER_IP_ADDRESS = "user.ipAddress";
-
-    private final EventExporterManager eventExporterManager;
-
-    private final EventInfo eventInfo;
 
     private final String serverId;
 
     private final String deploymentName;
+
+    private EventExporter eventExporter;
 
     private SessionManager sessionManager;
 
@@ -67,25 +65,27 @@ public class SessionEventReader implements EventReader {
 
     public SessionEventReader(@NonNull EventExporterManager eventExporterManager,
                               @NonNull EventInfo eventInfo) {
-        this.eventExporterManager = eventExporterManager;
-        this.eventInfo = eventInfo;
+        super(eventExporterManager, eventInfo);
 
-        String[] arr = StringUtils.split(eventInfo.getTarget(), '/', 2);
+        String[] arr = StringUtils.divide(eventInfo.getTarget(), "/");
         this.serverId = arr[0];
         this.deploymentName = arr[1];
     }
 
-    public EventExporter getEventExporter() {
-        return eventExporterManager.getExporter(eventInfo.getName());
+    EventExporter getEventExporter() {
+        if (eventExporter == null) {
+            eventExporter = getEventExporterManager().getExporter(getEventInfo().getName());
+        }
+        return eventExporter;
     }
 
     @Override
     public void start() {
         try {
-            TowServer towServer = eventExporterManager.getBean(serverId);
+            TowServer towServer = getEventExporterManager().getBean(serverId);
             sessionManager = towServer.getSessionManager(deploymentName);
         } catch (Exception e) {
-            throw new RuntimeException("Cannot resolve session handler with " + eventInfo.getTarget(), e);
+            throw new RuntimeException("Cannot resolve session handler with " + getEventInfo().getTarget(), e);
         }
         if (sessionManager != null) {
             sessionListener = new SessionEventListener(this);
@@ -110,7 +110,7 @@ public class SessionEventReader implements EventReader {
     @NonNull
     private SessionListenerRegistration getSessionListenerRegistration() {
         try {
-            return eventExporterManager.getBean(SessionListenerRegistration.class);
+            return getEventExporterManager().getBean(SessionListenerRegistration.class);
         } catch (NoSuchBeanException e) {
             throw new IllegalStateException("Bean for SessionListenerRegistration must be defined", e);
         }
@@ -150,35 +150,68 @@ public class SessionEventReader implements EventReader {
         }
     }
 
-    String readWithCreatedSession(Session session) {
+    void sessionCreated(@NonNull Session session) {
+        String json = readWithCreatedSession(session);
+        getEventExporter().broadcast(json);
+    }
+
+    void sessionDestroyed(@NonNull Session session) {
+        String json = readWithDestroyedSession(session.getId());
+        getEventExporter().broadcast(json);
+    }
+
+    void sessionEvicted(@NonNull Session session) {
+        String json = readWithEvictedSession(session.getId());
+        getEventExporter().broadcast(json);
+    }
+
+    void sessionResided(@NonNull Session session) {
+        String json = readWithResidedSession(session);
+        getEventExporter().broadcast(json);
+    }
+
+    void attributeAdded(Session session, String name) {
+        if (USER_NAME.equals(name)) {
+            sessionCreated(session);
+        }
+    }
+
+    void attributeUpdated(Session session, String name) {
+        if (USER_NAME.equals(name)) {
+            sessionCreated(session);
+        }
+    }
+
+    private String readWithCreatedSession(Session session) {
         SessionEventData data = load();
         oldData = data;
         data.setCreatedSessions(new JsonString[] { serialize(session) });
         return data.toJson();
     }
 
-    String readWithDestroyedSession(String sessionId) {
+    private String readWithDestroyedSession(String sessionId) {
         SessionEventData data = load();
         oldData = data;
         data.setDestroyedSessions(new String[] { sessionId });
         return data.toJson();
     }
 
-    String readWithEvictedSession(String sessionId) {
+    private String readWithEvictedSession(String sessionId) {
         SessionEventData data = load();
         oldData = data;
         data.setEvictedSessions(new String[] { sessionId });
         return data.toJson();
     }
 
-    String readWithResidedSession(Session session) {
+    private String readWithResidedSession(Session session) {
         SessionEventData data = load();
         oldData = data;
         data.setResidedSessions(new JsonString[] { serialize(session) });
         return data.toJson();
     }
 
-    SessionEventData loadWithActiveSessions() {
+    @NonNull
+    private SessionEventData loadWithActiveSessions() {
         SessionEventData data = load();
         data.setCreatedSessions(getAllActiveSessions());
         return data;

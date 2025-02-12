@@ -80,12 +80,12 @@ public class WebsocketExportService implements ExportService {
 
     @Initialize
     public void registerExportService() {
-        appMonManager.addExportService(this);
+        appMonManager.getExportServiceManager().addExportService(this);
     }
 
     @Destroy
     public void destroy() throws Exception {
-        appMonManager.removeExportService(this);
+        appMonManager.getExportServiceManager().removeExportService(this);
     }
 
     @OnOpen
@@ -161,8 +161,8 @@ public class WebsocketExportService implements ExportService {
 
     private void establishComplete(@NonNull Session session) {
         ServiceSession serviceSession = new WebsocketServiceSession(session);
-        appMonManager.join(serviceSession);
-        List<String> messages = appMonManager.getLastMessages(serviceSession);
+        appMonManager.getExportServiceManager().join(serviceSession);
+        List<String> messages = appMonManager.getExportServiceManager().getLastMessages(serviceSession);
         for (String message : messages) {
             broadcast(serviceSession, message);
         }
@@ -172,7 +172,7 @@ public class WebsocketExportService implements ExportService {
         WebsocketServiceSession serviceSession = new WebsocketServiceSession(session);
         synchronized (sessions) {
             if (sessions.remove(serviceSession)) {
-                appMonManager.release(serviceSession);
+                appMonManager.getExportServiceManager().release(serviceSession);
             }
         }
     }

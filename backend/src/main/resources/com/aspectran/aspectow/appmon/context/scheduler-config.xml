@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 8.0//EN"
+    "https://aspectran.com/dtd/aspectran-8.dtd">
+<aspectran>
+
+    <bean id="appmonScheduler" class="com.aspectran.core.scheduler.support.QuartzSchedulerFactoryBean">
+        <properties>
+            <item type="properties" name="quartzProperties">
+                <entry name="org.quartz.scheduler.instanceName">AppmonScheduler</entry>
+                <entry name="org.quartz.scheduler.rmi.export">false</entry>
+                <entry name="org.quartz.scheduler.rmi.proxy">false</entry>
+                <entry name="org.quartz.scheduler.wrapJobExecutionInUserTransaction">false</entry>
+                <entry name="org.quartz.threadPool.class">org.quartz.simpl.SimpleThreadPool</entry>
+                <entry name="org.quartz.threadPool.threadCount">1</entry>
+                <entry name="org.quartz.threadPool.threadPriority">5</entry>
+                <entry name="org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread">true</entry>
+                <entry name="org.quartz.jobStore.misfireThreshold">60000</entry>
+                <entry name="org.quartz.jobStore.class">org.quartz.simpl.RAMJobStore</entry>
+            </item>
+        </properties>
+    </bean>
+
+</aspectran>

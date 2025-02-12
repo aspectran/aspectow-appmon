@@ -57,13 +57,13 @@ public class PollingExportService implements ExportService {
     @Initialize
     public void registerExportService() throws Exception {
         sessionManager.initialize();
-        appMonManager.addExportService(this);
+        appMonManager.getExportServiceManager().addExportService(this);
     }
 
     @Destroy
     public void destroy() throws Exception {
         sessionManager.destroy();
-        appMonManager.removeExportService(this);
+        appMonManager.getExportServiceManager().removeExportService(this);
     }
 
     @RequestToPost("/${token}/polling/join")
@@ -83,12 +83,12 @@ public class PollingExportService implements ExportService {
         }
 
         PollingServiceSession serviceSession = sessionManager.createSession(translet, pollingConfig, instanceNames);
-        if (!appMonManager.join(serviceSession)) {
+        if (!appMonManager.getExportServiceManager().join(serviceSession)) {
             return null;
         }
 
         List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(serviceSession.getJoinedInstances());
-        List<String> messages = appMonManager.getLastMessages(serviceSession);
+        List<String> messages = appMonManager.getExportServiceManager().getLastMessages(serviceSession);
         return Map.of(
                 "token", AppMonManager.issueToken(),
                 "instances", instanceInfoList,

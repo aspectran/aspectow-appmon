@@ -19,8 +19,6 @@ import com.aspectran.core.component.session.Session;
 import com.aspectran.core.component.session.SessionListener;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 
-import static com.aspectran.aspectow.appmon.backend.exporter.event.session.SessionEventReader.USER_NAME;
-
 /**
  * <p>Created: 2024-12-13</p>
  */
@@ -34,40 +32,32 @@ public class SessionEventListener implements SessionListener {
 
     @Override
     public void sessionCreated(@NonNull Session session) {
-        String json = eventReader.readWithCreatedSession(session);
-        eventReader.getEventExporter().broadcast(json);
+        eventReader.sessionCreated(session);
     }
 
     @Override
     public void sessionDestroyed(@NonNull Session session) {
-        String json = eventReader.readWithDestroyedSession(session.getId());
-        eventReader.getEventExporter().broadcast(json);
+        eventReader.sessionDestroyed(session);
     }
 
     @Override
     public void sessionEvicted(@NonNull Session session) {
-        String json = eventReader.readWithEvictedSession(session.getId());
-        eventReader.getEventExporter().broadcast(json);
+        eventReader.sessionEvicted(session);
     }
 
     @Override
     public void sessionResided(@NonNull Session session) {
-        String json = eventReader.readWithResidedSession(session);
-        eventReader.getEventExporter().broadcast(json);
+        eventReader.sessionResided(session);
     }
 
     @Override
     public void attributeAdded(Session session, String name, Object value) {
-        if (USER_NAME.equals(name)) {
-            sessionCreated(session);
-        }
+        eventReader.attributeAdded(session, name);
     }
 
     @Override
     public void attributeUpdated(Session session, String name, Object newValue, Object oldValue) {
-        if (USER_NAME.equals(name)) {
-            sessionCreated(session);
-        }
+        eventReader.attributeUpdated(session, name);
     }
 
 }

@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.aspectow.appmon.backend.exporter.event.activity;
+package com.aspectran.aspectow.appmon.backend.persist.counter.activity;
 
 import com.aspectran.aspectow.appmon.backend.config.EventInfo;
-import com.aspectran.aspectow.appmon.backend.exporter.event.AbstractEventReader;
-import com.aspectran.aspectow.appmon.backend.exporter.event.EventExporter;
-import com.aspectran.aspectow.appmon.backend.exporter.event.EventExporterManager;
+import com.aspectran.aspectow.appmon.backend.persist.counter.AbstractCounterReader;
 import com.aspectran.core.component.UnavailableException;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.core.context.rule.AspectAdviceRule;
@@ -29,34 +27,21 @@ import com.aspectran.core.context.rule.type.AspectAdviceType;
 import com.aspectran.core.context.rule.type.JoinpointTargetType;
 import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.json.JsonBuilder;
 import com.aspectran.utils.logging.Logger;
 import com.aspectran.utils.logging.LoggerFactory;
-import com.aspectran.utils.statistic.CounterStatistic;
 
 /**
- * <p>Created: 2024-12-18</p>
+ * <p>Created: 2025-02-12</p>
  */
-public class ActivityEventReader extends AbstractEventReader {
+public class ActivityCounterReader extends AbstractCounterReader {
 
-    private static final Logger logger = LoggerFactory.getLogger(ActivityEventReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(ActivityCounterReader.class);
 
     private final String aspectId;
 
-    private EventExporter eventExporter;
-
-    private CounterStatistic activityCounter;
-
-    public ActivityEventReader(@NonNull EventExporterManager eventExporterManager, @NonNull EventInfo eventInfo) {
-        super(eventExporterManager, eventInfo);
+    public ActivityCounterReader(@NonNull EventInfo eventInfo) {
+        super(eventInfo);
         this.aspectId = getClass().getName() + ".ASPECT-" + hashCode();
-    }
-
-    EventExporter getEventExporter() {
-        if (eventExporter == null) {
-            eventExporter = getEventExporterManager().getExporter(getEventInfo().getName());
-        }
-        return eventExporter;
     }
 
     @Override
@@ -65,8 +50,6 @@ public class ActivityEventReader extends AbstractEventReader {
         if (context == null) {
             throw new Exception("Could not find ActivityContext named '" + getTarget() + "'");
         }
-
-        activityCounter = context.getActivityCounter();
 
         AspectRule aspectRule = new AspectRule();
         aspectRule.setId(aspectId);
@@ -81,18 +64,8 @@ public class ActivityEventReader extends AbstractEventReader {
         }
         aspectRule.setJoinpointRule(joinpointRule);
 
-        AspectAdviceRule beforeAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.BEFORE);
-        beforeAspectAdviceRule.setAdviceAction(activity -> {
-            ActivityEventAdvice activityEventAdvice = new ActivityEventAdvice();
-            activityEventAdvice.request(activity);
-            return activityEventAdvice;
-        });
-
         AspectAdviceRule afterAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.AFTER);
         afterAspectAdviceRule.setAdviceAction(activity -> {
-            ActivityEventAdvice activityEventAdvice = activity.getBeforeAdviceResult(aspectId);
-            String json = activityEventAdvice.complete(activity);
-            getEventExporter().broadcast(json);
             return null;
         });
 
@@ -113,29 +86,6 @@ public class ActivityEventReader extends AbstractEventReader {
         } catch (Exception e) {
             logger.warn(e);
         }
-    }
-
-    @Override
-    public String read() {
-        long current = activityCounter.getCurrent();
-        long max = activityCounter.getMax();
-        long total = activityCounter.getTotal();
-        return new JsonBuilder()
-            .prettyPrint(false)
-            .nullWritable(false)
-            .object()
-                .object("activities")
-                    .put("current", current)
-                    .put("max", max)
-                    .put("total", total)
-                .endObject()
-            .endObject()
-            .toString();
-    }
-
-    @Override
-    public String readIfChanged() {
-        return null;
     }
 
 }

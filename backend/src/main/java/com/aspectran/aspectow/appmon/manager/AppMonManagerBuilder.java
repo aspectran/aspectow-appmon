@@ -26,6 +26,7 @@ import com.aspectran.aspectow.appmon.backend.exporter.event.EventExporterBuilder
 import com.aspectran.aspectow.appmon.backend.exporter.event.EventExporterManager;
 import com.aspectran.aspectow.appmon.backend.exporter.log.LogExporterBuilder;
 import com.aspectran.aspectow.appmon.backend.exporter.log.LogExporterManager;
+import com.aspectran.aspectow.appmon.backend.service.ExportServiceManager;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.Assert;
 import com.aspectran.utils.annotation.jsr305.NonNull;
@@ -43,18 +44,18 @@ public abstract class AppMonManagerBuilder {
         Assert.notNull(backendConfig, "backendConfig must not be null");
 
         AppMonManager appMonManager = createAppMonManager(context, backendConfig);
+        ExportServiceManager exportServiceManager = appMonManager.getExportServiceManager();
 
         for (InstanceInfo instanceInfo : backendConfig.getInstanceInfoList()) {
-            List<EventInfo> eventInfoList = backendConfig.getEventInfoList(instanceInfo.getName());
+            String instanceName = instanceInfo.getName();
+            List<EventInfo> eventInfoList = backendConfig.getEventInfoList(instanceName);
             if (eventInfoList != null && !eventInfoList.isEmpty()) {
-                EventExporterManager eventExporterManager = new EventExporterManager(appMonManager, instanceInfo.getName());
-                appMonManager.addExporterManager(eventExporterManager);
+                EventExporterManager eventExporterManager = new EventExporterManager(exportServiceManager, instanceName);
                 EventExporterBuilder.build(eventExporterManager, eventInfoList);
             }
-            List<LogInfo> logInfoList = backendConfig.getLogInfoList(instanceInfo.getName());
+            List<LogInfo> logInfoList = backendConfig.getLogInfoList(instanceName);
             if (logInfoList != null && !logInfoList.isEmpty()) {
-                LogExporterManager logExporterManager = new LogExporterManager(appMonManager, instanceInfo.getName());
-                appMonManager.addExporterManager(logExporterManager);
+                LogExporterManager logExporterManager = new LogExporterManager(exportServiceManager, instanceName);
                 LogExporterBuilder.build(logExporterManager, logInfoList, context.getApplicationAdapter());
             }
         }

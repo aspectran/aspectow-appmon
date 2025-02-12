@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.appmon.backend.exporter;
 
-import com.aspectran.aspectow.appmon.manager.AppMonManager;
+import com.aspectran.aspectow.appmon.backend.service.ExportServiceManager;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.logging.Logger;
 import com.aspectran.utils.logging.LoggerFactory;
@@ -33,17 +33,13 @@ public abstract class ExporterManager {
 
     private final Map<String, Exporter> exporters = new LinkedHashMap<>();
 
-    private final AppMonManager appMonManager;
+    private final ExportServiceManager exportServiceManager;
 
     private final String instanceName;
 
-    public ExporterManager(AppMonManager appMonManager, String instanceName) {
-        this.appMonManager = appMonManager;
+    public ExporterManager(ExportServiceManager exportServiceManager, String instanceName) {
+        this.exportServiceManager = exportServiceManager;
         this.instanceName = instanceName;
-    }
-
-    public AppMonManager getAppMonManager() {
-        return appMonManager;
     }
 
     public String getInstanceName() {
@@ -89,16 +85,16 @@ public abstract class ExporterManager {
         }
     }
 
+    public void broadcast(String message) {
+        exportServiceManager.broadcast(message);
+    }
+
     public <V> V getBean(@NonNull String id) {
-        return appMonManager.getActivityContext().getBeanRegistry().getBean(id);
+        return exportServiceManager.getAppMonManager().getBean(id);
     }
 
     public <V> V getBean(Class<V> type) {
-        return appMonManager.getActivityContext().getBeanRegistry().getBean(type);
-    }
-
-    public void broadcast(String message) {
-        appMonManager.broadcast(message);
+        return exportServiceManager.getAppMonManager().getBean(type);
     }
 
 }

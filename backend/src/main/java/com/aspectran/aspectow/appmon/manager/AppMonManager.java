@@ -20,22 +20,16 @@ import com.aspectran.aspectow.appmon.backend.config.EndpointInfoHolder;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfoHolder;
 import com.aspectran.aspectow.appmon.backend.config.PollingConfig;
-import com.aspectran.aspectow.appmon.backend.exporter.ExporterManager;
-import com.aspectran.aspectow.appmon.backend.service.ExportService;
-import com.aspectran.aspectow.appmon.backend.service.ServiceSession;
+import com.aspectran.aspectow.appmon.backend.persist.PersistManager;
+import com.aspectran.aspectow.appmon.backend.service.ExportServiceManager;
 import com.aspectran.core.activity.InstantActivitySupport;
 import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.annotation.jsr305.Nullable;
 import com.aspectran.utils.security.InvalidPBTokenException;
 import com.aspectran.utils.security.TimeLimitedPBTokenIssuer;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * <p>Created: 4/3/2024</p>
@@ -48,9 +42,9 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final InstanceInfoHolder instanceInfoHolder;
 
-    private final List<ExporterManager> exporterManagers = new ArrayList<>();
+    private final ExportServiceManager exportServiceManager;
 
-    private final Set<ExportService> exportServices = new CopyOnWriteArraySet<>();
+    private final PersistManager persistManager;
 
     public AppMonManager(PollingConfig pollingConfig,
                          EndpointInfoHolder endpointInfoHolder,
@@ -58,6 +52,8 @@ public class AppMonManager extends InstantActivitySupport {
         this.pollingConfig = pollingConfig;
         this.endpointInfoHolder = endpointInfoHolder;
         this.instanceInfoHolder = instanceInfoHolder;
+        this.exportServiceManager = new ExportServiceManager(this);
+        this.persistManager = new PersistManager(this);
     }
 
     @Override
@@ -72,24 +68,24 @@ public class AppMonManager extends InstantActivitySupport {
         return super.getApplicationAdapter();
     }
 
-    void addExporterManager(ExporterManager exporterManager) {
-        exporterManagers.add(exporterManager);
-    }
-
-    public void addExportService(ExportService exportService) {
-        exportServices.add(exportService);
-    }
-
-    public void removeExportService(ExportService exportService) {
-        exportServices.remove(exportService);
-    }
-
     public PollingConfig getPollingConfig() {
         return pollingConfig;
     }
 
     public List<EndpointInfo> getEndpointInfoList() {
         return endpointInfoHolder.getEndpointInfoList();
+    }
+
+    public List<InstanceInfo> getInstanceInfoList() {
+        return instanceInfoHolder.getInstanceInfoList();
+    }
+
+    public List<InstanceInfo> getInstanceInfoList(String[] instanceNames) {
+        return instanceInfoHolder.getInstanceInfoList(instanceNames);
+    }
+
+    public boolean containsInstance(String instanceName) {
+        return instanceInfoHolder.containsInstance(instanceName);
     }
 
     public String[] getVerifiedInstanceNames(String[] instanceNames) {
@@ -101,134 +97,20 @@ public class AppMonManager extends InstantActivitySupport {
         }
     }
 
-    public List<InstanceInfo> getInstanceInfoList() {
-        return instanceInfoHolder.getInstanceInfoList();
+    public ExportServiceManager getExportServiceManager() {
+        return exportServiceManager;
     }
 
-    public List<InstanceInfo> getInstanceInfoList(String[] instanceNames) {
-        return instanceInfoHolder.getInstanceInfoList(instanceNames);
+    public PersistManager getPersistManager() {
+        return persistManager;
     }
 
-    public synchronized boolean join(@NonNull ServiceSession session) {
-        if (session.isValid()) {
-            String[] instanceNames = session.getJoinedInstances();
-            if (instanceNames != null && instanceNames.length > 0) {
-                for (String instanceName : instanceNames) {
-                    startExporters(instanceName);
-                }
-            } else {
-                startExporters(null);
-            }
-            return true;
-        } else {
-            return false;
-        }
+    public <V> V getBean(@NonNull String id) {
+        return getActivityContext().getBeanRegistry().getBean(id);
     }
 
-    private void startExporters(String instanceName) {
-        for (ExporterManager exporterManager : exporterManagers) {
-            if (instanceName == null || exporterManager.getInstanceName().equals(instanceName)) {
-                exporterManager.start();
-            }
-        }
-    }
-
-    public synchronized void release(ServiceSession session) {
-        String[] instanceNames = getUnusedInstances(session);
-        if (instanceNames != null) {
-            for (String name : instanceNames) {
-                stopExporters(name);
-            }
-        }
-        session.removeJoinedInstances();
-    }
-
-    private void stopExporters(String instanceName) {
-        for (ExporterManager exporterManager : exporterManagers) {
-            if (instanceName == null || exporterManager.getInstanceName().equals(instanceName)) {
-                exporterManager.stop();
-            }
-        }
-    }
-
-    public List<String> getLastMessages(@NonNull ServiceSession session) {
-        List<String> messages = new ArrayList<>();
-        if (session.isValid()) {
-            String[] instanceNames = session.getJoinedInstances();
-            if (instanceNames != null && instanceNames.length > 0) {
-                for (String name : instanceNames) {
-                    collectLastMessages(name, messages);
-                }
-            } else {
-                collectLastMessages(null, messages);
-            }
-        }
-        return messages;
-    }
-
-    private void collectLastMessages(String instanceName, List<String> messages) {
-        for (ExporterManager exporterManager : exporterManagers) {
-            if (instanceName == null || exporterManager.getInstanceName().equals(instanceName)) {
-                exporterManager.collectMessages(messages);
-            }
-        }
-    }
-
-    public void broadcast(String message) {
-        for (ExportService exportService : exportServices) {
-            exportService.broadcast(message);
-        }
-    }
-
-    public void broadcast(ServiceSession session, String message) {
-        for (ExportService exportService : exportServices) {
-            exportService.broadcast(session, message);
-        }
-    }
-
-    @Nullable
-    private String[] getUnusedInstances(ServiceSession session) {
-        String[] instanceNames = getJoinedInstances(session);
-        if (instanceNames == null || instanceNames.length == 0) {
-            return null;
-        }
-        List<String> unusedInstances = new ArrayList<>(instanceNames.length);
-        for (String name : instanceNames) {
-            boolean using = false;
-            for (ExportService exportService : exportServices) {
-                if (exportService.isUsingInstance(name)) {
-                    using = true;
-                    break;
-                }
-            }
-            if (!using) {
-                unusedInstances.add(name);
-            }
-        }
-        if (!unusedInstances.isEmpty()) {
-            return unusedInstances.toArray(new String[0]);
-        } else {
-            return null;
-        }
-    }
-
-    @Nullable
-    private String[] getJoinedInstances(@NonNull ServiceSession session) {
-        String[] instanceNames = session.getJoinedInstances();
-        if (instanceNames == null) {
-            return null;
-        }
-        Set<String> validJoinedInstances = new HashSet<>();
-        for (String name : instanceNames) {
-            if (instanceInfoHolder.containsInstance(name)) {
-                validJoinedInstances.add(name);
-            }
-        }
-        if (!validJoinedInstances.isEmpty()) {
-            return validJoinedInstances.toArray(new String[0]);
-        } else {
-            return null;
-        }
+    public <V> V getBean(Class<V> type) {
+        return getActivityContext().getBeanRegistry().getBean(type);
     }
 
     public static String issueToken() {
