@@ -1,7 +1,7 @@
-.endpoint.tabs .tabs-title .indicator.disconnected {
+.domain.tabs .tabs-title .indicator.disconnected {
     color: #ff9900;
 }
-.endpoint.tabs .tabs-title .indicator.error {
+.domain.tabs .tabs-title .indicator.error {
     color: #a01f27;
 }
 .options {

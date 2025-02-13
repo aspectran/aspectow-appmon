@@ -199,7 +199,7 @@ function FrontViewer() {
     };
 
     const indicate = function (instance, type, label) {
-        let $indicator1 = $indicators["endpoint:event:"];
+        let $indicator1 = $indicators["domain:event:"];
         blink($indicator1);
         if (visible) {
             if (type === "log") {

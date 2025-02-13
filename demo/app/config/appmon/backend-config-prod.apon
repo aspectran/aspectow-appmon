@@ -3,17 +3,21 @@ pollingConfig: {
     sessionTimeout: 10000
     initialBufferSize: 9999
 }
-endpoint: {
-    mode: auto
+domain: {
     name: backend1
     title: Server-1
-    url: /appmon/backend1
+    endpoint: {
+        mode: auto
+        url: /appmon/backend1
+    }
 }
-endpoint: {
-    mode: auto
+domain: {
     name: backend2
     title: Server-2
-    url: /appmon/backend2
+    endpoint: {
+        mode: auto
+        url: /appmon/backend2
+    }
 }
 instance: {
     name: jpetstore

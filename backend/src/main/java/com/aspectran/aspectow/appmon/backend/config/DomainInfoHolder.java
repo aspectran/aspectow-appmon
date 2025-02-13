@@ -22,18 +22,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EndpointInfoHolder {
+public class DomainInfoHolder {
 
-    private final Map<String, EndpointInfo> endpointInfos = new LinkedHashMap<>();
+    private final Map<String, DomainInfo> domainInfoMap = new LinkedHashMap<>();
 
-    public EndpointInfoHolder(@NonNull List<EndpointInfo> endpointInfoList) {
-        for (EndpointInfo info : endpointInfoList) {
-            endpointInfos.put(info.getName(), info);
+    public DomainInfoHolder(@NonNull List<DomainInfo> domainInfoList) {
+        for (DomainInfo info : domainInfoList) {
+            domainInfoMap.put(info.getName(), info);
         }
     }
 
-    public List<EndpointInfo> getEndpointInfoList() {
-        return new ArrayList<>(endpointInfos.values());
+    public List<DomainInfo> getDomainInfoList() {
+        return new ArrayList<>(domainInfoMap.values());
     }
 
 }

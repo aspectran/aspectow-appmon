@@ -30,19 +30,19 @@ import java.util.List;
 public class BackendConfig extends AbstractParameters {
 
     private static final ParameterKey pollingConfig;
-    private static final ParameterKey endpoint;
+    private static final ParameterKey domain;
     private static final ParameterKey instance;
 
     private static final ParameterKey[] parameterKeys;
 
     static {
         pollingConfig = new ParameterKey("pollingConfig", PollingConfig.class);
-        endpoint = new ParameterKey("endpoints", new String[] {"endpoint"}, EndpointInfo.class, true, true);
+        domain = new ParameterKey("domains", new String[] {"domain"}, DomainInfo.class, true, true);
         instance = new ParameterKey("instances", new String[] {"instance"}, InstanceInfo.class, true, true);
 
         parameterKeys = new ParameterKey[] {
                 pollingConfig,
-                endpoint,
+                domain,
                 instance
         };
     }
@@ -69,8 +69,8 @@ public class BackendConfig extends AbstractParameters {
         putValue(BackendConfig.pollingConfig, pollingConfig);
     }
 
-    public List<EndpointInfo> getEndpointInfoList() {
-        return getParametersList(endpoint);
+    public List<DomainInfo> getDomainInfoList() {
+        return getParametersList(domain);
     }
 
     public List<InstanceInfo> getInstanceInfoList() {

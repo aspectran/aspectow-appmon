@@ -7,7 +7,7 @@
 <script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250210"/>"></script>
 <script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250210"/>"></script>
 <script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250210"/>"></script>
-<div class="grid-x endpoint-box compact horizontal">
+<div class="grid-x domain-box compact horizontal">
     <div class="cell options t10 b5">
         <ul class="speed-options">
             <li class="fi-fast-forward fast" title="Set to poll every second. Turn this option on only when absolutely necessary."></li>

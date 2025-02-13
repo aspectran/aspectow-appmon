@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.appmon.backend;
 
-import com.aspectran.aspectow.appmon.backend.config.EndpointInfo;
+import com.aspectran.aspectow.appmon.backend.config.DomainInfo;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.manager.AppMonManager;
 import com.aspectran.core.component.bean.annotation.Autowired;
@@ -58,7 +58,7 @@ public class BackendAction {
             return new DefaultRestResponse().forbidden();
         }
 
-        List<EndpointInfo> endpointInfoList = appMonManager.getEndpointInfoList();
+        List<DomainInfo> domainInfoList = appMonManager.getDomainInfoList();
 
         String[] instanceNames = StringUtils.splitCommaDelimitedString(instances);
         instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
@@ -66,7 +66,7 @@ public class BackendAction {
 
         Map<String, Object> data = Map.of(
                 "token", AppMonManager.issueToken(),
-                "endpoints", endpointInfoList,
+                "domains", domainInfoList,
                 "instances", instanceInfoList
         );
         return new DefaultRestResponse(data).nullWritable(false).ok();

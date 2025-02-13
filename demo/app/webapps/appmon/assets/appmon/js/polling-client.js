@@ -1,6 +1,6 @@
-function PollingClient(endpoint, viewer, onJoined, onEstablished) {
+function PollingClient(domain, viewer, onJoined, onEstablished) {
 
-    const MODE = "polling";
+    const ENDPOINT_MODE = "polling";
     const MAX_RETRIES = 10;
     const RETRY_INTERVAL = 5000;
 
@@ -16,7 +16,7 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
 
     const join = function (specificInstances) {
         $.ajax({
-            url: endpoint.url + "/" + endpoint.token + "/polling/join",
+            url: domain.endpoint.url + "/" + domain.endpoint.token + "/polling/join",
             type: "post",
             dataType: "json",
             data: {
@@ -25,25 +25,25 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
             success: function (data) {
                 if (data) {
                     retryCount = 0;
-                    endpoint['mode'] = MODE;
-                    endpoint['token'] = data.token;
-                    endpoint['pollingInterval'] = data.pollingInterval;
+                    domain.endpoint['mode'] = ENDPOINT_MODE;
+                    domain.endpoint['token'] = data.token;
+                    domain.endpoint['pollingInterval'] = data.pollingInterval;
                     if (onJoined) {
-                        onJoined(endpoint, data);
+                        onJoined(domain, data);
                     }
                     if (onEstablished) {
-                        onEstablished(endpoint);
+                        onEstablished(domain);
                     }
                     viewer.printMessage("Polling every " + data.pollingInterval + " milliseconds.");
                     polling(specificInstances);
                 } else {
-                    console.log(endpoint.name, "connection failed");
+                    console.log(domain.name, "connection failed");
                     viewer.printErrorMessage("Connection failed.");
                     rejoin(specificInstances);
                 }
             },
             error: function (xhr, status, error) {
-                console.log(endpoint.name, "connection failed", error);
+                console.log(domain.name, "connection failed", error);
                 viewer.printErrorMessage("Connection failed.");
                 rejoin(specificInstances);
             }
@@ -52,9 +52,9 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
 
     const rejoin = function (specificInstances) {
         if (retryCount++ < MAX_RETRIES) {
-            let retryInterval = (RETRY_INTERVAL * retryCount) + (endpoint.index * 200) + endpoint.random1000;
+            let retryInterval = (RETRY_INTERVAL * retryCount) + (domain.index * 200) + domain.random1000;
             let status = "(" + retryCount + "/" + MAX_RETRIES + ", interval=" + retryInterval + ")";
-            console.log(endpoint.name, "trying to reconnect", status);
+            console.log(domain.name, "trying to reconnect", status);
             viewer.printMessage("Trying to reconnect... " + status);
             setTimeout(function () {
                 join(specificInstances);
@@ -66,25 +66,25 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
 
     const polling = function (specificInstances) {
         $.ajax({
-            url: endpoint.url + "/" + endpoint.token + "/polling/pull",
+            url: domain.endpoint.url + "/" + domain.endpoint.token + "/polling/pull",
             type: "get",
             success: function (data) {
                 if (data && data.token && data.messages) {
-                    endpoint['token'] = data.token;
+                    domain.endpoint['token'] = data.token;
                     for (let key in data.messages) {
                         viewer.processMessage(data.messages[key]);
                     }
                     setTimeout(function () {
                         polling(specificInstances);
-                    }, endpoint.pollingInterval);
+                    }, domain.endpoint.pollingInterval);
                 } else {
-                    console.log(endpoint.name, "connection lost");
+                    console.log(domain.name, "connection lost");
                     viewer.printErrorMessage("Connection lost.");
                     rejoin(specificInstances);
                 }
             },
             error: function (xhr, status, error) {
-                console.log(endpoint.name, "connection lost", error);
+                console.log(domain.name, "connection lost", error);
                 viewer.printErrorMessage("Connection lost.");
                 rejoin(specificInstances);
             }
@@ -93,7 +93,7 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
 
     const changePollingInterval = function (speed) {
         $.ajax({
-            url: endpoint.url + "/" + endpoint.token + "/polling/interval",
+            url: domain.endpoint.url + "/" + domain.endpoint.token + "/polling/interval",
             type: "post",
             dataType: "json",
             data: {
@@ -101,16 +101,16 @@ function PollingClient(endpoint, viewer, onJoined, onEstablished) {
             },
             success: function (data) {
                 if (data && data.pollingInterval) {
-                    endpoint.pollingInterval = data.pollingInterval;
-                    console.log(endpoint.name, "pollingInterval", data.pollingInterval);
+                    domain.endpoint.pollingInterval = data.pollingInterval;
+                    console.log(domain.name, "pollingInterval", data.pollingInterval);
                     viewer.printMessage("Polling every " + data + " milliseconds.");
                 } else {
-                    console.log(endpoint.name, "failed to change polling interval");
+                    console.log(domain.name, "failed to change polling interval");
                     viewer.printMessage("Failed to change polling interval.");
                 }
             },
             error: function (xhr, status, error) {
-                console.log(endpoint.name, "failed to change polling interval", error);
+                console.log(domain.name, "failed to change polling interval", error);
                 viewer.printMessage("Failed to change polling interval.");
             }
         });

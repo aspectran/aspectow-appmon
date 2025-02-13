@@ -15,8 +15,8 @@
  */
 package com.aspectran.aspectow.appmon.manager;
 
-import com.aspectran.aspectow.appmon.backend.config.EndpointInfo;
-import com.aspectran.aspectow.appmon.backend.config.EndpointInfoHolder;
+import com.aspectran.aspectow.appmon.backend.config.DomainInfo;
+import com.aspectran.aspectow.appmon.backend.config.DomainInfoHolder;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfoHolder;
 import com.aspectran.aspectow.appmon.backend.config.PollingConfig;
@@ -38,7 +38,7 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final PollingConfig pollingConfig;
 
-    private final EndpointInfoHolder endpointInfoHolder;
+    private final DomainInfoHolder domainInfoHolder;
 
     private final InstanceInfoHolder instanceInfoHolder;
 
@@ -47,10 +47,10 @@ public class AppMonManager extends InstantActivitySupport {
     private final PersistManager persistManager;
 
     public AppMonManager(PollingConfig pollingConfig,
-                         EndpointInfoHolder endpointInfoHolder,
+                         DomainInfoHolder domainInfoHolder,
                          InstanceInfoHolder instanceInfoHolder) {
         this.pollingConfig = pollingConfig;
-        this.endpointInfoHolder = endpointInfoHolder;
+        this.domainInfoHolder = domainInfoHolder;
         this.instanceInfoHolder = instanceInfoHolder;
         this.exportServiceManager = new ExportServiceManager(this);
         this.persistManager = new PersistManager(this);
@@ -72,8 +72,8 @@ public class AppMonManager extends InstantActivitySupport {
         return pollingConfig;
     }
 
-    public List<EndpointInfo> getEndpointInfoList() {
-        return endpointInfoHolder.getEndpointInfoList();
+    public List<DomainInfo> getDomainInfoList() {
+        return domainInfoHolder.getDomainInfoList();
     }
 
     public List<InstanceInfo> getInstanceInfoList() {

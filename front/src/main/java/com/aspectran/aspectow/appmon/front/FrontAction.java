@@ -69,7 +69,7 @@ public class FrontAction {
         try {
             AppMonManager.validateToken(token);
             return Map.of(
-                "headinclude", "appmon/_endpoints",
+                "headinclude", "appmon/_domains",
                 "include", "appmon/appmon",
                 "style", "fluid compact",
                 "version", AboutMe.getVersion(),

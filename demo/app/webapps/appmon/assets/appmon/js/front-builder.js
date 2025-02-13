@@ -1,6 +1,6 @@
 function FrontBuilder() {
 
-    const endpoints = [];
+    const domains = [];
     const instances = [];
     const viewers = [];
     const clients = [];
@@ -16,23 +16,25 @@ function FrontBuilder() {
             },
             success: function (data) {
                 if (data) {
-                    endpoints.length = 0;
+                    domains.length = 0;
                     instances.length = 0;
                     viewers.length = 0;
                     clients.length = 0;
                     let index = 0;
                     let random1000 = random(1, 1000);
-                    for (let key in data.endpoints) {
-                        let endpoint = data.endpoints[key];
-                        endpoint['index'] = index++;
-                        endpoint['token'] = data.token;
-                        endpoint['established'] = false;
-                        endpoint['establishCount'] = 0;
-                        endpoint['random1000'] = random1000;
-                        endpoint['active'] = true;
-                        endpoints.push(endpoint);
-                        viewers[endpoint.index] = new FrontViewer();
-                        console.log("endpoint", endpoint);
+                    for (let key in data.domains) {
+                        let domain = data.domains[key];
+                        domain['index'] = index++;
+                        domain['random1000'] = random1000;
+                        domain['active'] = true;
+                        domain.endpoint['token'] = data.token;
+                        domain['client'] = {
+                            established: false,
+                            establishCount: 0
+                        };
+                        domains.push(domain);
+                        viewers[domain.index] = new FrontViewer();
+                        console.log("domain", domain);
                     }
                     for (let key in data.instances) {
                         let instance = data.instances[key];
@@ -42,7 +44,7 @@ function FrontBuilder() {
                     }
                     buildView();
                     bindEvents();
-                    if (endpoints.length) {
+                    if (domains.length) {
                         establish(0, specificInstances);
                     }
                 }
@@ -54,144 +56,144 @@ function FrontBuilder() {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     };
 
-    const establish = function (endpointIndex, specificInstances) {
-        function onJoined(endpoint, payload) {
-            clearConsole(endpoint.index);
+    const establish = function (domainIndex, specificInstances) {
+        function onJoined(domain, payload) {
+            clearConsole(domain.index);
             if (payload) {
                 for (let key in payload.messages) {
                     let msg = payload.messages[key];
-                    viewers[endpoint.index].processMessage(msg);
+                    viewers[domain.index].processMessage(msg);
                 }
             }
         }
-        function onEstablished(endpoint) {
-            endpoint.established = true;
-            endpoint.establishCount++;
-            console.log(endpoint.name, "connection established", endpoint.establishCount);
-            changeEndpointState(endpoint);
-            if (endpoint.active) {
-                viewers[endpoint.index].setVisible(true);
+        function onEstablished(domain) {
+            domain.client.established = true;
+            domain.client.establishCount++;
+            console.log(domain.name, "connection established", domain.client.establishCount);
+            changeDomainState(domain);
+            if (domain.active) {
+                viewers[domain.index].setVisible(true);
             }
-            if (endpoint.establishCount === 1) {
-                console.log(endpoint.name, "init view");
+            if (domain.client.establishCount === 1) {
+                console.log(domain.name, "init view");
                 initView();
             }
-            if (endpoint.establishCount + endpoint.index < endpoints.length) {
-                establish(endpoint.index + 1, specificInstances);
+            if (domain.client.establishCount + domain.index < domains.length) {
+                establish(domain.index + 1, specificInstances);
             }
         }
-        function onClosed(endpoint) {
-            endpoint.established = false;
-            changeEndpointState(endpoint);
+        function onClosed(domain) {
+            domain.client.established = false;
+            changeDomainState(domain);
         }
-        function onFailed(endpoint) {
-            changeEndpointState(endpoint, true);
-            if (endpoint.mode !== "websocket") {
+        function onFailed(domain) {
+            changeDomainState(domain, true);
+            if (domain.endpoint.mode !== "websocket") {
                 setTimeout(function () {
-                    let client = new PollingClient(endpoint, viewers[endpoint.index], onJoined, onEstablished);
-                    clients[endpoint.index] = client;
+                    let client = new PollingClient(domain, viewers[domain.index], onJoined, onEstablished);
+                    clients[domain.index] = client;
                     client.start(specificInstances);
-                }, (endpoint.index - 1) * 1000);
+                }, (domain.index - 1) * 1000);
             }
         }
 
-        console.log("establish", endpointIndex);
-        let endpoint = endpoints[endpointIndex];
-        let viewer = viewers[endpointIndex];
+        console.log("establishing", domainIndex);
+        let domain = domains[domainIndex];
+        let viewer = viewers[domainIndex];
         let client;
-        if (endpoint.mode === "polling") {
-            client = new PollingClient(endpoint, viewer, onJoined, onEstablished);
+        if (domain.endpoint.mode === "polling") {
+            client = new PollingClient(domain, viewer, onJoined, onEstablished);
         } else {
-            client = new WebsocketClient(endpoint, viewer, onJoined, onEstablished, onClosed, onFailed);
+            client = new WebsocketClient(domain, viewer, onJoined, onEstablished, onClosed, onFailed);
         }
-        clients[endpointIndex] = client;
+        clients[domainIndex] = client;
         client.start(specificInstances);
     };
 
-    const changeEndpoint = function (endpointIndex) {
-        let availableTabs = $(".endpoint.tabs .tabs-title.available").length;
+    const changeDomain = function (domainIndex) {
+        let availableTabs = $(".domain.tabs .tabs-title.available").length;
         if (availableTabs <= 1) {
             return;
         }
-        let activeTabs = $(".endpoint.tabs .tabs-title.available.is-active").length;
-        let endpoint = endpoints[endpointIndex];
+        let activeTabs = $(".domain.tabs .tabs-title.available.is-active").length;
+        let domain = domains[domainIndex];
         if (activeTabs === 0) {
-            for (let key in endpoints) {
-                if (!!endpoints[key].active) {
-                    endpoints[key].active = false;
-                    showEndpoint(endpoints[key]);
+            for (let key in domains) {
+                if (!!domains[key].active) {
+                    domains[key].active = false;
+                    showDomain(domains[key]);
                 }
             }
-            endpoint.active = true;
-            showEndpoint(endpoint);
-        } else if (activeTabs === 1 && endpoint.active) {
-            for (let key in endpoints) {
-                if (endpoints[key].index !== endpoint.index) {
-                    endpoints[key].active = true;
-                    showEndpoint(endpoints[key]);
+            domain.active = true;
+            showDomain(domain);
+        } else if (activeTabs === 1 && domain.active) {
+            for (let key in domains) {
+                if (domains[key].index !== domain.index) {
+                    domains[key].active = true;
+                    showDomain(domains[key]);
                 }
             }
-        } else if (activeTabs === 1 && !endpoint.active) {
-            for (let key in endpoints) {
-                if (endpoints[key].index !== endpoint.index) {
-                    endpoints[key].active = false;
-                    showEndpoint(endpoints[key]);
+        } else if (activeTabs === 1 && !domain.active) {
+            for (let key in domains) {
+                if (domains[key].index !== domain.index) {
+                    domains[key].active = false;
+                    showDomain(domains[key]);
                 }
             }
-            endpoint.active = true;
-            showEndpoint(endpoint);
+            domain.active = true;
+            showDomain(domain);
         } else {
-            endpoint.active = !!!endpoint.active;
-            showEndpoint(endpoint);
+            domain.active = !!!domain.active;
+            showDomain(domain);
         }
-        let activeEndpoints = 0;
-        for (let key in endpoints) {
-            if (endpoints[key].active) {
-                activeEndpoints++;
+        let activeDomains = 0;
+        for (let key in domains) {
+            if (domains[key].active) {
+                activeDomains++;
             }
         }
-        $(".endpoint.tabs .tabs-title.available").removeClass("is-active");
-        if (availableTabs > activeEndpoints) {
-            for (let key in endpoints) {
-                if (endpoints[key].active) {
-                    $(".endpoint.tabs .tabs-title[data-endpoint-index=" + endpoints[key].index + "]").addClass("is-active");
+        $(".domain.tabs .tabs-title.available").removeClass("is-active");
+        if (availableTabs > activeDomains) {
+            for (let key in domains) {
+                if (domains[key].active) {
+                    $(".domain.tabs .tabs-title[data-domain-index=" + domains[key].index + "]").addClass("is-active");
                 }
             }
         }
     };
 
-    const showEndpoint = function (endpoint) {
-        if (endpoint.active) {
+    const showDomain = function (domain) {
+        if (domain.active) {
             for (let key in instances) {
                 let instance = instances[key];
                 if (instance.active) {
-                    $(".display-box[data-endpoint-index=" + endpoint.index + "][data-instance-name=" + instance.name + "]").show();
-                    $(".console-box[data-endpoint-index=" + endpoint.index + "][data-instance-name=" + instance.name + "]").show();
+                    $(".display-box[data-domain-index=" + domain.index + "][data-instance-name=" + instance.name + "]").show();
+                    $(".console-box[data-domain-index=" + domain.index + "][data-instance-name=" + instance.name + "]").show();
                 }
             }
-            viewers[endpoint.index].setVisible(true);
-            viewers[endpoint.index].refreshConsole();
+            viewers[domain.index].setVisible(true);
+            viewers[domain.index].refreshConsole();
         } else {
-            viewers[endpoint.index].setVisible(false);
+            viewers[domain.index].setVisible(false);
             for (let key in instances) {
                 let instance = instances[key];
                 if (instance.active) {
-                    $(".display-box[data-endpoint-index=" + endpoint.index + "][data-instance-name=" + instance.name + "]").hide();
-                    $(".console-box[data-endpoint-index=" + endpoint.index + "][data-instance-name=" + instance.name + "]").hide();
+                    $(".display-box[data-domain-index=" + domain.index + "][data-instance-name=" + instance.name + "]").hide();
+                    $(".console-box[data-domain-index=" + domain.index + "][data-instance-name=" + instance.name + "]").hide();
                 }
             }
         }
     }
 
-    const changeEndpointState = function (endpoint, errorOccurred) {
-        let $titleTab = $(".endpoint.tabs .tabs-title[data-endpoint-index=" + endpoint.index + "]");
+    const changeDomainState = function (domain, errorOccurred) {
+        let $titleTab = $(".domain.tabs .tabs-title[data-domain-index=" + domain.index + "]");
         let $indicator = $titleTab.find(".indicator");
         $indicator.removeClass($indicator.data("icon-connected") + " connected");
         $indicator.removeClass($indicator.data("icon-disconnected") + " disconnected");
         $indicator.removeClass($indicator.data("icon-error") + " error");
         if (errorOccurred) {
             $indicator.addClass($indicator.data("icon-error") + " error");
-        } else if (endpoint.established) {
+        } else if (domain.client.established) {
             $indicator.addClass($indicator.data("icon-connected") + " connected");
         } else {
             $indicator.addClass($indicator.data("icon-disconnected") + " disconnected");
@@ -208,7 +210,7 @@ function FrontBuilder() {
             let $tabTitle = $(".instance.tabs .tabs-title[data-instance-name=" + instance.name + "]");
             if (instance.name === instanceName) {
                 instance.active = true;
-                showEndpointInstance(instanceName);
+                showDomainInstance(instanceName);
                 if (!$tabTitle.hasClass("is-active")) {
                     $tabTitle.addClass("is-active");
                 }
@@ -225,18 +227,18 @@ function FrontBuilder() {
         }
     }
 
-    const showEndpointInstance = function (instanceName) {
-        for (let key in endpoints) {
-            let endpoint = endpoints[key];
-            if (endpoint.active) {
-                $(".track-box[data-endpoint-index=" + endpoint.index + "] .bullet").remove();
-                $(".display-box[data-endpoint-index=" + endpoint.index + "][data-instance-name!=" + instanceName + "]").hide();
-                $(".display-box[data-endpoint-index=" + endpoint.index + "][data-instance-name=" + instanceName + "]").show();
-                $(".console-box[data-endpoint-index=" + endpoint.index + "][data-instance-name!=" + instanceName + "]").hide();
-                $(".console-box[data-endpoint-index=" + endpoint.index + "][data-instance-name=" + instanceName + "]").show().each(function () {
+    const showDomainInstance = function (instanceName) {
+        for (let key in domains) {
+            let domain = domains[key];
+            if (domain.active) {
+                $(".track-box[data-domain-index=" + domain.index + "] .bullet").remove();
+                $(".display-box[data-domain-index=" + domain.index + "][data-instance-name!=" + instanceName + "]").hide();
+                $(".display-box[data-domain-index=" + domain.index + "][data-instance-name=" + instanceName + "]").show();
+                $(".console-box[data-domain-index=" + domain.index + "][data-instance-name!=" + instanceName + "]").hide();
+                $(".console-box[data-domain-index=" + domain.index + "][data-instance-name=" + instanceName + "]").show().each(function () {
                     let $console = $(this).find(".console");
                     if (!$console.data("pause")) {
-                        viewers[endpoint.index].refreshConsole($console);
+                        viewers[domain.index].refreshConsole($console);
                     }
                 });
             }
@@ -246,9 +248,9 @@ function FrontBuilder() {
     const initView = function () {
         $("ul.speed-options").hide();
         let pollingMode = false;
-        for (let key in endpoints) {
-            let endpoint = endpoints[key];
-            if (endpoint.mode === "polling") {
+        for (let key in domains) {
+            let domain = domains[key];
+            if (domain.endpoint.mode === "polling") {
                 pollingMode = true;
                 break;
             }
@@ -261,9 +263,9 @@ function FrontBuilder() {
     };
 
     const bindEvents = function () {
-        $(".endpoint.tabs .tabs-title.available a").off().on("click", function() {
-            let endpointIndex = $(this).closest(".tabs-title").data("endpoint-index");
-            changeEndpoint(endpointIndex);
+        $(".domain.tabs .tabs-title.available a").off().on("click", function() {
+            let domainIndex = $(this).closest(".tabs-title").data("domain-index");
+            changeDomain(domainIndex);
         });
         $(".instance.tabs .tabs-title.available a").off().on("click", function() {
             let instanceName = $(this).closest(".tabs-title").data("instance-name");
@@ -272,14 +274,14 @@ function FrontBuilder() {
         $(".console-box .tailing-switch").off().on("click", function() {
             let $consoleBox = $(this).closest(".console-box");
             let $console = $consoleBox.find(".console");
-            let endpointIndex = $consoleBox.data("endpoint-index");
+            let domainIndex = $consoleBox.data("domain-index");
             if ($console.data("tailing")) {
                 $console.data("tailing", false);
                 $consoleBox.find(".tailing-status").removeClass("on");
             } else {
                 $console.data("tailing", true);
                 $(this).find(".tailing-status").addClass("on");
-                viewers[endpointIndex].refreshConsole($console);
+                viewers[domainIndex].refreshConsole($console);
             }
         });
         $(".console-box .pause-switch").off().on("click", function() {
@@ -295,8 +297,8 @@ function FrontBuilder() {
         $(".console-box .clear-screen").off().on("click", function() {
             let $consoleBox = $(this).closest(".console-box");
             let $console = $consoleBox.find(".console");
-            let endpointIndex = $consoleBox.data("endpoint-index");
-            viewers[endpointIndex].clearConsole($console);
+            let domainIndex = $consoleBox.data("domain-index");
+            viewers[domainIndex].clearConsole($console);
         });
         $(".layout-options li a").off().on("click", function() {
             let $li = $(this).parent();
@@ -320,13 +322,13 @@ function FrontBuilder() {
             } else {
                 $liFast.addClass("on");
             }
-            for (let key in endpoints) {
-                let endpoint = endpoints[key];
-                if (endpoint.mode === "polling") {
+            for (let key in domains) {
+                let domain = domains[key];
+                if (domain.endpoint.mode === "polling") {
                     if (faster) {
-                        clients[endpoint.index].speed(1);
+                        clients[domain.index].speed(1);
                     } else {
-                        clients[endpoint.index].speed(0);
+                        clients[domain.index].speed(0);
                     }
                 }
             }
@@ -334,8 +336,8 @@ function FrontBuilder() {
     };
 
     const clearView = function () {
-        $(".endpoint.tabs .tabs-title.available").remove();
-        $(".endpoint.tabs .tabs-title").show();
+        $(".domain.tabs .tabs-title.available").remove();
+        $(".domain.tabs .tabs-title").show();
         $(".instance.tabs .tabs-title.available").remove();
         $(".instance.tabs .tabs-title").show();
         $(".display-box.available").remove();
@@ -343,47 +345,47 @@ function FrontBuilder() {
         $(".console-box").show();
     };
 
-    const clearConsole = function (endpointIndex) {
-        $(".console-box[data-endpoint-index=" + endpointIndex + "] .console").empty();
+    const clearConsole = function (domainIndex) {
+        $(".console-box[data-domain-index=" + domainIndex + "] .console").empty();
     };
 
     const buildView = function () {
-        for (let key in endpoints) {
-            let endpoint = endpoints[key];
-            let $titleTab = addEndpointTab(endpoint);
-            let $endpointIndicator = $titleTab.find(".indicator");
-            viewers[endpoint.index].putIndicator("endpoint", "event", "", $endpointIndicator);
+        for (let key in domains) {
+            let domain = domains[key];
+            let $titleTab = addDomainTab(domain);
+            let $domainIndicator = $titleTab.find(".indicator");
+            viewers[domain.index].putIndicator("domain", "event", "", $domainIndicator);
         }
         for (let key in instances) {
             let instance = instances[key];
             let $titleTab = addInstanceTab(instance);
             let $instanceIndicator = $titleTab.find(".indicator");
-            for (let key in endpoints) {
-                let endpoint = endpoints[key];
-                viewers[endpoint.index].putIndicator("instance", "event", instance.name, $instanceIndicator);
+            for (let key in domains) {
+                let domain = domains[key];
+                viewers[domain.index].putIndicator("instance", "event", instance.name, $instanceIndicator);
                 if (instance.events && instance.events.length) {
-                    let $displayBox = addDisplayBox(endpoint, instance);
+                    let $displayBox = addDisplayBox(domain, instance);
                     for (let key in instance.events) {
                         let event = instance.events[key];
                         if (event.name === "activity") {
-                            let $trackBox = addTrackBox($displayBox, endpoint, instance, event);
+                            let $trackBox = addTrackBox($displayBox, domain, instance, event);
                             let $activities = $trackBox.find(".activities");
-                            viewers[endpoint.index].putDisplay(instance.name, event.name, $trackBox);
-                            viewers[endpoint.index].putIndicator(instance.name, "event", event.name, $activities);
+                            viewers[domain.index].putDisplay(instance.name, event.name, $trackBox);
+                            viewers[domain.index].putIndicator(instance.name, "event", event.name, $activities);
                         } else if (event.name === "session") {
-                            let $sessionsBox = addSessionsBox($displayBox, endpoint, instance, event);
-                            viewers[endpoint.index].putDisplay(instance.name, event.name, $sessionsBox);
+                            let $sessionsBox = addSessionsBox($displayBox, domain, instance, event);
+                            viewers[domain.index].putDisplay(instance.name, event.name, $sessionsBox);
                         }
                     }
                 }
                 for (let key in instance.logs) {
                     let logInfo = instance.logs[key];
-                    let $consoleBox = addConsoleBox(endpoint, instance, logInfo);
+                    let $consoleBox = addConsoleBox(domain, instance, logInfo);
                     let $console = $consoleBox.find(".console").data("tailing", true);
                     $consoleBox.find(".tailing-status").addClass("on");
-                    viewers[endpoint.index].putConsole(instance.name, logInfo.name, $console);
+                    viewers[domain.index].putConsole(instance.name, logInfo.name, $console);
                     let $logIndicator = $consoleBox.find(".status-bar");
-                    viewers[endpoint.index].putIndicator(instance.name, "log", logInfo.name, $logIndicator);
+                    viewers[domain.index].putIndicator(instance.name, "log", logInfo.name, $logIndicator);
                 }
             }
         }
@@ -396,15 +398,15 @@ function FrontBuilder() {
         }
     };
 
-    const addEndpointTab = function (endpointInfo) {
-        let $tabs = $(".endpoint.tabs");
+    const addDomainTab = function (domainInfo) {
+        let $tabs = $(".domain.tabs");
         let $tab = $tabs.find(".tabs-title").eq(0).hide().clone()
             .addClass("available")
-            .attr("data-endpoint-index", endpointInfo.index)
-            .attr("data-endpoint-name", endpointInfo.name)
-            .attr("data-endpoint-title", endpointInfo.title)
-            .attr("data-endpoint-url", endpointInfo.url);
-        $tab.find("a .title").text(" " + endpointInfo.title + " ");
+            .attr("data-domain-index", domainInfo.index)
+            .attr("data-domain-name", domainInfo.name)
+            .attr("data-domain-title", domainInfo.title)
+            .attr("data-domain-url", domainInfo.url);
+        $tab.find("a .title").text(" " + domainInfo.title + " ");
         $tab.show().appendTo($tabs);
         return $tab;
     };
@@ -421,46 +423,46 @@ function FrontBuilder() {
         return $tab;
     };
 
-    const addDisplayBox = function (endpointInfo, instanceInfo) {
+    const addDisplayBox = function (domainInfo, instanceInfo) {
         let $displayBox = $(".display-box");
         let $newBox = $displayBox.eq(0).hide().clone()
             .addClass("available")
-            .attr("data-endpoint-index", endpointInfo.index)
+            .attr("data-domain-index", domainInfo.index)
             .attr("data-instance-name", instanceInfo.name)
         $newBox.find(".status-bar h4")
-            .text(endpointInfo.title);
+            .text(domainInfo.title);
         return $newBox.insertAfter($displayBox.last());
     };
 
-    const addTrackBox = function ($displayBox, endpointInfo, instanceInfo, eventInfo) {
+    const addTrackBox = function ($displayBox, domainInfo, instanceInfo, eventInfo) {
         let $trackBox = $displayBox.find(".track-box");
         let $newBox = $trackBox.eq(0).hide().clone()
             .addClass("available")
-            .attr("data-endpoint-index", endpointInfo.index)
+            .attr("data-domain-index", domainInfo.index)
             .attr("data-instance-name", instanceInfo.name)
             .attr("data-event-name", eventInfo.name);
         return $newBox.insertAfter($trackBox.last()).show();
     };
 
-    const addSessionsBox = function ($displayBox, endpointInfo, instanceInfo, eventInfo) {
+    const addSessionsBox = function ($displayBox, domainInfo, instanceInfo, eventInfo) {
         let $sessionsBox = $displayBox.find(".sessions-box");
         let $newBox = $sessionsBox.eq(0).hide().clone()
             .addClass("available")
-            .attr("data-endpoint-index", endpointInfo.index)
+            .attr("data-domain-index", domainInfo.index)
             .attr("data-instance-name", instanceInfo.name)
             .attr("data-event-name", eventInfo.name);
         return $newBox.insertAfter($sessionsBox.last()).show();
     };
 
-    const addConsoleBox = function (endpointInfo, instanceInfo, logInfo) {
+    const addConsoleBox = function (domainInfo, instanceInfo, logInfo) {
         let $consoleBox = $(".console-box");
         let $newBox = $consoleBox.eq(0).hide().clone()
             .addClass("available large-6")
-            .attr("data-endpoint-index", endpointInfo.index)
+            .attr("data-domain-index", domainInfo.index)
             .attr("data-instance-name", instanceInfo.name)
             .attr("data-log-name", logInfo.name);
         $newBox.find(".status-bar h4")
-            .text(endpointInfo.title + " ›› " + logInfo.file);
+            .text(domainInfo.title + " ›› " + logInfo.file);
         return $newBox.insertAfter($consoleBox.last());
     };
 }

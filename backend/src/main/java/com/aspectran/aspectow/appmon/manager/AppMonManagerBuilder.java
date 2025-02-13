@@ -16,7 +16,7 @@
 package com.aspectran.aspectow.appmon.manager;
 
 import com.aspectran.aspectow.appmon.backend.config.BackendConfig;
-import com.aspectran.aspectow.appmon.backend.config.EndpointInfoHolder;
+import com.aspectran.aspectow.appmon.backend.config.DomainInfoHolder;
 import com.aspectran.aspectow.appmon.backend.config.EventInfo;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.backend.config.InstanceInfoHolder;
@@ -74,10 +74,10 @@ public abstract class AppMonManagerBuilder {
             pollingConfig = new PollingConfig();
         }
 
-        EndpointInfoHolder endpointInfoHolder = new EndpointInfoHolder(backendConfig.getEndpointInfoList());
+        DomainInfoHolder domainInfoHolder = new DomainInfoHolder(backendConfig.getDomainInfoList());
         InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(backendConfig.getInstanceInfoList());
 
-        AppMonManager appMonManager = new AppMonManager(pollingConfig, endpointInfoHolder, instanceInfoHolder);
+        AppMonManager appMonManager = new AppMonManager(pollingConfig, domainInfoHolder, instanceInfoHolder);
         appMonManager.setActivityContext(context);
         return appMonManager;
     }
