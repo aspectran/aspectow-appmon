@@ -24,7 +24,7 @@ public class CounterData {
 
     private final LongAdder counter = new LongAdder();
 
-    private long old = 0L;
+    private volatile long old = 0L;
 
     public void count() {
         counter.increment();
