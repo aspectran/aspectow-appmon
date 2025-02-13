@@ -18,6 +18,7 @@ package com.aspectran.aspectow.appmon.backend.persist.counter.session;
 import com.aspectran.aspectow.appmon.backend.config.EventInfo;
 import com.aspectran.aspectow.appmon.backend.persist.counter.AbstractCounterReader;
 import com.aspectran.core.component.bean.NoSuchBeanException;
+import com.aspectran.core.component.session.SessionListener;
 import com.aspectran.core.component.session.SessionListenerRegistration;
 import com.aspectran.core.component.session.SessionManager;
 import com.aspectran.core.context.ActivityContext;
@@ -47,25 +48,26 @@ public class SessionCounterReader extends AbstractCounterReader {
 
     @Override
     public void initialize() throws Exception {
-//        ActivityContext context = CoreServiceHolder.findActivityContext(deploymentName);
-//        if (context != null) {
-//            registerSessionListener(context);
-//        } else {
+        final SessionListener sessionListener = new SessionCounterListener(this);
+        ActivityContext context = CoreServiceHolder.findActivityContext(deploymentName);
+        if (context != null) {
+            registerSessionListener(context, sessionListener);
+        } else {
             CoreServiceHolder.addServiceHolingListener(new ServiceHoldingListener() {
                 @Override
                 public void afterServiceHolding(CoreService service) {
-                    if (service.getActivityContext() != null) {
-                        String contextName = service.getActivityContext().getName();
-                        if (contextName != null && contextName.equals(deploymentName)) {
-                            registerSessionListener(service.getActivityContext());
-                        }
+                if (service.getActivityContext() != null) {
+                    String contextName = service.getActivityContext().getName();
+                    if (contextName != null && contextName.equals(deploymentName)) {
+                        registerSessionListener(service.getActivityContext(), sessionListener);
                     }
                 }
+                }
             });
-//        }
+        }
     }
 
-    private void registerSessionListener(@NonNull ActivityContext context) {
+    private void registerSessionListener(@NonNull ActivityContext context, SessionListener sessionListener) {
         SessionManager sessionManager;
         try {
             TowServer towServer = context.getBeanRegistry().getBean(serverId);
@@ -74,7 +76,6 @@ public class SessionCounterReader extends AbstractCounterReader {
             throw new RuntimeException("Cannot resolve session handler with " + getEventInfo().getTarget(), e);
         }
         if (sessionManager != null) {
-            SessionCounterListener sessionListener = new SessionCounterListener(this);
             getSessionListenerRegistration(context).register(sessionListener, deploymentName);
         }
     }

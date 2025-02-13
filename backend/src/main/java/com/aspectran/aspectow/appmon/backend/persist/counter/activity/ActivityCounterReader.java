@@ -43,26 +43,28 @@ public class ActivityCounterReader extends AbstractCounterReader {
 
     @Override
     public void initialize() throws Exception {
-//        ActivityContext context = CoreServiceHolder.findActivityContext(getEventInfo().getTarget());
-//        if (context != null) {
-//            registerAspect(context);
-//        } else {
+        ActivityContext context = CoreServiceHolder.findActivityContext(getEventInfo().getTarget());
+        if (context != null) {
+            registerAspect(context);
+        } else {
             CoreServiceHolder.addServiceHolingListener(new ServiceHoldingListener() {
                 @Override
                 public void afterServiceHolding(CoreService service) {
                     if (service.getActivityContext() != null) {
                         String contextName = service.getActivityContext().getName();
                         if (contextName != null && contextName.equals(getEventInfo().getTarget())) {
-                            System.out.println("======" + aspectId + "======");
                             registerAspect(service.getActivityContext());
                         }
                     }
                 }
             });
-//        }
+        }
     }
 
-    private void registerAspect(ActivityContext context) {
+    private void registerAspect(@NonNull ActivityContext context) {
+        if (context.getAspectRuleRegistry().contains(aspectId)) {
+            return;
+        }
         try {
             AspectRule aspectRule = new AspectRule();
             aspectRule.setId(aspectId);
