@@ -27,12 +27,9 @@ public abstract class AbstractEventReader implements EventReader {
 
     private final EventInfo eventInfo;
 
-    private final String target;
-
     public AbstractEventReader(@NonNull EventExporterManager eventExporterManager, @NonNull EventInfo eventInfo) {
         this.eventExporterManager = eventExporterManager;
         this.eventInfo = eventInfo;
-        this.target = eventInfo.getTarget();
     }
 
     public EventExporterManager getEventExporterManager() {
@@ -41,10 +38,6 @@ public abstract class AbstractEventReader implements EventReader {
 
     public EventInfo getEventInfo() {
         return eventInfo;
-    }
-
-    public String getTarget() {
-        return target;
     }
 
 }

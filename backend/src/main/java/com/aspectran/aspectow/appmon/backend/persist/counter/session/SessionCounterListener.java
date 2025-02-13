@@ -17,7 +17,6 @@ package com.aspectran.aspectow.appmon.backend.persist.counter.session;
 
 import com.aspectran.core.component.session.Session;
 import com.aspectran.core.component.session.SessionListener;
-import com.aspectran.utils.annotation.jsr305.NonNull;
 
 /**
  * <p>Created: 2024-12-13</p>
@@ -31,8 +30,8 @@ public class SessionCounterListener implements SessionListener {
     }
 
     @Override
-    public void sessionCreated(@NonNull Session session) {
-        counterReader.sessionCreated(session);
+    public void sessionCreated(Session session) {
+        counterReader.sessionCreated();
     }
 
 }

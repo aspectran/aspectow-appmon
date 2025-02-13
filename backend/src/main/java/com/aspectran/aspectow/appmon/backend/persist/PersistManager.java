@@ -18,17 +18,14 @@ package com.aspectran.aspectow.appmon.backend.persist;
 import com.aspectran.aspectow.appmon.backend.persist.counter.CounterPersist;
 import com.aspectran.aspectow.appmon.manager.AppMonManager;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * <p>Created: 2025-02-12</p>
  */
 public class PersistManager {
 
-    private final List<CounterPersist> counterPersistList = new ArrayList<>();
-
     private final AppMonManager appMonManager;
+
+    private final CounterPersist counterPersist = new CounterPersist();
 
     public PersistManager(AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
@@ -38,12 +35,8 @@ public class PersistManager {
         return appMonManager;
     }
 
-    public void addCounterPersist(CounterPersist counterPersist) {
-        counterPersistList.add(counterPersist);
-    }
-
-    public List<CounterPersist> getCounterPersistList() {
-        return counterPersistList;
+    public CounterPersist getCounterPersist() {
+        return counterPersist;
     }
 
 }

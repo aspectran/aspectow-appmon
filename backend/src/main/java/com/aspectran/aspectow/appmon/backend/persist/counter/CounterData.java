@@ -15,8 +15,26 @@
  */
 package com.aspectran.aspectow.appmon.backend.persist.counter;
 
+import java.util.concurrent.atomic.LongAdder;
+
 /**
  * <p>Created: 2025-02-12</p>
  */
 public class CounterData {
+
+    private final LongAdder counter = new LongAdder();
+
+    private long old = 0L;
+
+    public void count() {
+        counter.increment();
+    }
+
+    public synchronized long check() {
+        long current = counter.sum();
+        long offset = current - old;
+        old = current;
+        return offset;
+    }
+
 }

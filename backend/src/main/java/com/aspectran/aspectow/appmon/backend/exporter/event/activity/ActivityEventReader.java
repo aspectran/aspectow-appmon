@@ -49,7 +49,7 @@ public class ActivityEventReader extends AbstractEventReader {
 
     public ActivityEventReader(@NonNull EventExporterManager eventExporterManager, @NonNull EventInfo eventInfo) {
         super(eventExporterManager, eventInfo);
-        this.aspectId = getClass().getName() + ".ASPECT-" + hashCode();
+        this.aspectId = getClass().getName() + ".ASPECT@" + hashCode() + "[" + eventInfo.getTarget() + "]";
     }
 
     EventExporter getEventExporter() {
@@ -61,9 +61,9 @@ public class ActivityEventReader extends AbstractEventReader {
 
     @Override
     public void start() throws Exception {
-        ActivityContext context = CoreServiceHolder.findActivityContext(getTarget());
+        ActivityContext context = CoreServiceHolder.findActivityContext(getEventInfo().getTarget());
         if (context == null) {
-            throw new Exception("Could not find ActivityContext named '" + getTarget() + "'");
+            throw new Exception("Could not find ActivityContext named '" + getEventInfo().getTarget() + "'");
         }
 
         activityCounter = context.getActivityCounter();
@@ -102,7 +102,7 @@ public class ActivityEventReader extends AbstractEventReader {
     @Override
     public void stop() {
         try {
-            ActivityContext context = CoreServiceHolder.findActivityContext(getTarget());
+            ActivityContext context = CoreServiceHolder.findActivityContext(getEventInfo().getTarget());
             if (context != null) {
                 try {
                     context.getAspectRuleRegistry().removeAspectRule(aspectId);

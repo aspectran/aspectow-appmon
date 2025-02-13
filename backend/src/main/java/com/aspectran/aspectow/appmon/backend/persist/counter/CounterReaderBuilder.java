@@ -30,9 +30,9 @@ import java.util.List;
 /**
  * <p>Created: 2025. 2. 12.</p>
  */
-public abstract class CounterPersistBuilder {
+public abstract class CounterReaderBuilder {
 
-    private static final Logger logger = LoggerFactory.getLogger(CounterPersistBuilder.class);
+    private static final Logger logger = LoggerFactory.getLogger(CounterReaderBuilder.class);
 
     @NonNull
     public static void build(@NonNull PersistManager persistManager,
@@ -44,19 +44,18 @@ public abstract class CounterPersistBuilder {
 
             eventInfo.validateRequiredParameters();
 
-            CounterReader counterReader = createCounterReader(persistManager, eventInfo);
-            CounterPersist counterPersist = new CounterPersist(counterReader);
-            persistManager.addCounterPersist(counterPersist);
+            CounterReader counterReader = createCounterReader(eventInfo);
+            persistManager.getCounterPersist().addCounterReader(counterReader);
         }
     }
 
     @NonNull
-    private static CounterReader createCounterReader(PersistManager persistManager, @NonNull EventInfo eventInfo) throws Exception {
+    private static CounterReader createCounterReader(@NonNull EventInfo eventInfo) throws Exception {
         if (!eventInfo.hasReader()) {
             if ("activity".equals(eventInfo.getName())) {
                 return new ActivityCounterReader(eventInfo);
             } else if ("session".equals(eventInfo.getName())) {
-                return new SessionCounterReader(persistManager, eventInfo);
+                return new SessionCounterReader(eventInfo);
             } else {
                 throw new IllegalArgumentException("No counter reader specified for " + eventInfo.getName() + " " + eventInfo);
             }

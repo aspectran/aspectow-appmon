@@ -17,7 +17,6 @@ package com.aspectran.aspectow.appmon.backend.persist.counter.activity;
 
 import com.aspectran.aspectow.appmon.backend.config.EventInfo;
 import com.aspectran.aspectow.appmon.backend.persist.counter.AbstractCounterReader;
-import com.aspectran.core.component.UnavailableException;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.core.context.rule.AspectAdviceRule;
 import com.aspectran.core.context.rule.AspectRule;
@@ -25,66 +24,68 @@ import com.aspectran.core.context.rule.JoinpointRule;
 import com.aspectran.core.context.rule.params.PointcutParameters;
 import com.aspectran.core.context.rule.type.AspectAdviceType;
 import com.aspectran.core.context.rule.type.JoinpointTargetType;
+import com.aspectran.core.service.CoreService;
 import com.aspectran.core.service.CoreServiceHolder;
+import com.aspectran.core.service.ServiceHoldingListener;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.logging.Logger;
-import com.aspectran.utils.logging.LoggerFactory;
 
 /**
  * <p>Created: 2025-02-12</p>
  */
 public class ActivityCounterReader extends AbstractCounterReader {
 
-    private static final Logger logger = LoggerFactory.getLogger(ActivityCounterReader.class);
-
     private final String aspectId;
 
     public ActivityCounterReader(@NonNull EventInfo eventInfo) {
         super(eventInfo);
-        this.aspectId = getClass().getName() + ".ASPECT-" + hashCode();
+        this.aspectId = getClass().getName() + ".ASPECT@" + hashCode() + "[" + eventInfo.getTarget() + "]";
     }
 
     @Override
-    public void start() throws Exception {
-        ActivityContext context = CoreServiceHolder.findActivityContext(getTarget());
-        if (context == null) {
-            throw new Exception("Could not find ActivityContext named '" + getTarget() + "'");
-        }
-
-        AspectRule aspectRule = new AspectRule();
-        aspectRule.setId(aspectId);
-        aspectRule.setOrder(0);
-        aspectRule.setIsolated(true);
-
-        JoinpointRule joinpointRule = new JoinpointRule();
-        joinpointRule.setJoinpointTargetType(JoinpointTargetType.ACTIVITY);
-        if (getEventInfo().hasParameters()) {
-            PointcutParameters pointcutParameters = new PointcutParameters(getEventInfo().getParameters().toString());
-            JoinpointRule.updatePointcutRule(joinpointRule, pointcutParameters);
-        }
-        aspectRule.setJoinpointRule(joinpointRule);
-
-        AspectAdviceRule afterAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.AFTER);
-        afterAspectAdviceRule.setAdviceAction(activity -> {
-            return null;
-        });
-
-        context.getAspectRuleRegistry().addAspectRule(aspectRule);
-    }
-
-    @Override
-    public void stop() {
-        try {
-            ActivityContext context = CoreServiceHolder.findActivityContext(getTarget());
-            if (context != null) {
-                try {
-                    context.getAspectRuleRegistry().removeAspectRule(aspectId);
-                } catch (UnavailableException e) {
-                    // ignored
+    public void initialize() throws Exception {
+//        ActivityContext context = CoreServiceHolder.findActivityContext(getEventInfo().getTarget());
+//        if (context != null) {
+//            registerAspect(context);
+//        } else {
+            CoreServiceHolder.addServiceHolingListener(new ServiceHoldingListener() {
+                @Override
+                public void afterServiceHolding(CoreService service) {
+                    if (service.getActivityContext() != null) {
+                        String contextName = service.getActivityContext().getName();
+                        if (contextName != null && contextName.equals(getEventInfo().getTarget())) {
+                            System.out.println("======" + aspectId + "======");
+                            registerAspect(service.getActivityContext());
+                        }
+                    }
                 }
+            });
+//        }
+    }
+
+    private void registerAspect(ActivityContext context) {
+        try {
+            AspectRule aspectRule = new AspectRule();
+            aspectRule.setId(aspectId);
+            aspectRule.setOrder(0);
+            aspectRule.setIsolated(true);
+
+            JoinpointRule joinpointRule = new JoinpointRule();
+            joinpointRule.setJoinpointTargetType(JoinpointTargetType.ACTIVITY);
+            if (getEventInfo().hasParameters()) {
+                PointcutParameters pointcutParameters = new PointcutParameters(getEventInfo().getParameters().toString());
+                JoinpointRule.updatePointcutRule(joinpointRule, pointcutParameters);
             }
+            aspectRule.setJoinpointRule(joinpointRule);
+
+            AspectAdviceRule afterAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.AFTER);
+            afterAspectAdviceRule.setAdviceAction(activity -> {
+                getCounterData().count();
+                return null;
+            });
+
+            context.getAspectRuleRegistry().addAspectRule(aspectRule);
         } catch (Exception e) {
-            logger.warn(e);
+            throw new RuntimeException("Cannot register aspect rule", e);
         }
     }
 

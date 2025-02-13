@@ -20,9 +20,11 @@ import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.CronTrigger;
+import com.aspectran.core.component.bean.annotation.Initialize;
 import com.aspectran.core.component.bean.annotation.Job;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.Schedule;
+import com.aspectran.utils.annotation.jsr305.NonNull;
 
 import java.util.List;
 
@@ -32,7 +34,7 @@ import java.util.List;
 @Component
 @Bean
 @Schedule(
-    id = "counterPersist",
+    id = "counterPersist10m",
     scheduler = "appmonScheduler",
     cronTrigger = @CronTrigger(
         expression = "0/10 * * * * ?"
@@ -43,18 +45,30 @@ import java.util.List;
 )
 public class CounterPersistTasks {
 
-    private final AppMonManager appMonManager;
+    private final CounterPersist counterPersist;
+
+    private final CounterPersistDao counterPersistDao;
 
     @Autowired
-    public CounterPersistTasks(AppMonManager appMonManager) {
-        this.appMonManager = appMonManager;
+    public CounterPersistTasks(@NonNull AppMonManager appMonManager, CounterPersistDao counterPersistDao) {
+        this.counterPersist = appMonManager.getPersistManager().getCounterPersist();
+        this.counterPersistDao = counterPersistDao;
+    }
+
+    @Initialize
+    public void initialize() throws Exception {
+        List<CounterReader> counterReaderList = counterPersist.getCounterReaderList();
+        for (CounterReader counterReader : counterReaderList) {
+            counterReader.initialize();
+        }
     }
 
     @Request("appmon/persist/counter/save.job")
     public void save() {
-        List<CounterPersist> counterPersistList = appMonManager.getPersistManager().getCounterPersistList();
-        for (CounterPersist counterPersist : counterPersistList) {
-            counterPersist.saveCounterData();
+        List<CounterReader> counterReaderList = counterPersist.getCounterReaderList();
+        for (CounterReader counterReader : counterReaderList) {
+            long count = counterReader.getCounterData().check();
+            counterPersistDao.insert(count);
         }
     }
 

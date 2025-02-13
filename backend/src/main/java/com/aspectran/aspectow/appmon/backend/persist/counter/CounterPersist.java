@@ -15,27 +15,22 @@
  */
 package com.aspectran.aspectow.appmon.backend.persist.counter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <p>Created: 2025-02-12</p>
  */
 public class CounterPersist {
 
-    private final CounterReader counterReader;
+    private final List<CounterReader> counterReaderList = new ArrayList<>();
 
-    public CounterPersist(CounterReader counterReader) {
-        this.counterReader = counterReader;
+    public void addCounterReader(CounterReader counterReader) {
+        counterReaderList.add(counterReader);
     }
 
-    public CounterReader getCounterReader() {
-        return counterReader;
-    }
-
-    public CounterData getCounterData() {
-        return counterReader.getCounterData();
-    }
-
-    public void saveCounterData() {
-
+    public List<CounterReader> getCounterReaderList() {
+        return counterReaderList;
     }
 
 }

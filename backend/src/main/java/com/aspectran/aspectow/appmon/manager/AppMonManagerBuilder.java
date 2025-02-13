@@ -27,7 +27,7 @@ import com.aspectran.aspectow.appmon.backend.exporter.event.EventExporterManager
 import com.aspectran.aspectow.appmon.backend.exporter.log.LogExporterBuilder;
 import com.aspectran.aspectow.appmon.backend.exporter.log.LogExporterManager;
 import com.aspectran.aspectow.appmon.backend.persist.PersistManager;
-import com.aspectran.aspectow.appmon.backend.persist.counter.CounterPersistBuilder;
+import com.aspectran.aspectow.appmon.backend.persist.counter.CounterReaderBuilder;
 import com.aspectran.aspectow.appmon.backend.service.ExportServiceManager;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.Assert;
@@ -55,7 +55,7 @@ public abstract class AppMonManagerBuilder {
             if (eventInfoList != null && !eventInfoList.isEmpty()) {
                 EventExporterManager eventExporterManager = new EventExporterManager(exportServiceManager, instanceName);
                 EventExporterBuilder.build(eventExporterManager, eventInfoList);
-                CounterPersistBuilder.build(persistManager, eventInfoList);
+                CounterReaderBuilder.build(persistManager, eventInfoList);
             }
             List<LogInfo> logInfoList = backendConfig.getLogInfoList(instanceName);
             if (logInfoList != null && !logInfoList.isEmpty()) {
