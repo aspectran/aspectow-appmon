@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 8.0//EN"
+        "https://aspectran.com/dtd/aspectran-8.dtd">
+<aspectran>
+
+    <bean id="basePath" class="com.aspectran.core.support.BasePathFactoryBean"/>
+
+    <aspect id="defaultTransletSettings">
+        <description>
+            Defines an aspect rule that injects default settings into all translets.
+        </description>
+        <settings>
+            <setting name="format.indentSize" value="2"/>
+            <setting name="format.dateFormat" value="yyyy-MM-dd"/>
+            <setting name="format.dateTimeFormat" value="yyyy-MM-dd HH:mm:ss"/>
+            <setting name="format.nullWritable" value="true"/>
+        </settings>
+    </aspect>
+
+    <append resource="com/aspectran/appmon/context/scheduler-config.xml"/>
+    <append resource="com/aspectran/appmon/context/web-config.xml"/>
+
+</aspectran>

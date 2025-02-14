@@ -34,7 +34,7 @@
         </settings>
     </aspect>
 
-    <bean class="com.aspectran.aspectow.appmon.backend.config.BackendConfigResolver">
+    <bean class="com.aspectran.appmon.config.BackendConfigResolver">
         <properties profile="!prod">
             <item name="configLocation">/config/appmon/backend-config.apon</item>
         </properties>

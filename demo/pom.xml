@@ -32,7 +32,7 @@
 
     <properties>
         <main.basedir>${project.parent.basedir}</main.basedir>
-        <automatic.module.name>com.aspectran.aspectow.appmon.demo</automatic.module.name>
+        <automatic.module.name>com.aspectran.appmon.demo</automatic.module.name>
     </properties>
 
     <dependencies>
@@ -59,12 +59,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>aspectow-appmon-backend</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>aspectow-appmon-front</artifactId>
+            <artifactId>aspectow-appmon</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

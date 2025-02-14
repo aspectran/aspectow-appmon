@@ -1,0 +1,12 @@
+context: {
+    name: appmon
+    rules: classpath:com/aspectran/appmon/context/root-context.xml
+    scan: [
+        com.aspectran.appmon
+    ]
+}
+scheduler: {
+    startDelaySeconds: 2
+    waitOnShutdown: true
+    enabled: true
+}

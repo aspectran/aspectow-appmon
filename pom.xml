@@ -97,8 +97,7 @@
     </repositories>
 
     <modules>
-        <module>backend</module>
-        <module>front</module>
+        <module>appmon</module>
         <module>demo</module>
     </modules>
 
