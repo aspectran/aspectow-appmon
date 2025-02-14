@@ -19,6 +19,8 @@ public interface CounterReader {
 
     void initialize() throws Exception;
 
+    String getInstanceName();
+
     CounterData getCounterData();
 
 }

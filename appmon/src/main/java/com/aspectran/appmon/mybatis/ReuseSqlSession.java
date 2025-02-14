@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2025 The Aspectran Project
+ * Copyright (c) 2018-2025 The Aspectran Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,31 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.persist.counter;
+package com.aspectran.appmon.mybatis;
 
-import java.util.concurrent.atomic.LongAdder;
+import com.aspectran.core.component.bean.annotation.Bean;
+import com.aspectran.core.component.bean.annotation.Component;
+import com.aspectran.mybatis.SqlSessionAgent;
 
-/**
- * <p>Created: 2025-02-12</p>
- */
-public class CounterData {
+@Component
+@Bean("reuseSqlSession")
+public class ReuseSqlSession extends SqlSessionAgent {
 
-    private final LongAdder counter = new LongAdder();
-
-    private volatile long old = 0L;
-
-    public void count() {
-        counter.increment();
-    }
-
-    public long getCurrent() {
-        return counter.sum();
-    }
-
-    public synchronized long acquire(long current) {
-        long acquired = current - old;
-        old = current;
-        return acquired;
+    public ReuseSqlSession() {
+        super("reuseTxAspect");
     }
 
 }

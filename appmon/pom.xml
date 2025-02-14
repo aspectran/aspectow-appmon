@@ -48,6 +48,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>aspectran-with-mybatis</artifactId>
+            <version>${aspectran.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>jakarta.websocket</groupId>
             <artifactId>jakarta.websocket-api</artifactId>
             <version>${jakarta.websocket.api.version}</version>
@@ -58,6 +64,11 @@
             <artifactId>jakarta.websocket-client-api</artifactId>
             <version>${jakarta.websocket.api.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.3.232</version>
         </dependency>
         <!-- Additional testing dependencies -->
         <dependency>

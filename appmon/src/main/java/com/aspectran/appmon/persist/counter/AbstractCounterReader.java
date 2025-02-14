@@ -36,6 +36,11 @@ public abstract class AbstractCounterReader implements CounterReader {
     }
 
     @Override
+    public String getInstanceName() {
+        return eventInfo.getInstanceName();
+    }
+
+    @Override
     public CounterData getCounterData() {
         return counterData;
     }

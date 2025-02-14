@@ -1,5 +1,6 @@
 package com.aspectran.appmon.persist.counter;
 
+import com.aspectran.appmon.mybatis.mapper.CounterMapper;
 import com.aspectran.core.component.bean.annotation.Component;
 
 /**
@@ -8,8 +9,18 @@ import com.aspectran.core.component.bean.annotation.Component;
 @Component
 public class CounterPersistDao {
 
-    public void insert(long count) {
+    private final CounterMapper.Dao dao;
 
+    public CounterPersistDao(CounterMapper.Dao dao) {
+        this.dao = dao;
+    }
+
+    public void insert(String instanceName, long acquired, long current) {
+        CounterVO counterVO = new CounterVO();
+        counterVO.setInst(instanceName);
+        counterVO.setCnt1(acquired);
+        counterVO.setCnt2(current);
+        dao.insertCounterData(counterVO);
     }
 
 }

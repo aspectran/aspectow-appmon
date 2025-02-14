@@ -40,7 +40,7 @@ import java.util.List;
         expression = "0/10 * * * * ?"
     ),
     jobs = {
-        @Job(translet = "appmon/persist/counter/save.job", disabled = true)
+        @Job(translet = "appmon/persist/counter/save.job", disabled = false)
     }
 )
 public class CounterPersistTasks {
@@ -67,8 +67,10 @@ public class CounterPersistTasks {
     public void save() {
         List<CounterReader> counterReaderList = counterPersist.getCounterReaderList();
         for (CounterReader counterReader : counterReaderList) {
-            long count = counterReader.getCounterData().check();
-            counterPersistDao.insert(count);
+            String instanceName = counterReader.getInstanceName();
+            long current = counterReader.getCounterData().getCurrent();
+            long acquired = counterReader.getCounterData().acquire(current);
+            counterPersistDao.insert(instanceName, current, acquired);
         }
     }
 
