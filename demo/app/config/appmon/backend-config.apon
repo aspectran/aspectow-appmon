@@ -25,6 +25,9 @@ instance: {
     event: {
         name: activity
         target: root
+        parameters: {
+            +: /**
+        }
     }
     event: {
         name: session
@@ -49,6 +52,9 @@ instance: {
     event: {
         name: activity
         target: appmon
+        parameters: {
+            +: /**
+        }
     }
     log: {
         name: app

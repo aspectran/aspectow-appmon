@@ -7,9 +7,13 @@ public class CounterVO {
 
     private String inst;
 
+    private String evt;
+
     private String ymd;
 
-    private String tm;
+    private String hh;
+
+    private String mm;
 
     private long cnt1;
 
@@ -23,6 +27,14 @@ public class CounterVO {
         this.inst = inst;
     }
 
+    public String getEvt() {
+        return evt;
+    }
+
+    public void setEvt(String evt) {
+        this.evt = evt;
+    }
+
     public String getYmd() {
         return ymd;
     }
@@ -31,12 +43,20 @@ public class CounterVO {
         this.ymd = ymd;
     }
 
-    public String getTm() {
-        return tm;
+    public String getHh() {
+        return hh;
     }
 
-    public void setTm(String tm) {
-        this.tm = tm;
+    public void setHh(String hh) {
+        this.hh = hh;
+    }
+
+    public String getMm() {
+        return mm;
+    }
+
+    public void setMm(String mm) {
+        this.mm = mm;
     }
 
     public long getCnt1() {

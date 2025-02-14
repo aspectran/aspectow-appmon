@@ -16,16 +16,26 @@
 package com.aspectran.appmon.persist.counter;
 
 import com.aspectran.appmon.manager.AppMonManager;
+import com.aspectran.appmon.mybatis.mapper.CounterMapper;
+import com.aspectran.core.activity.InstantActivity;
+import com.aspectran.core.activity.InstantActivityException;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.CronTrigger;
+import com.aspectran.core.component.bean.annotation.Destroy;
 import com.aspectran.core.component.bean.annotation.Initialize;
 import com.aspectran.core.component.bean.annotation.Job;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.Schedule;
+import com.aspectran.core.component.bean.aware.ActivityContextAware;
+import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -34,25 +44,33 @@ import java.util.List;
 @Component
 @Bean
 @Schedule(
-    id = "counterPersist10m",
+    id = "counterPersist1m",
     scheduler = "appmonScheduler",
     cronTrigger = @CronTrigger(
-        expression = "0/10 * * * * ?"
+        expression = "59 * * * * ?"
     ),
     jobs = {
-        @Job(translet = "appmon/persist/counter/save.job", disabled = false)
+        @Job(translet = "appmon/persist/counter/save.job")
     }
 )
-public class CounterPersistTasks {
+public class CounterPersistTasks implements ActivityContextAware {
 
     private final CounterPersist counterPersist;
 
-    private final CounterPersistDao counterPersistDao;
+    private final CounterMapper.Dao dao;
+
+    private ActivityContext context;
 
     @Autowired
-    public CounterPersistTasks(@NonNull AppMonManager appMonManager, CounterPersistDao counterPersistDao) {
+    public CounterPersistTasks(@NonNull AppMonManager appMonManager,
+                               CounterMapper.Dao dao) {
         this.counterPersist = appMonManager.getPersistManager().getCounterPersist();
-        this.counterPersistDao = counterPersistDao;
+        this.dao = dao;
+    }
+
+    @Override
+    public void setActivityContext(ActivityContext context) {
+        this.context = context;
     }
 
     @Initialize
@@ -63,14 +81,45 @@ public class CounterPersistTasks {
         }
     }
 
+    @Destroy
+    public void destroy() {
+        try {
+            InstantActivity activity = new InstantActivity(context);
+            activity.perform(() -> {
+                save();
+                return null;
+            });
+        } catch (Exception e) {
+            throw new InstantActivityException(e);
+        }
+    }
+
     @Request("appmon/persist/counter/save.job")
     public void save() {
+        Instant instant = Instant.now();
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+        String yyyyMMddHHmm = formatter.format(localDateTime);
+        String ymd = yyyyMMddHHmm.substring(0, 8);
+        String hh = yyyyMMddHHmm.substring(8, 10);
+        String mm = yyyyMMddHHmm.substring(10, 12);
+
+        CounterVO counterVO = new CounterVO();
+        counterVO.setYmd(ymd);
+        counterVO.setHh(hh);
+        counterVO.setMm(mm);
+
         List<CounterReader> counterReaderList = counterPersist.getCounterReaderList();
         for (CounterReader counterReader : counterReaderList) {
-            String instanceName = counterReader.getInstanceName();
             long current = counterReader.getCounterData().getCurrent();
             long acquired = counterReader.getCounterData().acquire(current);
-            counterPersistDao.insert(instanceName, current, acquired);
+            if (acquired > 0) {
+                counterVO.setInst(counterReader.getInstanceName());
+                counterVO.setEvt(counterReader.getEventName());
+                counterVO.setCnt1(current);
+                counterVO.setCnt2(acquired);
+                dao.insertCounterData(counterVO);
+            }
         }
     }
 

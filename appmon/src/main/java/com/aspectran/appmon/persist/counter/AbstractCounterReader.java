@@ -25,19 +25,27 @@ public abstract class AbstractCounterReader implements CounterReader {
 
     private final EventInfo eventInfo;
 
+    private final String eventName;
+
     private final CounterData counterData = new CounterData();
 
     public AbstractCounterReader(@NonNull EventInfo eventInfo) {
         this.eventInfo = eventInfo;
-    }
-
-    public EventInfo getEventInfo() {
-        return eventInfo;
+        this.eventName = eventInfo.getName();
     }
 
     @Override
     public String getInstanceName() {
         return eventInfo.getInstanceName();
+    }
+
+    @Override
+    public String getEventName() {
+        return eventName;
+    }
+
+    public EventInfo getEventInfo() {
+        return eventInfo;
     }
 
     @Override

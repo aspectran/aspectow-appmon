@@ -24,10 +24,14 @@ public class CounterData {
 
     private final LongAdder counter = new LongAdder();
 
-    private volatile long old = 0L;
+    private volatile long previous = 0L;
 
     public void count() {
         counter.increment();
+    }
+
+    public long getPrevious() {
+        return previous;
     }
 
     public long getCurrent() {
@@ -35,8 +39,8 @@ public class CounterData {
     }
 
     public synchronized long acquire(long current) {
-        long acquired = current - old;
-        old = current;
+        long acquired = current - previous;
+        previous = current;
         return acquired;
     }
 

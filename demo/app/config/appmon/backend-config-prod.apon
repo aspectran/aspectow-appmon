@@ -23,8 +23,11 @@ instance: {
     name: jpetstore
     title: JPetStore
     event: {
-        name: request
+        name: activity
         target: jpetstore
+        parameters: {
+            +: /**
+        }
     }
     event: {
         name: session
@@ -49,8 +52,11 @@ instance: {
     name: demo
     title: Demo
     event: {
-        name: request
+        name: activity
         target: demo
+        parameters: {
+            +: /**
+        }
     }
     event: {
         name: session
@@ -75,8 +81,11 @@ instance: {
     name: root
     title: Root
     event: {
-        name: request
+        name: activity
         target: root
+        parameters: {
+            +: /**
+        }
     }
     event: {
         name: session

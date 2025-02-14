@@ -30,7 +30,7 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface CounterMapper {
 
-    void insertCounterData(CounterVO counterVO);
+    int insertCounterData(CounterVO counterVO);
 
     @Component
     class Dao extends SqlMapperDao<CounterMapper> implements CounterMapper {
@@ -41,8 +41,8 @@ public interface CounterMapper {
         }
 
         @Override
-        public void insertCounterData(CounterVO counterVO) {
-            simple().insertCounterData(counterVO);
+        public int insertCounterData(CounterVO counterVO) {
+            return simple().insertCounterData(counterVO);
         }
 
     }

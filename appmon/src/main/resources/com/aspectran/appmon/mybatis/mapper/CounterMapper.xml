@@ -7,10 +7,15 @@
     <cache />
 
     <insert id="insertCounterData" parameterType="com.aspectran.appmon.persist.counter.CounterVO">
-        INSERT INTO COUNTER
-          (INST, YMD, TM, CNT1, CNT2)
-        VALUES
-          (#{inst}, #{ymd}, #{tm}, #{cnt1}, #{cnt2})
+        merge into counter as a
+        using values (#{inst}, #{evt}, #{ymd}, #{hh}, #{mm}, #{cnt1}, #{cnt2})
+            as b (inst, evt, ymd, hh, mm, cnt1, cnt2)
+            on a.inst = b.inst and a.evt = b.evt and a.ymd = b.ymd and a.hh = b.hh and a.mm = b.mm
+        when matched then
+            update set cnt1 = a.cnt1 + b.cnt1, cnt2 = a.cnt2 + b.cnt2
+        when not matched then
+            insert (inst, evt, ymd, hh, mm, cnt1, cnt2)
+            values (b.inst, b.evt, b.ymd, b.hh, b.mm, b.cnt1, b.cnt2)
     </insert>
 
 </mapper>

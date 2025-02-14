@@ -21,6 +21,8 @@ public interface CounterReader {
 
     String getInstanceName();
 
+    String getEventName();
+
     CounterData getCounterData();
 
 }
