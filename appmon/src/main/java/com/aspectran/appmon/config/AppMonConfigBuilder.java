@@ -24,26 +24,26 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
 
-public abstract class BackendConfigBuilder {
+public abstract class AppMonConfigBuilder {
 
-    private static final String DEFAULT_BACKEND_CONFIG_RESOURCE = "com/aspectran/aspectow/appmon/backend/config/backend-config.apon";
+    private static final String DEFAULT_BACKEND_CONFIG_RESOURCE = "com/aspectran/appmon/context/appmon-config.apon";
 
     @NonNull
-    public static BackendConfig build() throws IOException {
+    public static AppMonConfig build() throws IOException {
         Reader reader = ResourceUtils.getResourceAsReader(DEFAULT_BACKEND_CONFIG_RESOURCE);
-        return new BackendConfig(reader);
+        return new AppMonConfig(reader);
     }
 
     @NonNull
-    public static BackendConfig build(URI configLocation, String encoding) throws IOException {
+    public static AppMonConfig build(URI configLocation, String encoding) throws IOException {
         Assert.notNull(configLocation, "configLocation must not be null");
         Reader reader = ResourceUtils.getReader(configLocation.toURL(), encoding);
-        return new BackendConfig(reader);
+        return new AppMonConfig(reader);
     }
 
     @NonNull
-    public static BackendConfig build(File configFile) throws IOException {
-        return new BackendConfig(configFile);
+    public static AppMonConfig build(File configFile) throws IOException {
+        return new AppMonConfig(configFile);
     }
 
 }

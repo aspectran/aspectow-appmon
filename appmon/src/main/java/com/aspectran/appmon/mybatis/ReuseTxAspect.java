@@ -52,6 +52,7 @@ public class ReuseTxAspect extends SqlSessionTxAdvice {
     @Autowired
     public ReuseTxAspect(SqlSessionFactory sqlSessionFactory) {
         super(sqlSessionFactory);
+        setAutoCommit(true);
     }
 
     @Before

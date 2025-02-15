@@ -52,6 +52,7 @@ public class BatchTxAspect extends SqlSessionTxAdvice {
     @Autowired
     public BatchTxAspect(SqlSessionFactory sqlSessionFactory) {
         super(sqlSessionFactory);
+        setAutoCommit(true);
     }
 
     @Before

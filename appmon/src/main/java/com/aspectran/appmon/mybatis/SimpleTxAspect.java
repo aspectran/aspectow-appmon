@@ -56,6 +56,7 @@ public class SimpleTxAspect extends SqlSessionTxAdvice {
     @Autowired
     public SimpleTxAspect(SqlSessionFactory sqlSessionFactory) {
         super(sqlSessionFactory);
+        setAutoCommit(true);
     }
 
     @Before

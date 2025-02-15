@@ -15,9 +15,9 @@
  */
 package com.aspectran.appmon.manager;
 
-import com.aspectran.appmon.config.BackendConfig;
-import com.aspectran.appmon.config.BackendConfigBuilder;
-import com.aspectran.appmon.config.BackendConfigResolver;
+import com.aspectran.appmon.config.AppMonConfig;
+import com.aspectran.appmon.config.AppMonConfigBuilder;
+import com.aspectran.appmon.config.AppMonConfigResolver;
 import com.aspectran.core.component.bean.ablility.FactoryBean;
 import com.aspectran.core.component.bean.annotation.AvoidAdvice;
 import com.aspectran.core.component.bean.annotation.Bean;
@@ -31,7 +31,7 @@ import com.aspectran.utils.annotation.jsr305.NonNull;
  * <p>Created: 2024-12-17</p>
  */
 @Component
-@Bean("appMonManager")
+@Bean(id = "appMonManager", lazyDestroy = true)
 public class AppMonManagerFactoryBean implements ActivityContextAware, FactoryBean<AppMonManager> {
 
     private ActivityContext context;
@@ -46,14 +46,14 @@ public class AppMonManagerFactoryBean implements ActivityContextAware, FactoryBe
 
     @Initialize
     public void createAppMonManager() throws Exception {
-        BackendConfig backendConfig;
-        if (context.getBeanRegistry().containsBean(BackendConfigResolver.class)) {
-            BackendConfigResolver backendConfigResolver = context.getBeanRegistry().getBean(BackendConfigResolver.class);
-            backendConfig = backendConfigResolver.resolveConfig();
+        AppMonConfig appMonConfig;
+        if (context.getBeanRegistry().containsBean(AppMonConfigResolver.class)) {
+            AppMonConfigResolver appMonConfigResolver = context.getBeanRegistry().getBean(AppMonConfigResolver.class);
+            appMonConfig = appMonConfigResolver.resolveConfig();
         } else {
-            backendConfig = BackendConfigBuilder.build();
+            appMonConfig = AppMonConfigBuilder.build();
         }
-        appMonManager = AppMonManagerBuilder.build(context, backendConfig);
+        appMonManager = AppMonManagerBuilder.build(context, appMonConfig);
     }
 
     @Override

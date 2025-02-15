@@ -30,7 +30,7 @@ import static com.aspectran.utils.ResourceUtils.CLASSPATH_URL_PREFIX;
 /**
  * <p>Created: 2025. 1. 18.</p>
  */
-public class BackendConfigResolver implements ApplicationAdapterAware {
+public class AppMonConfigResolver implements ApplicationAdapterAware {
 
     private ApplicationAdapter applicationAdapter;
 
@@ -56,7 +56,7 @@ public class BackendConfigResolver implements ApplicationAdapterAware {
         this.encoding = encoding;
     }
 
-    public BackendConfig resolveConfig() throws IOException, URISyntaxException {
+    public AppMonConfig resolveConfig() throws IOException, URISyntaxException {
         if (StringUtils.hasLength(configLocation)) {
             URI uri;
             if (configLocation.startsWith(CLASSPATH_URL_PREFIX)) {
@@ -64,9 +64,9 @@ public class BackendConfigResolver implements ApplicationAdapterAware {
             } else {
                 uri = getApplicationAdapter().getRealPath(configLocation).toUri();
             }
-            return BackendConfigBuilder.build(uri, encoding);
+            return AppMonConfigBuilder.build(uri, encoding);
         } else {
-            return BackendConfigBuilder.build();
+            return AppMonConfigBuilder.build();
         }
     }
 

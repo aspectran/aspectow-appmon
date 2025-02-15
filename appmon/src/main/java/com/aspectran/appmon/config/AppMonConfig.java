@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * <p>Created: 2024/12/17</p>
  */
-public class BackendConfig extends AbstractParameters {
+public class AppMonConfig extends AbstractParameters {
 
     private static final ParameterKey pollingConfig;
     private static final ParameterKey domain;
@@ -47,16 +47,16 @@ public class BackendConfig extends AbstractParameters {
         };
     }
 
-    public BackendConfig() {
+    public AppMonConfig() {
         super(parameterKeys);
     }
 
-    public BackendConfig(Reader reader) throws IOException {
+    public AppMonConfig(Reader reader) throws IOException {
         this();
         readFrom(reader);
     }
 
-    public BackendConfig(File configFile) throws IOException {
+    public AppMonConfig(File configFile) throws IOException {
         this();
         readFrom(configFile);
     }
@@ -66,7 +66,7 @@ public class BackendConfig extends AbstractParameters {
     }
 
     public void setPollingConfig(PollingConfig pollingConfig) {
-        putValue(BackendConfig.pollingConfig, pollingConfig);
+        putValue(AppMonConfig.pollingConfig, pollingConfig);
     }
 
     public List<DomainInfo> getDomainInfoList() {

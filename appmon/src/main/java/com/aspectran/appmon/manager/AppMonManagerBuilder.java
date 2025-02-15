@@ -15,7 +15,7 @@
  */
 package com.aspectran.appmon.manager;
 
-import com.aspectran.appmon.config.BackendConfig;
+import com.aspectran.appmon.config.AppMonConfig;
 import com.aspectran.appmon.config.DomainInfoHolder;
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.config.InstanceInfo;
@@ -41,23 +41,23 @@ import java.util.List;
 public abstract class AppMonManagerBuilder {
 
     @NonNull
-    public static AppMonManager build(ActivityContext context, BackendConfig backendConfig) throws Exception {
+    public static AppMonManager build(ActivityContext context, AppMonConfig appMonConfig) throws Exception {
         Assert.notNull(context, "context must not be null");
-        Assert.notNull(backendConfig, "backendConfig must not be null");
+        Assert.notNull(appMonConfig, "appMonConfig must not be null");
 
-        AppMonManager appMonManager = createAppMonManager(context, backendConfig);
+        AppMonManager appMonManager = createAppMonManager(context, appMonConfig);
         ExportServiceManager exportServiceManager = appMonManager.getExportServiceManager();
         PersistManager persistManager = appMonManager.getPersistManager();
 
-        for (InstanceInfo instanceInfo : backendConfig.getInstanceInfoList()) {
+        for (InstanceInfo instanceInfo : appMonConfig.getInstanceInfoList()) {
             String instanceName = instanceInfo.getName();
-            List<EventInfo> eventInfoList = backendConfig.getEventInfoList(instanceName);
+            List<EventInfo> eventInfoList = appMonConfig.getEventInfoList(instanceName);
             if (eventInfoList != null && !eventInfoList.isEmpty()) {
                 EventExporterManager eventExporterManager = new EventExporterManager(exportServiceManager, instanceName);
                 EventExporterBuilder.build(eventExporterManager, eventInfoList);
                 CounterReaderBuilder.build(persistManager, eventInfoList);
             }
-            List<LogInfo> logInfoList = backendConfig.getLogInfoList(instanceName);
+            List<LogInfo> logInfoList = appMonConfig.getLogInfoList(instanceName);
             if (logInfoList != null && !logInfoList.isEmpty()) {
                 LogExporterManager logExporterManager = new LogExporterManager(exportServiceManager, instanceName);
                 LogExporterBuilder.build(logExporterManager, logInfoList, context.getApplicationAdapter());
@@ -68,14 +68,14 @@ public abstract class AppMonManagerBuilder {
     }
 
     @NonNull
-    private static AppMonManager createAppMonManager(ActivityContext context, @NonNull BackendConfig backendConfig) {
-        PollingConfig pollingConfig = backendConfig.getPollingConfig();
+    private static AppMonManager createAppMonManager(ActivityContext context, @NonNull AppMonConfig appMonConfig) {
+        PollingConfig pollingConfig = appMonConfig.getPollingConfig();
         if (pollingConfig == null) {
             pollingConfig = new PollingConfig();
         }
 
-        DomainInfoHolder domainInfoHolder = new DomainInfoHolder(backendConfig.getDomainInfoList());
-        InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(backendConfig.getInstanceInfoList());
+        DomainInfoHolder domainInfoHolder = new DomainInfoHolder(appMonConfig.getDomainInfoList());
+        InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(appMonConfig.getInstanceInfoList());
 
         AppMonManager appMonManager = new AppMonManager(pollingConfig, domainInfoHolder, instanceInfoHolder);
         appMonManager.setActivityContext(context);

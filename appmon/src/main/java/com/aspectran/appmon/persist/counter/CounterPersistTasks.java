@@ -36,6 +36,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
@@ -47,7 +48,7 @@ import java.util.List;
     id = "counterPersist1m",
     scheduler = "appmonScheduler",
     cronTrigger = @CronTrigger(
-        expression = "59 * * * * ?"
+        expression = "0 * * * * ?"
     ),
     jobs = {
         @Job(translet = "appmon/persist/counter/save.job")
@@ -86,7 +87,7 @@ public class CounterPersistTasks implements ActivityContextAware {
         try {
             InstantActivity activity = new InstantActivity(context);
             activity.perform(() -> {
-                save();
+                save(true);
                 return null;
             });
         } catch (Exception e) {
@@ -95,8 +96,11 @@ public class CounterPersistTasks implements ActivityContextAware {
     }
 
     @Request("appmon/persist/counter/save.job")
-    public void save() {
+    public void save(boolean aborted) {
         Instant instant = Instant.now();
+        if (!aborted) {
+            instant = instant.minus(1, ChronoUnit.MINUTES);
+        }
         LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
         String yyyyMMddHHmm = formatter.format(localDateTime);
@@ -113,13 +117,13 @@ public class CounterPersistTasks implements ActivityContextAware {
         for (CounterReader counterReader : counterReaderList) {
             long current = counterReader.getCounterData().getCurrent();
             long acquired = counterReader.getCounterData().acquire(current);
-            if (acquired > 0) {
+//            if (acquired > 0) {
                 counterVO.setInst(counterReader.getInstanceName());
                 counterVO.setEvt(counterReader.getEventName());
                 counterVO.setCnt1(current);
                 counterVO.setCnt2(acquired);
                 dao.insertCounterData(counterVO);
-            }
+//            }
         }
     }
 
