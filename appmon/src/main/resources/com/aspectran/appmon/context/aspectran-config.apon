@@ -4,6 +4,11 @@ context: {
     scan: [
         com.aspectran.appmon
     ]
+    profiles: {
+        active: [
+            h2
+        ]
+    }
 }
 scheduler: {
     startDelaySeconds: 2

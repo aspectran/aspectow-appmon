@@ -17,8 +17,8 @@
         </settings>
     </aspect>
 
-    <append resource="com/aspectran/appmon/context/scheduler-config.xml"/>
-    <append resource="com/aspectran/appmon/context/mybatis.xml"/>
-    <append resource="com/aspectran/appmon/context/web-config.xml"/>
+    <append resource="com/aspectran/appmon/context/scheduler-context.xml"/>
+    <append resource="com/aspectran/appmon/context/mybatis-context.xml"/>
+    <append resource="com/aspectran/appmon/context/web-context.xml"/>
 
 </aspectran>
