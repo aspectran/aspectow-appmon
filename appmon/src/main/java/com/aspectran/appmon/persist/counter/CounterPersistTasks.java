@@ -76,9 +76,21 @@ public class CounterPersistTasks implements ActivityContextAware {
 
     @Initialize
     public void initialize() throws Exception {
-        List<CounterReader> counterReaderList = counterPersist.getCounterReaderList();
-        for (CounterReader counterReader : counterReaderList) {
-            counterReader.initialize();
+        try {
+            InstantActivity activity = new InstantActivity(context);
+            activity.perform(() -> {
+                List<EventCounter> eventCounterList = counterPersist.getEventCounterList();
+                for (EventCounter eventCounter : eventCounterList) {
+                    EventCountVO eventCountVO = dao.getFinalEventCount(eventCounter.getInstanceName(), eventCounter.getEventName());
+                    if (eventCountVO != null) {
+                        eventCounter.getEventCount().restore(eventCountVO.getTotal(), eventCountVO.getDelta());
+                    }
+                    eventCounter.initialize();
+                }
+                return null;
+            });
+        } catch (Exception e) {
+            throw new InstantActivityException(e);
         }
     }
 
@@ -108,21 +120,22 @@ public class CounterPersistTasks implements ActivityContextAware {
         String hh = yyyyMMddHHmm.substring(8, 10);
         String mm = yyyyMMddHHmm.substring(10, 12);
 
-        CounterVO counterVO = new CounterVO();
-        counterVO.setYmd(ymd);
-        counterVO.setHh(hh);
-        counterVO.setMm(mm);
+        EventCountVO eventCountVO = new EventCountVO();
+        eventCountVO.setYmd(ymd);
+        eventCountVO.setHh(hh);
+        eventCountVO.setMm(mm);
 
-        List<CounterReader> counterReaderList = counterPersist.getCounterReaderList();
-        for (CounterReader counterReader : counterReaderList) {
-            long current = counterReader.getCounterData().getCurrent();
-            long acquired = counterReader.getCounterData().acquire(current);
+        List<EventCounter> eventCounterList = counterPersist.getEventCounterList();
+        for (EventCounter eventCounter : eventCounterList) {
+            long total = eventCounter.getEventCount().getTotal();
+            long delta = eventCounter.getEventCount().getDelta(total);
 //            if (acquired > 0) {
-                counterVO.setInst(counterReader.getInstanceName());
-                counterVO.setEvt(counterReader.getEventName());
-                counterVO.setCnt1(current);
-                counterVO.setCnt2(acquired);
-                dao.insertCounterData(counterVO);
+                eventCountVO.setInst(eventCounter.getInstanceName());
+                eventCountVO.setEvt(eventCounter.getEventName());
+                eventCountVO.setTotal(total);
+                eventCountVO.setDelta(delta);
+                dao.updateFinalEventCount(eventCountVO);
+                dao.insertEventCount(eventCountVO);
 //            }
         }
     }

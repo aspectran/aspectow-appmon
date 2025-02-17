@@ -15,12 +15,15 @@
  */
 package com.aspectran.appmon.mybatis.mapper;
 
-import com.aspectran.appmon.persist.counter.CounterVO;
+import com.aspectran.appmon.persist.counter.EventCountVO;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.mybatis.SqlMapperAgent;
 import com.aspectran.mybatis.SqlMapperDao;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Map;
 
 /**
  * The Interface CounterMapper.
@@ -30,7 +33,11 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface CounterMapper {
 
-    int insertCounterData(CounterVO counterVO);
+    EventCountVO getFinalEventCount(@Param("inst") String instanceName, @Param("evt") String eventName);
+
+    void updateFinalEventCount(EventCountVO eventCountVO);
+
+    int insertEventCount(EventCountVO eventCountVO);
 
     @Component
     class Dao extends SqlMapperDao<CounterMapper> implements CounterMapper {
@@ -41,8 +48,18 @@ public interface CounterMapper {
         }
 
         @Override
-        public int insertCounterData(CounterVO counterVO) {
-            return simple().insertCounterData(counterVO);
+        public EventCountVO getFinalEventCount(String instanceName, String eventName) {
+            return simple().getFinalEventCount(instanceName, eventName);
+        }
+
+        @Override
+        public void updateFinalEventCount(EventCountVO eventCountVO) {
+            simple().updateFinalEventCount(eventCountVO);
+        }
+
+        @Override
+        public int insertEventCount(EventCountVO eventCountVO) {
+            return simple().insertEventCount(eventCountVO);
         }
 
     }

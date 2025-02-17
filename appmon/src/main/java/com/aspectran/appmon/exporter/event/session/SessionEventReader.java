@@ -59,7 +59,7 @@ public class SessionEventReader extends AbstractEventReader {
 
     private SessionManager sessionManager;
 
-    private SessionEventListener sessionListener;
+    private SessionEventReadingListener sessionListener;
 
     private volatile SessionEventData oldData;
 
@@ -88,7 +88,7 @@ public class SessionEventReader extends AbstractEventReader {
             throw new RuntimeException("Cannot resolve session manager with " + getEventInfo().getTarget(), e);
         }
         if (sessionManager != null) {
-            sessionListener = new SessionEventListener(this);
+            sessionListener = new SessionEventReadingListener(this);
             getSessionListenerRegistration().register(sessionListener, deploymentName);
         }
     }

@@ -21,15 +21,15 @@ import com.aspectran.utils.annotation.jsr305.NonNull;
 /**
  * <p>Created: 2025. 1. 27.</p>
  */
-public abstract class AbstractCounterReader implements CounterReader {
+public abstract class AbstractEventCounter implements EventCounter {
 
     private final EventInfo eventInfo;
 
     private final String eventName;
 
-    private final CounterData counterData = new CounterData();
+    private final EventCount eventCount = new EventCount();
 
-    public AbstractCounterReader(@NonNull EventInfo eventInfo) {
+    public AbstractEventCounter(@NonNull EventInfo eventInfo) {
         this.eventInfo = eventInfo;
         this.eventName = eventInfo.getName();
     }
@@ -49,8 +49,8 @@ public abstract class AbstractCounterReader implements CounterReader {
     }
 
     @Override
-    public CounterData getCounterData() {
-        return counterData;
+    public EventCount getEventCount() {
+        return eventCount;
     }
 
 }

@@ -18,18 +18,22 @@ package com.aspectran.appmon.mybatis;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
+import com.aspectran.core.component.bean.aware.ActivityContextAware;
+import com.aspectran.core.context.ActivityContext;
 import com.aspectran.mybatis.SqlMapperAgent;
 import org.apache.ibatis.session.SqlSession;
 
 @Component
 @Bean(lazyDestroy = true)
-public class DefaultSqlMapperAgent implements SqlMapperAgent {
+public class DefaultSqlMapperAgent implements SqlMapperAgent, ActivityContextAware {
 
     private final SqlSession simpleSqlSession;
 
     private final SqlSession batchSqlSession;
 
     private final SqlSession reuseSqlSession;
+
+    private ActivityContext context;
 
     @Autowired
     public DefaultSqlMapperAgent(
@@ -42,17 +46,25 @@ public class DefaultSqlMapperAgent implements SqlMapperAgent {
     }
 
     @Override
+    public void setActivityContext(ActivityContext context) {
+        this.context = context;
+    }
+
+    @Override
     public SqlSession getSimpleSqlSession() {
+        checkHasActivity();
         return simpleSqlSession;
     }
 
     @Override
     public SqlSession getBatchSqlSession() {
+        checkHasActivity();
         return batchSqlSession;
     }
 
     @Override
     public SqlSession getReuseSqlSession() {
+        checkHasActivity();
         return reuseSqlSession;
     }
 
@@ -69,6 +81,12 @@ public class DefaultSqlMapperAgent implements SqlMapperAgent {
     @Override
     public <T> T reuse(Class<T> type) {
         return getReuseSqlSession().getMapper(type);
+    }
+
+    private void checkHasActivity() {
+        if (!context.hasCurrentActivity()) {
+            throw new IllegalStateException("No activity");
+        }
     }
 
 }

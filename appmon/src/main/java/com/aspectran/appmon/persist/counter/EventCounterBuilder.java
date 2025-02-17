@@ -17,8 +17,8 @@ package com.aspectran.appmon.persist.counter;
 
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.persist.PersistManager;
-import com.aspectran.appmon.persist.counter.activity.ActivityCounterReader;
-import com.aspectran.appmon.persist.counter.session.SessionCounterReader;
+import com.aspectran.appmon.persist.counter.activity.ActivityEventCounter;
+import com.aspectran.appmon.persist.counter.session.SessionEventCounter;
 import com.aspectran.utils.ClassUtils;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
@@ -30,9 +30,9 @@ import java.util.List;
 /**
  * <p>Created: 2025. 2. 12.</p>
  */
-public abstract class CounterReaderBuilder {
+public abstract class EventCounterBuilder {
 
-    private static final Logger logger = LoggerFactory.getLogger(CounterReaderBuilder.class);
+    private static final Logger logger = LoggerFactory.getLogger(EventCounterBuilder.class);
 
     @NonNull
     public static void build(@NonNull PersistManager persistManager,
@@ -44,29 +44,29 @@ public abstract class CounterReaderBuilder {
 
             eventInfo.validateRequiredParameters();
 
-            CounterReader counterReader = createCounterReader(eventInfo);
-            persistManager.getCounterPersist().addCounterReader(counterReader);
+            EventCounter eventCounter = createEventCounter(eventInfo);
+            persistManager.getCounterPersist().addEventCounter(eventCounter);
         }
     }
 
     @NonNull
-    private static CounterReader createCounterReader(@NonNull EventInfo eventInfo) throws Exception {
-        if (!eventInfo.hasReader()) {
+    private static EventCounter createEventCounter(@NonNull EventInfo eventInfo) throws Exception {
+        if (!eventInfo.hasCounter()) {
             if ("activity".equals(eventInfo.getName())) {
-                return new ActivityCounterReader(eventInfo);
+                return new ActivityEventCounter(eventInfo);
             } else if ("session".equals(eventInfo.getName())) {
-                return new SessionCounterReader(eventInfo);
+                return new SessionEventCounter(eventInfo);
             } else {
-                throw new IllegalArgumentException("No counter reader specified for " + eventInfo.getName() + " " + eventInfo);
+                throw new IllegalArgumentException("No event counter specified for " + eventInfo.getName() + " " + eventInfo);
             }
         }
         try {
-            Class<CounterReader> readerType = ClassUtils.classForName(eventInfo.getReader());
+            Class<EventCounter> readerType = ClassUtils.classForName(eventInfo.getCounter());
             Object[] args = { eventInfo };
             Class<?>[] argTypes = { EventInfo.class };
             return ClassUtils.createInstance(readerType, args, argTypes);
         } catch (Exception e) {
-            throw new Exception(ToStringBuilder.toString("Failed to create counter reader", eventInfo), e);
+            throw new Exception(ToStringBuilder.toString("Failed to create event counter", eventInfo), e);
         }
     }
 

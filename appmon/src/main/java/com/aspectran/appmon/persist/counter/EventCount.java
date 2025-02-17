@@ -15,22 +15,39 @@
  */
 package com.aspectran.appmon.persist.counter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * <p>Created: 2025-02-12</p>
  */
-public class CounterPersist {
+public class EventCount {
 
-    private final List<EventCounter> eventCounterList = new ArrayList<>();
+    private final LongAdder counter = new LongAdder();
 
-    public void addEventCounter(EventCounter eventCounter) {
-        eventCounterList.add(eventCounter);
+    private volatile long previous = 0L;
+
+    public void hit() {
+        counter.increment();
     }
 
-    public List<EventCounter> getEventCounterList() {
-        return eventCounterList;
+    public long getPrevious() {
+        return previous;
+    }
+
+    public long getTotal() {
+        return counter.sum();
+    }
+
+    public synchronized long getDelta(long total) {
+        long delta = total - previous;
+        previous = total;
+        return delta;
+    }
+
+    public synchronized void restore(long total, long delta) {
+        counter.reset();
+        counter.add(total);
+        previous = total - delta;
     }
 
 }

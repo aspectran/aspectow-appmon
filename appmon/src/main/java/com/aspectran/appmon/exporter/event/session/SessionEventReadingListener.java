@@ -22,11 +22,11 @@ import com.aspectran.utils.annotation.jsr305.NonNull;
 /**
  * <p>Created: 2024-12-13</p>
  */
-public class SessionEventListener implements SessionListener {
+public class SessionEventReadingListener implements SessionListener {
 
     private final SessionEventReader eventReader;
 
-    public SessionEventListener(SessionEventReader eventReader) {
+    public SessionEventReadingListener(SessionEventReader eventReader) {
         this.eventReader = eventReader;
     }
 

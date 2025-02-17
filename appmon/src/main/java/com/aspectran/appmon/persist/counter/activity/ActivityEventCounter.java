@@ -16,7 +16,7 @@
 package com.aspectran.appmon.persist.counter.activity;
 
 import com.aspectran.appmon.config.EventInfo;
-import com.aspectran.appmon.persist.counter.AbstractCounterReader;
+import com.aspectran.appmon.persist.counter.AbstractEventCounter;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.core.context.rule.AspectAdviceRule;
 import com.aspectran.core.context.rule.AspectRule;
@@ -32,11 +32,11 @@ import com.aspectran.utils.annotation.jsr305.NonNull;
 /**
  * <p>Created: 2025-02-12</p>
  */
-public class ActivityCounterReader extends AbstractCounterReader {
+public class ActivityEventCounter extends AbstractEventCounter {
 
     private final String aspectId;
 
-    public ActivityCounterReader(@NonNull EventInfo eventInfo) {
+    public ActivityEventCounter(@NonNull EventInfo eventInfo) {
         super(eventInfo);
         this.aspectId = getClass().getName() + ".ASPECT@" + hashCode() + "[" + eventInfo.getTarget() + "]";
     }
@@ -81,7 +81,7 @@ public class ActivityCounterReader extends AbstractCounterReader {
 
             AspectAdviceRule afterAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.AFTER);
             afterAspectAdviceRule.setAdviceAction(activity -> {
-                getCounterData().count();
+                getEventCount().hit();
                 return null;
             });
 

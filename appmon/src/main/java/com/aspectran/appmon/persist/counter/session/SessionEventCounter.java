@@ -16,7 +16,7 @@
 package com.aspectran.appmon.persist.counter.session;
 
 import com.aspectran.appmon.config.EventInfo;
-import com.aspectran.appmon.persist.counter.AbstractCounterReader;
+import com.aspectran.appmon.persist.counter.AbstractEventCounter;
 import com.aspectran.core.component.bean.NoSuchBeanException;
 import com.aspectran.core.component.session.SessionListener;
 import com.aspectran.core.component.session.SessionListenerRegistration;
@@ -32,13 +32,13 @@ import com.aspectran.utils.annotation.jsr305.NonNull;
 /**
  * <p>Created: 2025-02-12</p>
  */
-public class SessionCounterReader extends AbstractCounterReader {
+public class SessionEventCounter extends AbstractEventCounter {
 
     private final String serverId;
 
     private final String deploymentName;
 
-    public SessionCounterReader(@NonNull EventInfo eventInfo) {
+    public SessionEventCounter(@NonNull EventInfo eventInfo) {
         super(eventInfo);
 
         String[] arr = StringUtils.divide(eventInfo.getTarget(), "/");
@@ -48,7 +48,7 @@ public class SessionCounterReader extends AbstractCounterReader {
 
     @Override
     public void initialize() throws Exception {
-        final SessionListener sessionListener = new SessionCounterListener(this);
+        final SessionListener sessionListener = new SessionEventCountingListener(this);
         ActivityContext context = CoreServiceHolder.findActivityContext(deploymentName);
         if (context != null) {
             registerSessionListener(context, sessionListener);
@@ -90,7 +90,7 @@ public class SessionCounterReader extends AbstractCounterReader {
     }
 
     void sessionCreated() {
-        getCounterData().count();
+        getEventCount().hit();
     }
 
 }

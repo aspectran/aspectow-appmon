@@ -29,6 +29,7 @@ public class EventInfo extends AbstractParameters {
     private static final ParameterKey name;
     private static final ParameterKey title;
     private static final ParameterKey reader;
+    private static final ParameterKey counter;
     private static final ParameterKey target;
     private static final ParameterKey parameters;
     private static final ParameterKey sampleInterval;
@@ -39,6 +40,7 @@ public class EventInfo extends AbstractParameters {
         name = new ParameterKey("name", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
         reader = new ParameterKey("reader", ValueType.STRING);
+        counter = new ParameterKey("counter", ValueType.STRING);
         target = new ParameterKey("target", ValueType.STRING);
         parameters = new ParameterKey("parameters", ValueType.PARAMETERS);
         sampleInterval = new ParameterKey("sampleInterval", ValueType.INT);
@@ -47,6 +49,7 @@ public class EventInfo extends AbstractParameters {
                 name,
                 title,
                 reader,
+                counter,
                 target,
                 parameters,
                 sampleInterval
@@ -93,6 +96,18 @@ public class EventInfo extends AbstractParameters {
 
     public boolean hasReader() {
         return hasValue(EventInfo.reader);
+    }
+
+    public String getCounter() {
+        return getString(counter);
+    }
+
+    public void setCounter(String counter) {
+        putValue(EventInfo.counter, counter);
+    }
+
+    public boolean hasCounter() {
+        return hasValue(EventInfo.counter);
     }
 
     public String getTarget() {

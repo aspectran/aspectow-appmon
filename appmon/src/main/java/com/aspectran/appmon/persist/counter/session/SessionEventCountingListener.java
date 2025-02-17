@@ -21,17 +21,17 @@ import com.aspectran.core.component.session.SessionListener;
 /**
  * <p>Created: 2024-12-13</p>
  */
-public class SessionCounterListener implements SessionListener {
+public class SessionEventCountingListener implements SessionListener {
 
-    private final SessionCounterReader counterReader;
+    private final SessionEventCounter counterCounter;
 
-    public SessionCounterListener(SessionCounterReader counterReader) {
-        this.counterReader = counterReader;
+    public SessionEventCountingListener(SessionEventCounter counterCounter) {
+        this.counterCounter = counterCounter;
     }
 
     @Override
     public void sessionCreated(Session session) {
-        counterReader.sessionCreated();
+        counterCounter.sessionCreated();
     }
 
 }

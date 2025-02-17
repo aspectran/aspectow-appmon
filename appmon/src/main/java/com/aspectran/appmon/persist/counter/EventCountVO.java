@@ -3,7 +3,7 @@ package com.aspectran.appmon.persist.counter;
 /**
  * <p>Created: 2025-02-14</p>
  */
-public class CounterVO {
+public class EventCountVO {
 
     private String inst;
 
@@ -15,9 +15,9 @@ public class CounterVO {
 
     private String mm;
 
-    private long cnt1;
+    private long total;
 
-    private long cnt2;
+    private long delta;
 
     public String getInst() {
         return inst;
@@ -59,19 +59,20 @@ public class CounterVO {
         this.mm = mm;
     }
 
-    public long getCnt1() {
-        return cnt1;
+    public long getTotal() {
+        return total;
     }
 
-    public void setCnt1(long cnt1) {
-        this.cnt1 = cnt1;
+    public void setTotal(long total) {
+        this.total = total;
     }
 
-    public long getCnt2() {
-        return cnt2;
+    public long getDelta() {
+        return delta;
     }
 
-    public void setCnt2(long cnt2) {
-        this.cnt2 = cnt2;
+    public void setDelta(long delta) {
+        this.delta = delta;
     }
+
 }

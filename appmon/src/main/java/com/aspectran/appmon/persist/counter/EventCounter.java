@@ -15,33 +15,14 @@
  */
 package com.aspectran.appmon.persist.counter;
 
-import java.util.concurrent.atomic.LongAdder;
+public interface EventCounter {
 
-/**
- * <p>Created: 2025-02-12</p>
- */
-public class CounterData {
+    void initialize() throws Exception;
 
-    private final LongAdder counter = new LongAdder();
+    String getInstanceName();
 
-    private volatile long previous = 0L;
+    String getEventName();
 
-    public void count() {
-        counter.increment();
-    }
-
-    public long getPrevious() {
-        return previous;
-    }
-
-    public long getCurrent() {
-        return counter.sum();
-    }
-
-    public synchronized long acquire(long current) {
-        long acquired = current - previous;
-        previous = current;
-        return acquired;
-    }
+    EventCount getEventCount();
 
 }
