@@ -18,7 +18,7 @@
                 as b (inst, evt, ymd, hh, mm, total, delta)
         on (a.inst = b.inst and a.evt = b.evt)
         when matched then
-            update set total = a.total + b.total, delta = a.delta + b.delta
+            update set ymd = b.ymd, hh = b.hh, mm = b.mm, total = b.total, delta = b.delta
         when not matched then
             insert (inst, evt, ymd, hh, mm, total, delta)
             values (b.inst, b.evt, b.ymd, b.hh, b.mm, b.total, b.delta)
@@ -30,7 +30,7 @@
             as b (inst, evt, ymd, hh, mm, total, delta)
             on (a.inst = b.inst and a.evt = b.evt and a.ymd = b.ymd and a.hh = b.hh and a.mm = b.mm)
         when matched then
-            update set total = a.total + b.total, delta = a.delta + b.delta
+            update set total = b.total, delta = b.delta
         when not matched then
             insert (inst, evt, ymd, hh, mm, total, delta)
             values (b.inst, b.evt, b.ymd, b.hh, b.mm, b.total, b.delta)

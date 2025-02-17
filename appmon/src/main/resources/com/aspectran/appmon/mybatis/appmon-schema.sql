@@ -17,5 +17,6 @@ create table if not exists event_count_final (
     mm varchar(2) not null,
     total int not null,
     delta int not null,
+    upd_dt timestamp default now() not null,
     constraint pk_event_count_final primary key (inst, evt)
 );

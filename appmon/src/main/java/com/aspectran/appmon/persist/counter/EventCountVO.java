@@ -1,9 +1,11 @@
 package com.aspectran.appmon.persist.counter;
 
+import java.io.Serializable;
+
 /**
  * <p>Created: 2025-02-14</p>
  */
-public class EventCountVO {
+public class EventCountVO implements Serializable {
 
     private String inst;
 

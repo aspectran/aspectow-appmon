@@ -23,8 +23,6 @@ import com.aspectran.mybatis.SqlMapperDao;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.Map;
-
 /**
  * The Interface CounterMapper.
  *

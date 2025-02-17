@@ -109,6 +109,27 @@ public class CounterPersistTasks implements ActivityContextAware {
 
     @Request("appmon/persist/counter/save.job")
     public void save(boolean aborted) {
+        EventCountVO eventCountVO = null;
+        List<EventCounter> eventCounterList = counterPersist.getEventCounterList();
+        for (EventCounter eventCounter : eventCounterList) {
+            long total = eventCounter.getEventCount().getTotal();
+            long delta = eventCounter.getEventCount().getDelta(total);
+            if (delta > 0) {
+                if (eventCountVO == null) {
+                    eventCountVO = createEventCountVO(aborted);
+                }
+                eventCountVO.setInst(eventCounter.getInstanceName());
+                eventCountVO.setEvt(eventCounter.getEventName());
+                eventCountVO.setTotal(total);
+                eventCountVO.setDelta(delta);
+                dao.updateFinalEventCount(eventCountVO);
+                dao.insertEventCount(eventCountVO);
+            }
+        }
+    }
+
+    @NonNull
+    private EventCountVO createEventCountVO(boolean aborted) {
         Instant instant = Instant.now();
         if (!aborted) {
             instant = instant.minus(1, ChronoUnit.MINUTES);
@@ -124,20 +145,7 @@ public class CounterPersistTasks implements ActivityContextAware {
         eventCountVO.setYmd(ymd);
         eventCountVO.setHh(hh);
         eventCountVO.setMm(mm);
-
-        List<EventCounter> eventCounterList = counterPersist.getEventCounterList();
-        for (EventCounter eventCounter : eventCounterList) {
-            long total = eventCounter.getEventCount().getTotal();
-            long delta = eventCounter.getEventCount().getDelta(total);
-//            if (acquired > 0) {
-                eventCountVO.setInst(eventCounter.getInstanceName());
-                eventCountVO.setEvt(eventCounter.getEventName());
-                eventCountVO.setTotal(total);
-                eventCountVO.setDelta(delta);
-                dao.updateFinalEventCount(eventCountVO);
-                dao.insertEventCount(eventCountVO);
-//            }
-        }
+        return eventCountVO;
     }
 
 }
