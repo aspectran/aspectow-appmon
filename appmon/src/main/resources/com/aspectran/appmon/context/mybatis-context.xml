@@ -12,6 +12,7 @@
             <item name="ignoreInvalidResource" valueType="boolean">true</item>
             <item name="locations" type="array">
                 <value>classpath:com/aspectran/appmon/mybatis/appmon.db.properties</value>
+                <value>classpath:com/aspectran/appmon/mybatis/appmon.db.system.properties</value>
                 <value>/config/appmon/appmon.db.properties</value>
             </item>
         </properties>
