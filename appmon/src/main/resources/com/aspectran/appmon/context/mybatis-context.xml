@@ -7,6 +7,16 @@
         Configuration for database transactions
     </description>
 
+    <bean id="appmonDBProperties" class="com.aspectran.core.support.PropertiesFactoryBean">
+        <properties>
+            <item name="ignoreInvalidResource" valueType="boolean">true</item>
+            <item name="locations" type="array">
+                <value>classpath:com/aspectran/appmon/mybatis/appmon.db.properties</value>
+                <value>/config/appmon/appmon.db.properties</value>
+            </item>
+        </properties>
+    </bean>
+
     <bean id="sqlSessionFactory" class="com.aspectran.mybatis.SqlSessionFactoryBean" lazyDestroy="true">
         <description>
             FactoryBean that creates an MyBatis SqlSessionFactory using default MyBatis Configuration.
@@ -15,10 +25,10 @@
             <item name="configLocation" value="classpath:com/aspectran/appmon/mybatis/mybatis-config.xml"/>
             <item name="environment" value="default"/>
             <item name="properties" type="properties">
-                <entry name="driver">%{classpath:com/aspectran/appmon/mybatis/appmon.db.properties^driver}</entry>
-                <entry name="url">%{classpath:com/aspectran/appmon/mybatis/appmon.db.properties^url}</entry>
-                <entry name="username">%{classpath:com/aspectran/appmon/mybatis/appmon.db.properties^username}</entry>
-                <entry name="password">%{classpath:com/aspectran/appmon/mybatis/appmon.db.properties^password}</entry>
+                <entry name="driver">#{appmonDBProperties^driver}</entry>
+                <entry name="url">#{appmonDBProperties^url}</entry>
+                <entry name="username">#{appmonDBProperties^username}</entry>
+                <entry name="password">#{appmonDBProperties^password}</entry>
             </item>
         </properties>
     </bean>
