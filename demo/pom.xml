@@ -37,10 +37,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>aspectran-with-logback</artifactId>
+            <groupId>com.aspectran</groupId>
+            <artifactId>aspectran-logging</artifactId>
             <version>${aspectran.version}</version>
-            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
