@@ -23,11 +23,11 @@ import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.RequestToGet;
 import com.aspectran.core.component.bean.annotation.Required;
 import com.aspectran.utils.StringUtils;
-import com.aspectran.utils.logging.Logger;
-import com.aspectran.utils.logging.LoggerFactory;
 import com.aspectran.utils.security.InvalidPBTokenException;
 import com.aspectran.web.activity.response.DefaultRestResponse;
 import com.aspectran.web.activity.response.RestResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -53,7 +53,7 @@ public class BackendAction {
             AppMonManager.validateToken(token);
         } catch (InvalidPBTokenException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug(e);
+                logger.debug(e.getMessage(), e);
             }
             return new DefaultRestResponse().forbidden();
         }

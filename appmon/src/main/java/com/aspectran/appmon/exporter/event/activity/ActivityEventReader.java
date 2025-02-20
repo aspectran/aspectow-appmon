@@ -30,9 +30,9 @@ import com.aspectran.core.context.rule.type.JoinpointTargetType;
 import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.json.JsonBuilder;
-import com.aspectran.utils.logging.Logger;
-import com.aspectran.utils.logging.LoggerFactory;
 import com.aspectran.utils.statistic.CounterStatistic;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>Created: 2024-12-18</p>
@@ -111,7 +111,7 @@ public class ActivityEventReader extends AbstractEventReader {
                 }
             }
         } catch (Exception e) {
-            logger.warn(e);
+            logger.warn(e.getMessage(), e);
         }
     }
 

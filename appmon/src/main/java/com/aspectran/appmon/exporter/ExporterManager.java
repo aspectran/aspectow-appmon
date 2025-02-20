@@ -17,8 +17,8 @@ package com.aspectran.appmon.exporter;
 
 import com.aspectran.appmon.service.ExportServiceManager;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.logging.Logger;
-import com.aspectran.utils.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -70,7 +70,7 @@ public abstract class ExporterManager {
             try {
                 exporter.start();
             } catch (Exception e) {
-                logger.warn(e);
+                logger.warn(e.getMessage(), e);
             }
         }
     }
@@ -80,7 +80,7 @@ public abstract class ExporterManager {
             try {
                 exporter.stop();
             } catch (Exception e) {
-                logger.warn(e);
+                logger.warn(e.getMessage(), e);
             }
         }
     }

@@ -32,8 +32,8 @@ import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.json.JsonBuilder;
 import com.aspectran.utils.json.JsonString;
-import com.aspectran.utils.logging.Logger;
-import com.aspectran.utils.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -127,7 +127,7 @@ public class SessionEventReader extends AbstractEventReader {
             oldData = data;
             return data.toJson();
         } catch (Exception e) {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             return null;
         }
     }
@@ -146,7 +146,7 @@ public class SessionEventReader extends AbstractEventReader {
                 return null;
             }
         } catch (Exception e) {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             return null;
         }
     }
