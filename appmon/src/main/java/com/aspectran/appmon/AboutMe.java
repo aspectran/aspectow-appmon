@@ -89,14 +89,14 @@ public abstract class AboutMe {
      */
     public static void printPretty(PrintStream output) {
         Assert.notNull(output, "output must not be null");
-        output.println("-------------------------------------------------------------------------------");
+        output.println("---------------------------------------------------------------------------------");
         output.printf(" %1$-9s : %2$s%n", "Aspectran", com.aspectran.core.AboutMe.getVersionDetail());
         output.printf(" %1$-9s : %2$s%n", "AppMon", getVersionDetail());
         output.printf(" %1$-9s : %2$s%n", "JVM", System.getProperty("java.vm.name") + " (build " +
                 System.getProperty("java.vm.version") + ", " + System.getProperty("java.vm.info") + ")");
         output.printf(" %1$-9s : %2$s%n", "OS", System.getProperty("os.name") + " " +
                 System.getProperty("os.version") + " " + System.getProperty("os.arch"));
-        output.println("-------------------------------------------------------------------------------");
+        output.println("---------------------------------------------------------------------------------");
     }
 
     /**
