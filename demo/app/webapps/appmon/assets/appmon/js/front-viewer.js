@@ -258,10 +258,18 @@ function FrontViewer() {
             }
             if (data.evictedSessions) {
                 data.evictedSessions.forEach(function (sessionId) {
-                    let $item = $sessions.find("li[data-sid='" + sessionId + "']").addClass("inactive");
-                    setTimeout(function () {
-                        $item.addClass("hidden");
-                    }, 30000);
+                    let $item = $sessions.find("li[data-sid='" + sessionId + "']");
+                    if ($item.data("temp-resident")) {
+                        let inactiveInterval = $item.data("inactive-interval")
+                        setTimeout(function () {
+                            $item.remove();
+                        }, (inactiveInterval||30) * 1000);
+                    } else {
+                        $item.addClass("inactive");
+                        setTimeout(function () {
+                            $item.addClass("hidden");
+                        }, 30000);
+                    }
                 });
             }
             if (data.residedSessions) {
@@ -278,7 +286,15 @@ function FrontViewer() {
         if (!session.username) {
             $indicator.addClass("logged-out")
         }
-        let $item = $("<li/>").attr("data-sid", session.sessionId).append($indicator).appendTo($sessions);
+        let $item = $("<li/>")
+            .attr("data-sid", session.sessionId)
+            .attr("data-temp-resident", session.tempResident)
+            .attr("data-inactive-interval", session.inactiveInterval)
+            .append($indicator)
+            .appendTo($sessions);
+        if (session.tempResident) {
+            $item.addClass("inactive");
+        }
         if (session.countryCode) {
             $("<img class='flag' alt=''/>")
                 .attr("src", "https://aspectran.com/assets/countries/flags/" + session.countryCode.toLowerCase() + ".png")
