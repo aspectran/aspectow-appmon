@@ -256,6 +256,8 @@ public class SessionEventReader extends AbstractEventReader {
                     .put("countryCode", session.getAttribute(USER_COUNTRY_CODE))
                     .put("ipAddress", session.getAttribute(USER_IP_ADDRESS))
                     .put("createAt", formatTime(session.getCreationTime()))
+                    .put("inactiveInterval", session.getMaxInactiveInterval())
+                    .put("tempResident", session.isTempResident())
                 .endObject()
                 .toJsonString();
     }
