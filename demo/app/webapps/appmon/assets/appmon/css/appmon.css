@@ -193,10 +193,10 @@
     font-size: .8em;
     color: #fff;
     background-color: #4B4B4B;
-    border-radius: 20px;
+    border-left: 3px solid #ccc;
+    border-radius: 0 20px 20px 0;
     padding: 0 7px;
     margin-right: 6px;
-    display: none;
 }
 .sessions-box ul.sessions li .hits.active {
     background-color: #02b502;
