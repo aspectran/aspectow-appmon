@@ -5,8 +5,11 @@ context: {
         com.aspectran.appmon
     ]
     profiles: {
-        active: [
+        essential: [
             h2
+        ]
+        default: [
+            dev
         ]
     }
 }

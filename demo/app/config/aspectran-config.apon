@@ -10,9 +10,10 @@ context: {
         /lib/ext
     ]
     scan: [
+        com.aspectran.appmon.demo
     ]
     profiles: {
-        active: [
+        default: [
             dev
         ]
     }

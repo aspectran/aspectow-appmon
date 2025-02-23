@@ -142,7 +142,7 @@ public class WebsocketExportService implements ExportService {
         WebsocketServiceSession serviceSession = new WebsocketServiceSession(session);
         synchronized (sessions) {
             if (sessions.add(serviceSession)) {
-                String[] instanceNames = StringUtils.splitCommaDelimitedString(joinInstances);
+                String[] instanceNames = StringUtils.splitWithComma(joinInstances);
                 instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
                 if (!StringUtils.hasText(joinInstances) || instanceNames.length > 0) {
                     serviceSession.setJoinedInstances(instanceNames);

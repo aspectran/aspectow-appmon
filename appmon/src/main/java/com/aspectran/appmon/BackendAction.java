@@ -60,7 +60,7 @@ public class BackendAction {
 
         List<DomainInfo> domainInfoList = appMonManager.getDomainInfoList();
 
-        String[] instanceNames = StringUtils.splitCommaDelimitedString(instances);
+        String[] instanceNames = StringUtils.splitWithComma(instances);
         instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
         List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(instanceNames);
 
