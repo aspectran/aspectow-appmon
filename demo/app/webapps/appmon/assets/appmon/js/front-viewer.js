@@ -259,16 +259,12 @@ function FrontViewer() {
             if (data.evictedSessions) {
                 data.evictedSessions.forEach(function (sessionId) {
                     let $item = $sessions.find("li[data-sid='" + sessionId + "']");
-                    if ($item.data("temp-resident")) {
-                        let inactiveInterval = $item.data("inactive-interval")
+                    if (!$item.addClass("inactive")) {
+                        $item.addClass("inactive");
+                        let inactiveInterval = $item.data("inactive-interval");
                         setTimeout(function () {
                             $item.remove();
                         }, (inactiveInterval||30) * 1000);
-                    } else {
-                        $item.addClass("inactive");
-                        setTimeout(function () {
-                            $item.addClass("hidden");
-                        }, 30000);
                     }
                 });
             }
@@ -294,6 +290,10 @@ function FrontViewer() {
             .appendTo($sessions);
         if (session.tempResident) {
             $item.addClass("inactive");
+            let inactiveInterval = session.inactiveInterval;
+            setTimeout(function () {
+                $item.remove();
+            }, (inactiveInterval||30) * 1000);
         }
         if (session.countryCode) {
             $("<img class='flag' alt=''/>")
