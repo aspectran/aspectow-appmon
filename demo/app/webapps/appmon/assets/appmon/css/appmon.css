@@ -188,16 +188,19 @@
 .sessions-box ul.sessions li.hidden {
     display: none;
 }
-.sessions-box ul.sessions li .indicator {
-    background-color: #13CF13;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    display: inline-block;
+.sessions-box ul.sessions li .hits {
+    font-weight: bold;
+    font-size: .8em;
+    color: #fff;
+    background-color: #4B4B4B;
+    border-radius: 20px;
+    padding: 0 7px;
     margin-right: 6px;
+    display: none;
 }
-.sessions-box ul.sessions li .indicator.logged-out {
-    background-color: #ccc;
+.sessions-box ul.sessions li .hits.active {
+    background-color: #02b502;
+    display: inline-block;
 }
 .sessions-box ul.sessions li .flag {
     max-width: 30px;
@@ -205,6 +208,12 @@
     border-radius: 0;
     vertical-align: middle;
     margin-right: 3px;
+}
+.sessions-box ul.sessions li .username {
+    font-weight: bold;
+}
+.sessions-box ul.sessions li .session-id {
+    font-style: italic;
 }
 
 .console-box .status-bar {

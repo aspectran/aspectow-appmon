@@ -107,28 +107,28 @@ function FrontViewer() {
         switch (type) {
             case "event":
                 if (text.length) {
-                    indicate(instance, type, label);
-                    processEventData(label, name, JSON.parse(text));
+                    processEventData(instance, type, label, name, JSON.parse(text));
                 }
                 break;
             case "log":
-                indicate(instance, type, label);
-                printLogMessage(name, text);
+                printLogMessage(instance, type, label, name, text);
                 break;
         }
     };
 
-    const printLogMessage = function (name, text) {
+    const printLogMessage = function (instance, type, label ,name, text) {
+        indicate(instance, type, label);
         let $console = getConsole(name);
-        if (!$console.data("pause")) {
+        if ($console && !$console.data("pause")) {
             $("<p/>").text(text).appendTo($console);
             scrollToBottom($console);
         }
     };
 
-    const processEventData = function (label, name, data) {
+    const processEventData = function (instance, type, label, name, data) {
         switch (label) {
             case "activity":
+                indicate(instance, type, label);
                 if (data.activities) {
                     printActivities(name, data.activities);
                 }
@@ -153,6 +153,7 @@ function FrontViewer() {
                 } else {
                     printCurrentActivities(name, 0);
                 }
+                updateSessionHits(instance + ":" + type + ":session", data.sessionId);
                 break;
             case "session":
                 printSessionEventData(name, data);
@@ -248,7 +249,7 @@ function FrontViewer() {
             let $sessions = $display.find("ul.sessions");
             if (data.createdSessions) {
                 data.createdSessions.forEach(function (session) {
-                    addSessionItem($sessions, session);
+                    addSession($sessions, session);
                 });
             }
             if (data.destroyedSessions) {
@@ -270,29 +271,34 @@ function FrontViewer() {
             }
             if (data.residedSessions) {
                 data.residedSessions.forEach(function (session) {
-                    addSessionItem($sessions, session);
+                    addSession($sessions, session);
                 });
             }
         }
     };
 
-    const addSessionItem = function ($sessions, session) {
-        $sessions.find("li[data-sid='" + session.sessionId + "']").remove();
-        let $indicator = $("<div/>").addClass("indicator");
-        if (!session.username) {
-            $indicator.addClass("logged-out")
+    const addSession = function ($sessions, session) {
+        let $old = $sessions.find("li[data-sid='" + session.sessionId + "']").detach();
+        let cnt = ($old.length ? $old.find("span.hits").data("hits")||0 : 0);
+        let $hits = $("<span class='hits'></span>").data("hits", cnt);
+        if (cnt > 0) {
+            $hits.text(cnt);
+        } else {
+            $hits.html("&nbsp;");
         }
-        let $item = $("<li/>")
+        if (session.username) {
+            $hits.addClass("active");
+        }
+        let $li = $("<li/>")
             .attr("data-sid", session.sessionId)
             .attr("data-temp-resident", session.tempResident)
             .attr("data-inactive-interval", session.inactiveInterval)
-            .append($indicator)
-            .appendTo($sessions);
+            .append($hits);
         if (session.tempResident) {
-            $item.addClass("inactive");
-            let inactiveInterval = session.inactiveInterval||30;
+            $li.addClass("inactive");
+            let inactiveInterval = Math.min(session.inactiveInterval||30, 30);
             setTimeout(function () {
-                $item.remove();
+                $li.remove();
             }, inactiveInterval * 1000);
         }
         if (session.countryCode) {
@@ -300,12 +306,21 @@ function FrontViewer() {
                 .attr("src", "https://aspectran.com/assets/countries/flags/" + session.countryCode.toLowerCase() + ".png")
                 .attr("alt", session.countryCode)
                 .attr("title", countries[session.countryCode].name + " / " + session.ipAddress)
-                .appendTo($item);
+                .appendTo($li);
         }
-        let str = "Session <strong>" + session.sessionId + "</strong> created at <strong>" + session.createAt + "</strong>";
         if (session.username) {
-            str = "(<strong>" + session.username + "</strong>) " + str;
+            $li.append("<span class='username'>" + session.username + "</span> ");
         }
-        $("<span/>").html(str).appendTo($item);
+        $li.append("<span class='session-id'>" + session.sessionId + "</span>")
+            .appendTo($sessions);
     };
+
+    const updateSessionHits = function (name, sessionId) {
+        let $display = getDisplay(name);
+        if ($display) {
+            let $hits = $display.find("ul.sessions li[data-sid='" + sessionId + "'] span.hits");
+            let cnt = ($hits.data("hits")||0) + 1;
+            $hits.data("hits", cnt).text(cnt).stop().hide().fadeIn();
+        }
+    }
 }
