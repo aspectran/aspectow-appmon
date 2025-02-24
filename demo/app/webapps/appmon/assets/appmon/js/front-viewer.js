@@ -15,6 +15,7 @@ function FrontViewer() {
     };
 
     this.putIndicator = function (instance, type, label, $indicator) {
+        console.log(instance + ":" + type + ":" + label);
         $indicators[instance + ":" + type + ":" + label] = $indicator;
     };
 
@@ -203,12 +204,11 @@ function FrontViewer() {
         let $indicator1 = $indicators["domain:event:"];
         blink($indicator1);
         if (visible) {
+            let $indicator2 = $indicators["instance:event:" + instance];
+            blink($indicator2);
             if (type === "log") {
                 let $indicator3 = $indicators[instance + ":log:" + label];
                 blink($indicator3);
-            } else {
-                let $indicator2 = $indicators["instance:event:" + instance];
-                blink($indicator2);
             }
         }
     };
