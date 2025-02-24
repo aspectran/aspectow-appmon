@@ -152,37 +152,50 @@
     border: 1px solid #ccc;
     border-bottom: 2px solid #ccc;
     border-radius: 0;
-    height: 260px;
+    height: 200px;
+    padding: .5em;
     overflow-y: auto;
 }
 .sessions-box .panel p {
     margin: 0;
 }
+.sessions-box .panel .elapsed {
+    font-size: .9em;
+    padding: 0 .5em 0 0;
+}
+.sessions-box dl.session-statistics {
+    margin-bottom: .3em;
+}
 .sessions-box dl.session-statistics dt {
     float: left;
     clear: left;
-    padding: 0;
+    padding: 0 0 0 .5em;
     margin: 0;
-    height: 30px;
+    height: 24px;
     font-size: 1em;
+    font-weight: normal;
 }
 .sessions-box dl.session-statistics dd {
     text-align: right;
-    font-weight: bold;
+    font-weight: normal;
     font-size: 1em;
-    padding: 0;
+    padding: 0 .5em 0 0;
     margin: 0;
-    height: 30px;
+    height: 24px;
     white-space: nowrap;
 }
 .sessions-box ul.sessions {
-    margin-left: 0;
+    margin: 0;
 }
 .sessions-box ul.sessions li {
     list-style-type: none;
-    white-space: nowrap;
-    margin-bottom: 2px;
     border-top: 1px solid #ccc;
+    width: 360px;
+    padding-right: 5px;
+    display: inline-block;
+    overflow: clip;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 .sessions-box ul.sessions li.inactive {
     opacity: .4;
@@ -195,13 +208,11 @@
     color: #fff;
     background-color: #8396a2;
     border-left: 3px solid #009400;
-    border-radius: 0 0 7px 0;
-    margin-right: 6px;
     padding: 2px 0;
 }
 .sessions-box ul.sessions li .hits.count {
-    padding-left: 5px;
-    padding-right: 10px;
+    padding-left: 6px;
+    padding-right: 8px;
 }
 .sessions-box ul.sessions li .hits.active {
     background-color: #02b502;
@@ -213,19 +224,19 @@
     border-left: 3px solid #009400;
 }
 .sessions-box ul.sessions li .flag {
-    max-width: 34px;
-    max-height: 23px;
+    height: 26px;
     border-radius: 0;
-    vertical-align: sub;
+    vertical-align: top;
     margin-right: 6px;
 }
 .sessions-box ul.sessions li .username {
-    font-weight: bold;
     margin-right: 6px;
+    font-weight: bold;
+    font-size: .9em;
 }
 .sessions-box ul.sessions li .session-id {
-    padding: 2px;
     font-style: italic;
+    font-size: .9em;
 }
 
 .console-box .status-bar {
