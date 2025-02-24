@@ -280,7 +280,7 @@ function FrontViewer() {
     const addSession = function ($sessions, session) {
         let $old = $sessions.find("li[data-sid='" + session.sessionId + "']").detach();
         let cnt = ($old.length ? $old.find("span.hits").data("hits")||0 : 0);
-        let $hits = $("<code class='hits'></code>").data("hits", cnt);
+        let $hits = $("<span class='hits'></span>").data("hits", cnt);
         if (cnt > 0) {
             $hits.addClass("count");
             $hits.text(cnt);
@@ -310,7 +310,7 @@ function FrontViewer() {
         if (session.username) {
             $li.append("<span class='username'>" + session.username + "</span>");
         }
-        $li.append("<code class='session-id'>" + session.sessionId + "</code>")
+        $li.append("<span class='session-id'>" + session.sessionId + "</span>")
             .appendTo($sessions);
     };
 
