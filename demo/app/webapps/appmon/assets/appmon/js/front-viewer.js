@@ -280,11 +280,10 @@ function FrontViewer() {
     const addSession = function ($sessions, session) {
         let $old = $sessions.find("li[data-sid='" + session.sessionId + "']").detach();
         let cnt = ($old.length ? $old.find("span.hits").data("hits")||0 : 0);
-        let $hits = $("<span class='hits'></span>").data("hits", cnt);
+        let $hits = $("<code class='hits'></code>").data("hits", cnt);
         if (cnt > 0) {
+            $hits.addClass("count");
             $hits.text(cnt);
-        } else {
-            $hits.html("&nbsp;");
         }
         if (session.username) {
             $hits.addClass("active");
@@ -309,18 +308,18 @@ function FrontViewer() {
                 .appendTo($li);
         }
         if (session.username) {
-            $li.append("<span class='username'>" + session.username + "</span> ");
+            $li.append("<span class='username'>" + session.username + "</span>");
         }
-        $li.append("<span class='session-id'>" + session.sessionId + "</span>")
+        $li.append("<code class='session-id'>" + session.sessionId + "</code>")
             .appendTo($sessions);
     };
 
     const updateSessionHits = function (name, sessionId) {
         let $display = getDisplay(name);
         if ($display) {
-            let $hits = $display.find("ul.sessions li[data-sid='" + sessionId + "'] span.hits");
+            let $hits = $display.find("ul.sessions li[data-sid='" + sessionId + "'] .hits");
             let cnt = ($hits.data("hits")||0) + 1;
-            $hits.data("hits", cnt).text(cnt).stop().hide().fadeIn();
+            $hits.addClass("count").data("hits", cnt).text(cnt).stop().hide().fadeIn();
         }
     }
 }
