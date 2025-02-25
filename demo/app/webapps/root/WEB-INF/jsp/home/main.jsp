@@ -49,3 +49,15 @@
     </div>
   </div>
 </div>
+<script>
+  $(function() {
+    $(".undercon").on("click", function () {
+      $(this).fadeOut(300, function () {
+        setTimeout(function () {
+          location.href = "/";
+        }, 100);
+        $(this).fadeIn(300);
+      });
+    });
+  });
+</script>

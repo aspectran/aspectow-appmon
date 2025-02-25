@@ -280,10 +280,9 @@ function FrontViewer() {
     const addSession = function ($sessions, session) {
         let $old = $sessions.find("li[data-sid='" + session.sessionId + "']").detach();
         let cnt = ($old.length ? $old.find("span.hits").data("hits")||0 : 0);
-        let $hits = $("<span class='hits'></span>").data("hits", cnt);
+        let $hits = $("<span class='hits'></span>").data("hits", cnt).text(cnt);
         if (cnt > 0) {
             $hits.addClass("count");
-            $hits.text(cnt);
         }
         if (session.username) {
             $hits.addClass("active");
