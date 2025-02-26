@@ -189,12 +189,12 @@
 }
 .sessions-box ul.sessions li {
     list-style-type: none;
-    border-top: 1px solid #ccc;
-    width: 360px;
     display: inline-block;
-    overflow: clip;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    padding: 0;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    height: 25px;
+    line-height: 25px;
 }
 .sessions-box ul.sessions li.inactive {
     opacity: .4;
@@ -203,11 +203,15 @@
     display: none;
 }
 .sessions-box ul.sessions li .hits {
-    font-weight: bold;
+    display: inline-block;
+    height: 25px;
+    line-height: 25px;
+    vertical-align: top;
     color: transparent;
     background-color: #8396a2;
     border-left: 3px solid #009400;
-    padding: 2px 8px 2px 6px;
+    padding: 0 8px 0 6px;
+    font-size: .85em;
 }
 .sessions-box ul.sessions li .hits.active {
     background-color: #02b502;
@@ -228,15 +232,14 @@
     vertical-align: top;
 }
 .sessions-box ul.sessions li .username {
-    margin-left: 6px;
-    font-weight: bold;
-    font-size: .9em;
-}
-.sessions-box ul.sessions li .session-id {
-    margin-left: 6px;
+    display: inline-block;
+    height: 25px;
+    line-height: 25px;
+    vertical-align: top;
+    padding-left: 6px;
     padding-right: 6px;
-    font-style: italic;
-    font-size: .9em;
+    font-size: .85em;
+    background-color: #e6e8e6;
 }
 
 .console-box .status-bar {

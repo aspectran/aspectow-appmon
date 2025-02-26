@@ -279,8 +279,8 @@ function FrontViewer() {
 
     const addSession = function ($sessions, session) {
         let $old = $sessions.find("li[data-sid='" + session.sessionId + "']").detach();
-        let cnt = ($old.length ? $old.find("span.hits").data("hits")||0 : 0);
-        let $hits = $("<span class='hits'></span>").data("hits", cnt).text(cnt);
+        let cnt = ($old.length ? $old.find(".hits").data("hits")||0 : 0);
+        let $hits = $("<div class='hits'></div>").data("hits", cnt).text(cnt);
         if (cnt > 0) {
             $hits.addClass("count");
         }
@@ -291,6 +291,7 @@ function FrontViewer() {
             .attr("data-sid", session.sessionId)
             .attr("data-temp-resident", session.tempResident)
             .attr("data-inactive-interval", session.inactiveInterval)
+            .attr("title", session.ipAddress + " / " + session.sessionId + " / " + session.createAt)
             .append($hits);
         if (session.tempResident) {
             $li.addClass("inactive");
@@ -303,19 +304,19 @@ function FrontViewer() {
             $("<img class='flag' alt=''/>")
                 .attr("src", "https://aspectran.com/assets/countries/flags/" + session.countryCode.toLowerCase() + ".png")
                 .attr("alt", session.countryCode)
-                .attr("title", countries[session.countryCode].name + " / " + session.ipAddress)
+                .attr("title", countries[session.countryCode].name)
                 .appendTo($li);
         }
         if (session.username) {
-            $("<span class='username'/>")
+            $("<div class='username'/>")
                 .text(session.username)
                 .appendTo($li);
         }
-        $("<span class='session-id'/>")
-            .attr("title", session.sessionId)
-            .text(session.sessionId)
-            .appendTo($li);
-        $li.appendTo($sessions);
+        if (session.tempResident) {
+            $li.appendTo($sessions);
+        } else {
+            $li.prependTo($sessions);
+        }
     };
 
     const updateSessionHits = function (name, sessionId) {
