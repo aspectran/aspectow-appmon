@@ -1,10 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
-<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250226"/>">
+<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250226-2"/>">
 <script src="https://aspectran.com/assets/countries/countries.js"></script>
 <script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20250225"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250226"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250226-2"/>"></script>
 <script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250225"/>"></script>
 <script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250225"/>"></script>
 <div class="grid-x domain-box compact horizontal">
@@ -34,17 +34,17 @@
                     <div class="cell small-12 medium-6 large-4">
                         <div class="panel">
                             <dl class="session-statistics">
-                                <dt class="ellipses" title="The number of active sessions">Current Active Sessions</dt>
+                                <dt title="The number of active sessions">Current Active Sessions</dt>
                                 <dd><span class="number numberOfActives">0</span></dd>
-                                <dt class="ellipses" title="The highest number of sessions that have been active at a single time">Highest Active Sessions</dt>
+                                <dt title="The highest number of sessions that have been active at a single time">Highest Active Sessions</dt>
                                 <dd><span class="number highestNumberOfActives">0</span></dd>
-                                <dt class="ellipses" title="The number of sessions created since system bootup">Created Sessions</dt>
+                                <dt title="The number of sessions created since system bootup">Created Sessions</dt>
                                 <dd><span class="number numberOfCreated">0</span></dd>
-                                <dt class="ellipses" title="The number of expired sessions">Expired Sessions</dt>
+                                <dt title="The number of expired sessions">Expired Sessions</dt>
                                 <dd><span class="number numberOfExpired">0</span></dd>
-                                <dt class="ellipses" title="This number of sessions includes sessions that are inactive or have been transferred to a session manager on another clustered server">Unmanaged Sessions</dt>
+                                <dt title="This number of sessions includes sessions that are inactive or have been transferred to a session manager on another clustered server">Unmanaged Sessions</dt>
                                 <dd><span class="number numberOfUnmanaged">0</span></dd>
-                                <dt class="ellipses" title="The number of rejected sessions">Rejected Sessions</dt>
+                                <dt title="The number of rejected sessions">Rejected Sessions</dt>
                                 <dd><span class="number numberOfRejected">0</span></dd>
                             </dl>
                             <p class="text-right"><i>Elapsed <span class="elapsed"></span></i></p>

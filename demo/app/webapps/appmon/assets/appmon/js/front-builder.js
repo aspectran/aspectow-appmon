@@ -305,11 +305,13 @@ function FrontBuilder() {
             if (!$li.hasClass("on")) {
                 if ($li.hasClass("compact")) {
                     $li.addClass("on");
+                    $(".display-box.available").addClass("large-6");
                     $(".console-box.available").addClass("large-6");
                 }
             } else {
                 if ($li.hasClass("compact")) {
                     $li.removeClass("on");
+                    $(".display-box.available").removeClass("large-6");
                     $(".console-box.available").removeClass("large-6");
                 }
             }
@@ -426,7 +428,7 @@ function FrontBuilder() {
     const addDisplayBox = function (domainInfo, instanceInfo) {
         let $displayBox = $(".display-box");
         let $newBox = $displayBox.eq(0).hide().clone()
-            .addClass("available")
+            .addClass("available large-6")
             .attr("data-domain-index", domainInfo.index)
             .attr("data-instance-name", instanceInfo.name)
         $newBox.find(".status-bar h4")

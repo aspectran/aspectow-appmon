@@ -172,8 +172,13 @@
     padding: 0 0 0 .5em;
     margin: 0;
     height: 24px;
-    font-size: 1em;
+    font-size: .9em;
     font-weight: normal;
+    width: 70%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-wrap: nowrap;
 }
 .sessions-box dl.session-statistics dd {
     text-align: right;
