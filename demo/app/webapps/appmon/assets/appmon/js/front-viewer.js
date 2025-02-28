@@ -15,7 +15,6 @@ function FrontViewer() {
     };
 
     this.putIndicator = function (instance, type, label, $indicator) {
-        console.log(instance + ":" + type + ":" + label);
         $indicators[instance + ":" + type + ":" + label] = $indicator;
     };
 
@@ -327,7 +326,6 @@ function FrontViewer() {
                 $count.addClass("counting");
             }
             $li.stop().hide().fadeIn(180);
-            console.log("addSession2", activityCount);
         }
     }
 }
