@@ -430,7 +430,7 @@ function FrontBuilder() {
         let $newBox = $displayBox.eq(0).hide().clone()
             .addClass("available large-6")
             .attr("data-domain-index", domainInfo.index)
-            .attr("data-instance-name", instanceInfo.name)
+            .attr("data-instance-name", instanceInfo.name);
         $newBox.find(".status-bar h4")
             .text(domainInfo.title);
         return $newBox.insertAfter($displayBox.last());

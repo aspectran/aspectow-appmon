@@ -154,7 +154,7 @@ function FrontViewer() {
                 } else {
                     printCurrentActivities(name, 0);
                 }
-                updateSessionHits(instance + ":" + type + ":session", data.sessionId);
+                updateactivityCount(instance + ":" + type + ":session", data.sessionId, data.activityCount||0);
                 break;
             case "session":
                 printSessionEventData(name, data);
@@ -278,21 +278,20 @@ function FrontViewer() {
     };
 
     const addSession = function ($sessions, session) {
-        let $old = $sessions.find("li[data-sid='" + session.sessionId + "']").detach();
-        let cnt = ($old.length ? $old.find(".hits").data("hits")||0 : 0);
-        let $hits = $("<div class='hits'></div>").data("hits", cnt).text(cnt);
-        if (cnt > 0) {
-            $hits.addClass("count");
+        $sessions.find("li[data-sid='" + session.sessionId + "']").remove();
+        let $count = $("<div class='count'></div>").text(session.activityCount||0);
+        if (session.activityCount > 0) {
+            $count.addClass("counting");
         }
         if (session.username) {
-            $hits.addClass("active");
+            $count.addClass("active");
         }
         let $li = $("<li/>")
             .attr("data-sid", session.sessionId)
             .attr("data-temp-resident", session.tempResident)
             .attr("data-inactive-interval", session.inactiveInterval)
             .attr("title", session.ipAddress + " / " + session.sessionId + " / " + session.createAt)
-            .append($hits);
+            .append($count);
         if (session.tempResident) {
             $li.addClass("inactive");
             let inactiveInterval = Math.min(session.inactiveInterval||30, 30);
@@ -319,12 +318,16 @@ function FrontViewer() {
         }
     };
 
-    const updateSessionHits = function (name, sessionId) {
+    const updateactivityCount = function (name, sessionId, activityCount) {
         let $display = getDisplay(name);
         if ($display) {
-            let $hits = $display.find("ul.sessions li[data-sid='" + sessionId + "'] .hits");
-            let cnt = ($hits.data("hits")||0) + 1;
-            $hits.addClass("count").data("hits", cnt).text(cnt).stop().hide().fadeIn();
+            let $li = $display.find("ul.sessions li[data-sid='" + sessionId + "']");
+            let $count = $li.find(".count").text(activityCount);
+            if (activityCount > 0) {
+                $count.addClass("counting");
+            }
+            $li.stop().hide().fadeIn(180);
+            console.log("addSession2", activityCount);
         }
     }
 }

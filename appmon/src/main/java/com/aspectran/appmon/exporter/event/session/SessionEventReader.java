@@ -27,7 +27,6 @@ import com.aspectran.core.component.session.SessionListenerRegistration;
 import com.aspectran.core.component.session.SessionManager;
 import com.aspectran.core.component.session.SessionStatistics;
 import com.aspectran.undertow.server.TowServer;
-import com.aspectran.utils.Assert;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.json.JsonBuilder;
@@ -42,14 +41,16 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SessionEventReader extends AbstractEventReader {
 
     private static final Logger logger = LoggerFactory.getLogger(SessionEventReader.class);
 
-    private static final String USER_NAME = "user.name";
-    private static final String USER_COUNTRY_CODE = "user.countryCode";
-    private static final String USER_IP_ADDRESS = "user.ipAddress";
+    public static final String USER_NAME = "user.name";
+    public static final String USER_IP_ADDRESS = "user.ipAddress";
+    public static final String USER_COUNTRY_CODE = "user.countryCode";
+    public static final String USER_ACTIVITY_COUNT = "user.activityCount";
 
     private final String serverId;
 
@@ -245,16 +246,17 @@ public class SessionEventReader extends AbstractEventReader {
         return list.toArray(new JsonString[0]);
     }
 
-    private static JsonString serialize(Session session) {
-        Assert.notNull(session, "Session must not be null");
+    private static JsonString serialize(@NonNull Session session) {
+        AtomicInteger count = session.getAttribute(USER_ACTIVITY_COUNT);
         return new JsonBuilder()
                 .nullWritable(false)
                 .prettyPrint(false)
                 .object()
                     .put("sessionId", session.getId())
                     .put("username", session.getAttribute(USER_NAME))
-                    .put("countryCode", session.getAttribute(USER_COUNTRY_CODE))
                     .put("ipAddress", session.getAttribute(USER_IP_ADDRESS))
+                    .put("countryCode", session.getAttribute(USER_COUNTRY_CODE))
+                    .put("activityCount", (count != null ? count.get() : 0))
                     .put("createAt", formatTime(session.getCreationTime()))
                     .put("inactiveInterval", session.getMaxInactiveInterval())
                     .put("tempResident", session.isTempResident())

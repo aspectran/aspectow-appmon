@@ -207,7 +207,7 @@
 .sessions-box ul.sessions li.hidden {
     display: none;
 }
-.sessions-box ul.sessions li .hits {
+.sessions-box ul.sessions li .count {
     display: inline-block;
     height: 25px;
     line-height: 25px;
@@ -218,17 +218,17 @@
     padding: 0 8px 0 6px;
     font-size: .85em;
 }
-.sessions-box ul.sessions li .hits.active {
+.sessions-box ul.sessions li .count.active {
     background-color: #02b502;
 }
-.sessions-box ul.sessions li .hits.count {
+.sessions-box ul.sessions li .count.counting {
     color: #fff;
 }
-.sessions-box ul.sessions li.inactive .hits.count {
+.sessions-box ul.sessions li.inactive .count.counting {
     border-left: 3px solid #090909;
     color: #fff;
 }
-.sessions-box ul.sessions li.inactive .hits.active {
+.sessions-box ul.sessions li.inactive .count.active {
     border-left: 3px solid #009400;
 }
 .sessions-box ul.sessions li .flag {

@@ -17,6 +17,7 @@ package com.aspectran.appmon.persist.counter.activity;
 
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.persist.counter.AbstractEventCounter;
+import com.aspectran.core.adapter.SessionAdapter;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.core.context.rule.AspectAdviceRule;
 import com.aspectran.core.context.rule.AspectRule;
@@ -28,6 +29,10 @@ import com.aspectran.core.service.CoreService;
 import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.core.service.ServiceHoldingListener;
 import com.aspectran.utils.annotation.jsr305.NonNull;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.aspectran.appmon.exporter.event.session.SessionEventReader.USER_ACTIVITY_COUNT;
 
 /**
  * <p>Created: 2025-02-12</p>
@@ -79,15 +84,26 @@ public class ActivityEventCounter extends AbstractEventCounter {
             }
             aspectRule.setJoinpointRule(joinpointRule);
 
-            AspectAdviceRule afterAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.AFTER);
+            AspectAdviceRule afterAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.BEFORE);
             afterAspectAdviceRule.setAdviceAction(activity -> {
                 getEventCount().hit();
+                SessionAdapter sessionAdapter = activity.getSessionAdapter();
+                if (sessionAdapter != null) {
+                    AtomicInteger count = sessionAdapter.getAttribute(USER_ACTIVITY_COUNT);
+                    if (count != null) {
+                        count.incrementAndGet();
+                    } else {
+                        count = new AtomicInteger(1);
+                    }
+                    // To ensure that session data is stored
+                    sessionAdapter.setAttribute(USER_ACTIVITY_COUNT, count);
+                }
                 return null;
             });
 
             context.getAspectRuleRegistry().addAspectRule(aspectRule);
         } catch (Exception e) {
-            throw new RuntimeException("Cannot register aspect rule", e);
+            throw new RuntimeException("Cannot register aspect id=" + aspectId, e);
         }
     }
 

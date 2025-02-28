@@ -16,9 +16,14 @@
 package com.aspectran.appmon.exporter.event.activity;
 
 import com.aspectran.core.activity.Activity;
+import com.aspectran.core.adapter.SessionAdapter;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.json.JsonBuilder;
 import com.aspectran.utils.statistic.CounterStatistic;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.aspectran.appmon.exporter.event.session.SessionEventReader.USER_ACTIVITY_COUNT;
 
 /**
  * <p>Created: 2024-12-19</p>
@@ -32,7 +37,7 @@ public class ActivityEventAdvice {
     public ActivityEventAdvice() {
     }
 
-    public void request(@NonNull Activity activity) {
+    public void before(@NonNull Activity activity) {
         startTime = System.currentTimeMillis();
 
         // Since the servlet container does not allow session creation after
@@ -42,12 +47,23 @@ public class ActivityEventAdvice {
         }
     }
 
-    public String complete(@NonNull Activity activity) {
+    public String after(@NonNull Activity activity) {
         CounterStatistic activityCounter = activity.getActivityContext().getActivityCounter();
         long current = activityCounter.getCurrent();
         long max = activityCounter.getMax();
         long total = activityCounter.getTotal();
+
         long elapsedTime = System.currentTimeMillis() - startTime;
+
+        int activityCount = 0;
+        SessionAdapter sessionAdapter = activity.getSessionAdapter();
+        if (sessionAdapter != null) {
+            AtomicInteger counter = sessionAdapter.getAttribute(USER_ACTIVITY_COUNT);
+            if (counter != null) {
+                activityCount = counter.get();
+            }
+        }
+
         Throwable error = activity.getRootCauseOfRaisedException();
 
         return new JsonBuilder()
@@ -63,6 +79,7 @@ public class ActivityEventAdvice {
                     .put("elapsedTime", elapsedTime)
                     .put("thread", Thread.currentThread().getName())
                     .put("sessionId", sessionId)
+                    .put("activityCount", activityCount)
                     .put("error", error)
                 .endObject()
                 .toString();
