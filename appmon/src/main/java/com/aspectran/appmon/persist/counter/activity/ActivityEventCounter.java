@@ -87,8 +87,8 @@ public class ActivityEventCounter extends AbstractEventCounter {
             AspectAdviceRule afterAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.BEFORE);
             afterAspectAdviceRule.setAdviceAction(activity -> {
                 getEventCount().hit();
-                SessionAdapter sessionAdapter = activity.getSessionAdapter();
-                if (sessionAdapter != null) {
+                if (activity.hasSessionAdapter()) {
+                    SessionAdapter sessionAdapter = activity.getSessionAdapter();
                     AtomicInteger count = sessionAdapter.getAttribute(USER_ACTIVITY_COUNT);
                     if (count != null) {
                         count.incrementAndGet();

@@ -56,8 +56,8 @@ public class ActivityEventAdvice {
         long elapsedTime = System.currentTimeMillis() - startTime;
 
         int activityCount = 0;
-        SessionAdapter sessionAdapter = activity.getSessionAdapter();
-        if (sessionAdapter != null) {
+        if (activity.hasSessionAdapter()) {
+            SessionAdapter sessionAdapter = activity.getSessionAdapter();
             AtomicInteger counter = sessionAdapter.getAttribute(USER_ACTIVITY_COUNT);
             if (counter != null) {
                 activityCount = counter.get();

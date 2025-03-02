@@ -5,7 +5,7 @@
 
     <append file="/config/server/undertow/tow-server.xml"/>
     <append file="/config/server/undertow/tow-context-root.xml"/>
-    <append resource="com/aspectran/appmon/context/tow-context-appmon.xml"/>
+    <append file="/config/server/undertow/tow-context-appmon.xml"/>
     <append file="/config/server/undertow/tow-support.xml"/>
 
 </aspectran>

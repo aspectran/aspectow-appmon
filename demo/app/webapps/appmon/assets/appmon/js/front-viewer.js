@@ -289,7 +289,7 @@ function FrontViewer() {
             .attr("data-sid", session.sessionId)
             .attr("data-temp-resident", session.tempResident)
             .attr("data-inactive-interval", session.inactiveInterval)
-            .attr("title", session.ipAddress + " / " + session.sessionId + " / " + session.createAt)
+            .attr("title", (session.ipAddress ? session.ipAddress + "\n" : "") + session.sessionId + "\n" + session.createAt)
             .append($count);
         if (session.tempResident) {
             $li.addClass("inactive");
@@ -325,7 +325,7 @@ function FrontViewer() {
             if (activityCount > 0) {
                 $count.addClass("counting");
             }
-            $li.stop().hide().fadeIn(180);
+            $li.stop().hide().fadeIn(250);
         }
     }
 }
