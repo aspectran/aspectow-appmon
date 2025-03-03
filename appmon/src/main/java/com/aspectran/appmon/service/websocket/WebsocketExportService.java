@@ -93,13 +93,13 @@ public class WebsocketExportService implements ExportService {
         try {
             AppMonManager.validateToken(token);
         } catch (InvalidPBTokenException e) {
-            logger.error("Invalid token: " + token);
+            logger.error("Invalid token: {}", token);
             String reason = "Invalid token";
             session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, reason));
             throw new IOException(reason, e);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("WebSocket connection established with token: " + token);
+            logger.debug("WebSocket connection established with token: {}", token);
         }
     }
 
@@ -120,7 +120,7 @@ public class WebsocketExportService implements ExportService {
     @OnClose
     public void onClose(Session session, CloseReason reason) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Websocket session " + session.getId() + " has been closed. Reason: " + reason);
+            logger.debug("Websocket session {} has been closed. Reason: {}", session.getId(), reason);
         }
         removeSession(session);
     }
@@ -128,7 +128,7 @@ public class WebsocketExportService implements ExportService {
     @OnError
     public void onError(@NonNull Session session, Throwable error) {
         if (!ExceptionUtils.hasCause(error, ClosedChannelException.class, TimeoutException.class)) {
-            logger.warn("Error in websocket session: " + session.getId(), error);
+            logger.warn("Error in websocket session: {}", session.getId(), error);
         }
         try {
             removeSession(session);

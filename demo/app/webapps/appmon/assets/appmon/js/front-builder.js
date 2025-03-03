@@ -90,7 +90,7 @@ function FrontBuilder() {
             changeDomainState(domain, true);
             if (domain.endpoint.mode !== "websocket") {
                 setTimeout(function () {
-                    let client = new PollingClient(domain, viewers[domain.index], onJoined, onEstablished);
+                    let client = new PollingClient(domain, viewers[domain.index], onJoined, onEstablished, onClosed, onFailed);
                     clients[domain.index] = client;
                     client.start(specificInstances);
                 }, (domain.index - 1) * 1000);
@@ -102,7 +102,7 @@ function FrontBuilder() {
         let viewer = viewers[domainIndex];
         let client;
         if (domain.endpoint.mode === "polling") {
-            client = new PollingClient(domain, viewer, onJoined, onEstablished);
+            client = new PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFailed);
         } else {
             client = new WebsocketClient(domain, viewer, onJoined, onEstablished, onClosed, onFailed);
         }
@@ -305,7 +305,9 @@ function FrontBuilder() {
             if (!$li.hasClass("on")) {
                 if ($li.hasClass("compact")) {
                     $li.addClass("on");
-                    $(".display-box.available").addClass("large-6");
+                    if (domains.length > 1) {
+                        $(".display-box.available").addClass("large-6");
+                    }
                     $(".console-box.available").addClass("large-6");
                 }
             } else {
@@ -428,9 +430,12 @@ function FrontBuilder() {
     const addDisplayBox = function (domainInfo, instanceInfo) {
         let $displayBox = $(".display-box");
         let $newBox = $displayBox.eq(0).hide().clone()
-            .addClass("available large-6")
+            .addClass("available")
             .attr("data-domain-index", domainInfo.index)
             .attr("data-instance-name", instanceInfo.name);
+        if (domains.length > 1) {
+            $newBox.addClass("large-6");
+        }
         $newBox.find(".status-bar h4")
             .text(domainInfo.title);
         return $newBox.insertAfter($displayBox.last());

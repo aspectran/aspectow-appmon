@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon;
+package com.aspectran.appmon.action;
 
+import com.aspectran.appmon.AboutMe;
 import com.aspectran.appmon.manager.AppMonManager;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Action;
@@ -77,7 +78,7 @@ public class FrontAction {
             );
         } catch (Exception e) {
             if (e instanceof InvalidPBTokenException) {
-                logger.error("Invalid token: " + token);
+                logger.error("Invalid token: {}", token);
             } else {
                 logger.error(e.getMessage(), e);
             }

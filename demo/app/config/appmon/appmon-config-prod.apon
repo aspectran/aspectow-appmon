@@ -20,64 +20,6 @@ domain: {
     }
 }
 instance: {
-    name: jpetstore
-    title: JPetStore
-    event: {
-        name: activity
-        target: jpetstore
-        parameters: {
-            +: /**
-        }
-    }
-    event: {
-        name: session
-        target: tow.server/jpetstore
-    }
-    log: {
-        name: app
-        title: JPetStore App
-        file: /logs/jpetstore.log
-        lastLines: 1000
-        sampleInterval: 300
-    }
-    log: {
-        name: access
-        title: JPetStore Access
-        file: /logs/jpetstore-access.log
-        lastLines: 1000
-        sampleInterval: 300
-    }
-}
-instance: {
-    name: demo
-    title: Demo
-    event: {
-        name: activity
-        target: demo
-        parameters: {
-            +: /**
-        }
-    }
-    event: {
-        name: session
-        target: tow.server/demo
-    }
-    log: {
-        name: app
-        title: Demo App
-        file: /logs/demo.log
-        lastLines: 1000
-        sampleInterval: 300
-    }
-    log: {
-        name: access
-        title: Demo Access
-        file: /logs/demo-access.log
-        lastLines: 1000
-        sampleInterval: 300
-    }
-}
-instance: {
     name: root
     title: Root
     event: {
@@ -93,16 +35,73 @@ instance: {
     }
     log: {
         name: app
-        title: Root App
         file: /logs/root.log
-        lastLines: 1000
         sampleInterval: 300
+        lastLines: 1000
     }
     log: {
         name: access
-        title: Root Access
         file: /logs/root-access.log
-        lastLines: 1000
         sampleInterval: 300
+        lastLines: 1000
+    }
+}
+instance: {
+    name: appmon
+    title: AppMon
+    event: {
+        name: activity
+        target: appmon
+        parameters: {
+            +: /**
+        }
+    }
+    event: {
+        name: session
+        target: tow.server/appmon
+    }
+    log: {
+        name: app
+        file: /logs/appmon.log
+        sampleInterval: 300
+        lastLines: 1000
+    }
+    log: {
+        name: access
+        file: /logs/appmon-access.log
+        sampleInterval: 300
+        lastLines: 1000
+    }
+}
+instance: {
+    name: jpetstore
+    title: JPetStore
+    log: {
+        name: app
+        file: /logs/jpetstore.log
+        sampleInterval: 300
+        lastLines: 1000
+    }
+    log: {
+        name: access
+        file: /logs/jpetstore-access.log
+        sampleInterval: 300
+        lastLines: 1000
+    }
+}
+instance: {
+    name: demo
+    title: Demo
+    log: {
+        name: app
+        file: /logs/demo.log
+        sampleInterval: 300
+        lastLines: 1000
+    }
+    log: {
+        name: access
+        file: /logs/demo-access.log
+        sampleInterval: 300
+        lastLines: 1000
     }
 }

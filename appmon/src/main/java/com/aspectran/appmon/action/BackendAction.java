@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon;
+package com.aspectran.appmon.action;
 
 import com.aspectran.appmon.config.DomainInfo;
 import com.aspectran.appmon.config.InstanceInfo;

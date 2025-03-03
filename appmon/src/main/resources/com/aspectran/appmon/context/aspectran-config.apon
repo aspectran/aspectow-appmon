@@ -2,7 +2,11 @@ context: {
     name: appmon
     rules: classpath:com/aspectran/appmon/context/root-context.xml
     scan: [
-        com.aspectran.appmon
+        com.aspectran.appmon.action
+        com.aspectran.appmon.manager
+        com.aspectran.appmon.mybatis
+        com.aspectran.appmon.service.polling
+        com.aspectran.appmon.service.websocket
     ]
     profiles: {
         essential: [

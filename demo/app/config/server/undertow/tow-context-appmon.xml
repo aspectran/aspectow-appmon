@@ -29,19 +29,7 @@
             </item>
             <item name="scratchDir">/work/_webapps/%{tow.context.appmon.name}</item>
             <item name="sessionManager">#{tow.context.appmon.sessionManager}</item>
-            <item name="servletSessionConfig">
-                <bean class="io.undertow.servlet.api.ServletSessionConfig">
-                    <properties>
-                        <item name="sessionTrackingModes" type="set">
-                            <value>#{class:jakarta.servlet.SessionTrackingMode^COOKIE}</value>
-                        </item>
-                        <item name="path" value="/"/>
-                    </properties>
-                    <properties profile="prod">
-                        <item name="domain" value="aspectran.com"/>
-                    </properties>
-                </bean>
-            </item>
+            <item name="servletSessionConfig">#{tow.context.appmon.sessionConfig}</item>
             <item name="initParams" type="map">
                 <entry name="aspectran:config">%{tow.context.appmon.config}</entry>
             </item>
@@ -85,6 +73,16 @@
         </properties>
     </bean>
 
+    <bean id="tow.context.appmon.sessionConfig"
+          class="io.undertow.servlet.api.ServletSessionConfig">
+        <properties>
+            <item name="sessionTrackingModes" type="set">
+                <value>#{class:jakarta.servlet.SessionTrackingMode^COOKIE}</value>
+            </item>
+            <item name="path" value="/"/>
+        </properties>
+    </bean>
+
     <bean id="tow.context.appmon.sessionManager"
           class="com.aspectran.undertow.server.session.TowSessionManager"
           scope="prototype">
@@ -93,13 +91,11 @@
                 <bean class="com.aspectran.core.context.config.SessionManagerConfig">
                     <arguments>
                         <item>
-                            workerName: appmon0
+                            workerName: am0
                             maxActiveSessions: 999
-                            maxIdleSeconds: 489
-                            evictionIdleSeconds: 258
-                            maxIdleSecondsForNew: 60
-                            evictionIdleSecondsForNew: 30
-                            scavengingIntervalSeconds: 90
+                            maxIdleSeconds: 600
+                            evictionIdleSeconds: 300
+                            scavengingIntervalSeconds: 180
                             clusterEnabled: false
                         </item>
                     </arguments>

@@ -1,4 +1,4 @@
-function PollingClient(domain, viewer, onJoined, onEstablished) {
+function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFailed) {
 
     const ENDPOINT_MODE = "polling";
     const MAX_RETRIES = 10;
@@ -61,6 +61,9 @@ function PollingClient(domain, viewer, onJoined, onEstablished) {
             }, retryInterval);
         } else {
             viewer.printMessage("Max connection attempts exceeded.");
+            if (onFailed) {
+                onFailed(domain);
+            }
         }
     };
 
@@ -80,12 +83,18 @@ function PollingClient(domain, viewer, onJoined, onEstablished) {
                 } else {
                     console.log(domain.name, "connection lost");
                     viewer.printErrorMessage("Connection lost.");
+                    if (onClosed) {
+                        onClosed(domain);
+                    }
                     rejoin(specificInstances);
                 }
             },
             error: function (xhr, status, error) {
                 console.log(domain.name, "connection lost", error);
                 viewer.printErrorMessage("Connection lost.");
+                if (onClosed) {
+                    onClosed(domain);
+                }
                 rejoin(specificInstances);
             }
         });
