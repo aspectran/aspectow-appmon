@@ -69,7 +69,8 @@ function FrontBuilder() {
         function onEstablished(domain) {
             domain.client.established = true;
             domain.client.establishCount++;
-            console.log(domain.name, "connection established", domain.client.establishCount);
+            console.log(domain.name, "connection established:", domain.client.establishCount);
+            console.log(domain.name, "endpoint mode:", domain.endpoint.mode)
             changeDomainState(domain);
             if (domain.active) {
                 viewers[domain.index].setVisible(true);

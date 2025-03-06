@@ -17,7 +17,6 @@ package com.aspectran.appmon.persist.counter.session;
 
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.persist.counter.AbstractEventCounter;
-import com.aspectran.core.component.bean.NoSuchBeanException;
 import com.aspectran.core.component.session.SessionListener;
 import com.aspectran.core.component.session.SessionListenerRegistration;
 import com.aspectran.core.component.session.SessionManager;
@@ -26,6 +25,7 @@ import com.aspectran.core.service.CoreService;
 import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.core.service.ServiceHoldingListener;
 import com.aspectran.undertow.server.TowServer;
+import com.aspectran.undertow.support.SessionListenerRegistrationBean;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 
@@ -82,11 +82,17 @@ public class SessionEventCounter extends AbstractEventCounter {
 
     @NonNull
     private SessionListenerRegistration getSessionListenerRegistration(@NonNull ActivityContext context) {
-        try {
-            return context.getBeanRegistry().getBean(SessionListenerRegistration.class);
-        } catch (NoSuchBeanException e) {
-            throw new IllegalStateException("Bean for SessionListenerRegistration must be defined", e);
+        SessionListenerRegistration sessionListenerRegistration;
+        if (context.getBeanRegistry().containsBean(SessionListenerRegistration.class)) {
+            sessionListenerRegistration = context.getBeanRegistry().getBean(SessionListenerRegistration.class);
+        } else {
+            if (context.getBeanRegistry().containsBean(TowServer.class)) {
+                sessionListenerRegistration = new SessionListenerRegistrationBean();
+            } else {
+                throw new IllegalStateException("Bean for SessionListenerRegistration must be defined");
+            }
         }
+        return sessionListenerRegistration;
     }
 
     void sessionCreated() {

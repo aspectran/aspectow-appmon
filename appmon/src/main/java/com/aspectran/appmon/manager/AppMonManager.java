@@ -113,6 +113,10 @@ public class AppMonManager extends InstantActivitySupport {
         return getActivityContext().getBeanRegistry().getBean(type);
     }
 
+    public boolean containsBean(Class<?> type) {
+        return getActivityContext().getBeanRegistry().containsBean(type);
+    }
+
     public static String issueToken() {
         return issueToken(60); // default 60 secs.
     }

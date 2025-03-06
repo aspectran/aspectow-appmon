@@ -24,6 +24,8 @@ import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.session.Session;
 import com.aspectran.core.component.session.SessionListener;
 import com.aspectran.core.component.session.SessionListenerRegistration;
+import com.aspectran.undertow.server.TowServer;
+import com.aspectran.undertow.support.SessionListenerRegistrationBean;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.web.support.http.HttpHeaders;
@@ -49,10 +51,22 @@ public class UserTrackingListener extends InstantActivitySupport implements Sess
 
     @Override
     public void initialize() throws Exception {
-        SessionListenerRegistration sessionListenerRegistration =
-                getBeanRegistry().getBean(SessionListenerRegistration.class);
-        if (sessionListenerRegistration == null) {
-            throw new IllegalStateException("Bean for SessionListenerRegistration must be defined");
+        try {
+            Class.forName("com.aspectran.undertow.server.TowServer");
+        } catch (ClassNotFoundException e) {
+            // Undertow not available
+            return;
+        }
+
+        SessionListenerRegistration sessionListenerRegistration;
+        if (getBeanRegistry().containsBean(SessionListenerRegistration.class)) {
+            sessionListenerRegistration = getBeanRegistry().getBean(SessionListenerRegistration.class);
+        } else {
+            if (getBeanRegistry().containsBean(TowServer.class)) {
+                sessionListenerRegistration = new SessionListenerRegistrationBean();
+            } else {
+                throw new IllegalStateException("Bean for SessionListenerRegistration must be defined");
+            }
         }
         sessionListenerRegistration.register(this, getActivityContext().getName());
     }

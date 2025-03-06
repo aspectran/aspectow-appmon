@@ -97,4 +97,8 @@ public abstract class ExporterManager {
         return exportServiceManager.getAppMonManager().getBean(type);
     }
 
+    public boolean containsBean(Class<?> type) {
+        return exportServiceManager.getAppMonManager().containsBean(type);
+    }
+
 }

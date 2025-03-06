@@ -51,32 +51,34 @@ function WebsocketClient(domain, viewer, onJoined, onEstablished, onClosed, onFa
         };
         socket.onclose = function (event) {
             closeSocket(true);
-            if (onClosed) {
-                onClosed(domain);
-            }
-            if (event.code === 1003) {
-                console.log(domain.name, "socket connection refused: ", event.code);
-                viewer.printErrorMessage("Socket connection refused by server.");
-                return;
-            }
-            if (event.code === 1000 || retryCount === 0) {
-                console.log(domain.name, "socket connection closed: ", event.code);
-                viewer.printMessage("Socket connection closed.");
-            }
-            if (event.code !== 1000) {
-                if (retryCount++ < MAX_RETRIES) {
-                    let retryInterval = (RETRY_INTERVAL * retryCount) + (domain.index * 200) + domain.random1000;
-                    let status = "(" + retryCount + "/" + MAX_RETRIES + ", interval=" + retryInterval + ")";
-                    console.log(domain.name, "trying to reconnect", status);
-                    viewer.printMessage("Trying to reconnect... " + status);
-                    setTimeout(function () {
-                        openSocket(specificInstances);
-                    }, retryInterval);
-                } else {
-                    console.log(domain.name, "abort reconnect attempt");
-                    viewer.printMessage("Max connection attempts exceeded.");
-                    if (onFailed) {
-                        onFailed(domain);
+            if (domain.endpoint.mode === ENDPOINT_MODE) {
+                if (onClosed) {
+                    onClosed(domain);
+                }
+                if (event.code === 1003) {
+                    console.log(domain.name, "socket connection refused: ", event.code);
+                    viewer.printErrorMessage("Socket connection refused by server.");
+                    return;
+                }
+                if (event.code === 1000 || retryCount === 0) {
+                    console.log(domain.name, "socket connection closed: ", event.code);
+                    viewer.printMessage("Socket connection closed.");
+                }
+                if (event.code !== 1000) {
+                    if (retryCount++ < MAX_RETRIES) {
+                        let retryInterval = (RETRY_INTERVAL * retryCount) + (domain.index * 200) + domain.random1000;
+                        let status = "(" + retryCount + "/" + MAX_RETRIES + ", interval=" + retryInterval + ")";
+                        console.log(domain.name, "trying to reconnect", status);
+                        viewer.printMessage("Trying to reconnect... " + status);
+                        setTimeout(function () {
+                            openSocket(specificInstances);
+                        }, retryInterval);
+                    } else {
+                        console.log(domain.name, "abort reconnect attempt");
+                        viewer.printMessage("Max connection attempts exceeded.");
+                        if (onFailed) {
+                            onFailed(domain);
+                        }
                     }
                 }
             }

@@ -20,13 +20,13 @@ import com.aspectran.appmon.exporter.event.AbstractEventReader;
 import com.aspectran.appmon.exporter.event.EventExporter;
 import com.aspectran.appmon.exporter.event.EventExporterManager;
 import com.aspectran.core.component.UnavailableException;
-import com.aspectran.core.component.bean.NoSuchBeanException;
 import com.aspectran.core.component.session.ManagedSession;
 import com.aspectran.core.component.session.Session;
 import com.aspectran.core.component.session.SessionListenerRegistration;
 import com.aspectran.core.component.session.SessionManager;
 import com.aspectran.core.component.session.SessionStatistics;
 import com.aspectran.undertow.server.TowServer;
+import com.aspectran.undertow.support.SessionListenerRegistrationBean;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.json.JsonBuilder;
@@ -111,11 +111,17 @@ public class SessionEventReader extends AbstractEventReader {
 
     @NonNull
     private SessionListenerRegistration getSessionListenerRegistration() {
-        try {
-            return getEventExporterManager().getBean(SessionListenerRegistration.class);
-        } catch (NoSuchBeanException e) {
-            throw new IllegalStateException("Bean for SessionListenerRegistration must be defined", e);
+        SessionListenerRegistration sessionListenerRegistration;
+        if (getEventExporterManager().containsBean(SessionListenerRegistration.class)) {
+            sessionListenerRegistration = getEventExporterManager().getBean(SessionListenerRegistration.class);
+        } else {
+            if (getEventExporterManager().containsBean(TowServer.class)) {
+                sessionListenerRegistration = new SessionListenerRegistrationBean();
+            } else {
+                throw new IllegalStateException("Bean for SessionListenerRegistration must be defined");
+            }
         }
+        return sessionListenerRegistration;
     }
 
     @Override
