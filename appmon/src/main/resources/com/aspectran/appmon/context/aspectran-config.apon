@@ -2,8 +2,7 @@ context: {
     name: appmon
     rules: classpath:com/aspectran/appmon/context/root-context.xml
     scan: [
-        com.aspectran.appmon.action
-        com.aspectran.appmon.listener
+        com.aspectran.appmon.agent
         com.aspectran.appmon.manager
         com.aspectran.appmon.mybatis
         com.aspectran.appmon.service.polling

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.listener;
+package com.aspectran.appmon.agent.listener;
 
 import com.aspectran.core.activity.Activity;
 import com.aspectran.core.activity.InstantActivitySupport;
@@ -51,17 +51,16 @@ public class UserTrackingListener extends InstantActivitySupport implements Sess
 
     @Override
     public void initialize() throws Exception {
-        try {
-            Class.forName("com.aspectran.undertow.server.TowServer");
-        } catch (ClassNotFoundException e) {
-            // Undertow not available
-            return;
-        }
-
         SessionListenerRegistration sessionListenerRegistration;
         if (getBeanRegistry().containsBean(SessionListenerRegistration.class)) {
             sessionListenerRegistration = getBeanRegistry().getBean(SessionListenerRegistration.class);
         } else {
+            try {
+                Class.forName("com.aspectran.undertow.server.TowServer");
+            } catch (ClassNotFoundException e) {
+                // Undertow not available
+                return;
+            }
             if (getBeanRegistry().containsBean(TowServer.class)) {
                 sessionListenerRegistration = new SessionListenerRegistrationBean();
             } else {

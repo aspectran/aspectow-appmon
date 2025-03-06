@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.action;
+package com.aspectran.appmon.agent.schedule;
 
 import com.aspectran.appmon.manager.AppMonManager;
 import com.aspectran.appmon.mybatis.mapper.CounterMapper;
@@ -57,7 +57,7 @@ import java.util.List;
         @Job(translet = "appmon/persist/counter/save.job")
     }
 )
-public class CounterPersistScheduledAction implements ActivityContextAware {
+public class CounterPersistSchedule implements ActivityContextAware {
 
     private final CounterPersist counterPersist;
 
@@ -66,8 +66,8 @@ public class CounterPersistScheduledAction implements ActivityContextAware {
     private ActivityContext context;
 
     @Autowired
-    public CounterPersistScheduledAction(@NonNull AppMonManager appMonManager,
-                                         CounterMapper.Dao dao) {
+    public CounterPersistSchedule(@NonNull AppMonManager appMonManager,
+                                  CounterMapper.Dao dao) {
         this.counterPersist = appMonManager.getPersistManager().getCounterPersist();
         this.dao = dao;
     }
