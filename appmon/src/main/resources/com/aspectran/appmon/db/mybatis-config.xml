@@ -28,7 +28,7 @@
     </environments>
 
     <mappers>
-        <mapper resource="com/aspectran/appmon/mybatis/mapper/CounterMapper.xml"/>
+        <mapper resource="com/aspectran/appmon/db/mapper/CounterMapper.xml"/>
     </mappers>
 
 </configuration>
