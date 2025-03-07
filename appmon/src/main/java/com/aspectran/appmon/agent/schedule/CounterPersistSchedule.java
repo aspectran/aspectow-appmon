@@ -16,7 +16,7 @@
 package com.aspectran.appmon.agent.schedule;
 
 import com.aspectran.appmon.manager.AppMonManager;
-import com.aspectran.appmon.mybatis.mapper.CounterMapper;
+import com.aspectran.appmon.persist.db.mapper.CounterMapper;
 import com.aspectran.appmon.persist.counter.CounterPersist;
 import com.aspectran.appmon.persist.counter.EventCountVO;
 import com.aspectran.appmon.persist.counter.EventCounter;

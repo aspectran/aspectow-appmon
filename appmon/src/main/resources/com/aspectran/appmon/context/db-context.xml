@@ -11,8 +11,8 @@
         <properties>
             <item name="ignoreInvalidResource" valueType="boolean">true</item>
             <item name="locations" type="array">
-                <value>classpath:com/aspectran/appmon/db/appmon.db.properties</value>
-                <value>classpath:com/aspectran/appmon/db/appmon.db.system.properties</value>
+                <value>classpath:com/aspectran/appmon/persist/db/appmon.db.properties</value>
+                <value>classpath:com/aspectran/appmon/persist/db/appmon.db.system.properties</value>
                 <value>/config/appmon/appmon.db.properties</value>
             </item>
         </properties>
@@ -23,7 +23,7 @@
             FactoryBean that creates an MyBatis SqlSessionFactory using default MyBatis Configuration.
         </description>
         <properties>
-            <item name="configLocation" value="classpath:com/aspectran/appmon/db/mybatis-config.xml"/>
+            <item name="configLocation" value="classpath:com/aspectran/appmon/persist/db/mybatis-config.xml"/>
             <item name="environment" value="default"/>
             <item name="properties" type="properties">
                 <entry name="driver">#{appmonDBProperties^driver}</entry>

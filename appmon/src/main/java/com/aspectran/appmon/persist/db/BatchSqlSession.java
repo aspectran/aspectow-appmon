@@ -13,18 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.mybatis;
+package com.aspectran.appmon.persist.db;
 
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.mybatis.SqlSessionAgent;
 
+/**
+ * Advice to handle database transactions in reuse mode.
+ * <ul>
+ * <li>PreparedStatements will be reused.
+ * </ul>
+ */
 @Component
-@Bean(id = "simpleSqlSession", lazyDestroy = true)
-public class SimpleSqlSession extends SqlSessionAgent {
+@Bean(id = "batchSqlSession", lazyDestroy = true)
+public class BatchSqlSession extends SqlSessionAgent {
 
-    public SimpleSqlSession() {
-        super("simpleTxAspect");
+    public BatchSqlSession() {
+        super("batchTxAspect");
     }
 
 }

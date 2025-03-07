@@ -4,7 +4,7 @@ context: {
     scan: [
         com.aspectran.appmon.agent
         com.aspectran.appmon.manager
-        com.aspectran.appmon.mybatis
+        com.aspectran.appmon.persist.db
         com.aspectran.appmon.service.polling
         com.aspectran.appmon.service.websocket
     ]
