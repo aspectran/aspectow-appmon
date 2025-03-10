@@ -1,11 +1,15 @@
 package com.aspectran.appmon.persist.counter;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * <p>Created: 2025-02-14</p>
  */
 public class EventCountVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 4071706635617339624L;
 
     private String inst;
 
