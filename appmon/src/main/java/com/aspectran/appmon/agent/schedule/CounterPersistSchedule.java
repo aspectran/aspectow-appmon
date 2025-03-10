@@ -16,10 +16,10 @@
 package com.aspectran.appmon.agent.schedule;
 
 import com.aspectran.appmon.manager.AppMonManager;
-import com.aspectran.appmon.persist.db.mapper.CounterMapper;
 import com.aspectran.appmon.persist.counter.CounterPersist;
 import com.aspectran.appmon.persist.counter.EventCountVO;
 import com.aspectran.appmon.persist.counter.EventCounter;
+import com.aspectran.appmon.persist.db.mapper.CounterMapper;
 import com.aspectran.core.activity.InstantActivity;
 import com.aspectran.core.activity.InstantActivityException;
 import com.aspectran.core.component.bean.annotation.Autowired;
@@ -40,7 +40,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 /**
  * <p>Created: 2025-02-12</p>
@@ -82,9 +81,8 @@ public class CounterPersistSchedule implements ActivityContextAware {
         try {
             InstantActivity activity = new InstantActivity(context);
             activity.perform(() -> {
-                List<EventCounter> eventCounterList = counterPersist.getEventCounterList();
-                for (EventCounter eventCounter : eventCounterList) {
-                    EventCountVO eventCountVO = dao.getFinalEventCount(eventCounter.getInstanceName(), eventCounter.getEventName());
+                for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
+                    EventCountVO eventCountVO = dao.getLastEventCount(eventCounter.getInstanceName(), eventCounter.getEventName());
                     if (eventCountVO != null) {
                         eventCounter.getEventCount().restore(eventCountVO.getTotal(), eventCountVO.getDelta());
                     }
@@ -113,8 +111,7 @@ public class CounterPersistSchedule implements ActivityContextAware {
     @Request("appmon/persist/counter/save.job")
     public void save(boolean aborted) {
         EventCountVO eventCountVO = null;
-        List<EventCounter> eventCounterList = counterPersist.getEventCounterList();
-        for (EventCounter eventCounter : eventCounterList) {
+        for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
             long total = eventCounter.getEventCount().getTotal();
             long delta = eventCounter.getEventCount().getDelta(total);
             if (delta > 0) {
@@ -125,7 +122,7 @@ public class CounterPersistSchedule implements ActivityContextAware {
                 eventCountVO.setEvt(eventCounter.getEventName());
                 eventCountVO.setTotal(total);
                 eventCountVO.setDelta(delta);
-                dao.updateFinalEventCount(eventCountVO);
+                dao.updateLastEventCount(eventCountVO);
                 dao.insertEventCount(eventCountVO);
             }
         }

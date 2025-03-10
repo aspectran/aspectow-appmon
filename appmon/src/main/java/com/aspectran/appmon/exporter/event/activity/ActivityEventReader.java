@@ -83,7 +83,7 @@ public class ActivityEventReader extends AbstractEventReader {
 
         AspectAdviceRule beforeAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.BEFORE);
         beforeAspectAdviceRule.setAdviceAction(activity -> {
-            ActivityEventAdvice activityEventAdvice = new ActivityEventAdvice();
+            ActivityEventAdvice activityEventAdvice = new ActivityEventAdvice(ActivityEventReader.this);
             activityEventAdvice.before(activity);
             return activityEventAdvice;
         });
@@ -119,7 +119,12 @@ public class ActivityEventReader extends AbstractEventReader {
     public String read() {
         long current = activityCounter.getCurrent();
         long max = activityCounter.getMax();
-        long total = activityCounter.getTotal();
+        long total;
+        if (getEventCount() != null) {
+            total = getEventCount().getTotal();
+        } else {
+            total = activityCounter.getTotal();
+        }
         return new JsonBuilder()
             .prettyPrint(false)
             .nullWritable(false)

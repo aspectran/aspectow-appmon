@@ -31,9 +31,9 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface CounterMapper {
 
-    EventCountVO getFinalEventCount(@Param("inst") String instanceName, @Param("evt") String eventName);
+    EventCountVO getLastEventCount(@Param("inst") String instanceName, @Param("evt") String eventName);
 
-    void updateFinalEventCount(EventCountVO eventCountVO);
+    void updateLastEventCount(EventCountVO eventCountVO);
 
     int insertEventCount(EventCountVO eventCountVO);
 
@@ -46,13 +46,13 @@ public interface CounterMapper {
         }
 
         @Override
-        public EventCountVO getFinalEventCount(String instanceName, String eventName) {
-            return simple().getFinalEventCount(instanceName, eventName);
+        public EventCountVO getLastEventCount(String instanceName, String eventName) {
+            return simple().getLastEventCount(instanceName, eventName);
         }
 
         @Override
-        public void updateFinalEventCount(EventCountVO eventCountVO) {
-            simple().updateFinalEventCount(eventCountVO);
+        public void updateLastEventCount(EventCountVO eventCountVO) {
+            simple().updateLastEventCount(eventCountVO);
         }
 
         @Override

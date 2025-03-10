@@ -17,6 +17,7 @@ package com.aspectran.appmon.exporter.event;
 
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.Exporter;
+import com.aspectran.appmon.persist.counter.EventCount;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 
@@ -56,6 +57,10 @@ public class EventExporter extends Exporter {
     @Override
     public String getName() {
         return eventInfo.getName();
+    }
+
+    public void setEventCount(EventCount eventCount) {
+        eventReader.setEventCount(eventCount);
     }
 
     @Override

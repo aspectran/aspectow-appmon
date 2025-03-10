@@ -22,11 +22,14 @@ import com.aspectran.appmon.config.InstanceInfo;
 import com.aspectran.appmon.config.InstanceInfoHolder;
 import com.aspectran.appmon.config.LogInfo;
 import com.aspectran.appmon.config.PollingConfig;
+import com.aspectran.appmon.exporter.Exporter;
+import com.aspectran.appmon.exporter.event.EventExporter;
 import com.aspectran.appmon.exporter.event.EventExporterBuilder;
 import com.aspectran.appmon.exporter.event.EventExporterManager;
 import com.aspectran.appmon.exporter.log.LogExporterBuilder;
 import com.aspectran.appmon.exporter.log.LogExporterManager;
 import com.aspectran.appmon.persist.PersistManager;
+import com.aspectran.appmon.persist.counter.EventCounter;
 import com.aspectran.appmon.persist.counter.EventCounterBuilder;
 import com.aspectran.appmon.service.ExportServiceManager;
 import com.aspectran.core.context.ActivityContext;
@@ -56,6 +59,13 @@ public abstract class AppMonManagerBuilder {
                 EventExporterManager eventExporterManager = new EventExporterManager(exportServiceManager, instanceName);
                 EventExporterBuilder.build(eventExporterManager, eventInfoList);
                 EventCounterBuilder.build(persistManager, eventInfoList);
+                for (EventInfo eventInfo : eventInfoList) {
+                    Exporter exporter = eventExporterManager.getExporter(eventInfo.getName());
+                    if (exporter instanceof EventExporter eventExporter) {
+                        EventCounter eventCounter = persistManager.getCounterPersist().getEventCounter(instanceName, eventInfo.getName());
+                        eventExporter.setEventCount(eventCounter.getEventCount());
+                    }
+                }
             }
             List<LogInfo> logInfoList = appMonConfig.getLogInfoList(instanceName);
             if (logInfoList != null && !logInfoList.isEmpty()) {

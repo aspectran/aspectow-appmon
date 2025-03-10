@@ -30,11 +30,14 @@ import static com.aspectran.appmon.exporter.event.session.SessionEventReader.USE
  */
 public class ActivityEventAdvice {
 
+    private final ActivityEventReader activityEventReader;
+
     private long startTime;
 
     private String sessionId;
 
-    public ActivityEventAdvice() {
+    public ActivityEventAdvice(ActivityEventReader activityEventReader) {
+        this.activityEventReader = activityEventReader;
     }
 
     public void before(@NonNull Activity activity) {
@@ -51,7 +54,12 @@ public class ActivityEventAdvice {
         CounterStatistic activityCounter = activity.getActivityContext().getActivityCounter();
         long current = activityCounter.getCurrent();
         long max = activityCounter.getMax();
-        long total = activityCounter.getTotal();
+        long total;
+        if (activityEventReader.getEventCount() != null) {
+            total = activityEventReader.getEventCount().getTotal();
+        } else {
+            total = activityCounter.getTotal();
+        }
 
         long elapsedTime = System.currentTimeMillis() - startTime;
 

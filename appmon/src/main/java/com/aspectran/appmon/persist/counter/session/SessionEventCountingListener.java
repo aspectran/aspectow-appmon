@@ -23,15 +23,15 @@ import com.aspectran.core.component.session.SessionListener;
  */
 public class SessionEventCountingListener implements SessionListener {
 
-    private final SessionEventCounter counterCounter;
+    private final SessionEventCounter sessionEventCounter;
 
-    public SessionEventCountingListener(SessionEventCounter counterCounter) {
-        this.counterCounter = counterCounter;
+    public SessionEventCountingListener(SessionEventCounter sessionEventCounter) {
+        this.sessionEventCounter = sessionEventCounter;
     }
 
     @Override
     public void sessionCreated(Session session) {
-        counterCounter.sessionCreated();
+        sessionEventCounter.sessionCreated();
     }
 
 }

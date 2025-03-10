@@ -15,22 +15,31 @@
  */
 package com.aspectran.appmon.persist.counter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * <p>Created: 2025-02-12</p>
  */
 public class CounterPersist {
 
-    private final List<EventCounter> eventCounterList = new ArrayList<>();
+    private final Map<String, EventCounter> eventCounterMap = new LinkedHashMap<>();
 
     public void addEventCounter(EventCounter eventCounter) {
-        eventCounterList.add(eventCounter);
+        eventCounterMap.put(eventCounter.getInstanceName() + ":" + eventCounter.getEventName(), eventCounter);
     }
 
-    public List<EventCounter> getEventCounterList() {
-        return eventCounterList;
+    public Collection<EventCounter> getEventCounterList() {
+        return eventCounterMap.values();
+    }
+
+    public EventCounter getEventCounter(String instanceName, String eventName) {
+        EventCounter eventCounter = eventCounterMap.get(instanceName + ":" + eventName);
+        if (eventCounter == null) {
+            throw new IllegalArgumentException("No event counter found for event '" + eventName + "' of instance '" + instanceName + "'");
+        }
+        return eventCounter;
     }
 
 }

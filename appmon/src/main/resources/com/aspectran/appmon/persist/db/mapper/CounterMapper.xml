@@ -6,13 +6,13 @@
 
     <cache />
 
-    <select id="getFinalEventCount" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
+    <select id="getLastEventCount" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
         select inst, evt, ymd, hh, mm, total, delta
         from event_count_final
         where inst = #{inst} and evt = #{evt}
     </select>
 
-    <update id="updateFinalEventCount" parameterType="com.aspectran.appmon.persist.counter.EventCountVO">
+    <update id="updateLastEventCount" parameterType="com.aspectran.appmon.persist.counter.EventCountVO">
         merge into event_count_final as a
             using values (#{inst}, #{evt}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta})
                 as b (inst, evt, ymd, hh, mm, total, delta)
