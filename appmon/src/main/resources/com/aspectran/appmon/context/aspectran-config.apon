@@ -9,7 +9,7 @@ context: {
         com.aspectran.appmon.service.websocket
     ]
     profiles: {
-        essential: [
+        base: [
             h2
         ]
         default: [
