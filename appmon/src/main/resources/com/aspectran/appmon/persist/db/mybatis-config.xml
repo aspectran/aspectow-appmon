@@ -27,6 +27,11 @@
         </environment>
     </environments>
 
+    <databaseIdProvider type="DB_VENDOR">
+        <property name="H2" value="h2"/>
+        <property name="Oracle" value="oracle"/>
+    </databaseIdProvider>
+
     <mappers>
         <mapper resource="com/aspectran/appmon/persist/db/mapper/CounterMapper.xml"/>
     </mappers>

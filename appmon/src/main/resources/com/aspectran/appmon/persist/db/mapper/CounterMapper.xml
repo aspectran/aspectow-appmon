@@ -13,27 +13,65 @@
     </select>
 
     <update id="updateLastEventCount" parameterType="com.aspectran.appmon.persist.counter.EventCountVO">
-        merge into event_count_last as a
-            using values (#{domain}, #{instance}, #{event}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta})
-                as b (domain, instance, event, ymd, hh, mm, total, delta)
-        on (a.domain = b.domain and a.instance = b.instance and a.event = b.event)
-        when matched then
-            update set ymd = b.ymd, hh = b.hh, mm = b.mm, total = b.total, delta = b.delta
-        when not matched then
-            insert (domain, instance, event, ymd, hh, mm, total, delta)
-            values (b.domain, b.instance, b.event, b.ymd, b.hh, b.mm, b.total, b.delta)
+        <choose>
+            <when test="_databaseId == 'oracle'">
+                merge into event_count_last a
+                using (
+                    select
+                        #{domain} as domain, #{instance} as instance, #{event} as event,
+                        #{ymd} as ymd, #{hh} as hh, #{mm} as mm, #{total} as total, #{delta} as delta
+                    from dual
+                ) b
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event)
+                when matched then
+                    update set ymd = b.ymd, hh = b.hh, mm = b.mm, total = b.total, delta = b.delta
+                when not matched then
+                    insert (domain, instance, event, ymd, hh, mm, total, delta)
+                    values (b.domain, b.instance, b.event, b.ymd, b.hh, b.mm, b.total, b.delta)
+            </when>
+            <otherwise>
+                merge into event_count_last as a
+                using values (#{domain}, #{instance}, #{event}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta})
+                    as b (domain, instance, event, ymd, hh, mm, total, delta)
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event)
+                when matched then
+                    update set ymd = b.ymd, hh = b.hh, mm = b.mm, total = b.total, delta = b.delta
+                when not matched then
+                    insert (domain, instance, event, ymd, hh, mm, total, delta)
+                    values (b.domain, b.instance, b.event, b.ymd, b.hh, b.mm, b.total, b.delta)
+            </otherwise>
+        </choose>
     </update>
 
     <insert id="insertEventCount" parameterType="com.aspectran.appmon.persist.counter.EventCountVO">
-        merge into event_count as a
-        using values (#{inst}, #{event}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta})
-            as b (domain, instance, event, ymd, hh, mm, total, delta)
-            on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.ymd = b.ymd and a.hh = b.hh and a.mm = b.mm)
-        when matched then
-            update set total = b.total, delta = b.delta
-        when not matched then
-            insert (domain, instance, event, ymd, hh, mm, total, delta)
-            values (b.domain, b.instance, b.event, b.ymd, b.hh, b.mm, b.total, b.delta)
+        <choose>
+            <when test="_databaseId == 'oracle'">
+                merge into event_count a
+                using (
+                    select
+                        #{domain} as domain, #{instance} as instance, #{event} as event,
+                        #{ymd} as ymd, #{hh} as hh, #{mm} as mm, #{total} as total, #{delta} as delta
+                    from dual
+                ) b
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.ymd = b.ymd and a.hh = b.hh and a.mm = b.mm)
+                when matched then
+                    update set total = b.total, delta = b.delta
+                when not matched then
+                    insert (domain, instance, event, ymd, hh, mm, total, delta)
+                    values (b.domain, b.instance, b.event, b.ymd, b.hh, b.mm, b.total, b.delta)
+            </when>
+            <otherwise>
+                merge into event_count as a
+                using values ((#{domain}, #{instance}, #{event}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta})
+                    as b (domain, instance, event, ymd, hh, mm, total, delta)
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.ymd = b.ymd and a.hh = b.hh and a.mm = b.mm)
+                when matched then
+                    update set total = b.total, delta = b.delta
+                when not matched then
+                    insert (domain, instance, event, ymd, hh, mm, total, delta)
+                    values (b.domain, b.instance, b.event, b.ymd, b.hh, b.mm, b.total, b.delta)
+            </otherwise>
+        </choose>
     </insert>
 
 </mapper>
