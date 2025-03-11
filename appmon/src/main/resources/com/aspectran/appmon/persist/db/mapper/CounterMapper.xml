@@ -8,14 +8,14 @@
 
     <select id="getLastEventCount" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
         select domain, instance, event, ymd, hh, mm, total, delta
-        from event_count_last
-        where domain = #{domain} and instance = #{instance}  and event = #{event}
+        from appmon_event_count_last
+        where domain = #{domain} and instance = #{instance} and event = #{event}
     </select>
 
     <update id="updateLastEventCount" parameterType="com.aspectran.appmon.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
-                merge into event_count_last a
+                merge into appmon_event_count_last a
                 using (
                     select
                         #{domain} as domain, #{instance} as instance, #{event} as event,
@@ -30,7 +30,7 @@
                     values (b.domain, b.instance, b.event, b.ymd, b.hh, b.mm, b.total, b.delta)
             </when>
             <otherwise>
-                merge into event_count_last as a
+                merge into appmon_event_count_last as a
                 using values (#{domain}, #{instance}, #{event}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta})
                     as b (domain, instance, event, ymd, hh, mm, total, delta)
                 on (a.domain = b.domain and a.instance = b.instance and a.event = b.event)
@@ -46,7 +46,7 @@
     <insert id="insertEventCount" parameterType="com.aspectran.appmon.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
-                merge into event_count a
+                merge into appmon_event_count a
                 using (
                     select
                         #{domain} as domain, #{instance} as instance, #{event} as event,
@@ -61,7 +61,7 @@
                     values (b.domain, b.instance, b.event, b.ymd, b.hh, b.mm, b.total, b.delta)
             </when>
             <otherwise>
-                merge into event_count as a
+                merge into appmon_event_count as a
                 using values ((#{domain}, #{instance}, #{event}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta})
                     as b (domain, instance, event, ymd, hh, mm, total, delta)
                 on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.ymd = b.ymd and a.hh = b.hh and a.mm = b.mm)
