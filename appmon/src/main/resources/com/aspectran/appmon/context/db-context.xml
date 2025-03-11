@@ -10,10 +10,20 @@
     <bean id="appmonDBProperties" class="com.aspectran.core.support.PropertiesFactoryBean">
         <properties>
             <item name="ignoreInvalidResource" valueType="boolean">true</item>
+        </properties>
+        <properties profile="h2">
             <item name="locations" type="array">
-                <value>classpath:com/aspectran/appmon/persist/db/appmon.db.properties</value>
-                <value>classpath:com/aspectran/appmon/persist/db/appmon.db.system.properties</value>
-                <value>/config/appmon/appmon.db.properties</value>
+                <value>classpath:com/aspectran/appmon/persist/db/appmon.db-h2.properties</value>
+                <value>classpath:com/aspectran/appmon/persist/db/appmon.db-h2.system.properties</value>
+                <value>/config/appmon/appmon.db-h2.properties</value>
+            </item>
+        </properties>
+        <properties profile="oracle">
+            <item name="ignoreInvalidResource" valueType="boolean">true</item>
+            <item name="locations" type="array">
+                <value>classpath:com/aspectran/appmon/persist/db/appmon.db-oracle.properties</value>
+                <value>classpath:com/aspectran/appmon/persist/db/appmon.db-oracle.system.properties</value>
+                <value>/config/appmon/appmon.db-oracle.properties</value>
             </item>
         </properties>
     </bean>

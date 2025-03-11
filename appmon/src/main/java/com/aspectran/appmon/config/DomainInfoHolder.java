@@ -36,4 +36,8 @@ public class DomainInfoHolder {
         return new ArrayList<>(domainInfoMap.values());
     }
 
+    public boolean hasDomain(String domain) {
+        return domainInfoMap.containsKey(domain);
+    }
+
 }

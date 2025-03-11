@@ -58,6 +58,8 @@ import java.time.temporal.ChronoUnit;
 )
 public class CounterPersistSchedule implements ActivityContextAware {
 
+    private final String currentDomain;
+
     private final CounterPersist counterPersist;
 
     private final CounterMapper.Dao dao;
@@ -67,6 +69,7 @@ public class CounterPersistSchedule implements ActivityContextAware {
     @Autowired
     public CounterPersistSchedule(@NonNull AppMonManager appMonManager,
                                   CounterMapper.Dao dao) {
+        this.currentDomain = appMonManager.getCurrentDomain();
         this.counterPersist = appMonManager.getPersistManager().getCounterPersist();
         this.dao = dao;
     }
@@ -82,7 +85,8 @@ public class CounterPersistSchedule implements ActivityContextAware {
             InstantActivity activity = new InstantActivity(context);
             activity.perform(() -> {
                 for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
-                    EventCountVO eventCountVO = dao.getLastEventCount(eventCounter.getInstanceName(), eventCounter.getEventName());
+                    EventCountVO eventCountVO = dao.getLastEventCount(
+                            currentDomain, eventCounter.getInstanceName(), eventCounter.getEventName());
                     if (eventCountVO != null) {
                         eventCounter.getEventCount().restore(eventCountVO.getTotal(), eventCountVO.getDelta());
                     }
@@ -118,8 +122,8 @@ public class CounterPersistSchedule implements ActivityContextAware {
                 if (eventCountVO == null) {
                     eventCountVO = createEventCountVO(aborted);
                 }
-                eventCountVO.setInst(eventCounter.getInstanceName());
-                eventCountVO.setEvt(eventCounter.getEventName());
+                eventCountVO.setInstance(eventCounter.getInstanceName());
+                eventCountVO.setEvent(eventCounter.getEventName());
                 eventCountVO.setTotal(total);
                 eventCountVO.setDelta(delta);
                 dao.updateLastEventCount(eventCountVO);
@@ -142,6 +146,7 @@ public class CounterPersistSchedule implements ActivityContextAware {
         String mm = yyyyMMddHHmm.substring(10, 12);
 
         EventCountVO eventCountVO = new EventCountVO();
+        eventCountVO.setDomain(currentDomain);
         eventCountVO.setYmd(ymd);
         eventCountVO.setHh(hh);
         eventCountVO.setMm(mm);

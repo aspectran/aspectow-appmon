@@ -56,10 +56,20 @@ public class EventInfo extends AbstractParameters {
         };
     }
 
+    private String domainName;
+
     private String instanceName;
 
     public EventInfo() {
         super(parameterKeys);
+    }
+
+    public String getDomainName() {
+        return domainName;
+    }
+
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
     }
 
     public String getInstanceName() {

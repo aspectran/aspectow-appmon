@@ -34,7 +34,10 @@ import com.aspectran.appmon.persist.counter.EventCounterBuilder;
 import com.aspectran.appmon.service.ExportServiceManager;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.Assert;
+import com.aspectran.utils.SystemUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -42,6 +45,12 @@ import java.util.List;
  * <p>Created: 2024-12-17</p>
  */
 public abstract class AppMonManagerBuilder {
+
+    private static final Logger logger = LoggerFactory.getLogger(AppMonManagerBuilder.class);
+
+    public static final String APPMON_DOMAIN_PROPERTY_NAME = "appmon.domain";
+
+    public static final String DEFAULT_DOMAIN = "localhost";
 
     @NonNull
     public static AppMonManager build(ActivityContext context, AppMonConfig appMonConfig) throws Exception {
@@ -78,7 +87,8 @@ public abstract class AppMonManagerBuilder {
     }
 
     @NonNull
-    private static AppMonManager createAppMonManager(ActivityContext context, @NonNull AppMonConfig appMonConfig) {
+    private static AppMonManager createAppMonManager(ActivityContext context, @NonNull AppMonConfig appMonConfig)
+            throws Exception {
         PollingConfig pollingConfig = appMonConfig.getPollingConfig();
         if (pollingConfig == null) {
             pollingConfig = new PollingConfig();
@@ -87,9 +97,21 @@ public abstract class AppMonManagerBuilder {
         DomainInfoHolder domainInfoHolder = new DomainInfoHolder(appMonConfig.getDomainInfoList());
         InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(appMonConfig.getInstanceInfoList());
 
-        AppMonManager appMonManager = new AppMonManager(pollingConfig, domainInfoHolder, instanceInfoHolder);
+        String currentDomain = resolveCurrentDomain();
+        if (!domainInfoHolder.hasDomain(currentDomain) && !DEFAULT_DOMAIN.equals(currentDomain)) {
+            throw new Exception("Unknown domain in AppMon: " + currentDomain);
+        }
+
+        logger.info("Current AppMon domain: {}", currentDomain);
+
+        AppMonManager appMonManager = new AppMonManager(currentDomain, pollingConfig, domainInfoHolder, instanceInfoHolder);
         appMonManager.setActivityContext(context);
         return appMonManager;
+    }
+
+    private static String resolveCurrentDomain() {
+        String domain = SystemUtils.getProperty(APPMON_DOMAIN_PROPERTY_NAME);
+        return (domain != null ? domain : DEFAULT_DOMAIN);
     }
 
 }

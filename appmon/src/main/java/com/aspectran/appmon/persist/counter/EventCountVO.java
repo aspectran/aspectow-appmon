@@ -11,9 +11,11 @@ public class EventCountVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 4071706635617339624L;
 
-    private String inst;
+    private String domain;
 
-    private String evt;
+    private String instance;
+
+    private String event;
 
     private String ymd;
 
@@ -25,20 +27,28 @@ public class EventCountVO implements Serializable {
 
     private long delta;
 
-    public String getInst() {
-        return inst;
+    public String getDomain() {
+        return domain;
     }
 
-    public void setInst(String inst) {
-        this.inst = inst;
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 
-    public String getEvt() {
-        return evt;
+    public String getInstance() {
+        return instance;
     }
 
-    public void setEvt(String evt) {
-        this.evt = evt;
+    public void setInstance(String instance) {
+        this.instance = instance;
+    }
+
+    public String getEvent() {
+        return event;
+    }
+
+    public void setEvent(String event) {
+        this.event = event;
     }
 
     public String getYmd() {

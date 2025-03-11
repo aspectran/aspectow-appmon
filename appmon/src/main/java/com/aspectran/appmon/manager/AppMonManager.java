@@ -36,6 +36,8 @@ import java.util.List;
  */
 public class AppMonManager extends InstantActivitySupport {
 
+    private final String currentDomain;
+
     private final PollingConfig pollingConfig;
 
     private final DomainInfoHolder domainInfoHolder;
@@ -46,9 +48,11 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final PersistManager persistManager;
 
-    public AppMonManager(PollingConfig pollingConfig,
+    public AppMonManager(String currentDomain,
+                         PollingConfig pollingConfig,
                          DomainInfoHolder domainInfoHolder,
                          InstanceInfoHolder instanceInfoHolder) {
+        this.currentDomain = currentDomain;
         this.pollingConfig = pollingConfig;
         this.domainInfoHolder = domainInfoHolder;
         this.instanceInfoHolder = instanceInfoHolder;
@@ -66,6 +70,10 @@ public class AppMonManager extends InstantActivitySupport {
     @NonNull
     public ApplicationAdapter getApplicationAdapter() {
         return super.getApplicationAdapter();
+    }
+
+    public String getCurrentDomain() {
+        return currentDomain;
     }
 
     public PollingConfig getPollingConfig() {
