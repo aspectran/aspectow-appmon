@@ -1,19 +1,19 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
-<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250303"/>">
+<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250311"/>">
 <script src="https://aspectran.com/assets/countries/countries.js"></script>
-<script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20250303"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250303"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20250310"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250311"/>"></script>
 <script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250303"/>"></script>
 <script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250303"/>"></script>
-<div class="grid-x domain-box compact horizontal">
+<div class="grid-x domain-box compact">
     <div class="cell options t10 b5">
         <ul class="speed-options">
             <li class="fi-fast-forward fast" title="Set to poll every second. Turn this option on only when absolutely necessary."></li>
         </ul>
         <ul class="layout-options hide-for-small-only">
-            <li class="fi-layout compact on horizontal"><a> Compact</a></li>
+            <li class="fi-layout compact on"><a> Compact</a></li>
         </ul>
     </div>
     <dl class="cell instance tabs b0">

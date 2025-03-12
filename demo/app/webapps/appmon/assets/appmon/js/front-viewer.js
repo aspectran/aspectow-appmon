@@ -153,7 +153,7 @@ function FrontViewer() {
                 } else {
                     printCurrentActivities(name, 0);
                 }
-                updateactivityCount(instance + ":" + type + ":session", data.sessionId, data.activityCount||0);
+                updateActivityCount(instance + ":" + type + ":session", data.sessionId, data.activityCount||0);
                 break;
             case "session":
                 printSessionEventData(name, data);
@@ -289,7 +289,6 @@ function FrontViewer() {
             .attr("data-sid", session.sessionId)
             .attr("data-temp-resident", session.tempResident)
             .attr("data-inactive-interval", session.inactiveInterval)
-            .attr("title", (session.ipAddress ? session.ipAddress + "\n" : "") + session.sessionId + "\n" + session.createAt)
             .append($count);
         if (session.tempResident) {
             $li.addClass("inactive");
@@ -310,6 +309,13 @@ function FrontViewer() {
                 .text(session.username)
                 .appendTo($li);
         }
+        let $detail = $("<div class='detail'/>")
+            .append($("<p/>").text(session.sessionId))
+            .append($("<p/>").text(session.createAt));
+        if (session.ipAddress) {
+            $detail.append($("<p/>").text(session.ipAddress));
+        }
+        $detail.appendTo($li);
         if (session.tempResident) {
             $li.appendTo($sessions);
         } else {
@@ -317,7 +323,7 @@ function FrontViewer() {
         }
     };
 
-    const updateactivityCount = function (name, sessionId, activityCount) {
+    const updateActivityCount = function (name, sessionId, activityCount) {
         let $display = getDisplay(name);
         if ($display) {
             let $li = $display.find("ul.sessions li[data-sid='" + sessionId + "']");

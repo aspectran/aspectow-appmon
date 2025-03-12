@@ -194,7 +194,7 @@
 }
 .sessions-box ul.sessions li {
     list-style-type: none;
-    display: inline-block;
+    display: inline-table;
     padding: 0;
     margin-right: 10px;
     margin-bottom: 5px;
@@ -245,6 +245,20 @@
     padding-right: 6px;
     font-size: .85em;
     background-color: #e6e8e6;
+}
+.sessions-box ul.sessions li .detail {
+    display: none;
+    line-height: .9;
+    border-top: 1px solid #ccc;
+}
+.sessions-box ul.sessions li.designated .detail {
+    display: block;
+}
+.sessions-box ul.sessions li .detail p {
+    padding: 0;
+    margin: 0;
+    font-size: .8em;
+    text-align: right;
 }
 
 .console-box .status-bar {

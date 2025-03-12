@@ -264,43 +264,6 @@ function FrontBuilder() {
     };
 
     const bindEvents = function () {
-        $(".domain.tabs .tabs-title.available a").off().on("click", function() {
-            let domainIndex = $(this).closest(".tabs-title").data("domain-index");
-            changeDomain(domainIndex);
-        });
-        $(".instance.tabs .tabs-title.available a").off().on("click", function() {
-            let instanceName = $(this).closest(".tabs-title").data("instance-name");
-            changeInstance(instanceName);
-        });
-        $(".console-box .tailing-switch").off().on("click", function() {
-            let $consoleBox = $(this).closest(".console-box");
-            let $console = $consoleBox.find(".console");
-            let domainIndex = $consoleBox.data("domain-index");
-            if ($console.data("tailing")) {
-                $console.data("tailing", false);
-                $consoleBox.find(".tailing-status").removeClass("on");
-            } else {
-                $console.data("tailing", true);
-                $(this).find(".tailing-status").addClass("on");
-                viewers[domainIndex].refreshConsole($console);
-            }
-        });
-        $(".console-box .pause-switch").off().on("click", function() {
-            let $console = $(this).closest(".console-box").find(".console");
-            if ($console.data("pause")) {
-                $console.data("pause", false);
-                $(this).removeClass("on");
-            } else {
-                $console.data("pause", true);
-                $(this).addClass("on");
-            }
-        });
-        $(".console-box .clear-screen").off().on("click", function() {
-            let $consoleBox = $(this).closest(".console-box");
-            let $console = $consoleBox.find(".console");
-            let domainIndex = $consoleBox.data("domain-index");
-            viewers[domainIndex].clearConsole($console);
-        });
         $(".layout-options li a").off().on("click", function() {
             let $li = $(this).parent();
             if (!$li.hasClass("on")) {
@@ -337,6 +300,47 @@ function FrontBuilder() {
                     }
                 }
             }
+        });
+        $(".domain.tabs .tabs-title.available a").off("click").on("click", function() {
+            let domainIndex = $(this).closest(".tabs-title").data("domain-index");
+            changeDomain(domainIndex);
+        });
+        $(".instance.tabs .tabs-title.available a").off("click").on("click", function() {
+            let instanceName = $(this).closest(".tabs-title").data("instance-name");
+            changeInstance(instanceName);
+        });
+        $(document).off("click", ".display-box ul.sessions li")
+            .on("click", ".display-box ul.sessions li", function() {
+                $(this).toggleClass("designated");
+        });
+        $(".console-box .tailing-switch").off("click").on("click", function() {
+            let $consoleBox = $(this).closest(".console-box");
+            let $console = $consoleBox.find(".console");
+            let domainIndex = $consoleBox.data("domain-index");
+            if ($console.data("tailing")) {
+                $console.data("tailing", false);
+                $consoleBox.find(".tailing-status").removeClass("on");
+            } else {
+                $console.data("tailing", true);
+                $(this).find(".tailing-status").addClass("on");
+                viewers[domainIndex].refreshConsole($console);
+            }
+        });
+        $(".console-box .pause-switch").off("click").on("click", function() {
+            let $console = $(this).closest(".console-box").find(".console");
+            if ($console.data("pause")) {
+                $console.data("pause", false);
+                $(this).removeClass("on");
+            } else {
+                $console.data("pause", true);
+                $(this).addClass("on");
+            }
+        });
+        $(".console-box .clear-screen").off("click").on("click", function() {
+            let $consoleBox = $(this).closest(".console-box");
+            let $console = $consoleBox.find(".console");
+            let domainIndex = $consoleBox.data("domain-index");
+            viewers[domainIndex].clearConsole($console);
         });
     };
 
