@@ -19,6 +19,6 @@ create table if not exists appmon_event_count_last (
     mm varchar(2) not null,
     total int not null,
     delta int not null,
-    upd_dt timestamp default now() not null,
+    reg_dt timestamp default now() not null,
     constraint pk_event_count_last primary key (domain, instance, event)
 );
