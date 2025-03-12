@@ -62,7 +62,7 @@
             </when>
             <otherwise>
                 merge into appmon_event_count as a
-                using values ((#{domain}, #{instance}, #{event}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta})
+                using values (#{domain}, #{instance}, #{event}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta})
                     as b (domain, instance, event, ymd, hh, mm, total, delta)
                 on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.ymd = b.ymd and a.hh = b.hh and a.mm = b.mm)
                 when matched then
