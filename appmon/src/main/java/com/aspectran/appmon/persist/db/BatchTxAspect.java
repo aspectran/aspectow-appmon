@@ -57,8 +57,7 @@ public class BatchTxAspect extends SqlSessionTxAdvice {
 
     @Before
     public void open() {
-        setExecutorType(ExecutorType.BATCH);
-        super.open();
+        super.open(ExecutorType.BATCH);
     }
 
     @After

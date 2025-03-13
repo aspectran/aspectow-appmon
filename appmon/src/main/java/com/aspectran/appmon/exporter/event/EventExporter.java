@@ -19,6 +19,8 @@ import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.Exporter;
 import com.aspectran.appmon.persist.counter.EventCount;
 import com.aspectran.appmon.persist.counter.EventCountRollupListener;
+import com.aspectran.appmon.persist.counter.EventCountVO;
+import com.aspectran.appmon.persist.db.mapper.EventCountMapper;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.json.JsonBuilder;
@@ -126,17 +128,29 @@ public class EventExporter extends Exporter implements EventCountRollupListener 
     }
 
     private String getChartData() {
-        String message = new JsonBuilder()
+        EventCountMapper.Dao dao = eventExporterManager.getBean(EventCountMapper.Dao.class);
+        List<EventCountVO> list = eventExporterManager.instantActivity(() -> dao.getChartData(
+                eventInfo.getDomainName(),
+                eventInfo.getInstanceName(),
+                eventInfo.getName()));
+
+        String[] labels = new String[list.size()];
+        long[] data = new long[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            labels[i] = list.get(i).getHh();
+            data[i] = list.get(i).getDelta();
+        }
+
+        return new JsonBuilder()
                 .prettyPrint(false)
                 .nullWritable(false)
                 .object()
                     .object("chartData")
-                        .put("labels", new JsonString("[\"2020\", \"2021\", \"2022\", \"2023\"]"))
-                        .put("data", new JsonString("[10, 20, 30, 40]"))
+                        .put("labels", labels)
+                        .put("data", data)
                     .endObject()
                 .endObject()
                 .toString();
-        return message;
     }
 
     @Override

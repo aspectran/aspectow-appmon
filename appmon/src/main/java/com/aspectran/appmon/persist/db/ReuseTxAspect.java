@@ -57,8 +57,7 @@ public class ReuseTxAspect extends SqlSessionTxAdvice {
 
     @Before
     public void open() {
-        setExecutorType(ExecutorType.REUSE);
-        super.open();
+        super.open(ExecutorType.REUSE);
     }
 
     @After

@@ -16,6 +16,7 @@
 package com.aspectran.appmon.exporter;
 
 import com.aspectran.appmon.service.ExportServiceManager;
+import com.aspectran.core.activity.InstantAction;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,6 +88,10 @@ public abstract class ExporterManager {
 
     public void broadcast(String message) {
         exportServiceManager.broadcast(message);
+    }
+
+    public <V> V instantActivity(InstantAction<V> instantAction) {
+        return exportServiceManager.getAppMonManager().instantActivity(instantAction);
     }
 
     public <V> V getBean(@NonNull String id) {

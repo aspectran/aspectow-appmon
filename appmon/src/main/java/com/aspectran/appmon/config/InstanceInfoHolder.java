@@ -26,19 +26,22 @@ public class InstanceInfoHolder {
 
     private final Map<String, InstanceInfo> instanceInfos = new LinkedHashMap<>();
 
-    public InstanceInfoHolder(@NonNull List<InstanceInfo> instanceInfoList) {
+    public InstanceInfoHolder(String domainName, @NonNull List<InstanceInfo> instanceInfoList) {
         for (InstanceInfo instanceInfo : instanceInfoList) {
+            instanceInfo.setDomainName(domainName);
             instanceInfos.put(instanceInfo.getName(), instanceInfo);
 
             List<EventInfo> eventInfoList = instanceInfo.getEventInfoList();
             if (eventInfoList != null) {
                 for (EventInfo eventInfo : eventInfoList) {
+                    eventInfo.setDomainName(domainName);
                     eventInfo.setInstanceName(instanceInfo.getName());
                 }
             }
             List<LogInfo> logInfoList = instanceInfo.getLogInfoList();
             if (logInfoList != null) {
                 for (LogInfo logInfo : logInfoList) {
+                    logInfo.setDomainName(domainName);
                     logInfo.setInstanceName(instanceInfo.getName());
                 }
             }

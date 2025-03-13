@@ -74,4 +74,17 @@
         </choose>
     </insert>
 
+    <select id="getChartData" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
+        select hh, delta
+        from (
+            select ymd, hh, sum(delta) as delta
+            from appmon_event_count
+            where domain = #{domain} and instance = #{instance} and event = #{event}
+            group by ymd, hh
+            order by ymd desc, hh desc
+        )
+        where rownum &lt;= 50
+        order by ymd, hh
+    </select>
+
 </mapper>

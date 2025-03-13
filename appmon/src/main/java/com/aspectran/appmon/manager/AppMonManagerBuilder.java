@@ -95,14 +95,14 @@ public abstract class AppMonManagerBuilder {
         }
 
         DomainInfoHolder domainInfoHolder = new DomainInfoHolder(appMonConfig.getDomainInfoList());
-        InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(appMonConfig.getInstanceInfoList());
 
         String currentDomain = resolveCurrentDomain();
         if (!domainInfoHolder.hasDomain(currentDomain) && !DEFAULT_DOMAIN.equals(currentDomain)) {
             throw new Exception("Unknown domain in AppMon: " + currentDomain);
         }
-
         logger.info("Current AppMon domain: {}", currentDomain);
+
+        InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(currentDomain, appMonConfig.getInstanceInfoList());
 
         AppMonManager appMonManager = new AppMonManager(currentDomain, pollingConfig, domainInfoHolder, instanceInfoHolder);
         appMonManager.setActivityContext(context);

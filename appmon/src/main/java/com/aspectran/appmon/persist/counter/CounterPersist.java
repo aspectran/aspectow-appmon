@@ -37,7 +37,8 @@ public class CounterPersist {
     public EventCounter getEventCounter(String instanceName, String eventName) {
         EventCounter eventCounter = eventCounterMap.get(instanceName + ":" + eventName);
         if (eventCounter == null) {
-            throw new IllegalArgumentException("No event counter found for event '" + eventName + "' of instance '" + instanceName + "'");
+            throw new IllegalArgumentException("No event counter found for event '" +
+                    eventName + "' of instance '" + instanceName + "'");
         }
         return eventCounter;
     }

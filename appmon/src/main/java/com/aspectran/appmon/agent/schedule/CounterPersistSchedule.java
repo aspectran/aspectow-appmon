@@ -59,6 +59,8 @@ import java.time.temporal.ChronoUnit;
 )
 public class CounterPersistSchedule implements ActivityContextAware {
 
+    private final AppMonManager appMonManager;
+
     private final String currentDomain;
 
     private final CounterPersist counterPersist;
@@ -70,6 +72,7 @@ public class CounterPersistSchedule implements ActivityContextAware {
     @Autowired
     public CounterPersistSchedule(@NonNull AppMonManager appMonManager,
                                   EventCountMapper.Dao dao) {
+        this.appMonManager = appMonManager;
         this.currentDomain = appMonManager.getCurrentDomain();
         this.counterPersist = appMonManager.getPersistManager().getCounterPersist();
         this.dao = dao;
@@ -83,8 +86,7 @@ public class CounterPersistSchedule implements ActivityContextAware {
     @Initialize
     public void initialize() throws Exception {
         try {
-            InstantActivity activity = new InstantActivity(context);
-            activity.perform(() -> {
+            appMonManager.instantActivity(() -> {
                 for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
                     EventCountVO eventCountVO = dao.getLastEventCount(
                             currentDomain, eventCounter.getInstanceName(), eventCounter.getEventName());

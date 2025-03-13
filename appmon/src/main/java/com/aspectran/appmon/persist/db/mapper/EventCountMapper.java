@@ -23,6 +23,8 @@ import com.aspectran.mybatis.SqlMapperDao;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * The Interface CounterMapper.
  *
@@ -38,6 +40,10 @@ public interface EventCountMapper {
     void updateLastEventCount(EventCountVO eventCountVO);
 
     int insertEventCount(EventCountVO eventCountVO);
+
+    List<EventCountVO> getChartData(@Param("domain") String domainName,
+                                    @Param("instance") String instanceName,
+                                    @Param("event") String eventName);
 
     @Component
     class Dao extends SqlMapperDao<EventCountMapper> implements EventCountMapper {
@@ -60,6 +66,11 @@ public interface EventCountMapper {
         @Override
         public int insertEventCount(EventCountVO eventCountVO) {
             return simple().insertEventCount(eventCountVO);
+        }
+
+        @Override
+        public List<EventCountVO> getChartData(String domainName, String instanceName, String eventName) {
+            return simple().getChartData(domainName, instanceName, eventName);
         }
 
     }

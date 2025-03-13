@@ -22,6 +22,7 @@ import com.aspectran.appmon.config.InstanceInfoHolder;
 import com.aspectran.appmon.config.PollingConfig;
 import com.aspectran.appmon.persist.PersistManager;
 import com.aspectran.appmon.service.ExportServiceManager;
+import com.aspectran.core.activity.InstantAction;
 import com.aspectran.core.activity.InstantActivitySupport;
 import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.core.context.ActivityContext;
@@ -111,6 +112,11 @@ public class AppMonManager extends InstantActivitySupport {
 
     public PersistManager getPersistManager() {
         return persistManager;
+    }
+
+    @Override
+    public <V> V instantActivity(InstantAction<V> instantAction) {
+        return super.instantActivity(instantAction);
     }
 
     public <V> V getBean(@NonNull String id) {

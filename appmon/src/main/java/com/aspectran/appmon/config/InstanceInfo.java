@@ -50,8 +50,18 @@ public class InstanceInfo extends AbstractParameters {
         };
     }
 
+    private String domainName;
+
     public InstanceInfo() {
         super(parameterKeys);
+    }
+
+    public String getDomainName() {
+        return domainName;
+    }
+
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
     }
 
     public String getName() {

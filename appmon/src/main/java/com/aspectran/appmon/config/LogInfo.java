@@ -52,10 +52,20 @@ public class LogInfo extends AbstractParameters {
         };
     }
 
+    private String domainName;
+
     private String instanceName;
 
     public LogInfo() {
         super(parameterKeys);
+    }
+
+    public String getDomainName() {
+        return domainName;
+    }
+
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
     }
 
     public String getInstanceName() {
