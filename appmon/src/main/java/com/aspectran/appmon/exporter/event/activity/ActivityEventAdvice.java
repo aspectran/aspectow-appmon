@@ -56,7 +56,7 @@ public class ActivityEventAdvice {
         long max = activityCounter.getMax();
         long total;
         if (activityEventReader.getEventCount() != null) {
-            total = activityEventReader.getEventCount().getTotal();
+            total = activityEventReader.getEventCount().getCurrentTotal();
         } else {
             total = activityCounter.getTotal();
         }

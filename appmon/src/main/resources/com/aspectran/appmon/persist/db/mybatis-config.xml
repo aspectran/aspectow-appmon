@@ -33,7 +33,7 @@
     </databaseIdProvider>
 
     <mappers>
-        <mapper resource="com/aspectran/appmon/persist/db/mapper/CounterMapper.xml"/>
+        <mapper resource="com/aspectran/appmon/persist/db/mapper/EventCountMapper.xml"/>
     </mappers>
 
 </configuration>

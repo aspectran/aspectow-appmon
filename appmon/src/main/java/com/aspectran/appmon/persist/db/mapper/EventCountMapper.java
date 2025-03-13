@@ -29,7 +29,7 @@ import org.apache.ibatis.annotations.Param;
  * @author Juho Jeong
  */
 @Mapper
-public interface CounterMapper {
+public interface EventCountMapper {
 
     EventCountVO getLastEventCount(@Param("domain") String domainName,
                                    @Param("instance") String instanceName,
@@ -40,11 +40,11 @@ public interface CounterMapper {
     int insertEventCount(EventCountVO eventCountVO);
 
     @Component
-    class Dao extends SqlMapperDao<CounterMapper> implements CounterMapper {
+    class Dao extends SqlMapperDao<EventCountMapper> implements EventCountMapper {
 
         @Autowired
         public Dao(SqlMapperAgent mapperAgent) {
-            super(mapperAgent, CounterMapper.class);
+            super(mapperAgent, EventCountMapper.class);
         }
 
         @Override

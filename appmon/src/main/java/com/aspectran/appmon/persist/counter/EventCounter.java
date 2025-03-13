@@ -25,4 +25,10 @@ public interface EventCounter {
 
     EventCount getEventCount();
 
+    void addEventRollupListener(EventCountRollupListener eventRollupListener);
+
+    void rollup();
+
+    void reset(long total, long delta);
+
 }

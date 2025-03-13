@@ -18,10 +18,15 @@ package com.aspectran.appmon.persist.counter;
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <p>Created: 2025. 1. 27.</p>
  */
 public abstract class AbstractEventCounter implements EventCounter {
+
+    private final List<EventCountRollupListener> eventCountRollupListeners = new ArrayList<>();
 
     private final EventInfo eventInfo;
 
@@ -51,6 +56,27 @@ public abstract class AbstractEventCounter implements EventCounter {
     @Override
     public EventCount getEventCount() {
         return eventCount;
+    }
+
+    @Override
+    public void addEventRollupListener(EventCountRollupListener eventRollupListener) {
+        eventCountRollupListeners.add(eventRollupListener);
+    }
+
+    @Override
+    public void rollup() {
+        eventCount.rollup();
+        for (EventCountRollupListener eventRollupListener : eventCountRollupListeners) {
+            eventRollupListener.onRolledUp(eventCount);
+        }
+    }
+
+    @Override
+    public void reset(long total, long delta) {
+        eventCount.reset(total, delta);
+        for (EventCountRollupListener eventRollupListener : eventCountRollupListeners) {
+            eventRollupListener.onRolledUp(eventCount);
+        }
     }
 
 }

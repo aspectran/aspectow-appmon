@@ -18,8 +18,11 @@ package com.aspectran.appmon.exporter.event;
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.Exporter;
 import com.aspectran.appmon.persist.counter.EventCount;
+import com.aspectran.appmon.persist.counter.EventCountRollupListener;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
+import com.aspectran.utils.json.JsonBuilder;
+import com.aspectran.utils.json.JsonString;
 
 import java.util.List;
 import java.util.Timer;
@@ -28,7 +31,7 @@ import java.util.TimerTask;
 /**
  * <p>Created: 2024-12-18</p>
  */
-public class EventExporter extends Exporter {
+public class EventExporter extends Exporter implements EventCountRollupListener {
 
     private static final String TYPE = ":event:";
 
@@ -43,6 +46,8 @@ public class EventExporter extends Exporter {
     private final int sampleInterval;
 
     private Timer timer;
+
+    private boolean firstRollup = true;
 
     public EventExporter(@NonNull EventExporterManager eventExporterManager,
                          @NonNull EventInfo eventInfo,
@@ -59,12 +64,9 @@ public class EventExporter extends Exporter {
         return eventInfo.getName();
     }
 
-    public void setEventCount(EventCount eventCount) {
-        eventReader.setEventCount(eventCount);
-    }
-
     @Override
     public void read(@NonNull List<String> messages) {
+        messages.add(label + getChartData());
         String json = eventReader.read();
         if (json != null) {
             messages.add(label + json);
@@ -112,6 +114,29 @@ public class EventExporter extends Exporter {
             timer = null;
         }
         eventReader.stop();
+    }
+
+    @Override
+    public void onRolledUp(EventCount eventCount) {
+        if (firstRollup) {
+            eventReader.setEventCount(eventCount);
+            firstRollup = false;
+        }
+        broadcast(getChartData());
+    }
+
+    private String getChartData() {
+        String message = new JsonBuilder()
+                .prettyPrint(false)
+                .nullWritable(false)
+                .object()
+                    .object("chartData")
+                        .put("labels", new JsonString("[\"2020\", \"2021\", \"2022\", \"2023\"]"))
+                        .put("data", new JsonString("[10, 20, 30, 40]"))
+                    .endObject()
+                .endObject()
+                .toString();
+        return message;
     }
 
     @Override

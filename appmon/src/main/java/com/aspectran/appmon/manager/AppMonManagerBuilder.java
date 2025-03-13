@@ -72,7 +72,7 @@ public abstract class AppMonManagerBuilder {
                     Exporter exporter = eventExporterManager.getExporter(eventInfo.getName());
                     if (exporter instanceof EventExporter eventExporter) {
                         EventCounter eventCounter = persistManager.getCounterPersist().getEventCounter(instanceName, eventInfo.getName());
-                        eventExporter.setEventCount(eventCounter.getEventCount());
+                        eventCounter.addEventRollupListener(eventExporter);
                     }
                 }
             }

@@ -22,32 +22,47 @@ import java.util.concurrent.atomic.LongAdder;
  */
 public class EventCount {
 
-    private final LongAdder counter = new LongAdder();
+    private final LongAdder current = new LongAdder();
 
-    private volatile long previous = 0L;
+    private volatile long old;
+
+    private volatile long total;
+
+    private volatile long delta;
 
     public void hit() {
-        counter.increment();
-    }
-
-    public long getPrevious() {
-        return previous;
+        current.increment();
     }
 
     public long getTotal() {
-        return counter.sum();
+        return total;
     }
 
-    public synchronized long getDelta(long total) {
-        long delta = total - previous;
-        previous = total;
+    public long getDelta() {
         return delta;
     }
 
-    public synchronized void restore(long total, long delta) {
-        counter.reset();
-        counter.add(total);
-        previous = total - delta;
+    public long getCurrent() {
+        return current.sum();
+    }
+
+    public synchronized long getCurrentTotal() {
+        return (total + current.sum());
+    }
+
+    synchronized void rollup() {
+        long sum = current.sum();
+        current.reset();
+        total += sum;
+        delta = total - old;
+        old = total;
+    }
+
+    synchronized void reset(long total, long delta) {
+        current.reset();
+        old = total - delta;
+        this.total = total;
+        this.delta = delta;
     }
 
 }

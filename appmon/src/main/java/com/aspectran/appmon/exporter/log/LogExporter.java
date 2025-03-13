@@ -89,7 +89,7 @@ public class LogExporter extends Exporter {
                     }
                 }
             } catch (IOException e) {
-                logger.error("Failed to read log file " + logFile, e);
+                logger.error("Failed to read log file {}", logFile, e);
             }
         }
     }

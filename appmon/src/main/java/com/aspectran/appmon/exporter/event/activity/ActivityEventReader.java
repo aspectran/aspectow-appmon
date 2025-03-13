@@ -121,7 +121,7 @@ public class ActivityEventReader extends AbstractEventReader {
         long max = activityCounter.getMax();
         long total;
         if (getEventCount() != null) {
-            total = getEventCount().getTotal();
+            total = getEventCount().getCurrentTotal();
         } else {
             total = activityCounter.getTotal();
         }
