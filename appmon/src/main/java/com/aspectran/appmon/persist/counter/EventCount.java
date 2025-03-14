@@ -22,16 +22,26 @@ import java.util.concurrent.atomic.LongAdder;
  */
 public class EventCount {
 
-    private final LongAdder current = new LongAdder();
+    private final LongAdder tally = new LongAdder();
 
-    private volatile long old;
+    private volatile String datetime;
+
+    private volatile long oldTotal;
 
     private volatile long total;
 
     private volatile long delta;
 
     public void hit() {
-        current.increment();
+        tally.increment();
+    }
+
+    public String getDatetime() {
+        return datetime;
+    }
+
+    public long getTally() {
+        return tally.sum();
     }
 
     public long getTotal() {
@@ -42,25 +52,22 @@ public class EventCount {
         return delta;
     }
 
-    public long getCurrent() {
-        return current.sum();
+    public synchronized long getGrandTotal() {
+        return (total + tally.sum());
     }
 
-    public synchronized long getCurrentTotal() {
-        return (total + current.sum());
-    }
-
-    synchronized void rollup() {
-        long sum = current.sum();
-        current.reset();
+    synchronized void rollup(String datetime) {
+        this.datetime = datetime;
+        long sum = tally.sum();
+        tally.reset();
         total += sum;
-        delta = total - old;
-        old = total;
+        delta = total - oldTotal;
+        oldTotal = total;
     }
 
     synchronized void reset(long total, long delta) {
-        current.reset();
-        old = total - delta;
+        tally.reset();
+        oldTotal = total - delta;
         this.total = total;
         this.delta = delta;
     }

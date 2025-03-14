@@ -117,22 +117,23 @@ public class ActivityEventReader extends AbstractEventReader {
 
     @Override
     public String read() {
-        long current = activityCounter.getCurrent();
-        long max = activityCounter.getMax();
         long total;
+        long tally;
         if (getEventCount() != null) {
-            total = getEventCount().getCurrentTotal();
+            total = getEventCount().getGrandTotal();
+            tally = getEventCount().getTally();
         } else {
             total = activityCounter.getTotal();
+            tally = 0L;
         }
+
         return new JsonBuilder()
             .prettyPrint(false)
             .nullWritable(false)
             .object()
                 .object("activities")
-                    .put("current", current)
-                    .put("max", max)
                     .put("total", total)
+                    .put("tally", tally)
                 .endObject()
             .endObject()
             .toString();

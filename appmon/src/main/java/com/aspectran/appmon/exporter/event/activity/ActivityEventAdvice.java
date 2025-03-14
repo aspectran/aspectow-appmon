@@ -51,14 +51,15 @@ public class ActivityEventAdvice {
     }
 
     public String after(@NonNull Activity activity) {
-        CounterStatistic activityCounter = activity.getActivityContext().getActivityCounter();
-        long current = activityCounter.getCurrent();
-        long max = activityCounter.getMax();
         long total;
+        long tally;
         if (activityEventReader.getEventCount() != null) {
-            total = activityEventReader.getEventCount().getCurrentTotal();
+            total = activityEventReader.getEventCount().getGrandTotal();
+            tally = activityEventReader.getEventCount().getTally();
         } else {
+            CounterStatistic activityCounter = activity.getActivityContext().getActivityCounter();
             total = activityCounter.getTotal();
+            tally = 0L;
         }
 
         long elapsedTime = System.currentTimeMillis() - startTime;
@@ -79,9 +80,8 @@ public class ActivityEventAdvice {
                 .nullWritable(false)
                 .object()
                     .object("activities")
-                        .put("current", current)
-                        .put("max", max)
                         .put("total", total)
+                        .put("tally", tally)
                     .endObject()
                     .put("startTime", startTime)
                     .put("elapsedTime", elapsedTime)

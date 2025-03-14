@@ -17,6 +17,8 @@ public class EventCountVO implements Serializable {
 
     private String event;
 
+    private String datetime;
+
     private String ymd;
 
     private String hh;
@@ -49,6 +51,14 @@ public class EventCountVO implements Serializable {
 
     public void setEvent(String event) {
         this.event = event;
+    }
+
+    public String getDatetime() {
+        return datetime;
+    }
+
+    public void setDatetime(String datetime) {
+        this.datetime = datetime;
     }
 
     public String getYmd() {

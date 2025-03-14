@@ -64,8 +64,8 @@ public abstract class AbstractEventCounter implements EventCounter {
     }
 
     @Override
-    public void rollup() {
-        eventCount.rollup();
+    public void rollup(String datetime) {
+        eventCount.rollup(datetime);
         for (EventCountRollupListener eventRollupListener : eventCountRollupListeners) {
             eventRollupListener.onRolledUp(eventCount);
         }

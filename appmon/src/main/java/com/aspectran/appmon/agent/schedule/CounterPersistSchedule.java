@@ -21,8 +21,6 @@ import com.aspectran.appmon.persist.counter.EventCount;
 import com.aspectran.appmon.persist.counter.EventCountVO;
 import com.aspectran.appmon.persist.counter.EventCounter;
 import com.aspectran.appmon.persist.db.mapper.EventCountMapper;
-import com.aspectran.core.activity.InstantActivity;
-import com.aspectran.core.activity.InstantActivityException;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
@@ -32,9 +30,9 @@ import com.aspectran.core.component.bean.annotation.Initialize;
 import com.aspectran.core.component.bean.annotation.Job;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.Schedule;
-import com.aspectran.core.component.bean.aware.ActivityContextAware;
-import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.annotation.jsr305.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -57,7 +55,9 @@ import java.time.temporal.ChronoUnit;
         @Job(translet = "appmon/persist/counter/rollup.job")
     }
 )
-public class CounterPersistSchedule implements ActivityContextAware {
+public class CounterPersistSchedule {
+
+    private static final Logger logger = LoggerFactory.getLogger(CounterPersistSchedule.class);
 
     private final AppMonManager appMonManager;
 
@@ -66,8 +66,6 @@ public class CounterPersistSchedule implements ActivityContextAware {
     private final CounterPersist counterPersist;
 
     private final EventCountMapper.Dao dao;
-
-    private ActivityContext context;
 
     @Autowired
     public CounterPersistSchedule(@NonNull AppMonManager appMonManager,
@@ -78,62 +76,49 @@ public class CounterPersistSchedule implements ActivityContextAware {
         this.dao = dao;
     }
 
-    @Override
-    public void setActivityContext(ActivityContext context) {
-        this.context = context;
-    }
-
     @Initialize
     public void initialize() throws Exception {
-        try {
-            appMonManager.instantActivity(() -> {
-                for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
-                    EventCountVO eventCountVO = dao.getLastEventCount(
-                            currentDomain, eventCounter.getInstanceName(), eventCounter.getEventName());
-                    if (eventCountVO != null) {
-                        eventCounter.reset(eventCountVO.getTotal(), eventCountVO.getDelta());
-                    } else {
-                        eventCounter.reset(0L, 0L);
-                    }
-                    eventCounter.initialize();
+        appMonManager.instantActivity(() -> {
+            for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
+                EventCountVO eventCountVO = dao.getLastEventCount(
+                        currentDomain, eventCounter.getInstanceName(), eventCounter.getEventName());
+                if (eventCountVO != null) {
+                    eventCounter.reset(eventCountVO.getTotal(), eventCountVO.getDelta());
+                } else {
+                    eventCounter.reset(0L, 0L);
                 }
-                return null;
-            });
-        } catch (Exception e) {
-            throw new InstantActivityException(e);
-        }
+                eventCounter.initialize();
+            }
+            return null;
+        });
     }
 
     @Destroy
     public void destroy() {
         try {
-            InstantActivity activity = new InstantActivity(context);
-            activity.perform(() -> {
-                save(true);
+            appMonManager.instantActivity(() -> {
+                EventCountVO eventCountVO = createEventCountVO(true);
+                save(eventCountVO);
                 return null;
             });
         } catch (Exception e) {
-            throw new InstantActivityException(e);
+            logger.error("Failed save last event count", e);
         }
     }
 
     @Request("appmon/persist/counter/rollup.job")
     public void rollup() {
         for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
-            eventCounter.rollup();
-            save(false);
-
+            EventCountVO eventCountVO = createEventCountVO(false);
+            eventCounter.rollup(eventCountVO.getDatetime());
+            save(eventCountVO);
         }
     }
 
-    private void save(boolean aborted) {
-        EventCountVO eventCountVO = null;
+    private void save(EventCountVO eventCountVO) {
         for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
             EventCount eventCount = eventCounter.getEventCount();
             if (eventCount.getDelta() > 0) {
-                if (eventCountVO == null) {
-                    eventCountVO = createEventCountVO(aborted);
-                }
                 eventCountVO.setInstance(eventCounter.getInstanceName());
                 eventCountVO.setEvent(eventCounter.getEventName());
                 eventCountVO.setTotal(eventCount.getTotal());
@@ -159,6 +144,7 @@ public class CounterPersistSchedule implements ActivityContextAware {
 
         EventCountVO eventCountVO = new EventCountVO();
         eventCountVO.setDomain(currentDomain);
+        eventCountVO.setDatetime(yyyyMMddHHmm);
         eventCountVO.setYmd(ymd);
         eventCountVO.setHh(hh);
         eventCountVO.setMm(mm);

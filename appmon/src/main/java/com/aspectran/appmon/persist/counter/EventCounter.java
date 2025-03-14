@@ -27,7 +27,7 @@ public interface EventCounter {
 
     void addEventRollupListener(EventCountRollupListener eventRollupListener);
 
-    void rollup();
+    void rollup(String datetime);
 
     void reset(long total, long delta);
 

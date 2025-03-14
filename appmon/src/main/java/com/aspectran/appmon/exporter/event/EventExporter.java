@@ -124,7 +124,17 @@ public class EventExporter extends Exporter implements EventCountRollupListener 
             eventReader.setEventCount(eventCount);
             firstRollup = false;
         }
-        broadcast(getChartData());
+        String message = new JsonBuilder()
+                .prettyPrint(false)
+                .nullWritable(false)
+                .object()
+                    .object("chartData")
+                        .put("labels", new String[] {eventCount.getDatetime()})
+                        .put("data", new Long[] {eventCount.getDelta()})
+                    .endObject()
+                .endObject()
+                .toString();
+        broadcast(message);
     }
 
     private String getChartData() {
@@ -137,8 +147,9 @@ public class EventExporter extends Exporter implements EventCountRollupListener 
         String[] labels = new String[list.size()];
         long[] data = new long[list.size()];
         for (int i = 0; i < list.size(); i++) {
-            labels[i] = list.get(i).getHh();
-            data[i] = list.get(i).getDelta();
+            EventCountVO vo = list.get(i);
+            labels[i] = vo.getDatetime();
+            data[i] = vo.getDelta();
         }
 
         return new JsonBuilder()
