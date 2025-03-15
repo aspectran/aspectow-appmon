@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.persist.db;
+package com.aspectran.appmon.persist.db.tx;
 
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.mybatis.SqlSessionAgent;
 
 @Component
-@Bean(id = "simpleSqlSession", lazyDestroy = true)
-public class SimpleSqlSession extends SqlSessionAgent {
+@Bean(id = "reuseSqlSession", lazyDestroy = true)
+public class ReuseSqlSession extends SqlSessionAgent {
 
-    public SimpleSqlSession() {
-        super("simpleTxAspect");
+    public ReuseSqlSession() {
+        super("reuseTxAspect");
     }
 
 }

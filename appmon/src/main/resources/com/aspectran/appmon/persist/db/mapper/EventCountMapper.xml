@@ -75,16 +75,32 @@
     </insert>
 
     <select id="getChartData" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
-        select ymd||hh||mm datetime, delta
-        from (
-            select ymd, hh, mm, sum(delta) as delta
-            from appmon_event_count
-            where domain = #{domain} and instance = #{instance} and event = #{event}
-            group by ymd, hh, mm
-            order by ymd desc, hh desc, mm desc
-        )
-        where rownum &lt;= 50
-        order by ymd, hh, mm
+        <choose>
+        <when test="_databaseId == 'oracle'">
+            select ymd||hh||mm datetime, delta
+            from (
+                select ymd, hh, mm, sum(delta) as delta
+                from appmon_event_count
+                where domain = #{domain} and instance = #{instance} and event = #{event}
+                group by ymd, hh, mm
+                order by ymd desc, hh desc, mm desc
+            )
+            where rownum &lt;= 50
+            order by ymd, hh, mm
+        </when>
+        <otherwise>
+            select ymd||hh||mm datetime, delta
+            from (
+                select ymd, hh, mm, sum(delta) as delta
+                from appmon_event_count
+                where domain = #{domain} and instance = #{instance} and event = #{event}
+                group by ymd, hh, mm
+                order by ymd desc, hh desc, mm desc
+                limit 50
+            )
+            order by ymd, hh, mm
+        </otherwise>
+        </choose>
     </select>
 
 </mapper>

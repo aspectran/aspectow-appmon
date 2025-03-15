@@ -46,7 +46,7 @@ public class LogExporter extends Exporter {
 
     private final LogInfo logInfo;
 
-    private final String label;
+    private final String prefix;
 
     /** the Charset to be used for reading the file */
     private final Charset charset;
@@ -66,7 +66,7 @@ public class LogExporter extends Exporter {
                        @NonNull File logFile) {
         this.logExporterManager = logExporterManager;
         this.logInfo = logInfo;
-        this.label = logInfo.getInstanceName() + TYPE + logInfo.getName() + ":";
+        this.prefix = logInfo.getInstanceName() + TYPE + logInfo.getName() + ":";
         this.charset = (logInfo.getCharset() != null ? Charset.forName(logInfo.getCharset()): DEFAULT_CHARSET);
         this.sampleInterval = (logInfo.getSampleInterval() > 0 ? logInfo.getSampleInterval() : DEFAULT_SAMPLE_INTERVAL);
         this.lastLines = logInfo.getLastLines();
@@ -107,7 +107,7 @@ public class LogExporter extends Exporter {
                 if (line == null) {
                     break;
                 }
-                list.add(label + line);
+                list.add(prefix + line);
             }
             Collections.reverse(list);
         }
@@ -116,7 +116,7 @@ public class LogExporter extends Exporter {
 
     @Override
     public void broadcast(String message) {
-        logExporterManager.broadcast(label + message);
+        logExporterManager.broadcast(prefix + message);
     }
 
     @Override

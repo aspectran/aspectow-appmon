@@ -18,7 +18,6 @@ package com.aspectran.appmon.exporter.event;
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.event.activity.ActivityEventReader;
 import com.aspectran.appmon.exporter.event.session.SessionEventReader;
-import com.aspectran.appmon.persist.db.mapper.EventCountMapper;
 import com.aspectran.utils.ClassUtils;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;

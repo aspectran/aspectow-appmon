@@ -24,7 +24,6 @@ import com.aspectran.appmon.persist.db.mapper.EventCountMapper;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.json.JsonBuilder;
-import com.aspectran.utils.json.JsonString;
 
 import java.util.List;
 import java.util.Timer;
@@ -43,7 +42,7 @@ public class EventExporter extends Exporter implements EventCountRollupListener 
 
     private final EventReader eventReader;
 
-    private final String label;
+    private final String prefix;
 
     private final int sampleInterval;
 
@@ -57,7 +56,7 @@ public class EventExporter extends Exporter implements EventCountRollupListener 
         this.eventExporterManager = eventExporterManager;
         this.eventInfo = eventInfo;
         this.eventReader = eventReader;
-        this.label = eventInfo.getInstanceName() + TYPE + eventInfo.getName() + ":";
+        this.prefix = eventInfo.getInstanceName() + TYPE + eventInfo.getName() + ":";
         this.sampleInterval = eventInfo.getSampleInterval();
     }
 
@@ -68,16 +67,16 @@ public class EventExporter extends Exporter implements EventCountRollupListener 
 
     @Override
     public void read(@NonNull List<String> messages) {
-        messages.add(label + getChartData());
+        messages.add(prefix + getChartData());
         String json = eventReader.read();
         if (json != null) {
-            messages.add(label + json);
+            messages.add(prefix + json);
         }
     }
 
     @Override
     public void broadcast(String message) {
-        eventExporterManager.broadcast(label + message);
+        eventExporterManager.broadcast(prefix + message);
     }
 
     private void broadcastIfChanged() {
