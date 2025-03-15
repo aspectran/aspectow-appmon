@@ -15,6 +15,8 @@
  */
 package com.aspectran.appmon.persist.counter;
 
+import com.aspectran.utils.Assert;
+
 import java.util.concurrent.atomic.LongAdder;
 
 /**
@@ -24,9 +26,9 @@ public class EventCount {
 
     private final LongAdder tally = new LongAdder();
 
-    private volatile String datetime;
+    private volatile boolean tallied;
 
-    private volatile long oldTotal;
+    private volatile String datetime;
 
     private volatile long total;
 
@@ -34,6 +36,10 @@ public class EventCount {
 
     public void hit() {
         tally.increment();
+    }
+
+    public boolean isTallied() {
+        return tallied;
     }
 
     public String getDatetime() {
@@ -57,17 +63,27 @@ public class EventCount {
     }
 
     synchronized void rollup(String datetime) {
-        this.datetime = datetime;
+        Assert.notNull(datetime, "datetime must not be null");
+        Assert.isTrue(datetime.length() == 12, "datetime length must be 12");
         long sum = tally.sum();
         tally.reset();
-        total += sum;
-        delta = total - oldTotal;
-        oldTotal = total;
+        tallied = (sum > 0);
+        if (datetime.equals(this.datetime)) {
+            total += sum;
+            delta += sum;
+        } else {
+            this.datetime = datetime;
+            total += sum;
+            delta = sum;
+        }
     }
 
-    synchronized void reset(long total, long delta) {
+    synchronized void reset(String datetime, long total, long delta) {
+        Assert.isTrue(total >= 0, "total must be positive");
+        Assert.isTrue(delta >= 0, "total must be positive");
+        this.datetime = datetime;
         tally.reset();
-        oldTotal = total - delta;
+        tallied = false;
         this.total = total;
         this.delta = delta;
     }

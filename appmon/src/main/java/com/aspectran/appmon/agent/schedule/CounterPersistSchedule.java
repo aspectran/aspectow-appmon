@@ -46,7 +46,7 @@ import java.time.temporal.ChronoUnit;
 @Component
 @Bean
 @Schedule(
-    id = "counterPersist1m",
+    id = "counterPersistSchedule",
     scheduler = "appmonScheduler",
     cronTrigger = @CronTrigger(
         expression = "0 * * * * ?"
@@ -79,13 +79,14 @@ public class CounterPersistSchedule {
     @Initialize
     public void initialize() throws Exception {
         appMonManager.instantActivity(() -> {
+            String datetime = getDatetime(false);
             for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
-                EventCountVO eventCountVO = dao.getLastEventCount(
+                EventCountVO vo = dao.getLastEventCount(
                         currentDomain, eventCounter.getInstanceName(), eventCounter.getEventName());
-                if (eventCountVO != null) {
-                    eventCounter.reset(eventCountVO.getTotal(), eventCountVO.getDelta());
+                if (vo != null && datetime.compareTo(vo.getDatetime()) >= 0) {
+                    eventCounter.reset(vo.getDatetime(), vo.getTotal(), vo.getDelta());
                 } else {
-                    eventCounter.reset(0L, 0L);
+                    eventCounter.reset(datetime, 0L, 0L);
                 }
                 eventCounter.initialize();
             }
@@ -97,28 +98,35 @@ public class CounterPersistSchedule {
     public void destroy() {
         try {
             appMonManager.instantActivity(() -> {
-                EventCountVO eventCountVO = createEventCountVO(true);
-                save(eventCountVO);
+                rollupAndSave(false);
                 return null;
             });
         } catch (Exception e) {
-            logger.error("Failed save last event count", e);
+            logger.error("Failed to save last event count", e);
         }
     }
 
     @Request("appmon/persist/counter/rollup.job")
     public void rollup() {
-        for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
-            EventCountVO eventCountVO = createEventCountVO(false);
-            eventCounter.rollup(eventCountVO.getDatetime());
-            save(eventCountVO);
-        }
+        rollupAndSave(true);
     }
 
-    private void save(EventCountVO eventCountVO) {
+    private void rollupAndSave(boolean scheduled) {
+        for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
+            String datetime = getDatetime(scheduled);
+            eventCounter.rollup(datetime);
+        }
+        save();
+    }
+
+    private void save() {
+        EventCountVO eventCountVO = null;
         for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
             EventCount eventCount = eventCounter.getEventCount();
-            if (eventCount.getDelta() > 0) {
+            if (eventCount.isTallied()) {
+                if (eventCountVO == null) {
+                    eventCountVO = createEventCountVO(eventCount.getDatetime());
+                }
                 eventCountVO.setInstance(eventCounter.getInstanceName());
                 eventCountVO.setEvent(eventCounter.getEventName());
                 eventCountVO.setTotal(eventCount.getTotal());
@@ -130,21 +138,24 @@ public class CounterPersistSchedule {
     }
 
     @NonNull
-    private EventCountVO createEventCountVO(boolean aborted) {
+    private String getDatetime(boolean scheduled) {
         Instant instant = Instant.now();
-        if (!aborted) {
+        if (scheduled) {
             instant = instant.minus(1, ChronoUnit.MINUTES);
         }
         LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-        String yyyyMMddHHmm = formatter.format(localDateTime);
-        String ymd = yyyyMMddHHmm.substring(0, 8);
-        String hh = yyyyMMddHHmm.substring(8, 10);
-        String mm = yyyyMMddHHmm.substring(10, 12);
+        return formatter.format(localDateTime);
+    }
 
+    @NonNull
+    private EventCountVO createEventCountVO(@NonNull String datetime) {
+        String ymd = datetime.substring(0, 8);
+        String hh = datetime.substring(8, 10);
+        String mm = datetime.substring(10, 12);
         EventCountVO eventCountVO = new EventCountVO();
         eventCountVO.setDomain(currentDomain);
-        eventCountVO.setDatetime(yyyyMMddHHmm);
+        eventCountVO.setDatetime(datetime);
         eventCountVO.setYmd(ymd);
         eventCountVO.setHh(hh);
         eventCountVO.setMm(mm);

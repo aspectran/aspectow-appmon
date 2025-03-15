@@ -72,8 +72,8 @@ public abstract class AbstractEventCounter implements EventCounter {
     }
 
     @Override
-    public void reset(long total, long delta) {
-        eventCount.reset(total, delta);
+    public void reset(String datetime, long total, long delta) {
+        eventCount.reset(datetime, total, delta);
         for (EventCountRollupListener eventRollupListener : eventCountRollupListeners) {
             eventRollupListener.onRolledUp(eventCount);
         }

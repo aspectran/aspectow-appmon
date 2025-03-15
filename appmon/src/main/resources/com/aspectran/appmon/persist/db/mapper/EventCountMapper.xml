@@ -7,7 +7,7 @@
     <cache />
 
     <select id="getLastEventCount" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
-        select domain, instance, event, ymd, hh, mm, total, delta
+        select domain, instance, event, ymd||hh||mm datetime, ymd, hh, mm, total, delta
         from appmon_event_count_last
         where domain = #{domain} and instance = #{instance} and event = #{event}
     </select>
@@ -81,7 +81,7 @@
             from appmon_event_count
             where domain = #{domain} and instance = #{instance} and event = #{event}
             group by ymd, hh, mm
-            order by ymd desc, hh desc
+            order by ymd desc, hh desc, mm desc
         )
         where rownum &lt;= 50
         order by ymd, hh, mm

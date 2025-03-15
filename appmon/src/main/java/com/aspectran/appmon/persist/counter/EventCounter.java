@@ -29,6 +29,6 @@ public interface EventCounter {
 
     void rollup(String datetime);
 
-    void reset(long total, long delta);
+    void reset(String datetime, long total, long delta);
 
 }
