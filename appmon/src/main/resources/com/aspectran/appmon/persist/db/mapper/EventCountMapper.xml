@@ -89,7 +89,7 @@
             order by ymd, hh, mm
         </when>
         <otherwise>
-            select ymd||hh||mm datetime, delta
+            select ymd||hh||mm as datetime, delta
             from (
                 select ymd, hh, mm, sum(delta) as delta
                 from appmon_event_count

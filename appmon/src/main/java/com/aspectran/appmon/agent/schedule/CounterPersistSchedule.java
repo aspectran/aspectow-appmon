@@ -49,7 +49,7 @@ import java.time.temporal.ChronoUnit;
     id = "counterPersistSchedule",
     scheduler = "appmonScheduler",
     cronTrigger = @CronTrigger(
-        expression = "0 * * * * ?"
+        expression = "0 */" + CounterPersistSchedule.SAMPLE_INTERVAL_IN_MINUTES + " * * * ?"
     ),
     jobs = {
         @Job(translet = "appmon/persist/counter/rollup.job")
@@ -58,6 +58,8 @@ import java.time.temporal.ChronoUnit;
 public class CounterPersistSchedule {
 
     private static final Logger logger = LoggerFactory.getLogger(CounterPersistSchedule.class);
+
+    protected static final int SAMPLE_INTERVAL_IN_MINUTES = 5; // every 5 minutes
 
     private final AppMonManager appMonManager;
 
@@ -140,8 +142,10 @@ public class CounterPersistSchedule {
     @NonNull
     private String getDatetime(boolean scheduled) {
         Instant instant = Instant.now();
-        if (scheduled) {
-            instant = instant.minus(1, ChronoUnit.MINUTES);
+        if (!scheduled) {
+            int minute = instant.atZone(ZoneOffset.UTC).getMinute();
+            int plus = SAMPLE_INTERVAL_IN_MINUTES - minute % SAMPLE_INTERVAL_IN_MINUTES;
+            instant = instant.minus(plus, ChronoUnit.MINUTES);
         }
         LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");

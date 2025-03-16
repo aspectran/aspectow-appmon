@@ -1,4 +1,4 @@
-create table if not exists appmon_event_count (
+create table appmon_event_count (
     domain varchar(30) not null,
     instance varchar(30) not null,
     event varchar(30) not null,
@@ -7,10 +7,10 @@ create table if not exists appmon_event_count (
     mm varchar(2) not null,
     total int not null,
     delta int not null,
-    constraint pk_event_count primary key (domain, instance, event, ymd, hh, mm)
+    constraint appmon_event_count_pk primary key (domain, instance, event, ymd, hh, mm)
 );
 
-create table if not exists appmon_event_count_last (
+create table appmon_event_count_last (
     domain varchar(30) not null,
     instance varchar(30) not null,
     event varchar(30) not null,
@@ -19,6 +19,6 @@ create table if not exists appmon_event_count_last (
     mm varchar(2) not null,
     total int not null,
     delta int not null,
-    reg_dt timestamp default now() not null,
-    constraint pk_event_count_last primary key (domain, instance, event)
+    upd_dt date default sysdate not null,
+    constraint appmon_event_count_last_pk primary key (domain, instance, event)
 );
