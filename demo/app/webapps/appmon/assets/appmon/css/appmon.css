@@ -51,10 +51,10 @@
     color: #fff;
 }
 
-.display-box {
+.event-box {
     display: none;
 }
-.display-box .status-bar {
+.event-box .status-bar {
     background-color: #242c43;
     color: #eee;
     overflow: auto;
@@ -62,10 +62,10 @@
     height: 29px;
     box-shadow: -20px 20px 20px -20px #394e59 inset;
 }
-.display-box .status-bar.on {
+.event-box .status-bar.on {
     background-color: #709185;
 }
-.display-box .status-bar h4 {
+.event-box .status-bar h4 {
     float: left;
     width: 70%;
     height: 29px;
@@ -124,12 +124,12 @@
 }
 .track-stack .activities {
     position: absolute;
-    top: 10px;
+    top: 5px;
     left: 0;
     right: 0;
     bottom: 0;
     color: #a5aecf;
-    font-size: 3.4em;
+    font-size: 3em;
     text-align: center;
     z-index: 11;
 }
@@ -141,32 +141,56 @@
 .track-stack .activities p.current {
     font-weight: bold;
 }
-.track-stack .activities p.total {
+.track-stack .activities p.tally {
     font-size: .7em;
 }
+.track-stack .activities p.total {
+    padding-top: 5px;
+    font-size: .35em;
+}
 
-.sessions-box {
+.visual-box {
     display: none;
 }
-.sessions-box .panel {
+.visual-box .chart-box {
+    height: 174px;
+    padding: 4px 5px 0;
+    box-shadow: 0 8px 15px -10px rgba(50, 50, 50, 0.33);
+}
+.visual-box .chart-box .chart {
+    width: 100%;
+    height: 170px;
+}
+.visual-box .chart-box .chart canvas {
+    width: 100%;
+}
+
+.session-box {
+    display: none;
+}
+.session-box .panel {
     border: 1px solid #ccc;
     border-bottom: 2px solid #ccc;
     border-radius: 0;
     height: 200px;
     padding: .5em;
     overflow-y: auto;
+    background-color: #d9e9f4;
 }
-.sessions-box .panel p {
+.session-box .panel.ground {
+    background-color: #eff5fa;
+}
+.session-box .panel p {
     margin: 0;
 }
-.sessions-box .panel .elapsed {
+.session-box .panel .elapsed {
     font-size: .9em;
     padding: 0 .5em 0 0;
 }
-.sessions-box dl.session-statistics {
+.session-box dl.session-stats {
     margin-bottom: .3em;
 }
-.sessions-box dl.session-statistics dt {
+.session-box dl.session-stats dt {
     float: left;
     clear: left;
     padding: 0 0 0 .5em;
@@ -180,7 +204,7 @@
     white-space: nowrap;
     text-wrap: nowrap;
 }
-.sessions-box dl.session-statistics dd {
+.session-box dl.session-stats dd {
     text-align: right;
     font-weight: normal;
     font-size: 1em;
@@ -189,10 +213,10 @@
     height: 24px;
     white-space: nowrap;
 }
-.sessions-box ul.sessions {
+.session-box ul.sessions {
     margin: 0;
 }
-.sessions-box ul.sessions li {
+.session-box ul.sessions li {
     list-style-type: none;
     display: inline-table;
     padding: 0;
@@ -200,14 +224,16 @@
     margin-bottom: 5px;
     height: 25px;
     line-height: 25px;
+    border-radius: 5px;
+    background-color: #fff;
 }
-.sessions-box ul.sessions li.inactive {
-    opacity: .4;
+.session-box ul.sessions li.inactive {
+    opacity: .525;
 }
-.sessions-box ul.sessions li.hidden {
+.session-box ul.sessions li.hidden {
     display: none;
 }
-.sessions-box ul.sessions li .count {
+.session-box ul.sessions li .count {
     display: inline-block;
     height: 25px;
     line-height: 25px;
@@ -218,25 +244,25 @@
     padding: 0 8px 0 6px;
     font-size: .85em;
 }
-.sessions-box ul.sessions li .count.active {
+.session-box ul.sessions li .count.active {
     background-color: #02b502;
 }
-.sessions-box ul.sessions li .count.counting {
+.session-box ul.sessions li .count.counting {
     color: #fff;
 }
-.sessions-box ul.sessions li.inactive .count.counting {
+.session-box ul.sessions li.inactive .count.counting {
     border-left: 3px solid #090909;
     color: #fff;
 }
-.sessions-box ul.sessions li.inactive .count.active {
+.session-box ul.sessions li.inactive .count.active {
     border-left: 3px solid #009400;
 }
-.sessions-box ul.sessions li .flag {
+.session-box ul.sessions li .flag {
     height: 25px;
     border-radius: 0;
     vertical-align: top;
 }
-.sessions-box ul.sessions li .username {
+.session-box ul.sessions li .username {
     display: inline-block;
     height: 25px;
     line-height: 25px;
@@ -246,19 +272,29 @@
     font-size: .85em;
     background-color: #e6e8e6;
 }
-.sessions-box ul.sessions li .detail {
+.session-box ul.sessions li .detail {
     display: none;
     line-height: .9;
-    border-top: 1px solid #ccc;
+    border-top: 1px solid #638499;
+    padding-left: 2px;
 }
-.sessions-box ul.sessions li.designated .detail {
+.session-box ul.sessions li.designated {
+    padding: 0 3px 3px 0;
+    border-radius: 5px;
+    background-color: #fff;
+}
+.session-box ul.sessions li.designated .detail {
     display: block;
 }
-.sessions-box ul.sessions li .detail p {
+.session-box ul.sessions li .detail p {
     padding: 0;
     margin: 0;
     font-size: .8em;
     text-align: right;
+    line-height: 1.1;
+}
+.session-box ul.sessions li .detail p:first-child {
+    font-size: .74em;
 }
 
 .console-box .status-bar {
