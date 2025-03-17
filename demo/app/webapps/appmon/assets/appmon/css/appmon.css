@@ -154,7 +154,7 @@
 }
 .visual-box .chart-box {
     height: 174px;
-    padding: 4px 5px 0;
+    padding: 4px 0 0 4px;
     box-shadow: 0 8px 15px -10px rgba(50, 50, 50, 0.33);
 }
 .visual-box .chart-box .chart {
