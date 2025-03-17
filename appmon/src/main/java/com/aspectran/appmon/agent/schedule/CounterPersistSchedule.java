@@ -81,13 +81,13 @@ public class CounterPersistSchedule {
     @Initialize
     public void initialize() throws Exception {
         appMonManager.instantActivity(() -> {
-            String datetime = getDatetime(false);
             for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
                 EventCountVO vo = dao.getLastEventCount(
                         currentDomain, eventCounter.getInstanceName(), eventCounter.getEventName());
-                if (vo != null && datetime.compareTo(vo.getDatetime()) >= 0) {
+                if (vo != null) {
                     eventCounter.reset(vo.getDatetime(), vo.getTotal(), vo.getDelta());
                 } else {
+                    String datetime = getDatetime(false);
                     eventCounter.reset(datetime, 0L, 0L);
                 }
                 eventCounter.initialize();
@@ -143,9 +143,9 @@ public class CounterPersistSchedule {
     private String getDatetime(boolean scheduled) {
         Instant instant = Instant.now();
         if (!scheduled) {
-            int minute = instant.atZone(ZoneOffset.UTC).getMinute();
-            int plus = SAMPLE_INTERVAL_IN_MINUTES - minute % SAMPLE_INTERVAL_IN_MINUTES;
-            instant = instant.minus(plus, ChronoUnit.MINUTES);
+            int next = instant.atZone(ZoneOffset.UTC).getMinute() + SAMPLE_INTERVAL_IN_MINUTES;
+            int offset = SAMPLE_INTERVAL_IN_MINUTES - next % SAMPLE_INTERVAL_IN_MINUTES;
+            instant = instant.plus(offset, ChronoUnit.MINUTES);
         }
         LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
