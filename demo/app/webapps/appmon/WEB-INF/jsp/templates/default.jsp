@@ -8,15 +8,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="google" content="notranslate">
-    <title>${empty page.title ? "AppMon" : page.title}</title>
     <meta name="description" content="${empty page.description ? "Welcome to AppMon" : page.description}">
-    <link rel="stylesheet" href="https://aspectran.com/assets/css/aspectran.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap">
-    <script src="https://aspectran.com/assets/js/modernizr-custom.js"></script>
-    <script src="https://aspectran.com/assets/countries/countries.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment-with-locales.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <meta name="msapplication-TileImage" content="https://aspectran.com/assets/img/ms-icon-144x144.png">
+    <meta name="msapplication-TileColor" content="#4B555A">
+    <title>${empty page.title ? "AppMon" : page.title}</title>
     <link rel="mask-icon" href="https://aspectran.com/assets/img/aspectran-logo.svg" color="#4B555A">
     <link rel="apple-touch-icon" sizes="57x57" href="https://aspectran.com/assets/img/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="https://aspectran.com/assets/img/apple-icon-60x60.png">
@@ -31,8 +26,17 @@
     <link rel="icon" type="image/png" sizes="16x16" href="https://aspectran.com/assets/img/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="https://aspectran.com/assets/img/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="https://aspectran.com/assets/img/favicon-96x96.png">
-    <meta name="msapplication-TileImage" content="https://aspectran.com/assets/img/ms-icon-144x144.png">
-    <meta name="msapplication-TileColor" content="#4B555A">
+    <link rel="stylesheet" href="https://aspectran.com/assets/css/aspectran.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap">
+    <script src="https://aspectran.com/assets/js/modernizr-custom.js"></script>
+    <script src="https://aspectran.com/assets/countries/countries.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/dayjs.min.js" integrity="sha512-FwNWaxyfy2XlEINoSnZh1JQ5TRRtGow0D6XcmAWmYCRgvqOUTnzCxPc9uF35u5ZEpirk1uhlPVA19tflhvnW1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/plugin/utc.min.js" integrity="sha512-z84O912dDT9nKqvpBnl1tri5IN0j/OEgMzLN1GlkpKLMscs5ZHVu+G2CYtA6dkS0YnOGi3cODt3BOPnYc8Agjg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/plugin/localizedFormat.min.js" integrity="sha512-vjS0MkqX58pv35Mv03gzee3TSJ74Gg5lPkgel1V8czy+sTX/ZoFMs/FqnGzWpf3IV+Ry3/mJ0i9nANcjKk1fBg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>dayjs.extend(window.dayjs_plugin_utc)</script>
+    <script>dayjs.extend(window.dayjs_plugin_localizedFormat)</script>
 </head>
 <body id="top-of-page" class="${page.style}" itemscope itemtype="https://schema.org/WebPage">
 <nav id="navigation" class="no-js">

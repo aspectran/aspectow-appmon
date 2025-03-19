@@ -1,9 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
-<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250317"/>">
+<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250317-5"/>">
 <script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20250316"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250317-3"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250317-6"/>"></script>
 <script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250316"/>"></script>
 <script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250316"/>"></script>
 <div class="grid-x">
@@ -56,8 +56,7 @@
                     </div>
                     <div class="cell small-12 medium-8">
                         <div class="panel ground">
-                            <ul class="sessions">
-                            </ul>
+                            <ul class="sessions"></ul>
                         </div>
                     </div>
                 </div>

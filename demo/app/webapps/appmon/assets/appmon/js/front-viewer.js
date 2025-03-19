@@ -340,7 +340,7 @@ function FrontViewer() {
         }
         let $detail = $("<div class='detail'/>")
             .append($("<p/>").text(session.sessionId))
-            .append($("<p/>").text(session.createAt));
+            .append($("<p/>").text(dayjs.utc(session.createAt).local().format("LLL")));
         if (session.ipAddress) {
             $detail.append($("<p/>").text(session.ipAddress));
         }
@@ -362,21 +362,19 @@ function FrontViewer() {
             }
             $li.stop().hide().fadeIn(250);
         }
-    }
+    };
 
     const processChartData = function (instanceName, messageType, eventName, messagePrefix, chartData) {
         let $chart = getChart(messagePrefix);
         if (!$chart) {
             return;
         }
-
         if (eventName === "activity") {
             resetActivityTally(messagePrefix);
         }
-
         let chart = $chart.data("chart");
         if (chart) {
-            updateChart(eventName, chart, chartData.labels, chartData.data);
+            updateChart(eventName, chart, toDatetime(chartData.labels), chartData.data);
         } else {
             let $canvas = $chart.find("canvas");
             if (!$canvas.length) {
@@ -385,10 +383,10 @@ function FrontViewer() {
             }
             let maxLabels = adjustLabelCount(eventName, chartData.labels, chartData.data);
             let autoSkip = (maxLabels === 0);
-            let chart = drawChart(eventName, $canvas[0], chartData.labels, chartData.data, autoSkip);
+            let chart = drawChart(eventName, $canvas[0], toDatetime(chartData.labels), chartData.data, autoSkip);
             $chart.data("chart", chart);
         }
-    }
+    };
 
     const updateChart = function (eventName, chart, labels, data) {
         if (chart.data.labels.length > 0) {
@@ -407,7 +405,7 @@ function FrontViewer() {
         chart.data.datasets[0].data.push(...data);
         adjustLabelCount(eventName, chart.data.labels, chart.data.datasets[0].data);
         chart.update();
-    }
+    };
 
     const adjustLabelCount = function (eventName, labels, data) {
         let canvasWidth = 0;
@@ -430,7 +428,15 @@ function FrontViewer() {
             data.splice(0, cnt);
         }
         return maxLabels;
-    }
+    };
+
+    const toDatetime = function (labels) {
+        let arr = []
+        labels.forEach(label => {
+            arr.push(dayjs.utc(label, "YYYYMMDDHHmm").local());
+        });
+        return arr;
+    };
 
     const drawChart = function (eventName, canvas, labels, data, autoSkip) {
         let dataLabel;
@@ -466,8 +472,8 @@ function FrontViewer() {
                             enabled: true,
                             callbacks: {
                                 title: function (tooltip) {
-                                    let label = tooltip[0].label;
-                                    return moment.utc(label, "YYYYMMDDHHmm").local().format("LLL");
+                                    let datetime = labels[tooltip[0].dataIndex];
+                                    return datetime.format("LLL");
                                 }
                             }
                         }
@@ -481,16 +487,17 @@ function FrontViewer() {
                             ticks: {
                                 autoSkip: autoSkip,
                                 callback: function (value, index) {
-                                    let label = labels[index];
-                                    let ymd = label.substring(0, 8);
-                                    let prevYmd = (index > 0 ? labels[index - 1].substring(0, 8) : "");
-                                    let datetime = moment.utc(label, "YYYYMMDDHHmm").local();
-                                    if (ymd !== prevYmd) {
+                                    let datetime = labels[index];
+                                    let datetime2 = (index > 0 ? labels[index - 1] : null);
+                                    if (datetime.isAfter(datetime2, 'day')) {
                                         return datetime.format("M/D HH:mm");
                                     } else {
                                         return datetime.format("HH:mm");
                                     }
                                 }
+                            },
+                            tooltip: {
+                                enabled: true,
                             }
                         },
                         y: {
@@ -521,5 +528,5 @@ function FrontViewer() {
                 }
             }
         );
-    }
+    };
 }

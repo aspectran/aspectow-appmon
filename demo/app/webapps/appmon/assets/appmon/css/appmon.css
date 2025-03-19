@@ -173,7 +173,7 @@
     border-bottom: 2px solid #ccc;
     border-radius: 0;
     height: 200px;
-    padding: .5em;
+    padding: 5px;
     overflow-y: auto;
     background-color: #d9e9f4;
 }
@@ -220,7 +220,7 @@
     list-style-type: none;
     display: inline-table;
     padding: 0;
-    margin-right: 10px;
+    margin-right: 5px;
     margin-bottom: 5px;
     height: 25px;
     line-height: 25px;
@@ -276,24 +276,32 @@
     display: none;
     line-height: .9;
     border-top: 1px solid #638499;
-    padding-left: 2px;
 }
 .session-box ul.sessions li.designated {
-    padding: 0 3px 3px 0;
+    padding: 0 0 3px 0;
     border-radius: 5px;
     background-color: #fff;
+    border: 1px solid #748fa0;
+}
+.session-box ul.sessions li.designated .count {
+    border-top-left-radius: 3px;
 }
 .session-box ul.sessions li.designated .detail {
     display: block;
 }
 .session-box ul.sessions li .detail p {
-    padding: 0;
+    padding: 2px;
     margin: 0;
     font-size: .8em;
     text-align: right;
-    line-height: 1.1;
+    line-height: 1;
 }
 .session-box ul.sessions li .detail p:first-child {
+    font-size: .74em;
+    background-color: #517386;
+    color: #fff;
+}
+.session-box ul.sessions li .detail p:last-child {
     font-size: .74em;
 }
 
