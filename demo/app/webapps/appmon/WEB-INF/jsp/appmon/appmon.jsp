@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
-<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250317-5"/>">
+<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250317-6"/>">
 <script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20250316"/>"></script>
 <script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250317-6"/>"></script>
 <script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250316"/>"></script>
@@ -11,7 +11,7 @@
         <ul class="speed-options">
             <li class="fi-fast-forward fast" title="Set to poll every second. Turn this option on only when absolutely necessary."></li>
         </ul>
-        <ul class="layout-options hide-for-small-only">
+        <ul class="layout-options show-for-large">
             <li class="fi-layout compact on"><a> Compact</a></li>
         </ul>
     </div>
