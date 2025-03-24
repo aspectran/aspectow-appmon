@@ -86,7 +86,7 @@
     position: absolute;
     top: 0;
     right: 0;
-    width: 220px;
+    width: 180px;
     height: 120px;
     background-color: #3e132d;
 }
@@ -95,15 +95,15 @@
         left: 0;
     }
     to {
-        left: calc(100% - 210px);
+        left: calc(100% - 170px);
     }
 }
 .track-box .bullet {
     position: absolute;
     top: 40%;
     right: 10px;
-    width: 200px;
-    height: 14px;
+    width: 160px;
+    height: 12px;
     border-radius: 50%;
     background: linear-gradient(to right, rgba(9, 17, 39, 0) 27%, rgba(17, 213, 57, 0.66) 100%);
     animation-name: bulletAnimation;
@@ -117,7 +117,7 @@
     background-color: #0d7aaa;
     border: 1px solid #086893;
     border-radius: 3px;
-    width: 200px;
+    width: 160px;
     height: 10px;
     margin: 2px 0;
     opacity: .4;
@@ -146,7 +146,7 @@
 }
 .track-stack .activities p.total {
     padding-top: 5px;
-    font-size: .35em;
+    font-size: .4em;
 }
 
 .visual-box {
