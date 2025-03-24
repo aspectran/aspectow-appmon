@@ -19,41 +19,29 @@ import com.aspectran.appmon.manager.AppMonManager;
 import com.aspectran.appmon.service.ExportService;
 import com.aspectran.appmon.service.ServiceSession;
 import com.aspectran.core.component.bean.annotation.Autowired;
-import com.aspectran.core.component.bean.annotation.AvoidAdvice;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Destroy;
 import com.aspectran.core.component.bean.annotation.Initialize;
-import com.aspectran.utils.ExceptionUtils;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.security.InvalidPBTokenException;
 import com.aspectran.web.websocket.jsr356.AspectranConfigurator;
+import com.aspectran.web.websocket.jsr356.SimplifiedEndpoint;
 import jakarta.websocket.CloseReason;
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnError;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
-import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.channels.ClosedChannelException;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.TimeoutException;
 
 @Component
 @ServerEndpoint(
         value = "/backend/{token}/websocket",
         configurator = AspectranConfigurator.class
 )
-@AvoidAdvice
-public class WebsocketExportService implements ExportService {
+public class WebsocketExportService extends SimplifiedEndpoint implements ExportService {
 
     private static final Logger logger = LoggerFactory.getLogger(WebsocketExportService.class);
 
@@ -68,8 +56,6 @@ public class WebsocketExportService implements ExportService {
     private static final String MESSAGE_JOINED = "joined:";
 
     private static final String MESSAGE_ESTABLISHED = "established:";
-
-    private final Set<WebsocketServiceSession> sessions = new CopyOnWriteArraySet<>();
 
     private final AppMonManager appMonManager;
 
@@ -88,8 +74,9 @@ public class WebsocketExportService implements ExportService {
         appMonManager.getExportServiceManager().removeExportService(this);
     }
 
-    @OnOpen
-    public void onOpen(@PathParam("token") String token, Session session) throws IOException {
+    @Override
+    public void checkAuthorized(@NonNull Session session) throws IOException {
+        String token = session.getPathParameters().get("token");
         try {
             AppMonManager.validateToken(token);
         } catch (InvalidPBTokenException e) {
@@ -103,115 +90,78 @@ public class WebsocketExportService implements ExportService {
         }
     }
 
-    @OnMessage
-    public void onMessage(Session session, String message) {
+    @Override
+    public void processMessage(Session session, String message) {
         if (MESSAGE_PING.equals(message)) {
-            String newToken = AppMonManager.issueToken(1800); // 30 min.
-            broadcast(session, MESSAGE_PONG + newToken);
+            pong(session);
         } else if (message != null && message.startsWith(MESSAGE_JOIN)) {
-            addSession(session, message.substring(MESSAGE_JOIN.length()));
+            join(session, message.substring(MESSAGE_JOIN.length()));
         } else if (MESSAGE_ESTABLISHED.equals(message)) {
-            establishComplete(session);
+            joinComplete(session);
         } else if (MESSAGE_LEAVE.equals(message)) {
             removeSession(session);
         }
     }
 
-    @OnClose
-    public void onClose(Session session, CloseReason reason) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Websocket session {} has been closed. Reason: {}", session.getId(), reason);
-        }
-        removeSession(session);
+    @Override
+    protected void onSessionRemoved(Session session) {
+        ServiceSession serviceSession = new WebsocketServiceSession(session);
+        appMonManager.getExportServiceManager().release(serviceSession);
     }
 
-    @OnError
-    public void onError(@NonNull Session session, Throwable error) {
-        if (!ExceptionUtils.hasCause(error, ClosedChannelException.class, TimeoutException.class)) {
-            logger.warn("Error in websocket session: {}", session.getId(), error);
-        }
-        try {
-            removeSession(session);
-            session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, null));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    private void pong(Session session) {
+        String newToken = AppMonManager.issueToken(1800); // 30 min.
+        sendText(session, MESSAGE_PONG + newToken);
     }
 
-    private void addSession(Session session, String joinInstances) {
-        WebsocketServiceSession serviceSession = new WebsocketServiceSession(session);
-        synchronized (sessions) {
-            if (sessions.add(serviceSession)) {
-                String[] instanceNames = StringUtils.splitWithComma(joinInstances);
-                instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
-                if (!StringUtils.hasText(joinInstances) || instanceNames.length > 0) {
-                    serviceSession.setJoinedInstances(instanceNames);
-                }
-                sendJoined(serviceSession);
-            }
+    private void join(Session session, String joinInstances) {
+        ServiceSession serviceSession = new WebsocketServiceSession(session);
+        String[] instanceNames = StringUtils.splitWithComma(joinInstances);
+        instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
+        if (!StringUtils.hasText(joinInstances) || instanceNames.length > 0) {
+            serviceSession.setJoinedInstances(instanceNames);
         }
-    }
-
-    private void sendJoined(@NonNull ServiceSession serviceSession) {
-        String[] instanceNames = serviceSession.getJoinedInstances();
-        if (instanceNames != null) {
+        if (addSession(session)) {
             broadcast(serviceSession, MESSAGE_JOINED);
         }
     }
 
-    private void establishComplete(@NonNull Session session) {
+    private void joinComplete(@NonNull Session session) {
         ServiceSession serviceSession = new WebsocketServiceSession(session);
         appMonManager.getExportServiceManager().join(serviceSession);
         List<String> messages = appMonManager.getExportServiceManager().getLastMessages(serviceSession);
         for (String message : messages) {
-            broadcast(serviceSession, message);
-        }
-    }
-
-    private void removeSession(Session session) {
-        WebsocketServiceSession serviceSession = new WebsocketServiceSession(session);
-        synchronized (sessions) {
-            if (sessions.remove(serviceSession)) {
-                appMonManager.getExportServiceManager().release(serviceSession);
-            }
+            sendText(session, message);
         }
     }
 
     @Override
     public void broadcast(String message) {
-        for (WebsocketServiceSession serviceSession : sessions) {
-            broadcast(serviceSession.getSession(), message);
-        }
+        super.broadcast(message);
     }
 
     @Override
     public void broadcast(@NonNull ServiceSession serviceSession, String message) {
         if (serviceSession instanceof WebsocketServiceSession session) {
-            broadcast(session.getSession(), message);
-        }
-    }
-
-    private void broadcast(@NonNull Session session, String message) {
-        if (session.isOpen()) {
-            session.getAsyncRemote().sendText(message);
+            sendText(session.getSession(), message);
         }
     }
 
     @Override
     public boolean isUsingInstance(String instanceName) {
         if (StringUtils.hasLength(instanceName)) {
-            synchronized (sessions) {
-                for (WebsocketServiceSession serviceSession : sessions) {
-                    String[] instanceNames = serviceSession.getJoinedInstances();
-                    if (instanceNames != null) {
-                        for (String name : instanceNames) {
-                            if (instanceName.equals(name)) {
-                                return true;
-                            }
+            return existsSession(session -> {
+                ServiceSession serviceSession = new WebsocketServiceSession(session);
+                String[] instanceNames = serviceSession.getJoinedInstances();
+                if (instanceNames != null) {
+                    for (String name : instanceNames) {
+                        if (instanceName.equals(name)) {
+                            return true;
                         }
                     }
                 }
-            }
+                return false;
+            });
         }
         return false;
     }
