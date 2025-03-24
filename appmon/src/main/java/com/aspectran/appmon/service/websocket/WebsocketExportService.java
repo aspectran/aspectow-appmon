@@ -42,9 +42,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.channels.ClosedChannelException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeoutException;
 
 @Component
@@ -69,7 +69,7 @@ public class WebsocketExportService implements ExportService {
 
     private static final String MESSAGE_ESTABLISHED = "established:";
 
-    private static final Set<WebsocketServiceSession> sessions = new HashSet<>();
+    private final Set<WebsocketServiceSession> sessions = new CopyOnWriteArraySet<>();
 
     private final AppMonManager appMonManager;
 
@@ -179,10 +179,8 @@ public class WebsocketExportService implements ExportService {
 
     @Override
     public void broadcast(String message) {
-        synchronized (sessions) {
-            for (WebsocketServiceSession serviceSession : sessions) {
-                broadcast(serviceSession.getSession(), message);
-            }
+        for (WebsocketServiceSession serviceSession : sessions) {
+            broadcast(serviceSession.getSession(), message);
         }
     }
 

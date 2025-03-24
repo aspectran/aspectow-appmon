@@ -26,6 +26,7 @@ import com.aspectran.utils.thread.ScheduledExecutorScheduler;
 import com.aspectran.utils.thread.Scheduler;
 import com.aspectran.web.support.util.CookieGenerator;
 import com.aspectran.web.support.util.WebUtils;
+import io.undertow.util.CopyOnWriteMap;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,7 +34,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class PollingServiceSessionManager extends AbstractComponent {
 
@@ -45,7 +45,7 @@ public class PollingServiceSessionManager extends AbstractComponent {
 
     private final Scheduler scheduler = new ScheduledExecutorScheduler("PSSM-Scheduler", false);
 
-    private final Map<String, PollingServiceSession> sessions = new ConcurrentHashMap<>();
+    private final Map<String, PollingServiceSession> sessions = new CopyOnWriteMap<>();
 
     private final AppMonManager appMonManager;
 
@@ -80,9 +80,14 @@ public class PollingServiceSessionManager extends AbstractComponent {
             if (instanceNames != null) {
                 newSession.setJoinedInstances(instanceNames);
             }
-            sessions.put(sessionId, newSession);
-            newSession.access(true);
-            return newSession;
+            existingSession = sessions.put(sessionId, newSession);
+            if (existingSession != null) {
+                return existingSession;
+            } else {
+                newSession.access(true);
+                return newSession;
+
+            }
         }
     }
 
@@ -151,13 +156,15 @@ public class PollingServiceSessionManager extends AbstractComponent {
 
     protected boolean isUsingInstance(String instanceName) {
         if (StringUtils.hasLength(instanceName)) {
-            for (PollingServiceSession serviceSession : sessions.values()) {
-                if (serviceSession.isValid()) {
-                    String[] instanceNames = serviceSession.getJoinedInstances();
-                    if (instanceNames != null) {
-                        for (String name : instanceNames) {
-                            if (instanceName.equals(name)) {
-                                return true;
+            synchronized (sessions) {
+                for (PollingServiceSession serviceSession : sessions.values()) {
+                    if (serviceSession.isValid()) {
+                        String[] instanceNames = serviceSession.getJoinedInstances();
+                        if (instanceNames != null) {
+                            for (String name : instanceNames) {
+                                if (instanceName.equals(name)) {
+                                    return true;
+                                }
                             }
                         }
                     }
