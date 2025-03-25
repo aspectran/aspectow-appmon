@@ -137,11 +137,6 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
     }
 
     @Override
-    public void broadcast(String message) {
-        super.broadcast(message);
-    }
-
-    @Override
     public void broadcast(@NonNull ServiceSession serviceSession, String message) {
         if (serviceSession instanceof WebsocketServiceSession session) {
             sendText(session.getSession(), message);
