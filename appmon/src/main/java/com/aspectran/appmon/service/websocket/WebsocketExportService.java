@@ -27,13 +27,11 @@ import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.security.InvalidPBTokenException;
 import com.aspectran.web.websocket.jsr356.AspectranConfigurator;
 import com.aspectran.web.websocket.jsr356.SimplifiedEndpoint;
-import jakarta.websocket.CloseReason;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.List;
 
 @Component
@@ -75,23 +73,26 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
     }
 
     @Override
-    public void checkAuthorized(@NonNull Session session) throws IOException {
+    protected boolean checkAuthorized(@NonNull Session session) {
         String token = session.getPathParameters().get("token");
         try {
             AppMonManager.validateToken(token);
         } catch (InvalidPBTokenException e) {
             logger.error("Invalid token: {}", token);
-            String reason = "Invalid token";
-            session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, reason));
-            throw new IOException(reason, e);
+            return false;
         }
-        if (logger.isDebugEnabled()) {
-            logger.debug("WebSocket connection established with token: {}", token);
-        }
+        return true;
     }
 
     @Override
-    public void processMessage(Session session, String message) {
+    protected void registerMessageHandlers(@NonNull Session session) {
+        if (session.getMessageHandlers().isEmpty()) {
+            session.addMessageHandler(String.class, message
+                    -> handleMessage(session, message));
+        }
+    }
+
+    private void handleMessage(Session session, String message) {
         if (MESSAGE_PING.equals(message)) {
             pong(session);
         } else if (message != null && message.startsWith(MESSAGE_JOIN)) {

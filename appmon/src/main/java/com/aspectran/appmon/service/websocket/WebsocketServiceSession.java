@@ -17,58 +17,36 @@ package com.aspectran.appmon.service.websocket;
 
 import com.aspectran.appmon.service.ServiceSession;
 import com.aspectran.utils.Assert;
-import com.aspectran.utils.annotation.jsr305.Nullable;
+import com.aspectran.web.websocket.jsr356.WrappedSession;
 import jakarta.websocket.Session;
 
-public class WebsocketServiceSession implements ServiceSession {
+public class WebsocketServiceSession extends WrappedSession implements ServiceSession {
 
     private static final String JOINED_INSTANCES_PROPERTY = "appmon:JoinedInstances";
 
-    private final Session session;
-
     public WebsocketServiceSession(Session session) {
-        this.session = session;
-    }
-
-    public Session getSession() {
-        return session;
+        super(session);
     }
 
     @Override
     public String[] getJoinedInstances() {
-        return (String[])session.getUserProperties().get(JOINED_INSTANCES_PROPERTY);
+        return (String[])getSession().getUserProperties().get(JOINED_INSTANCES_PROPERTY);
     }
 
     @Override
     public void setJoinedInstances(String[] instanceNames) {
         Assert.notNull(instanceNames, "instanceNames must not be null");
-        session.getUserProperties().put(JOINED_INSTANCES_PROPERTY, instanceNames);
+        getSession().getUserProperties().put(JOINED_INSTANCES_PROPERTY, instanceNames);
     }
 
     @Override
     public void removeJoinedInstances() {
-        session.getUserProperties().remove(JOINED_INSTANCES_PROPERTY);
+        getSession().getUserProperties().remove(JOINED_INSTANCES_PROPERTY);
     }
 
     @Override
     public boolean isValid() {
-        return session.isOpen();
-    }
-
-    @Override
-    public boolean equals(@Nullable Object other) {
-        if (this == other || session == other) {
-            return true;
-        }
-        if (other instanceof WebsocketServiceSession that) {
-            return session.equals(that.getSession());
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return session.hashCode();
+        return getSession().isOpen();
     }
 
 }
