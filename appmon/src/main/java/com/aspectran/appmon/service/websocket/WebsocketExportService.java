@@ -146,7 +146,7 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
     @Override
     public boolean isUsingInstance(String instanceName) {
         if (StringUtils.hasLength(instanceName)) {
-            return existsSession(session -> {
+            return containsSession(session -> {
                 ServiceSession serviceSession = new WebsocketServiceSession(session);
                 String[] instanceNames = serviceSession.getJoinedInstances();
                 if (instanceNames != null) {
