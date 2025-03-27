@@ -34,10 +34,10 @@ import com.aspectran.utils.json.JsonString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -235,7 +235,9 @@ public class SessionEventReader extends AbstractEventReader {
         data.setHighestNumberOfActives(statistics.getHighestNumberOfActives());
         data.setNumberOfUnmanaged(Math.abs(statistics.getNumberOfUnmanaged()));
         data.setNumberOfRejected(statistics.getNumberOfRejected());
-        data.setElapsedTime(formatDuration(statistics.getStartTime()));
+        if (oldData == null) {
+            data.setStartTime(formatTime(statistics.getStartTime()));
+        }
         return data;
     }
 
@@ -272,21 +274,7 @@ public class SessionEventReader extends AbstractEventReader {
 
     @NonNull
     private static String formatTime(long time) {
-        LocalDateTime date = LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault());
-        return date.toString();
-    }
-
-    @NonNull
-    private static String formatDuration(long startTime) {
-        Instant start = Instant.ofEpochMilli(startTime);
-        Instant end = Instant.now();
-        Duration duration = Duration.between(start, end);
-        long seconds = duration.getSeconds();
-        return String.format(
-                "%02d:%02d:%02d",
-                seconds / 3600,
-                (seconds % 3600) / 60,
-                seconds % 60);
+        return Instant.ofEpochMilli(time).toString();
     }
 
 }

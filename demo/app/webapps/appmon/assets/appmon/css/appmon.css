@@ -180,12 +180,16 @@
 .session-box .panel.ground {
     background-color: #eff5fa;
 }
-.session-box .panel p {
+.session-box .panel p.since {
     margin: 0;
+    padding: 0 .5em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-wrap: nowrap;
 }
-.session-box .panel .elapsed {
+.session-box .panel p.since .startTime {
     font-size: .9em;
-    padding: 0 .5em 0 0;
 }
 .session-box dl.session-stats {
     margin-bottom: .3em;

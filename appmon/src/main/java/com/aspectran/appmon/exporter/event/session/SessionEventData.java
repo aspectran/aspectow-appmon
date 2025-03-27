@@ -35,7 +35,7 @@ public class SessionEventData {
 
     private long numberOfRejected;
 
-    private String elapsedTime;
+    private String startTime;
 
     private JsonString[] createdSessions;
 
@@ -93,12 +93,12 @@ public class SessionEventData {
         this.numberOfRejected = numberOfRejected;
     }
 
-    public String getElapsedTime() {
-        return elapsedTime;
+    public String getStartTime() {
+        return startTime;
     }
 
-    public void setElapsedTime(String elapsedTime) {
-        this.elapsedTime = elapsedTime;
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
     }
 
     public JsonString[] getCreatedSessions() {
@@ -141,12 +141,12 @@ public class SessionEventData {
         if (!(other instanceof SessionEventData that)) {
             return false;
         }
-        return that.numberOfCreated == numberOfCreated &&
+        return (that.numberOfCreated == numberOfCreated &&
                 that.numberOfExpired == numberOfExpired &&
                 that.numberOfUnmanaged == numberOfUnmanaged &&
                 that.numberOfActives == numberOfActives &&
                 that.highestNumberOfActives == highestNumberOfActives &&
-                that.numberOfRejected == numberOfRejected;
+                that.numberOfRejected == numberOfRejected);
     }
 
     public String toJson() {

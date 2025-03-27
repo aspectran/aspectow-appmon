@@ -273,7 +273,9 @@ function FrontViewer() {
             $display.find(".highestNumberOfActives").text(eventData.highestNumberOfActives);
             $display.find(".numberOfUnmanaged").text(eventData.numberOfUnmanaged);
             $display.find(".numberOfRejected").text(eventData.numberOfRejected);
-            $display.find(".elapsed").text(eventData.elapsedTime);
+            if (eventData.startTime) {
+                $display.find(".startTime").text(dayjs.utc(eventData.startTime).local().format("LLL"));
+            }
             let $sessions = $display.find("ul.sessions");
             if (eventData.createdSessions) {
                 eventData.createdSessions.forEach(function (session) {

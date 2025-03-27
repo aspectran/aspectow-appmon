@@ -1,9 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
-<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250317-6"/>">
+<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250327"/>">
 <script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20250316"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250317-6"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250327"/>"></script>
 <script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250316"/>"></script>
 <script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250316"/>"></script>
 <div class="grid-x">
@@ -51,7 +51,7 @@
                                 <dt title="The number of rejected sessions">Rejected Sessions</dt>
                                 <dd><span class="number numberOfRejected">0</span></dd>
                             </dl>
-                            <p class="text-right"><i>Elapsed <span class="elapsed"></span></i></p>
+                            <p class="since"><i>Since <span class="startTime"></span></i></p>
                         </div>
                     </div>
                     <div class="cell small-12 medium-8">
