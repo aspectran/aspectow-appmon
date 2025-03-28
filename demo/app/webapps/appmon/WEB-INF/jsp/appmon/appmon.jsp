@@ -72,13 +72,13 @@
     <div class="cell console-box">
         <div class="status-bar">
             <h4 class="ellipses"></h4>
-            <a href="#" class="tailing-switch" title="Scroll to End of Log">
+            <a class="tailing-switch" title="Scroll to End of Log">
                 <span class="tailing-status"></span>
             </a>
-            <a href="#" class="clear-screen" title="Clear screen">
+            <a class="clear-screen" title="Clear screen">
                 <span class="icon fi-x"></span>
             </a>
-            <a href="#" class="pause-switch" title="Pause log output">
+            <a class="pause-switch" title="Pause log output">
                 <span class="icon fi-pause"></span>
             </a>
         </div>
