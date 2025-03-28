@@ -1,4 +1,7 @@
 function FrontViewer() {
+    const FLAGS_URL = "https://aspectran.com/assets/countries/flags/";
+    const TEMP_RESIDENT_INACTIVE_SECS = 30;
+
     let $displays = {};
     let $charts = {};
     let $consoles = {};
@@ -292,7 +295,7 @@ function FrontViewer() {
                     let $item = $sessions.find("li[data-sid='" + sessionId + "']");
                     if (!$item.hasClass("inactive")) {
                         $item.addClass("inactive");
-                        let inactiveInterval = Math.min($item.data("inactive-interval")||30, 30);
+                        let inactiveInterval = Math.min($item.data("inactive-interval")||TEMP_RESIDENT_INACTIVE_SECS, TEMP_RESIDENT_INACTIVE_SECS);
                         setTimeout(function () {
                             $item.remove();
                         }, inactiveInterval * 1000);
@@ -308,7 +311,12 @@ function FrontViewer() {
     };
 
     const addSession = function ($sessions, session) {
-        $sessions.find("li[data-sid='" + session.sessionId + "']").remove();
+        $sessions.find("li[data-sid='" + session.sessionId + "']").each(function () {
+            let timer = $(this).data("timer");
+            if (timer) {
+                clearTimeout(timer);
+            }
+        }).remove();
         let $count = $("<div class='count'></div>").text(session.activityCount||0);
         if (session.activityCount > 0) {
             $count.addClass("counting");
@@ -324,13 +332,14 @@ function FrontViewer() {
         if (session.tempResident) {
             $li.addClass("inactive");
             let inactiveInterval = Math.min(session.inactiveInterval||30, 30);
-            setTimeout(function () {
+            let timer = setTimeout(function () {
                 $li.remove();
             }, inactiveInterval * 1000);
+            $li.data("timer", timer);
         }
         if (session.countryCode) {
             $("<img class='flag' alt=''/>")
-                .attr("src", "https://aspectran.com/assets/countries/flags/" + session.countryCode.toLowerCase() + ".png")
+                .attr("src", FLAGS_URL + session.countryCode.toLowerCase() + ".png")
                 .attr("alt", session.countryCode)
                 .attr("title", countries[session.countryCode].name)
                 .appendTo($li);

@@ -60,7 +60,7 @@
     overflow: auto;
     padding : 0 7px 0 10px;
     height: 29px;
-    box-shadow: -20px 20px 20px -20px #394e59 inset;
+    box-shadow: inset -20px 20px 20px -20px #394e59;
 }
 .event-box .status-bar.on {
     background-color: #709185;
@@ -379,7 +379,10 @@
     background-color: #222;
     border: none;
     border-radius: 0;
-    box-shadow: -20px 20px 60px -20px #0d1939 inset;
+    box-shadow: inset -20px 20px 60px -20px #0d1939;
+}
+.console-box .console:hover {
+    box-shadow: inset 0 -16px 6px 6px #667178;
 }
 .console-box .console p {
     font-size: 12px;
