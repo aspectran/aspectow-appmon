@@ -7,13 +7,27 @@
     <cache />
 
     <select id="getLastEventCount" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
-        select domain, instance, event, ymd||hh||mm datetime, ymd, hh, mm, total, delta
-        from appmon_event_count_last
-        where domain = #{domain} and instance = #{instance} and event = #{event}
+        <choose>
+            <when test="_databaseId == 'mysql'">
+                select domain, instance, event, ymd||hh||mm datetime, ymd, hh, mm, total, delta
+                from appmon_event_count_last
+                where domain = #{domain} and instance = #{instance} and event = #{event}
+                </when>
+            <otherwise>
+                select domain, instance, event, concat(ymd, hh, mm) as datetime, ymd, hh, mm, total, delta
+                from appmon_event_count_last
+                where domain = #{domain} and instance = #{instance} and event = #{event}
+            </otherwise>
+        </choose>
     </select>
 
     <update id="updateLastEventCount" parameterType="com.aspectran.appmon.persist.counter.EventCountVO">
         <choose>
+            <when test="_databaseId == 'mysql'">
+                insert into appmon_event_count_last (domain, instance, event, ymd, hh, mm, total, delta)
+                values (#{domain}, #{instance}, #{event}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta})
+                on duplicate key update ymd = #{ymd}, hh = #{hh}, mm = #{mm}, total = #{total}, delta = #{delta}
+            </when>
             <when test="_databaseId == 'oracle'">
                 merge into appmon_event_count_last a
                 using (
@@ -45,6 +59,11 @@
 
     <insert id="insertEventCount" parameterType="com.aspectran.appmon.persist.counter.EventCountVO">
         <choose>
+            <when test="_databaseId == 'mysql'">
+                insert into appmon_event_count (domain, instance, event, ymd, hh, mm, total, delta)
+                values (#{domain}, #{instance}, #{event}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta})
+                on duplicate key update total = #{total}, delta = #{delta}
+            </when>
             <when test="_databaseId == 'oracle'">
                 merge into appmon_event_count a
                 using (
@@ -76,30 +95,30 @@
 
     <select id="getChartData" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
         <choose>
-        <when test="_databaseId == 'oracle'">
-            select ymd||hh||mm datetime, delta
-            from (
-                select ymd, hh, mm, sum(delta) as delta
-                from appmon_event_count
-                where domain = #{domain} and instance = #{instance} and event = #{event}
-                group by ymd, hh, mm
-                order by ymd desc, hh desc, mm desc
-            )
-            where rownum &lt;= 50
-            order by ymd, hh, mm
-        </when>
-        <otherwise>
-            select ymd||hh||mm as datetime, delta
-            from (
-                select ymd, hh, mm, sum(delta) as delta
-                from appmon_event_count
-                where domain = #{domain} and instance = #{instance} and event = #{event}
-                group by ymd, hh, mm
-                order by ymd desc, hh desc, mm desc
-                limit 50
-            )
-            order by ymd, hh, mm
-        </otherwise>
+            <when test="_databaseId == 'oracle'">
+                select ymd||hh||mm datetime, delta
+                from (
+                    select ymd, hh, mm, sum(delta) as delta
+                    from appmon_event_count
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    group by ymd, hh, mm
+                    order by ymd desc, hh desc, mm desc
+                )
+                where rownum &lt;= 50
+                order by ymd, hh, mm
+            </when>
+            <otherwise>
+                select concat(ymd, hh, mm) as datetime, delta
+                from (
+                    select ymd, hh, mm, sum(delta) as delta
+                    from appmon_event_count
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    group by ymd, hh, mm
+                    order by ymd desc, hh desc, mm desc
+                    limit 50
+                ) a
+                order by ymd, hh, mm
+            </otherwise>
         </choose>
     </select>
 

@@ -26,6 +26,14 @@
                 <value>/config/appmon/appmon.db-oracle.properties</value>
             </item>
         </properties>
+        <properties profile="mariadb">
+            <item name="ignoreInvalidResource" valueType="boolean">true</item>
+            <item name="locations" type="array">
+                <value>classpath:com/aspectran/appmon/persist/db/appmon.db-mariadb.properties</value>
+                <value>classpath:com/aspectran/appmon/persist/db/appmon.db-mariadb.system.properties</value>
+                <value>/config/appmon/appmon.db-mariadb.properties</value>
+            </item>
+        </properties>
     </bean>
 
     <bean id="sqlSessionFactory" class="com.aspectran.mybatis.SqlSessionFactoryBean" lazyDestroy="true">
