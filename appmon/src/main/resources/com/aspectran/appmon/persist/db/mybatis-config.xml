@@ -29,6 +29,8 @@
 
     <databaseIdProvider type="DB_VENDOR">
         <property name="H2" value="h2"/>
+        <property name="MariaDB" value="mysql"/>
+        <property name="MySQL" value="mysql"/>
         <property name="Oracle" value="oracle"/>
     </databaseIdProvider>
 
