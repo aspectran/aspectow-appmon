@@ -11,14 +11,14 @@ domain: {
         url: /appmon/backend
     }
 }
-domain: {
-    name: backend2
-    title: Localhost(Polling Mode)
-    endpoint: {
-        mode: polling
-        url: /appmon/backend
-    }
-}
+#domain: {
+#    name: backend2
+#    title: Localhost(Polling Mode)
+#    endpoint: {
+#        mode: polling
+#        url: /appmon/backend
+#    }
+#}
 instance: {
     name: root
     title: Root

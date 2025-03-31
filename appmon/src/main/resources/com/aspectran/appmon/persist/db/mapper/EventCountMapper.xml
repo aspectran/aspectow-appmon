@@ -116,7 +116,7 @@
                     group by ymd, hh, mm
                     order by ymd desc, hh desc, mm desc
                     limit 50
-                ) a
+                ) as a
                 order by ymd, hh, mm
             </otherwise>
         </choose>
