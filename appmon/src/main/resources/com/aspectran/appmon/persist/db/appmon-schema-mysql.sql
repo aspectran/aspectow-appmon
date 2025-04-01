@@ -8,7 +8,10 @@ create table if not exists appmon_event_count (
     total int not null,
     delta int not null,
     constraint appmon_event_count_pk primary key (domain, instance, event, ymd, hh, mm)
-);
+)
+    engine = MyISAM
+    charset = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
 create table if not exists appmon_event_count_last (
     domain varchar(30) not null,
@@ -21,4 +24,8 @@ create table if not exists appmon_event_count_last (
     delta int not null,
     reg_dt timestamp default now() not null,
     constraint appmon_event_count_last_pk primary key (domain, instance, event)
-);
+)
+    engine = MyISAM
+    charset = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
+
