@@ -78,6 +78,9 @@ function FrontBuilder() {
             if (domain.client.establishCount === 1) {
                 console.log(domain.name, "init view");
                 initView();
+            } else {
+                console.log(domain.name, "clear sessions");
+                clearSessions(domain.index);
             }
             if (domain.client.establishCount + domain.index < domains.length) {
                 establish(domain.index + 1, specificInstances);
@@ -299,6 +302,12 @@ function FrontBuilder() {
                     $(".console-box.available").removeClass("large-6");
                 }
             }
+            setTimeout(function () {
+                for (let key in domains) {
+                    let domain = domains[key];
+                    clients[domain.index].refresh();
+                }
+            }, 50);
         });
         $(".speed-options li").off().on("click", function() {
             let $liFast = $(".speed-options li.fast");
@@ -374,6 +383,10 @@ function FrontBuilder() {
 
     const clearConsole = function (domainIndex) {
         $(".console-box[data-domain-index=" + domainIndex + "] .console").empty();
+    };
+
+    const clearSessions = function (domainIndex) {
+        $(".session-box[data-domain-index=" + domainIndex + "] .sessions").empty();
     };
 
     const buildView = function () {

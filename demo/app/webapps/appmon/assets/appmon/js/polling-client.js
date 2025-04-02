@@ -5,6 +5,7 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
     const RETRY_INTERVAL = 5000;
 
     let retryCount = 0;
+    let commands = [];
 
     this.start = function (specificInstances) {
         join(specificInstances);
@@ -13,6 +14,16 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
     this.speed = function (speed) {
         changePollingInterval(speed);
     };
+
+    this.refresh = function () {
+        withCommand("refresh");
+    };
+
+    const withCommand = function (command) {
+        if (!commands.includes(command)) {
+            commands.push(command);
+        }
+    }
 
     const join = function (specificInstances) {
         $.ajax({
@@ -68,9 +79,17 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
     };
 
     const polling = function (specificInstances) {
+        let withCommands = null;
+        if (commands.length) {
+            withCommands = commands.slice();
+            commands.length = 0;
+        }
         $.ajax({
             url: domain.endpoint.url + "/" + domain.endpoint.token + "/polling/pull",
             type: "get",
+            data: {
+                commands: withCommands
+            },
             success: function (data) {
                 if (data && data.token && data.messages) {
                     domain.endpoint['token'] = data.token;

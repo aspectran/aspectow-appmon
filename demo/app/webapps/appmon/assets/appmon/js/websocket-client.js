@@ -19,6 +19,12 @@ function WebsocketClient(domain, viewer, onJoined, onEstablished, onClosed, onFa
         closeSocket();
     };
 
+    this.refresh = function () {
+        if (socket) {
+            socket.send("refresh:");
+        }
+    };
+
     const openSocket = function (specificInstances) {
         closeSocket(false);
         let url = new URL(domain.endpoint.url + "/" + domain.endpoint.token + "/websocket", location.href);

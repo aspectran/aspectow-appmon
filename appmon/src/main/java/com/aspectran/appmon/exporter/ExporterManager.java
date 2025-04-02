@@ -66,6 +66,12 @@ public abstract class ExporterManager {
         }
     }
 
+    public void collectNewMessages(List<String> messages) {
+        for (Exporter exporter : exporters.values()) {
+            exporter.readIfChanged(messages);
+        }
+    }
+
     public void start() {
         for (Exporter exporter : exporters.values()) {
             try {

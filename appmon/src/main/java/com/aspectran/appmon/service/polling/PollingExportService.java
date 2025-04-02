@@ -25,6 +25,7 @@ import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Destroy;
 import com.aspectran.core.component.bean.annotation.Initialize;
+import com.aspectran.core.component.bean.annotation.Qualifier;
 import com.aspectran.core.component.bean.annotation.RequestToGet;
 import com.aspectran.core.component.bean.annotation.RequestToPost;
 import com.aspectran.core.component.bean.annotation.Transform;
@@ -99,7 +100,9 @@ public class PollingExportService implements ExportService {
 
     @RequestToGet("/${token}/polling/pull")
     @Transform(FormatType.JSON)
-    public Map<String, Object> pull(@NonNull Translet translet, String token) throws IOException {
+    public Map<String, Object> pull(@NonNull Translet translet,
+                                    String token,
+                                    @Qualifier("commands[]") String[] commands) throws IOException {
         if (checkServiceAvailable(token)) {
             return null;
         }
@@ -107,6 +110,17 @@ public class PollingExportService implements ExportService {
         PollingServiceSession serviceSession = sessionManager.getSession(translet);
         if (serviceSession == null || !serviceSession.isValid()) {
             return null;
+        }
+
+        if (commands != null) {
+            for (String command : commands) {
+                if ("refresh".equals(command)) {
+                    List<String> newMessages = appMonManager.getExportServiceManager().getNewMessages(serviceSession);
+                    for (String msg : newMessages) {
+                        sessionManager.push(msg);
+                    }
+                }
+            }
         }
 
         String newToken = AppMonManager.issueToken(1800); // 30 min.

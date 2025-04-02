@@ -28,6 +28,9 @@ public abstract class Exporter extends AbstractLifeCycle {
 
     public abstract void read(List<String> messages);
 
+    public void readIfChanged(List<String> messages) {
+    }
+
     public abstract void broadcast(String message);
 
 }

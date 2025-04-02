@@ -75,6 +75,15 @@ public class EventExporter extends Exporter implements EventCountRollupListener 
     }
 
     @Override
+    public void readIfChanged(@NonNull List<String> messages) {
+        messages.add(prefix + getChartData());
+        String json = eventReader.readIfChanged();
+        if (json != null) {
+            messages.add(prefix + json);
+        }
+    }
+
+    @Override
     public void broadcast(String message) {
         eventExporterManager.broadcast(prefix + message);
     }
@@ -128,6 +137,7 @@ public class EventExporter extends Exporter implements EventCountRollupListener 
                 .nullWritable(false)
                 .object()
                     .object("chartData")
+                        .put("rolledUp", true)
                         .put("labels", new String[] {eventCount.getDatetime()})
                         .put("data", new Long[] {eventCount.getDelta()})
                     .endObject()

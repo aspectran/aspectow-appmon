@@ -55,6 +55,8 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
 
     private static final String MESSAGE_ESTABLISHED = "established:";
 
+    private static final String MESSAGE_REFRESH = "refresh:";
+
     private final AppMonManager appMonManager;
 
     @Autowired
@@ -99,6 +101,8 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
             join(session, message.substring(MESSAGE_JOIN.length()));
         } else if (MESSAGE_ESTABLISHED.equals(message)) {
             joinComplete(session);
+        } else if (MESSAGE_REFRESH.equals(message)) {
+            refreshData(session);
         } else if (MESSAGE_LEAVE.equals(message)) {
             removeSession(session);
         }
@@ -131,6 +135,14 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
         ServiceSession serviceSession = new WebsocketServiceSession(session);
         appMonManager.getExportServiceManager().join(serviceSession);
         List<String> messages = appMonManager.getExportServiceManager().getLastMessages(serviceSession);
+        for (String message : messages) {
+            sendText(session, message);
+        }
+    }
+
+    private void refreshData(@NonNull Session session) {
+        ServiceSession serviceSession = new WebsocketServiceSession(session);
+        List<String> messages = appMonManager.getExportServiceManager().getNewMessages(serviceSession);
         for (String message : messages) {
             sendText(session, message);
         }

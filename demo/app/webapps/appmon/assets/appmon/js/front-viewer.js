@@ -380,7 +380,7 @@ function FrontViewer() {
         if (!$chart) {
             return;
         }
-        if (eventName === "activity") {
+        if (eventName === "activity" && chartData.rolledUp) {
             resetActivityTally(messagePrefix);
         }
         let chart = $chart.data("chart");
@@ -426,13 +426,13 @@ function FrontViewer() {
                 if ($chart) {
                     canvasWidth = $chart.find("canvas").width();
                     if (canvasWidth > 0) {
-                        canvasWidth -= 100;
+                        canvasWidth -= 90;
                         break;
                     }
                 }
             }
         }
-        let maxLabels = (canvasWidth > 0 ? Math.floor(canvasWidth / 22) : 0);
+        let maxLabels = (canvasWidth > 0 ? Math.floor(canvasWidth / 21) : 0);
         if (maxLabels > 0 && labels.length > maxLabels) {
             let cnt = labels.length - maxLabels;
             labels.splice(0, cnt);
