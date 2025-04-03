@@ -104,7 +104,7 @@
                     group by ymd, hh, mm
                     order by ymd desc, hh desc, mm desc
                 )
-                where rownum &lt;= 50
+                where rownum &lt;= 72
                 order by ymd, hh, mm
             </when>
             <otherwise>
@@ -115,7 +115,7 @@
                     where domain = #{domain} and instance = #{instance} and event = #{event}
                     group by ymd, hh, mm
                     order by ymd desc, hh desc, mm desc
-                    limit 50
+                    limit 72
                 ) as a
                 order by ymd, hh, mm
             </otherwise>
