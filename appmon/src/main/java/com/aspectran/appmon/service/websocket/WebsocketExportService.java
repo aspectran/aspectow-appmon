@@ -89,8 +89,10 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
     @Override
     protected void registerMessageHandlers(@NonNull Session session) {
         if (session.getMessageHandlers().isEmpty()) {
-            session.addMessageHandler(String.class, message
-                    -> handleMessage(session, message));
+            session.addMessageHandler(String.class, message -> {
+                setLoggingGroup();
+                handleMessage(session, message);
+            });
         }
     }
 
