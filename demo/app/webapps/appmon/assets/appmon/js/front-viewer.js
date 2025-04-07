@@ -15,7 +15,7 @@ function FrontViewer() {
     };
 
     this.putChart = function (instanceName, eventName, $chart) {
-        $charts[instanceName + ":event:" + eventName] = $chart;
+        $charts[instanceName + ":data:" + eventName] = $chart;
     };
 
     this.putConsole = function (instanceName, logName, $console) {
@@ -124,10 +124,14 @@ function FrontViewer() {
             case "event":
                 if (messageText.length) {
                     let eventData = JSON.parse(messageText);
+                    processEventData(instanceName, messageType, nameOfEventOrLog, messagePrefix, eventData);
+                }
+                break;
+            case "data":
+                if (messageText.length) {
+                    let eventData = JSON.parse(messageText);
                     if (eventData.chartData) {
                         processChartData(instanceName, messageType, nameOfEventOrLog, messagePrefix, eventData.chartData);
-                    } else {
-                        processEventData(instanceName, messageType, nameOfEventOrLog, messagePrefix, eventData);
                     }
                 }
                 break;
@@ -381,7 +385,7 @@ function FrontViewer() {
             return;
         }
         if (eventName === "activity" && chartData.rolledUp) {
-            resetActivityTally(messagePrefix);
+            resetActivityTally(instanceName + ":event:" + eventName);
         }
         let chart = $chart.data("chart");
         if (chart) {

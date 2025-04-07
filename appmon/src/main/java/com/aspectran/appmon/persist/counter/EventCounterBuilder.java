@@ -16,7 +16,6 @@
 package com.aspectran.appmon.persist.counter;
 
 import com.aspectran.appmon.config.EventInfo;
-import com.aspectran.appmon.persist.PersistManager;
 import com.aspectran.appmon.persist.counter.activity.ActivityEventCounter;
 import com.aspectran.appmon.persist.counter.session.SessionEventCounter;
 import com.aspectran.utils.ClassUtils;
@@ -24,8 +23,6 @@ import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * <p>Created: 2025. 2. 12.</p>
@@ -35,18 +32,11 @@ public abstract class EventCounterBuilder {
     private static final Logger logger = LoggerFactory.getLogger(EventCounterBuilder.class);
 
     @NonNull
-    public static void build(@NonNull PersistManager persistManager,
-                             @NonNull List<EventInfo> eventInfoList) throws Exception {
-        for (EventInfo eventInfo : eventInfoList) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(ToStringBuilder.toString("Create CounterPersist", eventInfo));
-            }
-
-            eventInfo.validateRequiredParameters();
-
-            EventCounter eventCounter = createEventCounter(eventInfo);
-            persistManager.getCounterPersist().addEventCounter(eventCounter);
+    public static EventCounter build(EventInfo eventInfo) throws Exception {
+        if (logger.isDebugEnabled()) {
+            logger.debug(ToStringBuilder.toString("Create CounterPersist", eventInfo));
         }
+        return createEventCounter(eventInfo);
     }
 
     @NonNull

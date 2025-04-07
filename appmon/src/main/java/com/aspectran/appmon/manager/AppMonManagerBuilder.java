@@ -22,16 +22,15 @@ import com.aspectran.appmon.config.InstanceInfo;
 import com.aspectran.appmon.config.InstanceInfoHolder;
 import com.aspectran.appmon.config.LogInfo;
 import com.aspectran.appmon.config.PollingConfig;
-import com.aspectran.appmon.exporter.Exporter;
+import com.aspectran.appmon.exporter.ExporterManager;
+import com.aspectran.appmon.exporter.event.ChartDataExporter;
+import com.aspectran.appmon.exporter.event.ChartDataExporterBuilder;
 import com.aspectran.appmon.exporter.event.EventExporter;
 import com.aspectran.appmon.exporter.event.EventExporterBuilder;
-import com.aspectran.appmon.exporter.event.EventExporterManager;
+import com.aspectran.appmon.exporter.log.LogExporter;
 import com.aspectran.appmon.exporter.log.LogExporterBuilder;
-import com.aspectran.appmon.exporter.log.LogExporterManager;
-import com.aspectran.appmon.persist.PersistManager;
 import com.aspectran.appmon.persist.counter.EventCounter;
 import com.aspectran.appmon.persist.counter.EventCounterBuilder;
-import com.aspectran.appmon.service.ExportServiceManager;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.Assert;
 import com.aspectran.utils.SystemUtils;
@@ -58,37 +57,66 @@ public abstract class AppMonManagerBuilder {
         Assert.notNull(appMonConfig, "appMonConfig must not be null");
 
         AppMonManager appMonManager = createAppMonManager(context, appMonConfig);
-        ExportServiceManager exportServiceManager = appMonManager.getExportServiceManager();
-        PersistManager persistManager = appMonManager.getPersistManager();
 
         for (InstanceInfo instanceInfo : appMonConfig.getInstanceInfoList()) {
             String instanceName = instanceInfo.getName();
+
             List<EventInfo> eventInfoList = appMonConfig.getEventInfoList(instanceName);
             if (eventInfoList != null && !eventInfoList.isEmpty()) {
-                EventExporterManager eventExporterManager = new EventExporterManager(exportServiceManager, instanceName);
-                EventExporterBuilder.build(eventExporterManager, eventInfoList);
-                EventCounterBuilder.build(persistManager, eventInfoList);
-                for (EventInfo eventInfo : eventInfoList) {
-                    Exporter exporter = eventExporterManager.getExporter(eventInfo.getName());
-                    if (exporter instanceof EventExporter eventExporter) {
-                        EventCounter eventCounter = persistManager.getCounterPersist().getEventCounter(instanceName, eventInfo.getName());
-                        eventCounter.addEventRollupListener(eventExporter);
-                    }
-                }
+                buildEventExporters(appMonManager, instanceName, eventInfoList);
             }
+
             List<LogInfo> logInfoList = appMonConfig.getLogInfoList(instanceName);
             if (logInfoList != null && !logInfoList.isEmpty()) {
-                LogExporterManager logExporterManager = new LogExporterManager(exportServiceManager, instanceName);
-                LogExporterBuilder.build(logExporterManager, logInfoList, context.getApplicationAdapter());
+                buildLogExporters(appMonManager, instanceName, logInfoList);
             }
         }
 
         return appMonManager;
     }
 
+    private static void buildEventExporters(
+            AppMonManager appMonManager,
+            String instanceName,
+            @NonNull List<EventInfo> eventInfoList) throws Exception {
+        ExporterManager eventExporterManager = new ExporterManager(appMonManager, instanceName);
+        ExporterManager dataExporterManager = new ExporterManager(appMonManager, instanceName);
+        for (EventInfo eventInfo : eventInfoList) {
+            eventInfo.validateRequiredParameters();
+
+            EventCounter eventCounter = EventCounterBuilder.build(eventInfo);
+            appMonManager.getPersistManager().getCounterPersist().addEventCounter(eventCounter);
+
+            EventExporter eventExporter = EventExporterBuilder.build(eventExporterManager, eventInfo, eventCounter.getEventCount());
+            eventExporterManager.addExporter(eventExporter);
+
+            ChartDataExporter chartDataExporter = ChartDataExporterBuilder.build(dataExporterManager, eventInfo);
+            eventCounter.addEventRollupListener(chartDataExporter);
+            dataExporterManager.addExporter(chartDataExporter);
+        }
+        appMonManager.getExportServiceManager().addExporterManager(eventExporterManager);
+        appMonManager.getExportServiceManager().addExporterManager(dataExporterManager);
+    }
+
+    private static void buildLogExporters(
+            AppMonManager appMonManager,
+            String instanceName,
+            @NonNull List<LogInfo> logInfoList) throws Exception {
+        ExporterManager logExporterManager = new ExporterManager(appMonManager, instanceName);
+        for (LogInfo logInfo : logInfoList) {
+            logInfo.validateRequiredParameters();
+
+            LogExporter logExporter = LogExporterBuilder.build(logExporterManager, logInfo);
+
+            logExporterManager.addExporter(logExporter);
+        }
+        appMonManager.getExportServiceManager().addExporterManager(logExporterManager);
+    }
+
     @NonNull
-    private static AppMonManager createAppMonManager(ActivityContext context, @NonNull AppMonConfig appMonConfig)
-            throws Exception {
+    private static AppMonManager createAppMonManager(
+            ActivityContext context,
+            @NonNull AppMonConfig appMonConfig) throws Exception {
         PollingConfig pollingConfig = appMonConfig.getPollingConfig();
         if (pollingConfig == null) {
             pollingConfig = new PollingConfig();

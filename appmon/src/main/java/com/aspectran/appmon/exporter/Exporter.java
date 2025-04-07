@@ -15,22 +15,23 @@
  */
 package com.aspectran.appmon.exporter;
 
-import com.aspectran.utils.lifecycle.AbstractLifeCycle;
+import com.aspectran.utils.lifecycle.LifeCycle;
 
 import java.util.List;
 
 /**
  * <p>Created: 2024-12-18</p>
  */
-public abstract class Exporter extends AbstractLifeCycle {
+public interface Exporter extends LifeCycle {
 
-    public abstract String getName();
+    ExporterType getType();
 
-    public abstract void read(List<String> messages);
+    String getName();
 
-    public void readIfChanged(List<String> messages) {
-    }
+    void read(List<String> messages);
 
-    public abstract void broadcast(String message);
+    void readIfChanged(List<String> messages);
+
+    void broadcast(String message);
 
 }

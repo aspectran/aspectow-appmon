@@ -57,8 +57,8 @@ public class AppMonManager extends InstantActivitySupport {
         this.pollingConfig = pollingConfig;
         this.domainInfoHolder = domainInfoHolder;
         this.instanceInfoHolder = instanceInfoHolder;
-        this.exportServiceManager = new ExportServiceManager(this);
-        this.persistManager = new PersistManager(this);
+        this.exportServiceManager = new ExportServiceManager(instanceInfoHolder);
+        this.persistManager = new PersistManager();
     }
 
     @Override
@@ -91,10 +91,6 @@ public class AppMonManager extends InstantActivitySupport {
 
     public List<InstanceInfo> getInstanceInfoList(String[] instanceNames) {
         return instanceInfoHolder.getInstanceInfoList(instanceNames);
-    }
-
-    public boolean containsInstance(String instanceName) {
-        return instanceInfoHolder.containsInstance(instanceName);
     }
 
     public String[] getVerifiedInstanceNames(String[] instanceNames) {

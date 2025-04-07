@@ -1,0 +1,26 @@
+package com.aspectran.appmon.exporter;
+
+import com.aspectran.utils.lifecycle.AbstractLifeCycle;
+
+import java.util.List;
+
+/**
+ * <p>Created: 2025-04-07</p>
+ */
+public abstract class AbstractExporter extends AbstractLifeCycle implements Exporter {
+
+    private final ExporterType type;
+
+    public AbstractExporter(ExporterType type) {
+        super();
+        this.type = type;
+    }
+
+    public ExporterType getType() {
+        return type;
+    }
+
+    public void readIfChanged(List<String> messages) {
+    }
+
+}

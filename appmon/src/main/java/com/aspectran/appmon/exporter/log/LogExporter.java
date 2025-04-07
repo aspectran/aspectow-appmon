@@ -16,7 +16,9 @@
 package com.aspectran.appmon.exporter.log;
 
 import com.aspectran.appmon.config.LogInfo;
-import com.aspectran.appmon.exporter.Exporter;
+import com.aspectran.appmon.exporter.AbstractExporter;
+import com.aspectran.appmon.exporter.ExporterManager;
+import com.aspectran.appmon.exporter.ExporterType;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import org.apache.commons.io.input.ReversedLinesFileReader;
@@ -32,17 +34,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class LogExporter extends Exporter {
+public class LogExporter extends AbstractExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(LogExporter.class);
 
-    private static final String TYPE = ":log:";
+    private static final ExporterType TYPE = ExporterType.LOG;
 
     private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
 
     private static final int DEFAULT_SAMPLE_INTERVAL = 1000;
 
-    private final LogExporterManager logExporterManager;
+    private final ExporterManager exporterManager;
 
     private final LogInfo logInfo;
 
@@ -61,12 +63,13 @@ public class LogExporter extends Exporter {
 
     private Tailer tailer;
 
-    public LogExporter(@NonNull LogExporterManager logExporterManager,
+    public LogExporter(@NonNull ExporterManager exporterManager,
                        @NonNull LogInfo logInfo,
                        @NonNull File logFile) {
-        this.logExporterManager = logExporterManager;
+        super(TYPE);
+        this.exporterManager = exporterManager;
         this.logInfo = logInfo;
-        this.prefix = logInfo.getInstanceName() + TYPE + logInfo.getName() + ":";
+        this.prefix = logInfo.getInstanceName() + ":" + TYPE + ":" + logInfo.getName() + ":";
         this.charset = (logInfo.getCharset() != null ? Charset.forName(logInfo.getCharset()): DEFAULT_CHARSET);
         this.sampleInterval = (logInfo.getSampleInterval() > 0 ? logInfo.getSampleInterval() : DEFAULT_SAMPLE_INTERVAL);
         this.lastLines = logInfo.getLastLines();
@@ -116,7 +119,7 @@ public class LogExporter extends Exporter {
 
     @Override
     public void broadcast(String message) {
-        logExporterManager.broadcast(prefix + message);
+        exporterManager.broadcast(prefix + message);
     }
 
     @Override

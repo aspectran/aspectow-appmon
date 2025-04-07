@@ -16,14 +16,11 @@
 package com.aspectran.appmon.exporter.event;
 
 import com.aspectran.appmon.config.EventInfo;
-import com.aspectran.appmon.exporter.Exporter;
-import com.aspectran.appmon.persist.counter.EventCount;
-import com.aspectran.appmon.persist.counter.EventCountRollupListener;
-import com.aspectran.appmon.persist.counter.EventCountVO;
-import com.aspectran.appmon.persist.db.mapper.EventCountMapper;
+import com.aspectran.appmon.exporter.AbstractExporter;
+import com.aspectran.appmon.exporter.ExporterManager;
+import com.aspectran.appmon.exporter.ExporterType;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.json.JsonBuilder;
 
 import java.util.List;
 import java.util.Timer;
@@ -32,11 +29,11 @@ import java.util.TimerTask;
 /**
  * <p>Created: 2024-12-18</p>
  */
-public class EventExporter extends Exporter implements EventCountRollupListener {
+public class EventExporter extends AbstractExporter {
 
-    private static final String TYPE = ":event:";
+    private static final ExporterType TYPE = ExporterType.EVENT;
 
-    private final EventExporterManager eventExporterManager;
+    private final ExporterManager exporterManager;
 
     private final EventInfo eventInfo;
 
@@ -48,15 +45,14 @@ public class EventExporter extends Exporter implements EventCountRollupListener 
 
     private Timer timer;
 
-    private boolean firstRollup = true;
-
-    public EventExporter(@NonNull EventExporterManager eventExporterManager,
+    public EventExporter(@NonNull ExporterManager exporterManager,
                          @NonNull EventInfo eventInfo,
                          @NonNull EventReader eventReader) {
-        this.eventExporterManager = eventExporterManager;
+        super(TYPE);
+        this.exporterManager = exporterManager;
         this.eventInfo = eventInfo;
         this.eventReader = eventReader;
-        this.prefix = eventInfo.getInstanceName() + TYPE + eventInfo.getName() + ":";
+        this.prefix = eventInfo.getInstanceName() + ":" + TYPE + ":" + eventInfo.getName() + ":";
         this.sampleInterval = eventInfo.getSampleInterval();
     }
 
@@ -67,7 +63,6 @@ public class EventExporter extends Exporter implements EventCountRollupListener 
 
     @Override
     public void read(@NonNull List<String> messages) {
-        messages.add(prefix + getChartData());
         String json = eventReader.read();
         if (json != null) {
             messages.add(prefix + json);
@@ -76,7 +71,6 @@ public class EventExporter extends Exporter implements EventCountRollupListener 
 
     @Override
     public void readIfChanged(@NonNull List<String> messages) {
-        messages.add(prefix + getChartData());
         String json = eventReader.readIfChanged();
         if (json != null) {
             messages.add(prefix + json);
@@ -85,7 +79,7 @@ public class EventExporter extends Exporter implements EventCountRollupListener 
 
     @Override
     public void broadcast(String message) {
-        eventExporterManager.broadcast(prefix + message);
+        exporterManager.broadcast(prefix + message);
     }
 
     private void broadcastIfChanged() {
@@ -124,53 +118,6 @@ public class EventExporter extends Exporter implements EventCountRollupListener 
             timer = null;
         }
         eventReader.stop();
-    }
-
-    @Override
-    public void onRolledUp(EventCount eventCount) {
-        if (firstRollup) {
-            eventReader.setEventCount(eventCount);
-            firstRollup = false;
-        }
-        String message = new JsonBuilder()
-                .prettyPrint(false)
-                .nullWritable(false)
-                .object()
-                    .object("chartData")
-                        .put("rolledUp", true)
-                        .put("labels", new String[] {eventCount.getDatetime()})
-                        .put("data", new Long[] {eventCount.getDelta()})
-                    .endObject()
-                .endObject()
-                .toString();
-        broadcast(message);
-    }
-
-    private String getChartData() {
-        EventCountMapper.Dao dao = eventExporterManager.getBean(EventCountMapper.Dao.class);
-        List<EventCountVO> list = eventExporterManager.instantActivity(() -> dao.getChartData(
-                eventInfo.getDomainName(),
-                eventInfo.getInstanceName(),
-                eventInfo.getName()));
-
-        String[] labels = new String[list.size()];
-        long[] data = new long[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            EventCountVO vo = list.get(i);
-            labels[i] = vo.getDatetime();
-            data[i] = vo.getDelta();
-        }
-
-        return new JsonBuilder()
-                .prettyPrint(false)
-                .nullWritable(false)
-                .object()
-                    .object("chartData")
-                        .put("labels", labels)
-                        .put("data", data)
-                    .endObject()
-                .endObject()
-                .toString();
     }
 
     @Override

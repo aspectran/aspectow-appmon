@@ -15,7 +15,6 @@
  */
 package com.aspectran.appmon.persist;
 
-import com.aspectran.appmon.manager.AppMonManager;
 import com.aspectran.appmon.persist.counter.CounterPersist;
 
 /**
@@ -23,17 +22,7 @@ import com.aspectran.appmon.persist.counter.CounterPersist;
  */
 public class PersistManager {
 
-    private final AppMonManager appMonManager;
-
     private final CounterPersist counterPersist = new CounterPersist();
-
-    public PersistManager(AppMonManager appMonManager) {
-        this.appMonManager = appMonManager;
-    }
-
-    public AppMonManager getAppMonManager() {
-        return appMonManager;
-    }
 
     public CounterPersist getCounterPersist() {
         return counterPersist;

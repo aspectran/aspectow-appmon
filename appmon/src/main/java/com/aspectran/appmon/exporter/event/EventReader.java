@@ -15,8 +15,6 @@
  */
 package com.aspectran.appmon.exporter.event;
 
-import com.aspectran.appmon.persist.counter.EventCount;
-
 /**
  * <p>Created: 2024-12-18</p>
  */
@@ -30,6 +28,6 @@ public interface EventReader {
 
     String readIfChanged();
 
-    void setEventCount(EventCount eventCount);
+//    void setEventCount(EventCount eventCount);
 
 }

@@ -15,17 +15,28 @@
  */
 package com.aspectran.appmon.exporter.event;
 
+import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.ExporterManager;
-import com.aspectran.appmon.service.ExportServiceManager;
+import com.aspectran.utils.ToStringBuilder;
+import com.aspectran.utils.annotation.jsr305.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>Created: 2024-12-18</p>
  */
-public class EventExporterManager extends ExporterManager {
+public abstract class ChartDataExporterBuilder {
 
-    public EventExporterManager(ExportServiceManager exportServiceManager, String instanceName) {
-        super(exportServiceManager, instanceName);
-        exportServiceManager.addExporterManager(this);
+    private static final Logger logger = LoggerFactory.getLogger(ChartDataExporterBuilder.class);
+
+    @NonNull
+    public static ChartDataExporter build(
+            @NonNull ExporterManager exporterManager,
+            @NonNull EventInfo eventInfo) throws Exception {
+        if (logger.isDebugEnabled()) {
+            logger.debug(ToStringBuilder.toString("Create ChartDataExporter", eventInfo));
+        }
+        return new ChartDataExporter(exporterManager, eventInfo);
     }
 
 }

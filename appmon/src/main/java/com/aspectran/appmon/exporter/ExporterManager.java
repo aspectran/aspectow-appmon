@@ -15,7 +15,7 @@
  */
 package com.aspectran.appmon.exporter;
 
-import com.aspectran.appmon.service.ExportServiceManager;
+import com.aspectran.appmon.manager.AppMonManager;
 import com.aspectran.core.activity.InstantAction;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import org.slf4j.Logger;
@@ -28,19 +28,23 @@ import java.util.Map;
 /**
  * <p>Created: 2024-12-18</p>
  */
-public abstract class ExporterManager {
+public class ExporterManager {
 
     private static final Logger logger = LoggerFactory.getLogger(ExporterManager.class);
 
     private final Map<String, Exporter> exporters = new LinkedHashMap<>();
 
-    private final ExportServiceManager exportServiceManager;
+    private final AppMonManager appMonManager;
 
     private final String instanceName;
 
-    public ExporterManager(ExportServiceManager exportServiceManager, String instanceName) {
-        this.exportServiceManager = exportServiceManager;
+    public ExporterManager(@NonNull AppMonManager appMonManager, String instanceName) {
+        this.appMonManager = appMonManager;
         this.instanceName = instanceName;
+    }
+
+    public AppMonManager getAppMonManager() {
+        return appMonManager;
     }
 
     public String getInstanceName() {
@@ -93,23 +97,23 @@ public abstract class ExporterManager {
     }
 
     public void broadcast(String message) {
-        exportServiceManager.broadcast(message);
+        appMonManager.getExportServiceManager().broadcast(message);
     }
 
     public <V> V instantActivity(InstantAction<V> instantAction) {
-        return exportServiceManager.getAppMonManager().instantActivity(instantAction);
+        return appMonManager.instantActivity(instantAction);
     }
 
     public <V> V getBean(@NonNull String id) {
-        return exportServiceManager.getAppMonManager().getBean(id);
+        return appMonManager.getBean(id);
     }
 
     public <V> V getBean(Class<V> type) {
-        return exportServiceManager.getAppMonManager().getBean(type);
+        return appMonManager.getBean(type);
     }
 
     public boolean containsBean(Class<?> type) {
-        return exportServiceManager.getAppMonManager().containsBean(type);
+        return appMonManager.containsBean(type);
     }
 
 }

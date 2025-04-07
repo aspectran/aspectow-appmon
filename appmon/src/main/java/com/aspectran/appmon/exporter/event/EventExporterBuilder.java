@@ -16,15 +16,15 @@
 package com.aspectran.appmon.exporter.event;
 
 import com.aspectran.appmon.config.EventInfo;
+import com.aspectran.appmon.exporter.ExporterManager;
 import com.aspectran.appmon.exporter.event.activity.ActivityEventReader;
 import com.aspectran.appmon.exporter.event.session.SessionEventReader;
+import com.aspectran.appmon.persist.counter.EventCount;
 import com.aspectran.utils.ClassUtils;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * <p>Created: 2024-12-18</p>
@@ -34,37 +34,35 @@ public abstract class EventExporterBuilder {
     private static final Logger logger = LoggerFactory.getLogger(EventExporterBuilder.class);
 
     @NonNull
-    public static void build(@NonNull EventExporterManager eventExporterManager,
-                             @NonNull List<EventInfo> eventInfoList) throws Exception {
-        for (EventInfo eventInfo : eventInfoList) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(ToStringBuilder.toString("Create EventExporter", eventInfo));
-            }
-
-            eventInfo.validateRequiredParameters();
-
-            EventReader eventReader = createEventReader(eventExporterManager, eventInfo);
-            EventExporter eventExporter = new EventExporter(eventExporterManager, eventInfo, eventReader);
-            eventExporterManager.addExporter(eventExporter);
+    public static EventExporter build(
+            @NonNull ExporterManager exporterManager,
+            @NonNull EventInfo eventInfo,
+            @NonNull EventCount eventCount) throws Exception {
+        if (logger.isDebugEnabled()) {
+            logger.debug(ToStringBuilder.toString("Create EventExporter", eventInfo));
         }
+        EventReader eventReader = createEventReader(exporterManager, eventInfo, eventCount);
+        return new EventExporter(exporterManager, eventInfo, eventReader);
     }
 
     @NonNull
     private static EventReader createEventReader(
-            @NonNull EventExporterManager eventExporterManager, @NonNull EventInfo eventInfo) throws Exception {
+            @NonNull ExporterManager exporterManager,
+            @NonNull EventInfo eventInfo,
+            EventCount eventCount) throws Exception {
         if (!eventInfo.hasReader()) {
             if ("activity".equals(eventInfo.getName())) {
-                return new ActivityEventReader(eventExporterManager, eventInfo);
+                return new ActivityEventReader(exporterManager, eventInfo, eventCount);
             } else if ("session".equals(eventInfo.getName())) {
-                return new SessionEventReader(eventExporterManager, eventInfo);
+                return new SessionEventReader(exporterManager, eventInfo, eventCount);
             } else {
                 throw new IllegalArgumentException("No event reader specified for " + eventInfo.getName() + " " + eventInfo);
             }
         }
         try {
             Class<EventReader> readerType = ClassUtils.classForName(eventInfo.getReader());
-            Object[] args = { eventExporterManager, eventInfo };
-            Class<?>[] argTypes = { EventExporterManager.class, EventInfo.class };
+            Object[] args = { exporterManager, eventInfo };
+            Class<?>[] argTypes = { ExporterManager.class, EventInfo.class };
             return ClassUtils.createInstance(readerType, args, argTypes);
         } catch (Exception e) {
             throw new Exception(ToStringBuilder.toString("Failed to create event reader", eventInfo), e);

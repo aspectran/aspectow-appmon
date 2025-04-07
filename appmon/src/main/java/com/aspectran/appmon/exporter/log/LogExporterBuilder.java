@@ -16,6 +16,7 @@
 package com.aspectran.appmon.exporter.log;
 
 import com.aspectran.appmon.config.LogInfo;
+import com.aspectran.appmon.exporter.ExporterManager;
 import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
@@ -23,30 +24,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.List;
 
 public abstract class LogExporterBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(LogExporterBuilder.class);
 
     @NonNull
-    public static void build(@NonNull LogExporterManager logExporterManager,
-                             @NonNull List<LogInfo> logInfoList,
-                             @NonNull ApplicationAdapter applicationAdapter) throws Exception {
-        for (LogInfo logInfo : logInfoList) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(ToStringBuilder.toString("Create LogExporter", logInfo));
-            }
+    public static LogExporter build(@NonNull ExporterManager logExporterManager,
+                             @NonNull LogInfo logInfo) throws Exception {
+        if (logger.isDebugEnabled()) {
+            logger.debug(ToStringBuilder.toString("Create LogExporter", logInfo));
+        }
 
-            logInfo.validateRequiredParameters();
+        logInfo.validateRequiredParameters();
 
-            try {
-                File logFile = applicationAdapter.getRealPath(logInfo.getFile()).toFile();
-                LogExporter logExporter = new LogExporter(logExporterManager, logInfo, logFile);
-                logExporterManager.addExporter(logExporter);
-            } catch (Exception e) {
-                throw new Exception(ToStringBuilder.toString("Failed to create log exporter", logInfo), e);
-            }
+        try {
+            ApplicationAdapter applicationAdapter = logExporterManager.getAppMonManager().getApplicationAdapter();
+            File logFile = applicationAdapter.getRealPath(logInfo.getFile()).toFile();
+            return new LogExporter(logExporterManager, logInfo, logFile);
+        } catch (Exception e) {
+            throw new Exception(ToStringBuilder.toString("Failed to create log exporter", logInfo), e);
         }
     }
 

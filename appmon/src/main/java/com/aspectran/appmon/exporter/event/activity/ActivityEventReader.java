@@ -16,9 +16,10 @@
 package com.aspectran.appmon.exporter.event.activity;
 
 import com.aspectran.appmon.config.EventInfo;
+import com.aspectran.appmon.exporter.ExporterManager;
 import com.aspectran.appmon.exporter.event.AbstractEventReader;
 import com.aspectran.appmon.exporter.event.EventExporter;
-import com.aspectran.appmon.exporter.event.EventExporterManager;
+import com.aspectran.appmon.persist.counter.EventCount;
 import com.aspectran.core.component.UnavailableException;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.core.context.rule.AspectAdviceRule;
@@ -47,14 +48,15 @@ public class ActivityEventReader extends AbstractEventReader {
 
     private CounterStatistic activityCounter;
 
-    public ActivityEventReader(@NonNull EventExporterManager eventExporterManager, @NonNull EventInfo eventInfo) {
-        super(eventExporterManager, eventInfo);
+    public ActivityEventReader(@NonNull ExporterManager exporterManager, @NonNull EventInfo eventInfo,
+                               @NonNull EventCount eventCount) {
+        super(exporterManager, eventInfo, eventCount);
         this.aspectId = getClass().getName() + ".ASPECT@" + hashCode() + "[" + eventInfo.getTarget() + "]";
     }
 
     EventExporter getEventExporter() {
         if (eventExporter == null) {
-            eventExporter = getEventExporterManager().getExporter(getEventInfo().getName());
+            eventExporter = getExporterManager().getExporter(getEventInfo().getName());
         }
         return eventExporter;
     }

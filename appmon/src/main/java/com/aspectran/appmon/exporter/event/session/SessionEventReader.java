@@ -16,9 +16,10 @@
 package com.aspectran.appmon.exporter.event.session;
 
 import com.aspectran.appmon.config.EventInfo;
+import com.aspectran.appmon.exporter.ExporterManager;
 import com.aspectran.appmon.exporter.event.AbstractEventReader;
 import com.aspectran.appmon.exporter.event.EventExporter;
-import com.aspectran.appmon.exporter.event.EventExporterManager;
+import com.aspectran.appmon.persist.counter.EventCount;
 import com.aspectran.core.component.UnavailableException;
 import com.aspectran.core.component.session.ManagedSession;
 import com.aspectran.core.component.session.Session;
@@ -61,9 +62,10 @@ public class SessionEventReader extends AbstractEventReader {
 
     private volatile SessionEventData oldData;
 
-    public SessionEventReader(@NonNull EventExporterManager eventExporterManager,
-                              @NonNull EventInfo eventInfo) {
-        super(eventExporterManager, eventInfo);
+    public SessionEventReader(@NonNull ExporterManager exporterManager,
+                              @NonNull EventInfo eventInfo,
+                              @NonNull EventCount eventCount) {
+        super(exporterManager, eventInfo, eventCount);
 
         String[] arr = StringUtils.divide(eventInfo.getTarget(), "/");
         this.serverId = arr[0];
@@ -72,7 +74,7 @@ public class SessionEventReader extends AbstractEventReader {
 
     EventExporter getEventExporter() {
         if (eventExporter == null) {
-            eventExporter = getEventExporterManager().getExporter(getEventInfo().getName());
+            eventExporter = getExporterManager().getExporter(getEventInfo().getName());
         }
         return eventExporter;
     }
@@ -80,7 +82,7 @@ public class SessionEventReader extends AbstractEventReader {
     @Override
     public void start() {
         try {
-            TowServer towServer = getEventExporterManager().getBean(serverId);
+            TowServer towServer = getExporterManager().getBean(serverId);
             sessionManager = towServer.getSessionManager(deploymentName);
         } catch (Exception e) {
             throw new RuntimeException("Cannot resolve session manager with " + getEventInfo().getTarget(), e);
@@ -109,10 +111,10 @@ public class SessionEventReader extends AbstractEventReader {
     @NonNull
     private SessionListenerRegistration getSessionListenerRegistration() {
         SessionListenerRegistration sessionListenerRegistration;
-        if (getEventExporterManager().containsBean(SessionListenerRegistration.class)) {
-            sessionListenerRegistration = getEventExporterManager().getBean(SessionListenerRegistration.class);
+        if (getExporterManager().containsBean(SessionListenerRegistration.class)) {
+            sessionListenerRegistration = getExporterManager().getBean(SessionListenerRegistration.class);
         } else {
-            if (getEventExporterManager().containsBean(TowServer.class)) {
+            if (getExporterManager().containsBean(TowServer.class)) {
                 sessionListenerRegistration = new SessionListenerRegistrationBean();
             } else {
                 throw new IllegalStateException("Bean for SessionListenerRegistration must be defined");

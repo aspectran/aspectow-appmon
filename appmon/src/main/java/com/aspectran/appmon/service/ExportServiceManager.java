@@ -15,8 +15,8 @@
  */
 package com.aspectran.appmon.service;
 
+import com.aspectran.appmon.config.InstanceInfoHolder;
 import com.aspectran.appmon.exporter.ExporterManager;
-import com.aspectran.appmon.manager.AppMonManager;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.annotation.jsr305.Nullable;
 
@@ -31,18 +31,14 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class ExportServiceManager {
 
-    private final AppMonManager appMonManager;
-
     private final Set<ExportService> exportServices = new CopyOnWriteArraySet<>();
 
     private final List<ExporterManager> exporterManagers = new ArrayList<>();
 
-    public ExportServiceManager(AppMonManager appMonManager) {
-        this.appMonManager = appMonManager;
-    }
+    private final InstanceInfoHolder instanceInfoHolder;
 
-    public AppMonManager getAppMonManager() {
-        return appMonManager;
+    public ExportServiceManager(InstanceInfoHolder instanceInfoHolder) {
+        this.instanceInfoHolder = instanceInfoHolder;
     }
 
     public void addExportService(ExportService exportService) {
@@ -191,7 +187,7 @@ public class ExportServiceManager {
         }
         Set<String> validJoinedInstances = new HashSet<>();
         for (String name : instanceNames) {
-            if (appMonManager.containsInstance(name)) {
+            if (instanceInfoHolder.containsInstance(name)) {
                 validJoinedInstances.add(name);
             }
         }
