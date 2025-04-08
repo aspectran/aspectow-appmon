@@ -122,6 +122,13 @@
     margin: 2px 0;
     opacity: .4;
 }
+.track-box .bullet.error {
+    background: linear-gradient(to right, rgba(9, 17, 39, 0) 27%, rgb(255, 0, 0) 100%);
+}
+.track-box .bullet.error.arrive {
+    background-color: #a51e1e;
+    border: 1px solid #f34d4d;
+}
 .track-stack .activities {
     position: absolute;
     top: 5px;
@@ -141,7 +148,7 @@
 .track-stack .activities p.current {
     font-weight: bold;
 }
-.track-stack .activities p.tally {
+.track-stack .activities p.tallied {
     font-size: .7em;
 }
 .track-stack .activities p.total {

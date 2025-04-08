@@ -90,7 +90,7 @@ public class ActivityEventReader extends AbstractEventReader {
             return activityEventAdvice;
         });
 
-        AspectAdviceRule afterAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.AFTER);
+        AspectAdviceRule afterAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.FINALLY);
         afterAspectAdviceRule.setAdviceAction(activity -> {
             ActivityEventAdvice activityEventAdvice = activity.getBeforeAdviceResult(aspectId);
             String json = activityEventAdvice.after(activity);
@@ -120,13 +120,13 @@ public class ActivityEventReader extends AbstractEventReader {
     @Override
     public String read() {
         long total;
-        long tally;
+        long tallied;
         if (getEventCount() != null) {
             total = getEventCount().getGrandTotal();
-            tally = getEventCount().getTally();
+            tallied = getEventCount().getTallied();
         } else {
             total = activityCounter.getTotal();
-            tally = 0L;
+            tallied = 0L;
         }
 
         return new JsonBuilder()
@@ -135,7 +135,7 @@ public class ActivityEventReader extends AbstractEventReader {
             .object()
                 .object("activities")
                     .put("total", total)
-                    .put("tally", tally)
+                    .put("tallied", tallied)
                 .endObject()
             .endObject()
             .toString();

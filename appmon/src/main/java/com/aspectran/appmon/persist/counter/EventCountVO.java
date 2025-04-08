@@ -29,6 +29,8 @@ public class EventCountVO implements Serializable {
 
     private long delta;
 
+    private long error;
+
     public String getDomain() {
         return domain;
     }
@@ -99,6 +101,14 @@ public class EventCountVO implements Serializable {
 
     public void setDelta(long delta) {
         this.delta = delta;
+    }
+
+    public long getError() {
+        return error;
+    }
+
+    public void setError(long error) {
+        this.error = error;
     }
 
 }

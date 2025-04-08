@@ -1,11 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
-<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250402"/>">
-<script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20250402"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250402"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250402"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250402"/>"></script>
+<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250408"/>">
+<script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20250408"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250408"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250408"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250408"/>"></script>
 <div class="grid-x">
     <div class="cell options t10 b5">
         <ul class="speed-options">
@@ -28,7 +28,7 @@
             <div class="cell track-box">
                 <div class="track-stack"><div class="activities">
                     <p class="current" title="Current activities"></p>
-                    <p class="tally" title="Activities tallied during the sampling period">-</p>
+                    <p class="tallied" title="Activities tallied during the sampling period">-</p>
                     <p class="total" title="Total activities recorded"></p>
                 </div>
                 </div>

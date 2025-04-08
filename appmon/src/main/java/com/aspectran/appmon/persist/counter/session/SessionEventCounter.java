@@ -96,7 +96,7 @@ public class SessionEventCounter extends AbstractEventCounter {
     }
 
     void sessionCreated() {
-        getEventCount().hit();
+        getEventCount().count();
     }
 
 }

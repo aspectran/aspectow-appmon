@@ -208,6 +208,9 @@ function FrontViewer() {
                 .attr("sessionId", eventData.sessionId)
                 .css("top", position + "px")
                 .appendTo($track).show();
+            if (eventData.error) {
+                $bullet.addClass("error");
+            }
             setTimeout(function () {
                 $bullet.addClass("arrive");
                 setTimeout(function () {
@@ -252,15 +255,15 @@ function FrontViewer() {
     const printActivities = function (messagePrefix, activities) {
         let $activities = getIndicator(messagePrefix);
         if ($activities) {
-            $activities.find(".tally").text(activities.tally > 0 ? "+" + activities.tally : "-");
+            $activities.find(".tallied").text(activities.tallied > 0 ? "+" + activities.tallied : "-");
             $activities.find(".total").text(activities.total);
         }
     }
 
-    const resetActivityTally = function (messagePrefix) {
+    const resetTalliedActivities = function (messagePrefix) {
         let $activities = getIndicator(messagePrefix);
         if ($activities) {
-            $activities.find(".tally").text(0);
+            $activities.find(".tallied").text(0);
         }
     }
 
@@ -385,44 +388,50 @@ function FrontViewer() {
             return;
         }
         if (eventName === "activity" && chartData.rolledUp) {
-            resetActivityTally(instanceName + ":event:" + eventName);
+            resetTalliedActivities(instanceName + ":event:" + eventName);
         }
+        let labels = chartData.labels;
+        let data1 = chartData.data1;
+        let data2 = chartData.data2.map(n => (eventName === "activity" ? n : null));
         let chart = $chart.data("chart");
         if (chart) {
-            updateChart(eventName, chart, toDatetime(chartData.labels), chartData.data);
+            updateChart(eventName, chart, toDatetime(labels), data1, data2);
         } else {
             let $canvas = $chart.find("canvas");
             if (!$canvas.length) {
                 $canvas = $("<canvas/>");
                 $canvas.appendTo($chart);
             }
-            let maxLabels = adjustLabelCount(eventName, chartData.labels, chartData.data);
+            let maxLabels = adjustLabelCount(eventName, labels, data1, data2);
             let autoSkip = (maxLabels === 0);
-            let chart = drawChart(eventName, $canvas[0], toDatetime(chartData.labels), chartData.data, autoSkip);
+            let chart = drawChart(eventName, $canvas[0], toDatetime(labels), data1, data2, autoSkip);
             $chart.data("chart", chart);
         }
     };
 
-    const updateChart = function (eventName, chart, labels, data) {
+    const updateChart = function (eventName, chart, labels, data1, data2) {
         if (chart.data.labels.length > 0) {
             if (labels.length > 1) {
                 chart.data.labels.length = 0;
                 chart.data.datasets[0].data.length = 0;
+                chart.data.datasets[1].data.length = 0;
             } else if (labels.length === 1) {
                 let lastIndex = chart.data.labels.length - 1;
                 if (chart.data.labels[lastIndex] >= labels[0]) {
                     chart.data.labels.splice(lastIndex, 1);
                     chart.data.datasets[0].data.splice(lastIndex, 1);
+                    chart.data.datasets[1].data.splice(lastIndex, 1);
                 }
             }
         }
         chart.data.labels.push(...labels);
-        chart.data.datasets[0].data.push(...data);
-        adjustLabelCount(eventName, chart.data.labels, chart.data.datasets[0].data);
+        chart.data.datasets[0].data.push(...data1);
+        chart.data.datasets[1].data.push(...data2);
+        adjustLabelCount(eventName, chart.data.labels, chart.data.datasets[0].data, chart.data.datasets[1].data);
         chart.update();
     };
 
-    const adjustLabelCount = function (eventName, labels, data) {
+    const adjustLabelCount = function (eventName, labels, data1, data2) {
         let canvasWidth = 0;
         for (let key in $charts) {
             if (key.endsWith(":" + eventName)) {
@@ -440,7 +449,8 @@ function FrontViewer() {
         if (maxLabels > 0 && labels.length > maxLabels) {
             let cnt = labels.length - maxLabels;
             labels.splice(0, cnt);
-            data.splice(0, cnt);
+            data1.splice(0, cnt);
+            data2.splice(0, cnt);
         }
         return maxLabels;
     };
@@ -453,23 +463,23 @@ function FrontViewer() {
         return arr;
     };
 
-    const drawChart = function (eventName, canvas, labels, data, autoSkip) {
-        let dataLabel;
-        let borderColor;
-        let backgroundColor;
+    const drawChart = function (eventName, canvas, labels, data1, data2, autoSkip) {
+        let dataLabel1;
+        let borderColor1;
+        let backgroundColor1;
         switch (eventName) {
             case "activity":
-                dataLabel = "Activities";
-                borderColor = "#713f5c";
-                backgroundColor = "#c1cffb";
+                dataLabel1 = "Activities";
+                borderColor1 = "#5267d1";
+                backgroundColor1 = "#ccd7fa";
                 break;
             case "session":
-                dataLabel = "Sessions";
-                borderColor = "#476b80";
-                backgroundColor = "#c7e0f1";
+                dataLabel1 = "Sessions";
+                borderColor1 = "#476b80";
+                backgroundColor1 = "#cbe3f4";
                 break;
             default:
-                dataLabel = "";
+                dataLabel1 = "";
         }
         return new Chart(
             canvas,
@@ -485,12 +495,12 @@ function FrontViewer() {
                         },
                         tooltip: {
                             enabled: true,
+                            reverse: true,
                             callbacks: {
                                 title: function (tooltip) {
-                                    let datetime = labels[tooltip[0].dataIndex];
-                                    return datetime.format("LLL");
+                                    return labels[tooltip[0].dataIndex].format("LLL");
                                 }
-                            }
+                            },
                         }
                     },
                     scales: {
@@ -513,16 +523,25 @@ function FrontViewer() {
                             },
                             tooltip: {
                                 enabled: true,
-                            }
+                            },
+                            grid: {
+                                color: function (context) {
+                                    return (data2[context.tick.value] > 0 ? "#fd5b5b" : "#e4e4e4");
+                                },
+                            },
+
                         },
                         y: {
                             display: true,
                             title: {
                                 display: true,
-                                text: dataLabel
+                                text: dataLabel1
                             },
                             suggestedMin: 0,
-                            suggestedMax: 5
+                            suggestedMax: 5,
+                            grid: {
+                                color: "#e4e4e4"
+                            }
                         }
                     }
                 },
@@ -530,14 +549,26 @@ function FrontViewer() {
                     labels: labels,
                     datasets: [
                         {
-                            label: dataLabel,
-                            data: data,
+                            label: dataLabel1,
+                            data: data1,
                             fill: true,
-                            borderColor: borderColor,
-                            backgroundColor: backgroundColor,
-                            borderWidth: 1.2,
+                            borderColor: borderColor1,
+                            backgroundColor: backgroundColor1,
+                            borderWidth: 1.4,
                             tension: 0.1,
                             pointStyle: false,
+                            order: 2
+                        },
+                        {
+                            label: "Errors",
+                            data: data2,
+                            type: "line",
+                            fill: true,
+                            backgroundColor: "#f83636",
+                            borderWidth: 0,
+                            tension: 0.1,
+                            pointStyle: false,
+                            order: 1
                         }
                     ]
                 }

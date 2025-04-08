@@ -85,10 +85,10 @@ public class CounterPersistSchedule {
                 EventCountVO vo = dao.getLastEventCount(
                         currentDomain, eventCounter.getInstanceName(), eventCounter.getEventName());
                 if (vo != null) {
-                    eventCounter.reset(vo.getDatetime(), vo.getTotal(), vo.getDelta());
+                    eventCounter.reset(vo.getDatetime(), vo.getTotal(), vo.getDelta(), vo.getError());
                 } else {
                     String datetime = getDatetime(false);
-                    eventCounter.reset(datetime, 0L, 0L);
+                    eventCounter.reset(datetime, 0L, 0L, 0L);
                 }
                 eventCounter.initialize();
             }
@@ -125,7 +125,7 @@ public class CounterPersistSchedule {
         EventCountVO eventCountVO = null;
         for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
             EventCount eventCount = eventCounter.getEventCount();
-            if (eventCount.isTallied()) {
+            if (eventCount.hasTalliedUp()) {
                 if (eventCountVO == null) {
                     eventCountVO = createEventCountVO(eventCount.getDatetime());
                 }
@@ -133,6 +133,7 @@ public class CounterPersistSchedule {
                 eventCountVO.setEvent(eventCounter.getEventName());
                 eventCountVO.setTotal(eventCount.getTotal());
                 eventCountVO.setDelta(eventCount.getDelta());
+                eventCountVO.setError(eventCount.getError());
                 dao.updateLastEventCount(eventCountVO);
                 dao.insertEventCount(eventCountVO);
             }

@@ -52,14 +52,14 @@ public class ActivityEventAdvice {
 
     public String after(@NonNull Activity activity) {
         long total;
-        long tally;
+        long tallied;
         if (activityEventReader.getEventCount() != null) {
             total = activityEventReader.getEventCount().getGrandTotal();
-            tally = activityEventReader.getEventCount().getTally();
+            tallied = activityEventReader.getEventCount().getTallied();
         } else {
             CounterStatistic activityCounter = activity.getActivityContext().getActivityCounter();
             total = activityCounter.getTotal();
-            tally = 0L;
+            tallied = 0L;
         }
 
         long elapsedTime = System.currentTimeMillis() - startTime;
@@ -74,6 +74,9 @@ public class ActivityEventAdvice {
         }
 
         Throwable error = activity.getRootCauseOfRaisedException();
+        if (error != null && activityEventReader.getEventCount() != null) {
+            activityEventReader.getEventCount().error();
+        }
 
         return new JsonBuilder()
                 .prettyPrint(false)
@@ -81,7 +84,7 @@ public class ActivityEventAdvice {
                 .object()
                     .object("activities")
                         .put("total", total)
-                        .put("tally", tally)
+                        .put("tallied", tallied)
                     .endObject()
                     .put("startTime", startTime)
                     .put("elapsedTime", elapsedTime)

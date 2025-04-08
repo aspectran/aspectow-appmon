@@ -73,8 +73,9 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
     @Override
     public void onRolledUp(@NonNull EventCount eventCount) {
         String[] labels = new String[] { eventCount.getDatetime() };
-        long[] data = new long[] { eventCount.getDelta() };
-        String message = toJson(labels, data, true);
+        long[] data1 = new long[] { eventCount.getDelta() };
+        long[] data2 = new long[] { eventCount.getError() };
+        String message = toJson(labels, data1, data2, true);
         broadcast(message);
     }
 
@@ -86,24 +87,27 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
                 eventInfo.getName()));
 
         String[] labels = new String[list.size()];
-        long[] data = new long[list.size()];
+        long[] data1 = new long[list.size()];
+        long[] data2 = new long[list.size()];
         for (int i = 0; i < list.size(); i++) {
             EventCountVO vo = list.get(i);
             labels[i] = vo.getDatetime();
-            data[i] = vo.getDelta();
+            data1[i] = vo.getDelta();
+            data2[i] = vo.getError();
         }
 
-        return toJson(labels, data, false);
+        return toJson(labels, data1, data2, false);
     }
 
-    private String toJson(String[] labels, long[] data, boolean rolledUp) {
+    private String toJson(String[] labels, long[] data1, long[] data2, boolean rolledUp) {
         return new JsonBuilder()
                 .prettyPrint(false)
                 .nullWritable(false)
                 .object()
                     .object("chartData")
                         .put("labels", labels)
-                        .put("data", data)
+                        .put("data1", data1)
+                        .put("data2", data2)
                         .put("rolledUp", rolledUp)
                     .endObject()
                 .endObject()
