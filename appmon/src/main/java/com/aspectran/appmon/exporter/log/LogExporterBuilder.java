@@ -31,13 +31,10 @@ public abstract class LogExporterBuilder {
 
     @NonNull
     public static LogExporter build(@NonNull ExporterManager logExporterManager,
-                             @NonNull LogInfo logInfo) throws Exception {
+                                    @NonNull LogInfo logInfo) throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug(ToStringBuilder.toString("Create LogExporter", logInfo));
         }
-
-        logInfo.validateRequiredParameters();
-
         try {
             ApplicationAdapter applicationAdapter = logExporterManager.getAppMonManager().getApplicationAdapter();
             File logFile = applicationAdapter.getRealPath(logInfo.getFile()).toFile();

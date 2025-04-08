@@ -28,6 +28,4 @@ public interface EventReader {
 
     String readIfChanged();
 
-//    void setEventCount(EventCount eventCount);
-
 }

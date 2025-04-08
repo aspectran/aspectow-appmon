@@ -38,7 +38,7 @@ public class ExporterManager {
 
     private final String instanceName;
 
-    public ExporterManager(@NonNull AppMonManager appMonManager, String instanceName) {
+    public ExporterManager(AppMonManager appMonManager, String instanceName) {
         this.appMonManager = appMonManager;
         this.instanceName = instanceName;
     }

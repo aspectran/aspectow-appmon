@@ -12,14 +12,15 @@ public abstract class AbstractExporter extends AbstractLifeCycle implements Expo
     private final ExporterType type;
 
     public AbstractExporter(ExporterType type) {
-        super();
         this.type = type;
     }
 
+    @Override
     public ExporterType getType() {
         return type;
     }
 
+    @Override
     public void readIfChanged(List<String> messages) {
     }
 
