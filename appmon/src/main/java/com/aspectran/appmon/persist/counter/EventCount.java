@@ -16,6 +16,7 @@
 package com.aspectran.appmon.persist.counter;
 
 import com.aspectran.utils.Assert;
+import com.aspectran.utils.annotation.jsr305.NonNull;
 
 import java.util.concurrent.atomic.LongAdder;
 
@@ -24,101 +25,64 @@ import java.util.concurrent.atomic.LongAdder;
  */
 public class EventCount {
 
-    private final TallyCounter counter = new TallyCounter();
+    private final Tallying tallying = new Tallying();
 
-    private volatile boolean talliedUp;
+    private final Tallied tallied = new Tallied();
 
-    private volatile String datetime;
-
-    private volatile long total;
-
-    private volatile long delta;
-
-    private volatile long error;
+    private volatile boolean updated;
 
     public void count() {
-        counter.count();
+        tallying.count();
     }
 
     public void error() {
-        counter.error();
+        tallying.error();
     }
 
-    public long getTallied() {
-        return counter.getTallied();
+    public Tallying getTallying() {
+        return tallying;
     }
 
-    public boolean hasTalliedUp() {
-        return talliedUp;
+    public Tallied getTallied() {
+        return tallied;
     }
 
-    public String getDatetime() {
-        return datetime;
-    }
-
-    public long getTotal() {
-        return total;
-    }
-
-    public long getDelta() {
-        return delta;
-    }
-
-    public long getError() {
-        return error;
-    }
-
-    public synchronized long getGrandTotal() {
-        return (total + counter.getTallied());
+    public boolean isUpdated() {
+        return updated;
     }
 
     synchronized void rollup(String datetime) {
         Assert.notNull(datetime, "datetime must not be null");
         Assert.isTrue(datetime.length() == 12, "datetime length must be 12");
-        long tallied = counter.getTallied();
-        long error = counter.getError();
-        counter.reset();
-        talliedUp = (tallied > 0L);
-        if (datetime.equals(this.datetime)) {
-            total += tallied;
-            delta += tallied;
-            this.error += error;
-        } else {
-            this.datetime = datetime;
-            total += tallied;
-            delta = tallied;
-            this.error = error;
-        }
+        updated = tallied.update(datetime, tallying);
+        tallying.reset();
     }
 
     synchronized void reset(String datetime, long total, long delta, long error) {
         Assert.isTrue(total >= 0, "total must be positive");
         Assert.isTrue(delta >= 0, "delta must be positive");
         Assert.isTrue(error >= 0, "error must be positive");
-        this.datetime = datetime;
-        counter.reset();
-        talliedUp = false;
-        this.total = total;
-        this.delta = delta;
-        this.error = error;
+        tallied.update(datetime, total, delta, error);
+        tallying.reset();
+        updated = false;
     }
 
-    private static class TallyCounter {
+    public static class Tallying {
 
-        private final LongAdder count = new LongAdder();
+        private final LongAdder total = new LongAdder();
 
         private final LongAdder error = new LongAdder();
 
         public void count() {
-            count.increment();
+            total.increment();
         }
 
         public void error() {
             error.increment();
         }
 
-        public long getTallied() {
-            return count.sum();
+        public long getTotal() {
+            return total.sum();
         }
 
         public long getError() {
@@ -126,8 +90,59 @@ public class EventCount {
         }
 
         public void reset() {
-            count.reset();
+            total.reset();
             error.reset();
+        }
+
+    }
+
+    public static class Tallied {
+
+        private String datetime;
+
+        private long total;
+
+        private long delta;
+
+        private long error;
+
+        public String getDatetime() {
+            return datetime;
+        }
+
+        public long getTotal() {
+            return total;
+        }
+
+        public long getDelta() {
+            return delta;
+        }
+
+        public long getError() {
+            return error;
+        }
+
+        private boolean update(@NonNull String datetime, @NonNull Tallying tallying) {
+            long total = tallying.getTotal();
+            long error = tallying.getError();
+            if (datetime.equals(this.datetime)) {
+                this.total += total;
+                this.delta += total;
+                this.error += error;
+            } else {
+                this.datetime = datetime;
+                this.total += total;
+                this.delta = total;
+                this.error = error;
+            }
+            return (total > 0);
+        }
+
+        private void update(String datetime, long total, long delta, long error) {
+            this.datetime = datetime;
+            this.total = total;
+            this.delta = delta;
+            this.error = error;
         }
 
     }

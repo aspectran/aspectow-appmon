@@ -125,15 +125,15 @@ public class CounterPersistSchedule {
         EventCountVO eventCountVO = null;
         for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
             EventCount eventCount = eventCounter.getEventCount();
-            if (eventCount.hasTalliedUp()) {
+            if (eventCount.isUpdated()) {
                 if (eventCountVO == null) {
-                    eventCountVO = createEventCountVO(eventCount.getDatetime());
+                    eventCountVO = createEventCountVO(eventCount.getTallied().getDatetime());
                 }
                 eventCountVO.setInstance(eventCounter.getInstanceName());
                 eventCountVO.setEvent(eventCounter.getEventName());
-                eventCountVO.setTotal(eventCount.getTotal());
-                eventCountVO.setDelta(eventCount.getDelta());
-                eventCountVO.setError(eventCount.getError());
+                eventCountVO.setTotal(eventCount.getTallied().getTotal());
+                eventCountVO.setDelta(eventCount.getTallied().getDelta());
+                eventCountVO.setError(eventCount.getTallied().getError());
                 dao.updateLastEventCount(eventCountVO);
                 dao.insertEventCount(eventCountVO);
             }

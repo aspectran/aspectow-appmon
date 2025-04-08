@@ -72,9 +72,9 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
 
     @Override
     public void onRolledUp(@NonNull EventCount eventCount) {
-        String[] labels = new String[] { eventCount.getDatetime() };
-        long[] data1 = new long[] { eventCount.getDelta() };
-        long[] data2 = new long[] { eventCount.getError() };
+        String[] labels = new String[] { eventCount.getTallied().getDatetime() };
+        long[] data1 = new long[] { eventCount.getTallied().getDelta() };
+        long[] data2 = new long[] { eventCount.getTallied().getError() };
         String message = toJson(labels, data1, data2, true);
         broadcast(message);
     }

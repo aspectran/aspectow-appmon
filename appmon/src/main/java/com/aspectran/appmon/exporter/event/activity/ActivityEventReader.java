@@ -31,7 +31,6 @@ import com.aspectran.core.context.rule.type.JoinpointTargetType;
 import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.json.JsonBuilder;
-import com.aspectran.utils.statistic.CounterStatistic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +44,6 @@ public class ActivityEventReader extends AbstractEventReader {
     private final String aspectId;
 
     private EventExporter eventExporter;
-
-    private CounterStatistic activityCounter;
 
     public ActivityEventReader(@NonNull ExporterManager exporterManager, @NonNull EventInfo eventInfo,
                                @NonNull EventCount eventCount) {
@@ -67,8 +64,6 @@ public class ActivityEventReader extends AbstractEventReader {
         if (context == null) {
             throw new Exception("Could not find ActivityContext named '" + getEventInfo().getTarget() + "'");
         }
-
-        activityCounter = context.getActivityCounter();
 
         AspectRule aspectRule = new AspectRule();
         aspectRule.setId(aspectId);
@@ -119,15 +114,9 @@ public class ActivityEventReader extends AbstractEventReader {
 
     @Override
     public String read() {
-        long total;
-        long tallied;
-        if (getEventCount() != null) {
-            total = getEventCount().getGrandTotal();
-            tallied = getEventCount().getTallied();
-        } else {
-            total = activityCounter.getTotal();
-            tallied = 0L;
-        }
+        long interim = getEventCount().getTallying().getTotal();
+        long total = interim + getEventCount().getTallied().getTotal();
+        long errors = getEventCount().getTallying().getError();
 
         return new JsonBuilder()
             .prettyPrint(false)
@@ -135,7 +124,8 @@ public class ActivityEventReader extends AbstractEventReader {
             .object()
                 .object("activities")
                     .put("total", total)
-                    .put("tallied", tallied)
+                    .put("interim", interim)
+                    .put("errors", errors)
                 .endObject()
             .endObject()
             .toString();

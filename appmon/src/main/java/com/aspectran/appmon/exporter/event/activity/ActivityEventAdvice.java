@@ -19,7 +19,6 @@ import com.aspectran.core.activity.Activity;
 import com.aspectran.core.adapter.SessionAdapter;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.json.JsonBuilder;
-import com.aspectran.utils.statistic.CounterStatistic;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -51,16 +50,14 @@ public class ActivityEventAdvice {
     }
 
     public String after(@NonNull Activity activity) {
-        long total;
-        long tallied;
-        if (activityEventReader.getEventCount() != null) {
-            total = activityEventReader.getEventCount().getGrandTotal();
-            tallied = activityEventReader.getEventCount().getTallied();
-        } else {
-            CounterStatistic activityCounter = activity.getActivityContext().getActivityCounter();
-            total = activityCounter.getTotal();
-            tallied = 0L;
+        Throwable error = activity.getRootCauseOfRaisedException();
+        if (error != null && activityEventReader.getEventCount() != null) {
+            activityEventReader.getEventCount().error();
         }
+
+        long interim = activityEventReader.getEventCount().getTallying().getTotal();
+        long total = interim + activityEventReader.getEventCount().getTallied().getTotal();
+        long errors = activityEventReader.getEventCount().getTallying().getError();
 
         long elapsedTime = System.currentTimeMillis() - startTime;
 
@@ -73,18 +70,14 @@ public class ActivityEventAdvice {
             }
         }
 
-        Throwable error = activity.getRootCauseOfRaisedException();
-        if (error != null && activityEventReader.getEventCount() != null) {
-            activityEventReader.getEventCount().error();
-        }
-
         return new JsonBuilder()
                 .prettyPrint(false)
                 .nullWritable(false)
                 .object()
                     .object("activities")
                         .put("total", total)
-                        .put("tallied", tallied)
+                        .put("interim", interim)
+                        .put("errors", errors)
                     .endObject()
                     .put("startTime", startTime)
                     .put("elapsedTime", elapsedTime)
