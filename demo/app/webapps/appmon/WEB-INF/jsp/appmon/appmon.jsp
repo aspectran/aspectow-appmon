@@ -1,11 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
-<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250408"/>">
-<script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20250408"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250408"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250408"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250408"/>"></script>
+<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250409"/>">
+<script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20250409"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250409"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250409"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250409"/>"></script>
 <div class="grid-x">
     <div class="cell options t10 b5">
         <ul class="speed-options">
@@ -26,17 +26,19 @@
                 <h4 class="ellipses"></h4>
             </div>
             <div class="cell track-box">
-                <div class="track-stack"><div class="activities">
-                    <p class="current" title="Current activities"></p>
-                    <p class="tallied" title="Activities tallied during the sampling period">-</p>
-                    <p class="total" title="Total activities recorded"></p>
-                </div>
+                <div class="track-stack">
+                    <div class="activity-status">
+                        <p class="current" title="Current activities"><span class="total"></span></p>
+                        <p class="interim" title="Activities tallied during the sampling period"><span class="errors"></span><span class="separator">-</span><span class="total"></span></p>
+                        <p class="cumulative" title="Total cumulative activities recorded"><span class="total"></span></p>
+                        <div class="sampling-timer"></div>
+                    </div>
                 </div>
             </div>
             <div class="cell session-box">
                 <div class="grid-x">
                     <div class="cell small-12 medium-4">
-                        <div class="panel">
+                        <div class="panel status">
                             <dl class="session-stats">
                                 <dt title="The number of active sessions">Current Active Sessions</dt>
                                 <dd><span class="number numberOfActives">0</span></dd>

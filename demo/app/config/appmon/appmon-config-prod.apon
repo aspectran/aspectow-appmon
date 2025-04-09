@@ -10,6 +10,7 @@ domain: {
         mode: auto
         url: /appmon/backend1
     }
+    sampleInterval: 5
 }
 domain: {
     name: backend2
@@ -18,6 +19,7 @@ domain: {
         mode: auto
         url: /appmon/backend2
     }
+    sampleInterval: 5
 }
 instance: {
     name: root

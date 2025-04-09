@@ -27,6 +27,7 @@ public class DomainInfo extends AbstractParameters {
     private static final ParameterKey name;
     private static final ParameterKey title;
     private static final ParameterKey endpoint;
+    private static final ParameterKey sampleInterval;
 
     private static final ParameterKey[] parameterKeys;
 
@@ -34,11 +35,13 @@ public class DomainInfo extends AbstractParameters {
         name = new ParameterKey("name", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
         endpoint = new ParameterKey("endpoint", EndpointInfo.class);
+        sampleInterval = new ParameterKey("sampleInterval", ValueType.INT);
 
         parameterKeys = new ParameterKey[] {
                 name,
                 title,
-                endpoint
+                endpoint,
+                sampleInterval
         };
     }
 
@@ -68,6 +71,14 @@ public class DomainInfo extends AbstractParameters {
 
     public void setEndpointInfo(EndpointInfo endpointInfo) {
         putValue(DomainInfo.endpoint, endpointInfo);
+    }
+
+    public int getSampleInterval() {
+        return getInt(sampleInterval, 0);
+    }
+
+    public void setSampleInterval(int sampleInterval) {
+        putValue(DomainInfo.sampleInterval, sampleInterval);
     }
 
 }

@@ -1,4 +1,4 @@
-function FrontViewer() {
+function FrontViewer(sampleInterval) {
     const FLAGS_URL = "https://aspectran.com/assets/countries/flags/";
     const TEMP_RESIDENT_INACTIVE_SECS = 30;
 
@@ -6,9 +6,10 @@ function FrontViewer() {
     let $charts = {};
     let $consoles = {};
     let $indicators = {};
+    let enable = false;
     let visible = false;
     let prevPosition = 0;
-    let currentActivities = [];
+    let currentActivityCounts = {};
 
     this.putDisplay = function (instanceName, eventName, $display) {
         $displays[instanceName + ":event:" + eventName] = $display;
@@ -74,6 +75,10 @@ function FrontViewer() {
             }, 300);
             $console.data("timer", timer);
         }
+    };
+
+    this.setEnable = function (flag) {
+        enable = !!flag;
     };
 
     this.setVisible = function (flag) {
@@ -155,28 +160,28 @@ function FrontViewer() {
             case "activity":
                 indicate(instanceName, messageType, eventName);
                 if (eventData.activities) {
-                    printActivities(messagePrefix, eventData.activities);
+                    printActivityStatus(messagePrefix, eventData.activities);
                 }
                 if (visible) {
                     let $track = getDisplay(messagePrefix);
                     if ($track) {
                         let varName = messagePrefix.replace(':', '_');
-                        if (!currentActivities[varName]) {
-                            currentActivities[varName] = 0;
-                            printCurrentActivities(messagePrefix, 0);
+                        if (!currentActivityCounts[varName]) {
+                            currentActivityCounts[varName] = 0;
+                            printCurrentActivityCount(messagePrefix, 0);
                         }
                         launchBullet($track, eventData, function () {
-                            currentActivities[varName]++;
-                            printCurrentActivities(messagePrefix, currentActivities[varName]);
+                            currentActivityCounts[varName]++;
+                            printCurrentActivityCount(messagePrefix, currentActivityCounts[varName]);
                         }, function () {
-                            if (currentActivities[varName] > 0) {
-                                currentActivities[varName]--;
+                            if (currentActivityCounts[varName] > 0) {
+                                currentActivityCounts[varName]--;
                             }
-                            printCurrentActivities(messagePrefix, currentActivities[varName]);
+                            printCurrentActivityCount(messagePrefix, currentActivityCounts[varName]);
                         });
                     }
                 } else {
-                    printCurrentActivities(messagePrefix, 0);
+                    printCurrentActivityCount(messagePrefix, 0);
                 }
                 updateActivityCount(
                     instanceName + ":" + messageType + ":session",
@@ -252,25 +257,53 @@ function FrontViewer() {
         }
     }
 
-    const printActivities = function (messagePrefix, activities) {
-        let $activities = getIndicator(messagePrefix);
-        if ($activities) {
-            $activities.find(".tallied").text(activities.tallied > 0 ? "+" + activities.tallied : "-");
-            $activities.find(".total").text(activities.total);
+    const printActivityStatus = function (messagePrefix, activities) {
+        let $activityStatus = getIndicator(messagePrefix);
+        if ($activityStatus) {
+            let separator = (activities.errors > 0 ? " / " : (activities.interim > 0 ? "+" : "-"));
+            $activityStatus.find(".interim .separator").text(separator);
+            $activityStatus.find(".interim .total").text(activities.interim > 0 ? activities.interim : "");
+            $activityStatus.find(".interim .errors").text(activities.errors > 0 ? activities.errors : "");
+            $activityStatus.find(".cumulative .total").text(activities.total);
         }
     }
 
-    const resetTalliedActivities = function (messagePrefix) {
-        let $activities = getIndicator(messagePrefix);
-        if ($activities) {
-            $activities.find(".tallied").text(0);
+    const resetInterimActivityStatus = function (messagePrefix, rolledUp) {
+        let $activityStatus = getIndicator(messagePrefix);
+        if ($activityStatus) {
+            if (rolledUp) {
+                $activityStatus.find(".interim .separator").text("");
+                $activityStatus.find(".interim .total").text(0);
+                $activityStatus.find(".interim .errors").text("");
+            }
+            if (sampleInterval) {
+                let $samplingTimer = $activityStatus.find(".sampling-timer");
+                if ($samplingTimer.length) {
+                    let timer = $samplingTimer.data("timer");
+                    if (timer) {
+                        clearInterval(timer);
+                    }
+                    $samplingTimer.animate({height: "0"}, 1000);
+                    let seconds = 0;
+                    timer = setInterval(function () {
+                        if (!enable) {
+                            clearInterval(timer);
+                            return;
+                        }
+                        let percent = seconds++ / sampleInterval * 100;
+                        $samplingTimer.css("height", percent.toFixed(2) + "%")
+                            .attr("title", seconds + "/" + sampleInterval);
+                    }, 1000);
+                    $samplingTimer.data("timer", timer);
+                }
+            }
         }
     }
 
-    const printCurrentActivities = function (messagePrefix, current) {
-        let $activities = getIndicator(messagePrefix);
-        if ($activities) {
-            $activities.find(".current").text(current);
+    const printCurrentActivityCount = function (messagePrefix, count) {
+        let $activityStatus = getIndicator(messagePrefix);
+        if ($activityStatus) {
+            $activityStatus.find(".current .total").text(count);
         }
     }
 
@@ -387,8 +420,8 @@ function FrontViewer() {
         if (!$chart) {
             return;
         }
-        if (eventName === "activity" && chartData.rolledUp) {
-            resetTalliedActivities(instanceName + ":event:" + eventName);
+        if (eventName === "activity") {
+            resetInterimActivityStatus(instanceName + ":event:" + eventName, chartData.rolledUp);
         }
         let labels = chartData.labels;
         let data1 = chartData.data1;

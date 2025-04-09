@@ -10,6 +10,7 @@ domain: {
         mode: auto
         url: /appmon/backend
     }
+    sampleInterval: 5
 }
 #domain: {
 #    name: backend2

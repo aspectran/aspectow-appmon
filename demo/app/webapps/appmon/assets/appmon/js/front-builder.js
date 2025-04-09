@@ -33,7 +33,7 @@ function FrontBuilder() {
                             establishCount: 0
                         };
                         domains.push(domain);
-                        viewers[domain.index] = new FrontViewer();
+                        viewers[domain.index] = new FrontViewer(domain.sampleInterval * 60);
                         console.log("domain", domain);
                     }
                     for (let key in data.instances) {
@@ -72,6 +72,8 @@ function FrontBuilder() {
             console.log(domain.name, "connection established:", domain.client.establishCount);
             console.log(domain.name, "endpoint mode:", domain.endpoint.mode)
             changeDomainState(domain);
+            viewers[domain.index].setEnable(true);
+            console.log(domain.name, "viewer enabled");
             if (domain.active) {
                 viewers[domain.index].setVisible(true);
             }
@@ -89,6 +91,8 @@ function FrontBuilder() {
         function onClosed(domain) {
             domain.client.established = false;
             changeDomainState(domain);
+            viewers[domain.index].setEnable(false);
+            console.log(domain.name, "viewer disabled");
         }
         function onFailed(domain) {
             changeDomainState(domain, true);
@@ -409,9 +413,9 @@ function FrontBuilder() {
                         let event = instance.events[key];
                         if (event.name === "activity") {
                             let $trackBox = addTrackBox($eventBox, domain, instance, event);
-                            let $activities = $trackBox.find(".activities");
+                            let $activityStatus = $trackBox.find(".activity-status");
                             viewers[domain.index].putDisplay(instance.name, event.name, $trackBox);
-                            viewers[domain.index].putIndicator(instance.name, "event", event.name, $activities);
+                            viewers[domain.index].putIndicator(instance.name, "event", event.name, $activityStatus);
                         } else if (event.name === "session") {
                             let $sessionBox = addSessionBox($eventBox, domain, instance, event);
                             viewers[domain.index].putDisplay(instance.name, event.name, $sessionBox);

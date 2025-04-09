@@ -105,7 +105,7 @@
     width: 160px;
     height: 12px;
     border-radius: 50%;
-    background: linear-gradient(to right, rgba(9, 17, 39, 0) 27%, rgba(17, 213, 57, 0.66) 100%);
+    background: linear-gradient(to right, rgba(9, 17, 39, 0) 25%, rgba(17, 213, 57, 0.66) 100%);
     animation-name: bulletAnimation;
     animation-timing-function: linear;
     animation-iteration-count: 1;
@@ -129,9 +129,9 @@
     background-color: #a51e1e;
     border: 1px solid #f34d4d;
 }
-.track-stack .activities {
+.track-stack .activity-status {
     position: absolute;
-    top: 5px;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
@@ -140,29 +140,48 @@
     text-align: center;
     z-index: 11;
 }
-.track-stack .activities p {
+.track-stack .activity-status p {
     margin: 0;
     padding: 0;
     line-height: 1;
 }
-.track-stack .activities p.current {
+.track-stack .activity-status p.current {
     font-weight: bold;
+    padding-top: 4px;
 }
-.track-stack .activities p.tallied {
-    font-size: .7em;
+.track-stack .activity-status p.interim {
+    font-size: .65em;
+    color: #35e771;
+    line-height: 1.1;
 }
-.track-stack .activities p.total {
+.track-stack .activity-status p.interim .errors {
+    color: #fc2184;
+}
+.track-stack .activity-status p.interim .separator {
+    color: #a48599;
+    letter-spacing: -3px;
+}
+.track-stack .activity-status p.cumulative {
     padding-top: 5px;
     font-size: .4em;
+}
+.track-stack .activity-status .sampling-timer {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 5px;
+    height: 100%;
+    background-color: #b989a6;
 }
 
 .visual-box {
     display: none;
+    box-shadow: 0 8px 10px -10px rgba(50, 50, 50, 0.33);
 }
 .visual-box .chart-box {
     height: 174px;
     padding: 4px 0 0 4px;
-    box-shadow: 0 8px 15px -10px rgba(50, 50, 50, 0.33);
+    box-shadow: 0 6px 10px -10px rgba(50, 50, 50, 0.45);
 }
 .visual-box .chart-box .chart {
     width: 100%;
@@ -183,6 +202,13 @@
     padding: 5px;
     overflow-y: auto;
     background-color: #d9e9f4;
+}
+@media screen and (max-width: 39.9988em) {
+    .session-box .panel.status {
+        height: 34px;
+        overflow-y: hidden;
+        border-bottom: none;
+    }
 }
 .session-box .panel.ground {
     background-color: #eff5fa;
