@@ -23,6 +23,7 @@ import com.aspectran.appmon.persist.counter.EventCount;
 import com.aspectran.appmon.persist.counter.EventCountRollupListener;
 import com.aspectran.appmon.persist.counter.EventCountVO;
 import com.aspectran.appmon.persist.db.mapper.EventCountMapper;
+import com.aspectran.core.activity.InstantAction;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.json.JsonBuilder;
@@ -75,27 +76,34 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
         String[] labels = new String[] { eventCount.getTallied().getDatetime() };
         long[] data1 = new long[] { eventCount.getTallied().getDelta() };
         long[] data2 = new long[] { eventCount.getTallied().getError() };
-        String message = toJson(labels, data1, data2, true);
+        String message = toJson(null, labels, data1, data2, true);
         broadcast(message);
     }
 
     private String readChartData(String[] options) {
-        EventCountMapper.Dao dao = exporterManager.getBean(EventCountMapper.Dao.class);
-        List<EventCountVO> list = exporterManager.instantActivity(() -> {
-            String dateUnit = null;
-            if (options != null) {
-                for (String option : options) {
-                    if (option.startsWith("dateUnit:")) {
-                        dateUnit = option.substring("dateUnit:".length());
-                        break;
-                    }
+        String dateUnit = null;
+        if (options != null) {
+            for (String option : options) {
+                if (option.startsWith("dateUnit:")) {
+                    dateUnit = option.substring("dateUnit:".length());
+                    break;
                 }
             }
-            return dao.getChartData(
-                    eventInfo.getDomainName(),
-                    eventInfo.getInstanceName(),
-                    eventInfo.getName(),
-                    dateUnit);
+        }
+        final String finalDateUnit = dateUnit;
+        EventCountMapper.Dao dao = exporterManager.getBean(EventCountMapper.Dao.class);
+        List<EventCountVO> list = exporterManager.instantActivity(() -> {
+            if ("hour".equals(finalDateUnit)) {
+                return dao.getChartDataByHour(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName());
+            } else if ("day".equals(finalDateUnit)) {
+                return dao.getChartDataByDay(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName());
+            } else if ("month".equals(finalDateUnit)) {
+                return dao.getChartDataByMonth(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName());
+            } else if ("year".equals(finalDateUnit)) {
+                return dao.getChartDataByYear(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName());
+            } else {
+                return dao.getChartData(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName());
+            }
         });
 
         String[] labels = new String[list.size()];
@@ -108,15 +116,16 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
             data2[i] = vo.getError();
         }
 
-        return toJson(labels, data1, data2, false);
+        return toJson(finalDateUnit, labels, data1, data2, false);
     }
 
-    private String toJson(String[] labels, long[] data1, long[] data2, boolean rolledUp) {
+    private String toJson(String dateUnit, String[] labels, long[] data1, long[] data2, boolean rolledUp) {
         return new JsonBuilder()
                 .prettyPrint(false)
                 .nullWritable(false)
                 .object()
                     .object("chartData")
+                        .put("dateUnit", dateUnit)
                         .put("labels", labels)
                         .put("data1", data1)
                         .put("data2", data2)

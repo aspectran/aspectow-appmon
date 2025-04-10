@@ -108,7 +108,7 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
         } else if (MESSAGE_ESTABLISHED.equals(message)) {
             joinComplete(session);
         } else if (message.startsWith(MESSAGE_REFRESH)) {
-            refreshData(session, parseOptions(message.substring(MESSAGE_JOIN.length())));
+            refreshData(session, parseOptions(message.substring(MESSAGE_REFRESH.length())));
         } else if (MESSAGE_LEAVE.equals(message)) {
             removeSession(session);
         }

@@ -116,8 +116,124 @@
                     where domain = #{domain} and instance = #{instance} and event = #{event}
                     order by ymd desc, hh desc, mm desc
                     limit 72
-                ) as a
+                ) as x
                 order by ymd, hh, mm
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getChartDataByHour" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'oracle'">
+                select ymd||hh||'00' datetime, delta, error
+                from (
+                    select ymd, hh, sum(delta) delta, sum(error) error
+                    from appmon_event_count
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    group by ymd, hh
+                    order by ymd desc, hh desc
+                )
+                where rownum &lt;= 72
+                order by ymd, hh
+            </when>
+            <otherwise>
+                select concat(ymd, hh, '00') as datetime, delta, error
+                from (
+                    select ymd, hh, sum(delta) as delta, sum(error) as error
+                    from appmon_event_count
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    group by ymd, hh
+                    order by ymd desc, hh desc
+                    limit 72
+                ) as x
+                order by ymd, hh
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getChartDataByDay" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'oracle'">
+                select ymd||'0000' datetime, delta, error
+                from (
+                    select ymd, sum(delta) delta, sum(error) error
+                    from appmon_event_count
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    group by ymd
+                    order by ymd desc
+                )
+                where rownum &lt;= 72
+                order by ymd
+            </when>
+            <otherwise>
+                select concat(ymd, '0000') as datetime, delta, error
+                from (
+                    select ymd, sum(delta) as delta, sum(error) as error
+                    from appmon_event_count
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    group by ymd
+                    order by ymd desc
+                    limit 72
+                ) as x
+                order by ymd
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getChartDataByMonth" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'oracle'">
+                select ym||'010000' datetime, delta, error
+                from (
+                    select substr(ymd, 1, 6) ym, sum(delta) delta, sum(error) error
+                    from appmon_event_count
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    group by substr(ymd, 1, 6)
+                    order by 1 desc
+                )
+                where rownum &lt;= 72
+                order by ym
+            </when>
+            <otherwise>
+                select concat(ym, '010000') as datetime, delta, error
+                from (
+                    select substr(ymd, 1, 6) as ym, sum(delta) as delta, sum(error) as error
+                    from appmon_event_count
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    group by substr(ymd, 1, 6)
+                    order by 1 desc
+                    limit 72
+                ) as x
+                order by ym
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getChartDataByYear" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'oracle'">
+                select yy||'01010000' datetime, delta, error
+                from (
+                    select substr(ymd, 1, 4) yy, sum(delta) delta, sum(error) error
+                    from appmon_event_count
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    group by substr(ymd, 1, 4)
+                    order by 1 desc
+                )
+                where rownum &lt;= 72
+                order by yy
+            </when>
+            <otherwise>
+                select concat(yy, '01010000') as datetime, delta, error
+                from (
+                    select substr(ymd, 1, 4) as yy, sum(delta) as delta, sum(error) as error
+                    from appmon_event_count
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    group by substr(ymd, 1, 4)
+                    order by 1 desc
+                    limit 72
+                ) as x
+                order by yy
             </otherwise>
         </choose>
     </select>

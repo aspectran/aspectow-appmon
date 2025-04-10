@@ -21,7 +21,6 @@ import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.mybatis.SqlMapperAgent;
 import com.aspectran.mybatis.SqlMapperDao;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -33,18 +32,21 @@ import java.util.List;
 @Mapper
 public interface EventCountMapper {
 
-    EventCountVO getLastEventCount(String domain,
-                                   String instance,
-                                   String event);
+    EventCountVO getLastEventCount(String domain, String instance, String event);
 
     void updateLastEventCount(EventCountVO eventCountVO);
 
     int insertEventCount(EventCountVO eventCountVO);
 
-    List<EventCountVO> getChartData(String domain,
-                                    String instance,
-                                    String event,
-                                    String unit);
+    List<EventCountVO> getChartData(String domain, String instance, String event);
+
+    List<EventCountVO> getChartDataByHour(String domain, String instance, String event);
+
+    List<EventCountVO> getChartDataByDay(String domain, String instance, String event);
+
+    List<EventCountVO> getChartDataByMonth(String domain, String instance, String event);
+
+    List<EventCountVO> getChartDataByYear(String domain, String instance, String event);
 
     @Component
     class Dao extends SqlMapperDao<EventCountMapper> implements EventCountMapper {
@@ -55,8 +57,8 @@ public interface EventCountMapper {
         }
 
         @Override
-        public EventCountVO getLastEventCount(String domainName, String instanceName, String eventName) {
-            return simple().getLastEventCount(domainName, instanceName, eventName);
+        public EventCountVO getLastEventCount(String domain, String instance, String event) {
+            return simple().getLastEventCount(domain, instance, event);
         }
 
         @Override
@@ -70,8 +72,28 @@ public interface EventCountMapper {
         }
 
         @Override
-        public List<EventCountVO> getChartData(String domainName, String instanceName, String eventName, String dateUnit) {
-            return simple().getChartData(domainName, instanceName, eventName, dateUnit);
+        public List<EventCountVO> getChartData(String domain, String instance, String event) {
+            return simple().getChartData(domain, instance, event);
+        }
+
+        @Override
+        public List<EventCountVO> getChartDataByHour(String domain, String instance, String event) {
+            return simple().getChartDataByHour(domain, instance, event);
+        }
+
+        @Override
+        public List<EventCountVO> getChartDataByDay(String domain, String instance, String event) {
+            return simple().getChartDataByDay(domain, instance, event);
+        }
+
+        @Override
+        public List<EventCountVO> getChartDataByMonth(String domain, String instance, String event) {
+            return simple().getChartDataByMonth(domain, instance, event);
+        }
+
+        @Override
+        public List<EventCountVO> getChartDataByYear(String domain, String instance, String event) {
+            return simple().getChartDataByYear(domain, instance, event);
         }
 
     }
