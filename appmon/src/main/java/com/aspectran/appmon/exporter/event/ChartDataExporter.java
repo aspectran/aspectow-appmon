@@ -57,12 +57,12 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
 
     @Override
     public void read(@NonNull List<String> messages) {
-        messages.add(prefix + readChartData());
+        messages.add(prefix + readChartData(null));
     }
 
     @Override
-    public void readIfChanged(@NonNull List<String> messages) {
-        messages.add(prefix + readChartData());
+    public void readIfChanged(@NonNull List<String> messages, String[] options) {
+        messages.add(prefix + readChartData(options));
     }
 
     @Override
@@ -79,12 +79,24 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
         broadcast(message);
     }
 
-    private String readChartData() {
+    private String readChartData(String[] options) {
         EventCountMapper.Dao dao = exporterManager.getBean(EventCountMapper.Dao.class);
-        List<EventCountVO> list = exporterManager.instantActivity(() -> dao.getChartData(
-                eventInfo.getDomainName(),
-                eventInfo.getInstanceName(),
-                eventInfo.getName()));
+        List<EventCountVO> list = exporterManager.instantActivity(() -> {
+            String dateUnit = null;
+            if (options != null) {
+                for (String option : options) {
+                    if (option.startsWith("dateUnit:")) {
+                        dateUnit = option.substring("dateUnit:".length());
+                        break;
+                    }
+                }
+            }
+            return dao.getChartData(
+                    eventInfo.getDomainName(),
+                    eventInfo.getInstanceName(),
+                    eventInfo.getName(),
+                    dateUnit);
+        });
 
         String[] labels = new String[list.size()];
         long[] data1 = new long[list.size()];

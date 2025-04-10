@@ -21,7 +21,7 @@ public abstract class AbstractExporter extends AbstractLifeCycle implements Expo
     }
 
     @Override
-    public void readIfChanged(List<String> messages) {
+    public void readIfChanged(List<String> messages, String[] options) {
     }
 
 }

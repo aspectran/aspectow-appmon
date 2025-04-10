@@ -70,9 +70,9 @@ public class ExporterManager {
         }
     }
 
-    public void collectNewMessages(List<String> messages) {
+    public void collectNewMessages(List<String> messages, String[] options) {
         for (Exporter exporter : exporters.values()) {
-            exporter.readIfChanged(messages);
+            exporter.readIfChanged(messages, options);
         }
     }
 

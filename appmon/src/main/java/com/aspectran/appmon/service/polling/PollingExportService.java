@@ -32,6 +32,7 @@ import com.aspectran.core.component.bean.annotation.Transform;
 import com.aspectran.core.context.rule.type.FormatType;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
+import com.aspectran.utils.annotation.jsr305.Nullable;
 import com.aspectran.utils.security.InvalidPBTokenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,8 @@ import java.util.Map;
 public class PollingExportService implements ExportService {
 
     private static final Logger logger = LoggerFactory.getLogger(PollingExportService.class);
+
+    private static final String COMMAND_REFRESH = "refresh:";
 
     private final AppMonManager appMonManager;
 
@@ -114,8 +117,9 @@ public class PollingExportService implements ExportService {
 
         if (commands != null) {
             for (String command : commands) {
-                if ("refresh".equals(command)) {
-                    List<String> newMessages = appMonManager.getExportServiceManager().getNewMessages(serviceSession);
+                if (command.startsWith(COMMAND_REFRESH)) {
+                    String[] options = parseOptions(command.substring(COMMAND_REFRESH.length()));
+                    List<String> newMessages = appMonManager.getExportServiceManager().getNewMessages(serviceSession, options);
                     for (String msg : newMessages) {
                         sessionManager.push(msg);
                     }
@@ -132,7 +136,7 @@ public class PollingExportService implements ExportService {
     }
 
     @RequestToPost("/${token}/polling/interval")
-    @Transform(FormatType.TEXT)
+    @Transform(FormatType.JSON)
     public Map<String, Object> pollingInterval(@NonNull Translet translet, String token, int speed) {
         if (checkServiceAvailable(token)) {
             return null;
@@ -167,6 +171,12 @@ public class PollingExportService implements ExportService {
     @Override
     public boolean isUsingInstance(String instanceName) {
         return sessionManager.isUsingInstance(instanceName);
+    }
+
+    @Nullable
+    private String[] parseOptions(@NonNull String optionsStr) {
+        String[] options = StringUtils.splitWithComma(optionsStr);
+        return (options.length > 0 ? options : null);
     }
 
     private boolean checkServiceAvailable(String token) {

@@ -33,17 +33,18 @@ import java.util.List;
 @Mapper
 public interface EventCountMapper {
 
-    EventCountVO getLastEventCount(@Param("domain") String domainName,
-                                   @Param("instance") String instanceName,
-                                   @Param("event") String eventName);
+    EventCountVO getLastEventCount(String domain,
+                                   String instance,
+                                   String event);
 
     void updateLastEventCount(EventCountVO eventCountVO);
 
     int insertEventCount(EventCountVO eventCountVO);
 
-    List<EventCountVO> getChartData(@Param("domain") String domainName,
-                                    @Param("instance") String instanceName,
-                                    @Param("event") String eventName);
+    List<EventCountVO> getChartData(String domain,
+                                    String instance,
+                                    String event,
+                                    String unit);
 
     @Component
     class Dao extends SqlMapperDao<EventCountMapper> implements EventCountMapper {
@@ -69,8 +70,8 @@ public interface EventCountMapper {
         }
 
         @Override
-        public List<EventCountVO> getChartData(String domainName, String instanceName, String eventName) {
-            return simple().getChartData(domainName, instanceName, eventName);
+        public List<EventCountVO> getChartData(String domainName, String instanceName, String eventName, String dateUnit) {
+            return simple().getChartData(domainName, instanceName, eventName, dateUnit);
         }
 
     }

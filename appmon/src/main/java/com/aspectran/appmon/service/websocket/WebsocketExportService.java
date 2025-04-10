@@ -24,6 +24,7 @@ import com.aspectran.core.component.bean.annotation.Destroy;
 import com.aspectran.core.component.bean.annotation.Initialize;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
+import com.aspectran.utils.annotation.jsr305.Nullable;
 import com.aspectran.utils.security.InvalidPBTokenException;
 import com.aspectran.web.websocket.jsr356.AspectranConfigurator;
 import com.aspectran.web.websocket.jsr356.SimplifiedEndpoint;
@@ -97,17 +98,26 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
     }
 
     private void handleMessage(Session session, String message) {
+        if (StringUtils.isEmpty(message)) {
+            return;
+        }
         if (MESSAGE_PING.equals(message)) {
             pong(session);
-        } else if (message != null && message.startsWith(MESSAGE_JOIN)) {
+        } else if (message.startsWith(MESSAGE_JOIN)) {
             join(session, message.substring(MESSAGE_JOIN.length()));
         } else if (MESSAGE_ESTABLISHED.equals(message)) {
             joinComplete(session);
-        } else if (MESSAGE_REFRESH.equals(message)) {
-            refreshData(session);
+        } else if (message.startsWith(MESSAGE_REFRESH)) {
+            refreshData(session, parseOptions(message.substring(MESSAGE_JOIN.length())));
         } else if (MESSAGE_LEAVE.equals(message)) {
             removeSession(session);
         }
+    }
+
+    @Nullable
+    private String[] parseOptions(@NonNull String optionsStr) {
+        String[] options = StringUtils.splitWithComma(optionsStr);
+        return (options.length > 0 ? options : null);
     }
 
     @Override
@@ -142,9 +152,9 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
         }
     }
 
-    private void refreshData(@NonNull Session session) {
+    private void refreshData(@NonNull Session session, String[] options) {
         ServiceSession serviceSession = new WebsocketServiceSession(session);
-        List<String> messages = appMonManager.getExportServiceManager().getNewMessages(serviceSession);
+        List<String> messages = appMonManager.getExportServiceManager().getNewMessages(serviceSession, options);
         for (String message : messages) {
             sendText(session, message);
         }

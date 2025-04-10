@@ -70,7 +70,7 @@ public class EventExporter extends AbstractExporter {
     }
 
     @Override
-    public void readIfChanged(@NonNull List<String> messages) {
+    public void readIfChanged(@NonNull List<String> messages, String[] options) {
         String json = eventReader.readIfChanged();
         if (json != null) {
             messages.add(prefix + json);

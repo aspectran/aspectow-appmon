@@ -130,25 +130,25 @@ public class ExportServiceManager {
         }
     }
 
-    public List<String> getNewMessages(@NonNull ServiceSession session) {
+    public List<String> getNewMessages(@NonNull ServiceSession session, String[] options) {
         List<String> messages = new ArrayList<>();
         if (session.isValid()) {
             String[] instanceNames = session.getJoinedInstances();
             if (instanceNames != null && instanceNames.length > 0) {
                 for (String name : instanceNames) {
-                    collectNewMessages(name, messages);
+                    collectNewMessages(name, messages, options);
                 }
             } else {
-                collectNewMessages(null, messages);
+                collectNewMessages(null, messages, options);
             }
         }
         return messages;
     }
 
-    private void collectNewMessages(String instanceName, List<String> messages) {
+    private void collectNewMessages(String instanceName, List<String> messages, String[] options) {
         for (ExporterManager exporterManager : exporterManagers) {
             if (instanceName == null || exporterManager.getInstanceName().equals(instanceName)) {
-                exporterManager.collectNewMessages(messages);
+                exporterManager.collectNewMessages(messages, options);
             }
         }
     }

@@ -30,7 +30,7 @@ public interface Exporter extends LifeCycle {
 
     void read(List<String> messages);
 
-    void readIfChanged(List<String> messages);
+    void readIfChanged(List<String> messages, String[] options);
 
     void broadcast(String message);
 
