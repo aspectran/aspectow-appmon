@@ -175,7 +175,7 @@ public class PollingExportService implements ExportService {
 
     @Nullable
     private String[] parseOptions(@NonNull String optionsStr) {
-        String[] options = StringUtils.splitWithComma(optionsStr);
+        String[] options = StringUtils.split(optionsStr, ';');
         return (options.length > 0 ? options : null);
     }
 

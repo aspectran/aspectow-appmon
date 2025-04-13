@@ -19,12 +19,6 @@ public class EventCountVO implements Serializable {
 
     private String datetime;
 
-    private String ymd;
-
-    private String hh;
-
-    private String mm;
-
     private long total;
 
     private long delta;
@@ -61,30 +55,6 @@ public class EventCountVO implements Serializable {
 
     public void setDatetime(String datetime) {
         this.datetime = datetime;
-    }
-
-    public String getYmd() {
-        return ymd;
-    }
-
-    public void setYmd(String ymd) {
-        this.ymd = ymd;
-    }
-
-    public String getHh() {
-        return hh;
-    }
-
-    public void setHh(String hh) {
-        this.hh = hh;
-    }
-
-    public String getMm() {
-        return mm;
-    }
-
-    public void setMm(String mm) {
-        this.mm = mm;
     }
 
     public long getTotal() {

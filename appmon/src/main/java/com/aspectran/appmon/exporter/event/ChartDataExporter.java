@@ -76,17 +76,20 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
         String[] labels = new String[] { eventCount.getTallied().getDatetime() };
         long[] data1 = new long[] { eventCount.getTallied().getDelta() };
         long[] data2 = new long[] { eventCount.getTallied().getError() };
-        String message = toJson(null, labels, data1, data2, true);
+        String message = toJson(null, null, labels, data1, data2, true);
         broadcast(message);
     }
 
     private String readChartData(String[] options) {
         String dateUnit = null;
+        String dateOffset = null;
         if (options != null) {
             for (String option : options) {
-                if (option.startsWith("dateUnit:")) {
+                if (dateUnit == null && option.startsWith("dateUnit:")) {
                     dateUnit = option.substring("dateUnit:".length());
-                    break;
+                }
+                if (dateOffset == null && option.startsWith("dateOffset:")) {
+                    dateOffset = option.substring("dateOffset:".length());
                 }
             }
         }
@@ -116,16 +119,18 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
             data2[i] = vo.getError();
         }
 
-        return toJson(finalDateUnit, labels, data1, data2, false);
+        return toJson(dateUnit, dateOffset, labels, data1, data2, false);
     }
 
-    private String toJson(String dateUnit, String[] labels, long[] data1, long[] data2, boolean rolledUp) {
+    private String toJson(String dateUnit, String dateOffset, String[] labels,
+                          long[] data1, long[] data2, boolean rolledUp) {
         return new JsonBuilder()
                 .prettyPrint(false)
                 .nullWritable(false)
                 .object()
                     .object("chartData")
                         .put("dateUnit", dateUnit)
+                        .put("dateOffset", dateOffset)
                         .put("labels", labels)
                         .put("data1", data1)
                         .put("data2", data2)

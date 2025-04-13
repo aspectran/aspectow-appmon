@@ -114,20 +114,14 @@ public class CounterPersistSchedule {
     }
 
     private void rollupAndSave(boolean scheduled) {
-        for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
-            String datetime = getDatetime(scheduled);
-            eventCounter.rollup(datetime);
-        }
-        save();
-    }
-
-    private void save() {
+        String datetime = getDatetime(scheduled);
         EventCountVO eventCountVO = null;
         for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
+            eventCounter.rollup(datetime);
             EventCount eventCount = eventCounter.getEventCount();
             if (eventCount.isUpdated()) {
                 if (eventCountVO == null) {
-                    eventCountVO = createEventCountVO(eventCount.getTallied().getDatetime());
+                    eventCountVO = createEventCountVO(datetime);
                 }
                 eventCountVO.setInstance(eventCounter.getInstanceName());
                 eventCountVO.setEvent(eventCounter.getEventName());
@@ -155,15 +149,9 @@ public class CounterPersistSchedule {
 
     @NonNull
     private EventCountVO createEventCountVO(@NonNull String datetime) {
-        String ymd = datetime.substring(0, 8);
-        String hh = datetime.substring(8, 10);
-        String mm = datetime.substring(10, 12);
         EventCountVO eventCountVO = new EventCountVO();
         eventCountVO.setDomain(currentDomain);
         eventCountVO.setDatetime(datetime);
-        eventCountVO.setYmd(ymd);
-        eventCountVO.setHh(hh);
-        eventCountVO.setMm(mm);
         return eventCountVO;
     }
 

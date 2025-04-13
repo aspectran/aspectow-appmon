@@ -9,12 +9,12 @@
     <select id="getLastEventCount" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'mysql'">
-                select domain, instance, event, ymd||hh||mm datetime, ymd, hh, mm, total, delta, error
+                select domain, instance, event, datetime, total, delta, error
                 from appmon_event_count_last
                 where domain = #{domain} and instance = #{instance} and event = #{event}
                 </when>
             <otherwise>
-                select domain, instance, event, concat(ymd, hh, mm) as datetime, ymd, hh, mm, total, delta, error
+                select domain, instance, event, datetime, total, delta, error
                 from appmon_event_count_last
                 where domain = #{domain} and instance = #{instance} and event = #{event}
             </otherwise>
@@ -24,36 +24,35 @@
     <update id="updateLastEventCount" parameterType="com.aspectran.appmon.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'mysql'">
-                insert into appmon_event_count_last (domain, instance, event, ymd, hh, mm, total, delta, error)
-                values (#{domain}, #{instance}, #{event}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta}, #{error})
-                on duplicate key update ymd = #{ymd}, hh = #{hh}, mm = #{mm}, total = #{total}, delta = #{delta}, error = #{error}
+                insert into appmon_event_count_last (domain, instance, event, datetime, total, delta, error)
+                values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                on duplicate key update datetime = #{datetime}, total = #{total}, delta = #{delta}, error = #{error}
             </when>
             <when test="_databaseId == 'oracle'">
                 merge into appmon_event_count_last a
                 using (
                     select
                         #{domain} domain, #{instance} instance, #{event} event,
-                        #{ymd} ymd, #{hh} hh, #{mm} mm,
-                        #{total} total, #{delta} delta, #{error} error
+                        #{datetime} datetime, #{total} total, #{delta} delta, #{error} error
                     from dual
                 ) b
                 on (a.domain = b.domain and a.instance = b.instance and a.event = b.event)
                 when matched then
-                    update set ymd = b.ymd, hh = b.hh, mm = b.mm, total = b.total, delta = b.delta, error = b.error
+                    update set datetime = b.datetime, total = b.total, delta = b.delta, error = b.error
                 when not matched then
-                    insert (domain, instance, event, ymd, hh, mm, total, delta, error)
-                    values (b.domain, b.instance, b.event, b.ymd, b.hh, b.mm, b.total, b.delta, b.error)
+                    insert (domain, instance, event, datetime, total, delta, error)
+                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
             </when>
             <otherwise>
                 merge into appmon_event_count_last as a
-                using values (#{domain}, #{instance}, #{event}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta}, #{error})
-                    as b (domain, instance, event, ymd, hh, mm, total, delta, error)
+                using values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                    as b (domain, instance, event, datetime, total, delta, error)
                 on (a.domain = b.domain and a.instance = b.instance and a.event = b.event)
                 when matched then
-                    update set ymd = b.ymd, hh = b.hh, mm = b.mm, total = b.total, delta = b.delta, error = b.error
+                    update set datetime = b.datetime, total = b.total, delta = b.delta, error = b.error
                 when not matched then
-                    insert (domain, instance, event, ymd, hh, mm, total, delta, error)
-                    values (b.domain, b.instance, b.event, b.ymd, b.hh, b.mm, b.total, b.delta, b.error)
+                    insert (domain, instance, event, datetime, total, delta, error)
+                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
             </otherwise>
         </choose>
     </update>
@@ -61,8 +60,8 @@
     <insert id="insertEventCount" parameterType="com.aspectran.appmon.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'mysql'">
-                insert into appmon_event_count (domain, instance, event, ymd, hh, mm, total, delta, error)
-                values (#{domain}, #{instance}, #{event}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta}, #{error})
+                insert into appmon_event_count (domain, instance, event, datetime, total, delta, error)
+                values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
                 on duplicate key update total = #{total}, delta = #{delta}, error = #{error}
             </when>
             <when test="_databaseId == 'oracle'">
@@ -70,27 +69,26 @@
                 using (
                     select
                         #{domain} domain, #{instance} instance, #{event} event,
-                        #{ymd} ymd, #{hh} hh, #{mm} mm,
-                        #{total} total, #{delta} delta, #{error} error
+                        #{datetime} datetime, #{total} total, #{delta} delta, #{error} error
                     from dual
                 ) b
-                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.ymd = b.ymd and a.hh = b.hh and a.mm = b.mm)
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.datetime = b.datetime)
                 when matched then
                     update set total = b.total, delta = b.delta, error = b.error
                 when not matched then
-                    insert (domain, instance, event, ymd, hh, mm, total, delta, error)
-                    values (b.domain, b.instance, b.event, b.ymd, b.hh, b.mm, b.total, b.delta, b.error)
+                    insert (domain, instance, event, datetime, total, delta, error)
+                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
             </when>
             <otherwise>
                 merge into appmon_event_count as a
-                using values (#{domain}, #{instance}, #{event}, #{ymd}, #{hh}, #{mm}, #{total}, #{delta}, #{error})
-                    as b (domain, instance, event, ymd, hh, mm, total, delta, error)
-                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.ymd = b.ymd and a.hh = b.hh and a.mm = b.mm)
+                using values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                    as b (domain, instance, event, datetime, total, delta, error)
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.datetime = b.datetime)
                 when matched then
                     update set total = b.total, delta = b.delta, error = b.error
                 when not matched then
-                    insert (domain, instance, event, ymd, hh, mm, total, delta, error)
-                    values (b.domain, b.instance, b.event, b.ymd, b.hh, b.mm, b.total, b.delta, b.error)
+                    insert (domain, instance, event, datetime, total, delta, error)
+                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
             </otherwise>
         </choose>
     </insert>
@@ -98,26 +96,26 @@
     <select id="getChartData" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
-                select ymd||hh||mm datetime, delta, error
+                select datetime, delta, error
                 from (
-                    select ymd, hh, mm, delta, error
+                    select datetime, delta, error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
-                    order by ymd desc, hh desc, mm desc
+                    order by datetime desc
                 )
                 where rownum &lt;= 72
-                order by ymd, hh, mm
+                order by datetime
             </when>
             <otherwise>
-                select concat(ymd, hh, mm) as datetime, delta, error
+                select datetime, delta, error
                 from (
-                    select ymd, hh, mm, delta, error
+                    select datetime, delta, error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
-                    order by ymd desc, hh desc, mm desc
+                    order by datetime desc
                     limit 72
                 ) as x
-                order by ymd, hh, mm
+                order by datetime
             </otherwise>
         </choose>
     </select>
@@ -125,28 +123,28 @@
     <select id="getChartDataByHour" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
-                select ymd||hh||'00' datetime, delta, error
+                select ymdhh||'00' datetime, delta, error
                 from (
-                    select ymd, hh, sum(delta) delta, sum(error) error
+                    select substr(datetime, 1, 10) ymdhh, sum(delta) delta, sum(error) error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
-                    group by ymd, hh
-                    order by ymd desc, hh desc
+                    group by substr(datetime, 1, 10)
+                    order by 1 desc
                 )
                 where rownum &lt;= 72
-                order by ymd, hh
+                order by ymdhh
             </when>
             <otherwise>
-                select concat(ymd, hh, '00') as datetime, delta, error
+                select concat(ymdhh, '00') as datetime, delta, error
                 from (
-                    select ymd, hh, sum(delta) as delta, sum(error) as error
+                    select substr(datetime, 1, 10) as ymdhh, sum(delta) as delta, sum(error) as error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
-                    group by ymd, hh
-                    order by ymd desc, hh desc
+                    group by substr(datetime, 1, 10)
+                    order by 1 desc
                     limit 72
                 ) as x
-                order by ymd, hh
+                order by ymdhh
             </otherwise>
         </choose>
     </select>
@@ -156,11 +154,11 @@
             <when test="_databaseId == 'oracle'">
                 select ymd||'0000' datetime, delta, error
                 from (
-                    select ymd, sum(delta) delta, sum(error) error
+                    select substr(datetime, 1, 8) ymd, sum(delta) delta, sum(error) error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
-                    group by ymd
-                    order by ymd desc
+                    group by substr(datetime, 1, 8)
+                    order by 1 desc
                 )
                 where rownum &lt;= 72
                 order by ymd
@@ -168,11 +166,11 @@
             <otherwise>
                 select concat(ymd, '0000') as datetime, delta, error
                 from (
-                    select ymd, sum(delta) as delta, sum(error) as error
+                    select substr(datetime, 1, 8) as ymd, sum(delta) as delta, sum(error) as error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
-                    group by ymd
-                    order by ymd desc
+                    group by substr(datetime, 1, 8)
+                    order by 1 desc
                     limit 72
                 ) as x
                 order by ymd
@@ -185,10 +183,10 @@
             <when test="_databaseId == 'oracle'">
                 select ym||'010000' datetime, delta, error
                 from (
-                    select substr(ymd, 1, 6) ym, sum(delta) delta, sum(error) error
+                    select substr(datetime, 1, 6) ym, sum(delta) delta, sum(error) error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
-                    group by substr(ymd, 1, 6)
+                    group by substr(datetime, 1, 6)
                     order by 1 desc
                 )
                 where rownum &lt;= 72
@@ -197,10 +195,10 @@
             <otherwise>
                 select concat(ym, '010000') as datetime, delta, error
                 from (
-                    select substr(ymd, 1, 6) as ym, sum(delta) as delta, sum(error) as error
+                    select substr(datetime, 1, 6) as ym, sum(delta) as delta, sum(error) as error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
-                    group by substr(ymd, 1, 6)
+                    group by substr(datetime, 1, 6)
                     order by 1 desc
                     limit 72
                 ) as x
@@ -214,10 +212,10 @@
             <when test="_databaseId == 'oracle'">
                 select yy||'01010000' datetime, delta, error
                 from (
-                    select substr(ymd, 1, 4) yy, sum(delta) delta, sum(error) error
+                    select substr(datetime, 1, 4) yy, sum(delta) delta, sum(error) error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
-                    group by substr(ymd, 1, 4)
+                    group by substr(datetime, 1, 4)
                     order by 1 desc
                 )
                 where rownum &lt;= 72
@@ -226,10 +224,10 @@
             <otherwise>
                 select concat(yy, '01010000') as datetime, delta, error
                 from (
-                    select substr(ymd, 1, 4) as yy, sum(delta) as delta, sum(error) as error
+                    select substr(datetime, 1, 4) as yy, sum(delta) as delta, sum(error) as error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
-                    group by substr(ymd, 1, 4)
+                    group by substr(datetime, 1, 4)
                     order by 1 desc
                     limit 72
                 ) as x
