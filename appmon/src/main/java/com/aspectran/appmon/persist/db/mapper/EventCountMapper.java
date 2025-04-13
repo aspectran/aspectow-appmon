@@ -38,15 +38,15 @@ public interface EventCountMapper {
 
     int insertEventCount(EventCountVO eventCountVO);
 
-    List<EventCountVO> getChartData(String domain, String instance, String event);
+    List<EventCountVO> getChartData(String domain, String instance, String event, String dateOffset);
 
-    List<EventCountVO> getChartDataByHour(String domain, String instance, String event);
+    List<EventCountVO> getChartDataByHour(String domain, String instance, String event, String dateOffset);
 
-    List<EventCountVO> getChartDataByDay(String domain, String instance, String event);
+    List<EventCountVO> getChartDataByDay(String domain, String instance, String event, String dateOffset);
 
-    List<EventCountVO> getChartDataByMonth(String domain, String instance, String event);
+    List<EventCountVO> getChartDataByMonth(String domain, String instance, String event, String dateOffset);
 
-    List<EventCountVO> getChartDataByYear(String domain, String instance, String event);
+    List<EventCountVO> getChartDataByYear(String domain, String instance, String event, String dateOffset);
 
     @Component
     class Dao extends SqlMapperDao<EventCountMapper> implements EventCountMapper {
@@ -72,28 +72,28 @@ public interface EventCountMapper {
         }
 
         @Override
-        public List<EventCountVO> getChartData(String domain, String instance, String event) {
-            return simple().getChartData(domain, instance, event);
+        public List<EventCountVO> getChartData(String domain, String instance, String event, String dateOffset) {
+            return simple().getChartData(domain, instance, event, dateOffset);
         }
 
         @Override
-        public List<EventCountVO> getChartDataByHour(String domain, String instance, String event) {
-            return simple().getChartDataByHour(domain, instance, event);
+        public List<EventCountVO> getChartDataByHour(String domain, String instance, String event, String dateOffset) {
+            return simple().getChartDataByHour(domain, instance, event, dateOffset);
         }
 
         @Override
-        public List<EventCountVO> getChartDataByDay(String domain, String instance, String event) {
-            return simple().getChartDataByDay(domain, instance, event);
+        public List<EventCountVO> getChartDataByDay(String domain, String instance, String event, String dateOffset) {
+            return simple().getChartDataByDay(domain, instance, event, dateOffset);
         }
 
         @Override
-        public List<EventCountVO> getChartDataByMonth(String domain, String instance, String event) {
-            return simple().getChartDataByMonth(domain, instance, event);
+        public List<EventCountVO> getChartDataByMonth(String domain, String instance, String event, String dateOffset) {
+            return simple().getChartDataByMonth(domain, instance, event, dateOffset);
         }
 
         @Override
-        public List<EventCountVO> getChartDataByYear(String domain, String instance, String event) {
-            return simple().getChartDataByYear(domain, instance, event);
+        public List<EventCountVO> getChartDataByYear(String domain, String instance, String event, String dateOffset) {
+            return simple().getChartDataByYear(domain, instance, event, dateOffset);
         }
 
     }

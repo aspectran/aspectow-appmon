@@ -94,18 +94,19 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
             }
         }
         final String finalDateUnit = dateUnit;
+        final String finalDateOffset = dateOffset;
         EventCountMapper.Dao dao = exporterManager.getBean(EventCountMapper.Dao.class);
         List<EventCountVO> list = exporterManager.instantActivity(() -> {
             if ("hour".equals(finalDateUnit)) {
-                return dao.getChartDataByHour(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName());
+                return dao.getChartDataByHour(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), finalDateOffset);
             } else if ("day".equals(finalDateUnit)) {
-                return dao.getChartDataByDay(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName());
+                return dao.getChartDataByDay(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), finalDateOffset);
             } else if ("month".equals(finalDateUnit)) {
-                return dao.getChartDataByMonth(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName());
+                return dao.getChartDataByMonth(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), finalDateOffset);
             } else if ("year".equals(finalDateUnit)) {
-                return dao.getChartDataByYear(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName());
+                return dao.getChartDataByYear(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), finalDateOffset);
             } else {
-                return dao.getChartData(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName());
+                return dao.getChartData(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), finalDateOffset);
             }
         });
 
