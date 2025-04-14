@@ -19,9 +19,9 @@ function WebsocketClient(domain, viewer, onJoined, onEstablished, onClosed, onFa
         closeSocket();
     };
 
-    this.refresh = function () {
+    this.refresh = function (options) {
         if (socket) {
-            socket.send("refresh:");
+            socket.send("refresh:" + options||"");
         }
     };
 

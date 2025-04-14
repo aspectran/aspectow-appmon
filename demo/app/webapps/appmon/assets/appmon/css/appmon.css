@@ -4,77 +4,53 @@
 .domain.tabs .tabs-title .indicator.error {
     color: #a01f27;
 }
-.options {
-    font-size: 90%;
+
+.control-bar {
+    background-color: #677278;
+    color: #eee;
+    padding : 5px;
+    box-shadow: 0 6px 10px -10px rgba(50, 50, 50, 0.45);
     text-align: right;
 }
-.options ul.layout-options {
-    float: right;
-    list-style-type: none;
+.control-bar .options .button-group {
+    display: inline;
     margin: 0;
 }
-.options ul.layout-options li {
-    float: left;
-    margin-left: .3em;
-    border: 1px solid #ccc;
-    padding: 0 .5em;
-    border-radius: 5px;
-    color: #777;
+.control-bar .options .button-group span {
+    color: #d6e5e4;
 }
-.options ul.layout-options li a {
-    color: #777;
-}
-.options ul.layout-options li.on {
-    background-color: #748fa0;
+.control-bar .options .button-group .button {
+    padding: 3px 8px;
+    font-size: .9em;
+    background-color: #545a5d;
     color: #fff;
 }
-.options ul.layout-options li.on a {
+.control-bar-bar .options .button-group .button span {
     color: #fff;
 }
-.options ul.speed-options {
-    float: right;
-    list-style-type: none;
-    margin: 0;
-    display: none;
-}
-.options ul.speed-options li {
-    float: left;
-    margin-left: .3em;
-    border: 1px solid #ccc;
-    padding: 0 .5em;
-    border-radius: 5px;
-    color: #777;
-    cursor: pointer;
-}
-.options ul.speed-options li.on {
-    background-color: #748fa0;
-    color: #fff;
+.control-bar .options .button-group .button.on {
+    background-color: #2a4959;
 }
 
 .event-box {
     display: none;
 }
-.event-box .status-bar {
+.event-box .title-bar {
     background-color: #242c43;
     color: #eee;
-    overflow: auto;
     padding : 0 7px 0 10px;
     height: 29px;
     box-shadow: inset -20px 20px 20px -20px #394e59;
 }
-.event-box .status-bar.on {
+.event-box .title-bar.on {
     background-color: #709185;
 }
-.event-box .status-bar h4 {
-    float: left;
-    width: 70%;
-    height: 29px;
+.event-box .title-bar h4 {
     line-height: 29px;
     font-size: .9em;
     font-weight: normal;
     margin: 0;
 }
-
 .track-box {
     position: relative;
     height: 120px;
@@ -136,7 +112,6 @@
     right: 0;
     bottom: 0;
     color: #a5aecf;
-    font-size: 3em;
     text-align: center;
     z-index: 11;
 }
@@ -146,11 +121,12 @@
     line-height: 1;
 }
 .track-stack .activity-status p.current {
+    font-size: 3em;
     font-weight: bold;
     padding-top: 4px;
 }
 .track-stack .activity-status p.interim {
-    font-size: .65em;
+    font-size: 2em;
     color: #35e771;
     line-height: 1.1;
 }
@@ -163,15 +139,25 @@
 }
 .track-stack .activity-status p.cumulative {
     padding-top: 5px;
-    font-size: .4em;
+    font-size: 1em;
 }
-.track-stack .activity-status .sampling-timer {
+.track-stack .activity-status .sampling-timer-bar {
     position: absolute;
     right: 0;
     bottom: 0;
     width: 5px;
     height: 100%;
     background-color: #b989a6;
+}
+.track-stack .activity-status .sampling-timer-status {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    text-align: right;
+    font-size: .6em;
+    padding: 2px 8px;
 }
 
 .visual-box {
@@ -202,12 +188,33 @@
     padding: 5px;
     overflow-y: auto;
     background-color: #d9e9f4;
+    position: relative;
 }
-@media screen and (max-width: 39.9988em) {
+.session-box .panel.status .knob {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    margin-left: -25px;
+    width: 50px;
+    height: 5px;
+    background-color: #69899c;
+    border-radius: 10px 10px 0 0;
+    display: none;
+}
+@media screen and (max-width: 40em) {
     .session-box .panel.status {
         height: 34px;
         overflow-y: hidden;
         border-bottom: none;
+    }
+    .session-box .panel.status.expanded {
+        height: 200px;
+    }
+    .session-box .panel.status .knob {
+        display: block;
+    }
+    .session-box .panel.status .knob:hover {
+        background-color: #3eaceb;
     }
 }
 .session-box .panel.ground {

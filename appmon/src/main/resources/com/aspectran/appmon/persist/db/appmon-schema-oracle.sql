@@ -5,7 +5,7 @@ create table appmon_event_count (
     datetime varchar(12) not null,
     total integer not null,
     delta integer not null,
-    delta integer not null,
+    error integer not null,
     constraint appmon_event_count_pk primary key (domain, instance, event, datetime)
 );
 
@@ -17,6 +17,6 @@ create table appmon_event_count_last (
     total integer not null,
     delta integer not null,
     error integer not null,
-    upd_dt date default sysdate not null,
+    reg_dt date default sysdate not null,
     constraint appmon_event_count_last_pk primary key (domain, instance, event)
 );

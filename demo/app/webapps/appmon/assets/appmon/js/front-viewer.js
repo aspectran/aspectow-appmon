@@ -2,14 +2,30 @@ function FrontViewer(sampleInterval) {
     const FLAGS_URL = "https://aspectran.com/assets/countries/flags/";
     const TEMP_RESIDENT_INACTIVE_SECS = 30;
 
+    let client = null;
+    let enable = false;
+    let visible = false;
     let $displays = {};
     let $charts = {};
     let $consoles = {};
     let $indicators = {};
-    let enable = false;
-    let visible = false;
     let prevPosition = 0;
     let currentActivityCounts = {};
+
+    this.setClient = function (newClient) {
+        client = newClient;
+    }
+
+    this.setEnable = function (flag) {
+        enable = !!flag;
+    };
+
+    this.setVisible = function (flag) {
+        visible = !!flag;
+        if (!visible) {
+            clearBullets();
+        }
+    };
 
     this.putDisplay = function (instanceName, eventName, $display) {
         $displays[instanceName + ":event:" + eventName] = $display;
@@ -74,21 +90,6 @@ function FrontViewer(sampleInterval) {
                 }
             }, 300);
             $console.data("timer", timer);
-        }
-    };
-
-    this.setEnable = function (flag) {
-        enable = !!flag;
-    };
-
-    this.setVisible = function (flag) {
-        visible = !!flag;
-        if (!visible) {
-            for (let key in $displays) {
-                if ($displays[key].hasClass("track-box")) {
-                    $displays[key].find(".bullet").remove();
-                }
-            }
         }
     };
 
@@ -231,6 +232,14 @@ function FrontViewer(sampleInterval) {
         }
     };
 
+    const clearBullets = function () {
+        for (let key in $displays) {
+            if ($displays[key].hasClass("track-box")) {
+                $displays[key].find(".bullet").remove();
+            }
+        }
+    }
+
     const generateRandom = function (min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     };
@@ -268,33 +277,47 @@ function FrontViewer(sampleInterval) {
         }
     }
 
-    const resetInterimActivityStatus = function (messagePrefix, rolledUp) {
+    const resetInterimActivityStatus = function (messagePrefix) {
         let $activityStatus = getIndicator(messagePrefix);
         if ($activityStatus) {
-            if (rolledUp) {
-                $activityStatus.find(".interim .separator").text("");
-                $activityStatus.find(".interim .total").text(0);
-                $activityStatus.find(".interim .errors").text("");
-            }
-            if (sampleInterval) {
-                let $samplingTimer = $activityStatus.find(".sampling-timer");
-                if ($samplingTimer.length) {
-                    let timer = $samplingTimer.data("timer");
+            $activityStatus.find(".interim .separator").text("");
+            $activityStatus.find(".interim .total").text(0);
+            $activityStatus.find(".interim .errors").text("");
+        }
+    }
+
+    const resetInterimTimer = function (messagePrefix) {
+        if (sampleInterval) {
+            let $activityStatus = getIndicator(messagePrefix);
+            if ($activityStatus) {
+                let $samplingTimerBar = $activityStatus.find(".sampling-timer-bar");
+                let $samplingTimerStatus = $activityStatus.find(".sampling-timer-status");
+                if ($samplingTimerBar.length) {
+                    let timer = $samplingTimerBar.data("timer");
                     if (timer) {
                         clearInterval(timer);
+                        $samplingTimerBar.removeData("timer");
                     }
-                    $samplingTimer.animate({height: "0"}, 1000);
-                    let seconds = 0;
+                    let second = (dayjs().minute() * 60 + dayjs().second()) % sampleInterval;
+                    $samplingTimerBar.animate({height: 0}, 600);
+                    $samplingTimerBar.animate({height: (second++ / sampleInterval * 100).toFixed(2) + "%"}, 400);
+                    $samplingTimerStatus.text(second + "/" + sampleInterval);
                     timer = setInterval(function () {
                         if (!enable) {
                             clearInterval(timer);
+                            $samplingTimerBar.removeData("timer");
                             return;
                         }
-                        let percent = seconds++ / sampleInterval * 100;
-                        $samplingTimer.css("height", percent.toFixed(2) + "%")
-                            .attr("title", seconds + "/" + sampleInterval);
+                        let percent = second++ / sampleInterval * 100;
+                        $samplingTimerBar.css("height", percent.toFixed(2) + "%");
+                        $samplingTimerStatus.text(second + "/" + sampleInterval);
+                        if (second > 300) {
+                            second = 0;
+                        } else if (second % 10 === 0) {
+                            second = (dayjs().minute() * 60 + dayjs().second()) % sampleInterval;
+                        }
                     }, 1000);
-                    $samplingTimer.data("timer", timer);
+                    $samplingTimerBar.data("timer", timer);
                 }
             }
         }
@@ -420,16 +443,24 @@ function FrontViewer(sampleInterval) {
         if (!$chart) {
             return;
         }
+        let chart = $chart.data("chart");
         if (eventName === "activity") {
-            resetInterimActivityStatus(instanceName + ":event:" + eventName, chartData.rolledUp);
+            if (!chart) {
+                resetInterimTimer(instanceName + ":event:" + eventName);
+            } else if (chartData.rolledUp) {
+                resetInterimTimer(instanceName + ":event:" + eventName);
+                resetInterimActivityStatus(instanceName + ":event:" + eventName, chartData.rolledUp);
+            }
         }
+        let dateUnit = (chartData.rolledUp ? $chart.data("dateUnit") : chartData.dateUnit);
+        let dateOffset = (chartData.rolledUp ? $chart.data("dateOffset") : chartData.dateOffset);
         let labels = chartData.labels;
         let data1 = chartData.data1;
         let data2 = chartData.data2.map(n => (eventName === "activity" ? n : null));
-        let chart = $chart.data("chart");
-        if (chart) {
-            updateChart(eventName, chart, toDatetime(labels), data1, data2);
-        } else {
+        if (!chart || !chartData.rolledUp) {
+            if (chart) {
+                chart.destroy();
+            }
             let $canvas = $chart.find("canvas");
             if (!$canvas.length) {
                 $canvas = $("<canvas/>");
@@ -437,24 +468,39 @@ function FrontViewer(sampleInterval) {
             }
             let maxLabels = adjustLabelCount(eventName, labels, data1, data2);
             let autoSkip = (maxLabels === 0);
-            let chart = drawChart(eventName, $canvas[0], toDatetime(labels), data1, data2, autoSkip);
-            $chart.data("chart", chart);
+            let newChart = drawChart(eventName, $canvas[0], dateUnit, labels, data1, data2, autoSkip);
+            $chart.data("chart", newChart);
+            if (dateUnit) {
+                $chart.data("dateUnit", dateUnit);
+            } else {
+                $chart.removeData("dateUnit");
+            }
+            if (dateOffset) {
+                $chart.data("dateOffset", dateOffset);
+            } else {
+                $chart.removeData("dateOffset");
+            }
+        } else if (!dateOffset) {
+            if (!dateUnit) {
+                updateChartAfterRolledUp(eventName, chart, labels, data1, data2);
+            } else if (client) {
+                setTimeout(function () {
+                    let options = [];
+                    options.push("instance:" + instanceName);
+                    options.push("dateUnit:" + dateUnit);
+                    client.refresh(options.join(";"));
+                }, 900);
+            }
         }
     };
 
-    const updateChart = function (eventName, chart, labels, data1, data2) {
+    const updateChartAfterRolledUp = function (eventName, chart, labels, data1, data2) {
         if (chart.data.labels.length > 0) {
-            if (labels.length > 1) {
-                chart.data.labels.length = 0;
-                chart.data.datasets[0].data.length = 0;
-                chart.data.datasets[1].data.length = 0;
-            } else if (labels.length === 1) {
-                let lastIndex = chart.data.labels.length - 1;
-                if (chart.data.labels[lastIndex] >= labels[0]) {
-                    chart.data.labels.splice(lastIndex, 1);
-                    chart.data.datasets[0].data.splice(lastIndex, 1);
-                    chart.data.datasets[1].data.splice(lastIndex, 1);
-                }
+            let lastIndex = chart.data.labels.length - 1;
+            if (chart.data.labels[lastIndex] >= labels[0]) {
+                chart.data.labels.splice(0, lastIndex);
+                chart.data.datasets[0].data.splice(0, lastIndex);
+                chart.data.datasets[1].data.splice(0, lastIndex);
             }
         }
         chart.data.labels.push(...labels);
@@ -488,36 +534,63 @@ function FrontViewer(sampleInterval) {
         return maxLabels;
     };
 
-    const toDatetime = function (labels) {
-        let arr = []
-        labels.forEach(label => {
-            arr.push(dayjs.utc(label, "YYYYMMDDHHmm").local());
-        });
-        return arr;
+    this.getMaxStartDatetime = function (instanceName) {
+        let result = "";
+        for (let key in $charts) {
+            if (key.startsWith(instanceName + ":")) {
+                let $chart = $charts[key];
+                let chart = $chart.data("chart");
+                if (chart) {
+                    let labels = chart.data.labels;
+                    if (labels.length) {
+                        if (labels[0] > result) {
+                            result = labels[0];
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    const toDatetime = function (label, dateUnit) {
+        switch (dateUnit) {
+            case "hour":
+                return dayjs.utc(label.substring(0, 10), "YYYYMMDDHH").local();
+            case "day":
+                return dayjs.utc(label.substring(0, 8), "YYYYMMDD").local();
+            case "month":
+                return dayjs.utc(label.substring(0, 6), "YYYYMM").local();
+            case "year":
+                return dayjs.utc(label.substring(0, 4), "YYYY").local();
+            default:
+                return dayjs.utc(label, "YYYYMMDDHHmm").local();
+        }
     };
 
-    const drawChart = function (eventName, canvas, labels, data1, data2, autoSkip) {
+    const drawChart = function (eventName, canvas, dateUnit, labels, data1, data2, autoSkip) {
         let dataLabel1;
         let borderColor1;
         let backgroundColor1;
         switch (eventName) {
             case "activity":
                 dataLabel1 = "Activities";
-                borderColor1 = "#5267d1";
-                backgroundColor1 = "#ccd7fa";
+                borderColor1 = "#36a2eb";
+                backgroundColor1 = "#cce0fa";
                 break;
             case "session":
                 dataLabel1 = "Sessions";
-                borderColor1 = "#476b80";
+                borderColor1 = "#7794a5";
                 backgroundColor1 = "#cbe3f4";
                 break;
             default:
                 dataLabel1 = "";
         }
+        let chartType = (!dateUnit || dateUnit === "hour" ? "line" : "bar");
         return new Chart(
             canvas,
             {
-                type: 'line',
+                type: chartType,
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -531,9 +604,9 @@ function FrontViewer(sampleInterval) {
                             reverse: true,
                             callbacks: {
                                 title: function (tooltip) {
-                                    return labels[tooltip[0].dataIndex].format("LLL");
+                                    return toDatetime(labels[tooltip[0].dataIndex], dateUnit).format("LLL");
                                 }
-                            },
+                            }
                         }
                     },
                     scales: {
@@ -545,24 +618,37 @@ function FrontViewer(sampleInterval) {
                             ticks: {
                                 autoSkip: autoSkip,
                                 callback: function (value, index) {
-                                    let datetime = labels[index];
-                                    let datetime2 = (index > 0 ? labels[index - 1] : null);
-                                    if (datetime.isAfter(datetime2, 'day')) {
-                                        return datetime.format("M/D HH:mm");
-                                    } else {
-                                        return datetime.format("HH:mm");
+                                    let datetime = toDatetime(labels[index], dateUnit);
+                                    let datetime2 = (index > 0 ? toDatetime(labels[index - 1], dateUnit) : null);
+                                    switch (dateUnit) {
+                                        case "day":
+                                            if (datetime2 && datetime.isAfter(datetime2, "month")) {
+                                                return datetime.format("YYYY M/D");
+                                            } else {
+                                                return datetime.format("M/D");
+                                            }
+                                        case "month":
+                                            return datetime.format("YYYY/M");
+                                        case "year":
+                                            return datetime.format("YYYY");
+                                        default:
+                                            if (datetime2 && datetime.isAfter(datetime2, "day")) {
+                                                return datetime.format("M/D HH:mm");
+                                            } else {
+                                                return datetime.format("HH:mm");
+                                            }
                                     }
                                 }
                             },
                             tooltip: {
-                                enabled: true,
+                                enabled: true
                             },
-                            grid: {
-                                color: function (context) {
-                                    return (data2[context.tick.value] > 0 ? "#fd5b5b" : "#e4e4e4");
-                                },
-                            },
-
+                            stacked: true,
+                            grid: chartType === "line" ? {
+                                color: function (ctx) {
+                                    return (data2[ctx.tick.value] > 0 ? "#ff6384" : "#e4e4e4");
+                                }
+                            } : {}
                         },
                         y: {
                             display: true,
@@ -572,6 +658,7 @@ function FrontViewer(sampleInterval) {
                             },
                             suggestedMin: 0,
                             suggestedMax: 5,
+                            stacked: true,
                             grid: {
                                 color: "#e4e4e4"
                             }
@@ -581,7 +668,7 @@ function FrontViewer(sampleInterval) {
                 data: {
                     labels: labels,
                     datasets: [
-                        {
+                        chartType === "line" ? {
                             label: dataLabel1,
                             data: data1,
                             fill: true,
@@ -591,15 +678,20 @@ function FrontViewer(sampleInterval) {
                             tension: 0.1,
                             pointStyle: false,
                             order: 2
+                        } : {
+                            label: dataLabel1,
+                            data: data1,
+                            fill: true,
+                            backgroundColor: borderColor1,
+                            order: 2
                         },
                         {
                             label: "Errors",
                             data: data2,
-                            type: "line",
+                            type: chartType,
                             fill: true,
-                            backgroundColor: "#f83636",
-                            borderWidth: 0,
-                            tension: 0.1,
+                            backgroundColor: "#ff6384",
+                            showLine: false,
                             pointStyle: false,
                             order: 1
                         }

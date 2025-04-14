@@ -15,8 +15,8 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
         changePollingInterval(speed);
     };
 
-    this.refresh = function () {
-        withCommand("refresh");
+    this.refresh = function (options) {
+        withCommand("refresh:" + options||"");
     };
 
     const withCommand = function (command) {

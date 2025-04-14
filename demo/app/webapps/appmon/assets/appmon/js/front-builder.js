@@ -114,6 +114,7 @@ function FrontBuilder() {
         } else {
             client = new WebsocketClient(domain, viewer, onJoined, onEstablished, onClosed, onFailed);
         }
+        viewer.setClient(client);
         clients[domainIndex] = client;
         client.start(specificInstances);
     };
@@ -238,6 +239,8 @@ function FrontBuilder() {
     }
 
     const showDomainInstance = function (instanceName) {
+        $(".control-bar[data-instance-name!=" + instanceName + "]").hide();
+        $(".control-bar[data-instance-name=" + instanceName + "]").show();
         for (let key in domains) {
             let domain = domains[key];
             if (domain.active) {
@@ -258,7 +261,7 @@ function FrontBuilder() {
     };
 
     const initView = function () {
-        $("ul.speed-options").hide();
+        $(".speed-options").addClass("hide");
         let pollingMode = false;
         for (let key in domains) {
             let domain = domains[key];
@@ -268,9 +271,7 @@ function FrontBuilder() {
             }
         }
         if (pollingMode) {
-            $("ul.speed-options").show();
-        } else {
-            $("ul.speed-options").hide();
+            $(".speed-options").removeClass("hide");
         }
         for (let key in instances) {
             let instance = instances[key];
@@ -289,37 +290,62 @@ function FrontBuilder() {
     };
 
     const bindEvents = function () {
-        $(".layout-options li a").off().on("click", function() {
-            let $li = $(this).parent();
-            if (!$li.hasClass("on")) {
-                if ($li.hasClass("compact")) {
-                    $li.addClass("on");
-                    $(".event-box.available:not(.fixed-layout)").addClass("large-6");
-                    $(".visual-box.available:not(.fixed-layout)").addClass("large-6");
-                    $(".console-box.available").addClass("large-6");
+        $(".domain.tabs .tabs-title.available a").off("click").on("click", function() {
+            let domainIndex = $(this).closest(".tabs-title").data("domain-index");
+            changeDomain(domainIndex);
+        });
+        $(".instance.tabs .tabs-title.available a").off("click").on("click", function() {
+            let instanceName = $(this).closest(".tabs-title").data("instance-name");
+            changeInstance(instanceName);
+        });
+        $(".layout-options .button").off().on("click", function() {
+            let instanceName = $(this).closest(".control-bar").data("instance-name");
+            if (!$(this).hasClass("on")) {
+                if ($(this).hasClass("compact")) {
+                    $(this).addClass("on");
+                    $(".event-box.available:not(.fixed-layout)[data-instance-name=" + instanceName + "]").addClass("large-6");
+                    $(".visual-box.available:not(.fixed-layout)[data-instance-name=" + instanceName + "]").addClass("large-6");
+                    $(".console-box.available[data-instance-name=" + instanceName + "]").addClass("large-6");
                 }
             } else {
-                if ($li.hasClass("compact")) {
-                    $li.removeClass("on");
-                    $(".event-box.available:not(.fixed-layout)").removeClass("large-6");
-                    $(".visual-box.available:not(.fixed-layout)").removeClass("large-6");
-                    $(".console-box.available").removeClass("large-6");
+                if ($(this).hasClass("compact")) {
+                    $(this).removeClass("on");
+                    $(".event-box.available:not(.fixed-layout)[data-instance-name=" + instanceName + "]").removeClass("large-6");
+                    $(".visual-box.available:not(.fixed-layout)[data-instance-name=" + instanceName + "]").removeClass("large-6");
+                    $(".console-box.available[data-instance-name=" + instanceName + "]").removeClass("large-6");
                 }
             }
-            setTimeout(function () {
-                for (let key in domains) {
-                    let domain = domains[key];
-                    clients[domain.index].refresh();
-                }
-            }, 50);
+            refreshData(instanceName);
         });
-        $(".speed-options li").off().on("click", function() {
-            let $liFast = $(".speed-options li.fast");
-            let faster = !$liFast.hasClass("on");
-            if (!faster) {
-                $liFast.removeClass("on");
+        $(".date-unit-options .button").off().on("click", function() {
+            let $controlBar = $(this).closest(".control-bar");
+            let instanceName = $controlBar.data("instance-name");
+            let unit = $(this).data("unit")||"";
+            $(this).parent().data("unit", unit).find(".button").removeClass("on");
+            $(this).addClass("on");
+            $controlBar.find(".date-offset-options").data("offset", "");
+            $controlBar.find(".date-offset-options .button.current").removeClass("on");
+            refreshData(instanceName);
+        });
+        $(".date-offset-options .button").off().on("click", function() {
+            let $controlBar = $(this).closest(".control-bar");
+            let instanceName = $controlBar.data("instance-name");
+            let offset = $(this).data("offset")||"";
+            if (offset !== "current") {
+                $(this).parent().find(".button.current").addClass("on");
             } else {
-                $liFast.addClass("on");
+                $(this).parent().find(".button").addClass("on");
+                $(this).parent().find(".button.current").removeClass("on");
+            }
+            $(this).parent().data("offset", offset);
+            refreshData(instanceName, offset);
+        });
+        $(".speed-options .button").off().on("click", function() {
+            let faster = !$(this).hasClass("on");
+            if (faster) {
+                $(this).addClass("on");
+            } else {
+                $(this).removeClass("on");
             }
             for (let key in domains) {
                 let domain = domains[key];
@@ -332,16 +358,14 @@ function FrontBuilder() {
                 }
             }
         });
-        $(".domain.tabs .tabs-title.available a").off("click").on("click", function() {
-            let domainIndex = $(this).closest(".tabs-title").data("domain-index");
-            changeDomain(domainIndex);
+        $(document).off("click", ".session-box .panel.status .knob")
+            .on("click", ".session-box .panel.status .knob", function() {
+                if ($("#navigation .title-bar").is(":visible")) {
+                    $(this).parent().toggleClass("expanded")
+                }
         });
-        $(".instance.tabs .tabs-title.available a").off("click").on("click", function() {
-            let instanceName = $(this).closest(".tabs-title").data("instance-name");
-            changeInstance(instanceName);
-        });
-        $(document).off("click", ".event-box ul.sessions li")
-            .on("click", ".event-box ul.sessions li", function() {
+        $(document).off("click", ".session-box ul.sessions li")
+            .on("click", ".session-box ul.sessions li", function() {
                 $(this).toggleClass("designated");
         });
         $(".console-box .tailing-switch").off("click").on("click", function() {
@@ -375,6 +399,37 @@ function FrontBuilder() {
         });
     };
 
+    const refreshData = function (instanceName, dateOffset) {
+        let options = [];
+        options.push("instance:" + instanceName);
+        let dateUnit = $(".control-bar[data-instance-name=" + instanceName + "] .date-unit-options").data("unit");
+        if (dateUnit) {
+            options.push("dateUnit:" + dateUnit);
+        }
+        if (dateOffset === "previous") {
+            let maxStartDate = "";
+            for (let key in viewers) {
+                let viewer = viewers[key];
+                let startDate = viewer.getMaxStartDatetime(instanceName);
+                if (startDate > maxStartDate) {
+                    maxStartDate = startDate;
+                }
+            }
+            if (maxStartDate) {
+                options.push("dateOffset:" + maxStartDate);
+            } else {
+                $(".control-bar[data-instance-name=" + instanceName + "] .date-offset-options .button.previous").removeClass("on");
+                return;
+            }
+        }
+        setTimeout(function () {
+            for (let key in domains) {
+                let domain = domains[key];
+                clients[domain.index].refresh(options.join(";"));
+            }
+        }, 50);
+    }
+
     const clearView = function () {
         $(".domain.tabs .tabs-title.available").remove();
         $(".domain.tabs .tabs-title").show();
@@ -402,8 +457,9 @@ function FrontBuilder() {
         }
         for (let key in instances) {
             let instance = instances[key];
-            let $titleTab = addInstanceTab(instance);
-            let $instanceIndicator = $titleTab.find(".indicator");
+            let $instanceTab = addInstanceTab(instance);
+            let $instanceIndicator = $instanceTab.find(".indicator");
+            addControlBar(instance);
             for (let key in domains) {
                 let domain = domains[key];
                 viewers[domain.index].putIndicator("instance", "event", instance.name, $instanceIndicator);
@@ -473,13 +529,21 @@ function FrontBuilder() {
         return $tab;
     };
 
+    const addControlBar = function (instanceInfo) {
+        let $controlBar = $(".control-bar");
+        let $newControlBar = $controlBar.first().hide().clone()
+            .addClass("available")
+            .attr("data-instance-name", instanceInfo.name);
+        return $newControlBar.insertAfter($controlBar.last());
+    };
+
     const addEventBox = function (domainInfo, instanceInfo) {
         let $eventBox = $(".event-box");
         let $newBox = $eventBox.first().hide().clone()
             .addClass("available")
             .attr("data-domain-index", domainInfo.index)
             .attr("data-instance-name", instanceInfo.name);
-        $newBox.find(".status-bar h4")
+        $newBox.find(".title-bar h4")
             .text(domainInfo.title);
         return $newBox.insertBefore($(".console-box").first());
     };
