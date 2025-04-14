@@ -131,15 +131,25 @@ public class ExportServiceManager {
     }
 
     public List<String> getNewMessages(@NonNull ServiceSession session, String[] options) {
+        String instanceName = null;
+        if (options != null) {
+            for (String option : options) {
+                if (instanceName == null && option.startsWith("instance:")) {
+                    instanceName = option.substring("instance:".length());
+                }
+            }
+        }
         List<String> messages = new ArrayList<>();
         if (session.isValid()) {
             String[] instanceNames = session.getJoinedInstances();
             if (instanceNames != null && instanceNames.length > 0) {
                 for (String name : instanceNames) {
-                    collectNewMessages(name, messages, options);
+                    if (instanceName == null || name.equals(instanceName)) {
+                        collectNewMessages(name, messages, options);
+                    }
                 }
             } else {
-                collectNewMessages(null, messages, options);
+                collectNewMessages(instanceName, messages, options);
             }
         }
         return messages;
