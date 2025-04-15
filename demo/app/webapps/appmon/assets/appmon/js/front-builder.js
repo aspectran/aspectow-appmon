@@ -358,8 +358,8 @@ function FrontBuilder() {
                 }
             }
         });
-        $(document).off("click", ".session-box .panel.status .knob")
-            .on("click", ".session-box .panel.status .knob", function() {
+        $(document).off("click", ".session-box .panel.status .knob-bar")
+            .on("click", ".session-box .panel.status .knob-bar", function() {
                 if ($("#navigation .title-bar").is(":visible")) {
                     $(this).parent().toggleClass("expanded")
                 }
@@ -449,17 +449,19 @@ function FrontBuilder() {
     };
 
     const buildView = function () {
+        let sampleInterval = 0;
         for (let key in domains) {
             let domain = domains[key];
             let $titleTab = addDomainTab(domain);
             let $domainIndicator = $titleTab.find(".indicator");
             viewers[domain.index].putIndicator("domain", "event", "", $domainIndicator);
+            sampleInterval = Math.max(domain.sampleInterval, sampleInterval);
         }
         for (let key in instances) {
             let instance = instances[key];
             let $instanceTab = addInstanceTab(instance);
             let $instanceIndicator = $instanceTab.find(".indicator");
-            addControlBar(domain, instance);
+            addControlBar(instance, sampleInterval);
             for (let key in domains) {
                 let domain = domains[key];
                 viewers[domain.index].putIndicator("instance", "event", instance.name, $instanceIndicator);
@@ -529,12 +531,12 @@ function FrontBuilder() {
         return $tab;
     };
 
-    const addControlBar = function (domainInfo, instanceInfo) {
+    const addControlBar = function (instanceInfo, sampleInterval) {
         let $controlBar = $(".control-bar");
         let $newControlBar = $controlBar.first().hide().clone()
             .addClass("available")
             .attr("data-instance-name", instanceInfo.name);
-        $newControlBar.find(".button.default").text(domainInfo.sampleInterval + "min.");
+        $newControlBar.find(".button.default").text(sampleInterval + "min.");
         return $newControlBar.insertAfter($controlBar.last());
     };
 

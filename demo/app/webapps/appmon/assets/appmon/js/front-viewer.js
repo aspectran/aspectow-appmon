@@ -622,7 +622,7 @@ function FrontViewer(sampleInterval) {
                                     let datetime2 = (index > 0 ? toDatetime(labels[index - 1], dateUnit) : null);
                                     switch (dateUnit) {
                                         case "day":
-                                            if (datetime2 && datetime.isAfter(datetime2, "month")) {
+                                            if (datetime2 && datetime.isAfter(datetime2, "year")) {
                                                 return datetime.format("YYYY M/D");
                                             } else {
                                                 return datetime.format("M/D");
@@ -681,7 +681,10 @@ function FrontViewer(sampleInterval) {
                         } : {
                             label: dataLabel1,
                             data: data1,
+                            minBarLength: 2,
                             fill: true,
+                            borderWidth: 1,
+                            borderColor: borderColor1,
                             backgroundColor: borderColor1,
                             order: 2
                         },
@@ -690,6 +693,8 @@ function FrontViewer(sampleInterval) {
                             data: data2,
                             type: chartType,
                             fill: true,
+                            borderWidth: 1,
+                            borderColor: "#ff6384",
                             backgroundColor: "#ff6384",
                             showLine: false,
                             pointStyle: false,

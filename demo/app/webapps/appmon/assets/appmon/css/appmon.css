@@ -8,9 +8,10 @@
 .control-bar {
     background-color: #677278;
     color: #eee;
-    padding : 5px;
+    padding : 5px 6px;
     box-shadow: 0 6px 10px -10px rgba(50, 50, 50, 0.45);
     text-align: right;
+    border-top-right-radius: 3px;
 }
 .control-bar .options .button-group {
     display: inline;
@@ -18,6 +19,7 @@
 }
 .control-bar .options .button-group span {
     color: #d6e5e4;
+    margin-left: 2px;
 }
 .control-bar .options .button-group .button {
     padding: 3px 8px;
@@ -27,6 +29,7 @@
 }
 .control-bar-bar .options .button-group .button span {
     color: #fff;
+    margin: 0;
 }
 .control-bar .options .button-group .button.on {
     background-color: #2a4959;
@@ -105,6 +108,32 @@
     background-color: #a51e1e;
     border: 1px solid #f34d4d;
 }
+.track-stack .activity-status-plate {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9;
+}
+.track-stack .activity-status-plate .bottom-plate-left {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 115px;
+    height: 24px;
+    background-color: #572b2a;
+    color: #eee;
+}
+.track-stack .activity-status-plate .bottom-plate-right {
+    position: absolute;
+    bottom: 0;
+    right: 5px;
+    width: 55px;
+    height: 24px;
+    background-color: #572b2a;
+    color: #eee;
+}
 .track-stack .activity-status {
     position: absolute;
     top: 0;
@@ -138,7 +167,13 @@
     letter-spacing: -3px;
 }
 .track-stack .activity-status p.cumulative {
-    padding-top: 5px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 115px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
     font-size: 1em;
 }
 .track-stack .activity-status .sampling-timer-bar {
@@ -151,13 +186,13 @@
 }
 .track-stack .activity-status .sampling-timer-status {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 20px;
-    text-align: right;
-    font-size: .6em;
-    padding: 2px 8px;
+    bottom: 0;
+    right: 5px;
+    width: 55px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    font-size: .7em;
 }
 
 .visual-box {
@@ -190,6 +225,14 @@
     background-color: #d9e9f4;
     position: relative;
 }
+.session-box .panel.status .knob-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    display: none;
+}
 .session-box .panel.status .knob {
     position: absolute;
     bottom: 0;
@@ -199,7 +242,6 @@
     height: 5px;
     background-color: #69899c;
     border-radius: 10px 10px 0 0;
-    display: none;
 }
 @media screen and (max-width: 40em) {
     .session-box .panel.status {
@@ -210,11 +252,8 @@
     .session-box .panel.status.expanded {
         height: 200px;
     }
-    .session-box .panel.status .knob {
+    .session-box .panel.status .knob-bar {
         display: block;
-    }
-    .session-box .panel.status .knob:hover {
-        background-color: #3eaceb;
     }
 }
 .session-box .panel.ground {
