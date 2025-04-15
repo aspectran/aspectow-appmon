@@ -26,4 +26,3 @@ create table if not exists appmon_event_count_last (
     engine = MyISAM
     charset = utf8mb4
     COLLATE = utf8mb4_unicode_ci;
-
