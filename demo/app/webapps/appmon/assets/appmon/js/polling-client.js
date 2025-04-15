@@ -131,7 +131,7 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
                 if (data && data.pollingInterval) {
                     domain.endpoint.pollingInterval = data.pollingInterval;
                     console.log(domain.name, "pollingInterval", data.pollingInterval);
-                    viewer.printMessage("Polling every " + data + " milliseconds.");
+                    viewer.printMessage("Polling every " + data.pollingInterval + " milliseconds.");
                 } else {
                     console.log(domain.name, "failed to change polling interval");
                     viewer.printMessage("Failed to change polling interval.");
