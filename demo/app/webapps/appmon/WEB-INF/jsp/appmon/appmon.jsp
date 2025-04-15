@@ -20,7 +20,7 @@
             </div>
             <div class="date-unit-options button-group tin">
                 <span class="fi-graph-bar"></span>
-                <a class="button default on">Default</a><a class="button hour" data-unit="hour">Hour</a><a class="button day" data-unit="day">Day</a><a class="button month" data-unit="month">Month</a><a class="button year" data-unit="year">Year</a>
+                <a class="button default on">5min.</a><a class="button hour" data-unit="hour">Hour</a><a class="button day" data-unit="day">Day</a><a class="button month" data-unit="month">Month</a><a class="button year" data-unit="year">Year</a>
             </div>
             <div class="date-offset-options button-group tiny">
                 <a class="button previous on" data-offset="previous" title="Previous"><span class="fi-previous"></span></a><a class="button current" data-offset="current" title="Next"><span class="fi-next"></span></a>

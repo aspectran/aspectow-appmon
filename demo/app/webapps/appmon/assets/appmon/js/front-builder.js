@@ -459,7 +459,7 @@ function FrontBuilder() {
             let instance = instances[key];
             let $instanceTab = addInstanceTab(instance);
             let $instanceIndicator = $instanceTab.find(".indicator");
-            addControlBar(instance);
+            addControlBar(domain, instance);
             for (let key in domains) {
                 let domain = domains[key];
                 viewers[domain.index].putIndicator("instance", "event", instance.name, $instanceIndicator);
@@ -529,11 +529,12 @@ function FrontBuilder() {
         return $tab;
     };
 
-    const addControlBar = function (instanceInfo) {
+    const addControlBar = function (domainInfo, instanceInfo) {
         let $controlBar = $(".control-bar");
         let $newControlBar = $controlBar.first().hide().clone()
             .addClass("available")
             .attr("data-instance-name", instanceInfo.name);
+        $newControlBar.find(".button.default").text(domainInfo.sampleInterval + "min.");
         return $newControlBar.insertAfter($controlBar.last());
     };
 
