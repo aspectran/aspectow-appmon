@@ -1,6 +1,3 @@
-alter table APPMON_EVENT_COUNT_LAST
-    alter column UPD_DT rename to REG_DT;
-
 alter table appmon_event_count
     rename to appmon_event_count_bak;
 
