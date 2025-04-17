@@ -15,6 +15,7 @@
  */
 package com.aspectran.appmon.service.polling;
 
+import com.aspectran.appmon.config.CommandOptions;
 import com.aspectran.appmon.config.InstanceInfo;
 import com.aspectran.appmon.config.PollingConfig;
 import com.aspectran.appmon.manager.AppMonManager;
@@ -46,7 +47,7 @@ public class PollingExportService implements ExportService {
 
     private static final Logger logger = LoggerFactory.getLogger(PollingExportService.class);
 
-    private static final String COMMAND_REFRESH = "refresh:";
+    private static final String COMMAND_REFRESH = "refresh";
 
     private final AppMonManager appMonManager;
 
@@ -79,10 +80,10 @@ public class PollingExportService implements ExportService {
 
         PollingConfig pollingConfig = appMonManager.getPollingConfig();
 
-        String specificInstances = translet.getParameter("instances");
-        String[] instanceNames = StringUtils.splitWithComma(specificInstances);
+        String instancesToJoin = translet.getParameter("instances");
+        String[] instanceNames = StringUtils.splitWithComma(instancesToJoin);
         instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
-        if (StringUtils.hasText(specificInstances) && instanceNames.length == 0) {
+        if (StringUtils.hasText(instancesToJoin) && instanceNames.length == 0) {
             return null;
         }
 
@@ -116,13 +117,11 @@ public class PollingExportService implements ExportService {
         }
 
         if (commands != null) {
-            for (String command : commands) {
-                if (command.startsWith(COMMAND_REFRESH)) {
-                    String[] options = parseOptions(command.substring(COMMAND_REFRESH.length()));
-                    List<String> newMessages = appMonManager.getExportServiceManager().getNewMessages(serviceSession, options);
-                    for (String msg : newMessages) {
-                        sessionManager.push(msg);
-                    }
+            CommandOptions commandOptions = new CommandOptions(commands);
+            if (commandOptions.hasCommand(COMMAND_REFRESH)) {
+                List<String> newMessages = appMonManager.getExportServiceManager().getNewMessages(serviceSession, commandOptions);
+                for (String msg : newMessages) {
+                    sessionManager.push(msg);
                 }
             }
         }

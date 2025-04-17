@@ -15,6 +15,7 @@
  */
 package com.aspectran.appmon.exporter;
 
+import com.aspectran.appmon.config.CommandOptions;
 import com.aspectran.appmon.manager.AppMonManager;
 import com.aspectran.core.activity.InstantAction;
 import com.aspectran.utils.annotation.jsr305.NonNull;
@@ -70,9 +71,9 @@ public class ExporterManager {
         }
     }
 
-    public void collectNewMessages(List<String> messages, String[] options) {
+    public void collectNewMessages(List<String> messages, CommandOptions commandOptions) {
         for (Exporter exporter : exporters.values()) {
-            exporter.readIfChanged(messages, options);
+            exporter.readIfChanged(messages, commandOptions);
         }
     }
 

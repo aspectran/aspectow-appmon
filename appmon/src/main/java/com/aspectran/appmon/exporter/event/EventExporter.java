@@ -15,6 +15,7 @@
  */
 package com.aspectran.appmon.exporter.event;
 
+import com.aspectran.appmon.config.CommandOptions;
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.AbstractExporter;
 import com.aspectran.appmon.exporter.ExporterManager;
@@ -70,7 +71,7 @@ public class EventExporter extends AbstractExporter {
     }
 
     @Override
-    public void readIfChanged(@NonNull List<String> messages, String[] options) {
+    public void readIfChanged(@NonNull List<String> messages, CommandOptions commandOptions) {
         String json = eventReader.readIfChanged();
         if (json != null) {
             messages.add(prefix + json);

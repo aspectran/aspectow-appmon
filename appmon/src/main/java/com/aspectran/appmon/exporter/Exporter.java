@@ -15,6 +15,7 @@
  */
 package com.aspectran.appmon.exporter;
 
+import com.aspectran.appmon.config.CommandOptions;
 import com.aspectran.utils.lifecycle.LifeCycle;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public interface Exporter extends LifeCycle {
 
     void read(List<String> messages);
 
-    void readIfChanged(List<String> messages, String[] options);
+    void readIfChanged(List<String> messages, CommandOptions commandOptions);
 
     void broadcast(String message);
 

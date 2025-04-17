@@ -15,6 +15,7 @@
  */
 package com.aspectran.appmon.exporter.event;
 
+import com.aspectran.appmon.config.CommandOptions;
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.AbstractExporter;
 import com.aspectran.appmon.exporter.ExporterManager;
@@ -23,9 +24,9 @@ import com.aspectran.appmon.persist.counter.EventCount;
 import com.aspectran.appmon.persist.counter.EventCountRollupListener;
 import com.aspectran.appmon.persist.counter.EventCountVO;
 import com.aspectran.appmon.persist.db.mapper.EventCountMapper;
-import com.aspectran.core.activity.InstantAction;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
+import com.aspectran.utils.annotation.jsr305.Nullable;
 import com.aspectran.utils.json.JsonBuilder;
 
 import java.util.List;
@@ -62,8 +63,8 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
     }
 
     @Override
-    public void readIfChanged(@NonNull List<String> messages, String[] options) {
-        messages.add(prefix + readChartData(options));
+    public void readIfChanged(@NonNull List<String> messages, CommandOptions commandOptions) {
+        messages.add(prefix + readChartData(commandOptions));
     }
 
     @Override
@@ -80,33 +81,22 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
         broadcast(message);
     }
 
-    private String readChartData(String[] options) {
-        String dateUnit = null;
-        String dateOffset = null;
-        if (options != null) {
-            for (String option : options) {
-                if (dateUnit == null && option.startsWith("dateUnit:")) {
-                    dateUnit = option.substring("dateUnit:".length());
-                }
-                if (dateOffset == null && option.startsWith("dateOffset:")) {
-                    dateOffset = option.substring("dateOffset:".length());
-                }
-            }
-        }
-        final String finalDateUnit = dateUnit;
-        final String finalDateOffset = dateOffset;
+    private String readChartData(@Nullable CommandOptions commandOptions) {
+        final String timeZone = (commandOptions != null ? commandOptions.getTimeZone() : null);
+        final String dateUnit = (commandOptions != null ? commandOptions.getDateUnit() : null);
+        final String dateOffset = (commandOptions != null ? commandOptions.getDateOffset() : null);
         EventCountMapper.Dao dao = exporterManager.getBean(EventCountMapper.Dao.class);
         List<EventCountVO> list = exporterManager.instantActivity(() -> {
-            if ("hour".equals(finalDateUnit)) {
-                return dao.getChartDataByHour(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), finalDateOffset);
-            } else if ("day".equals(finalDateUnit)) {
-                return dao.getChartDataByDay(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), finalDateOffset);
-            } else if ("month".equals(finalDateUnit)) {
-                return dao.getChartDataByMonth(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), finalDateOffset);
-            } else if ("year".equals(finalDateUnit)) {
-                return dao.getChartDataByYear(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), finalDateOffset);
+            if ("hour".equals(dateUnit)) {
+                return dao.getChartDataByHour(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), dateOffset);
+            } else if ("day".equals(dateUnit)) {
+                return dao.getChartDataByDay(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), dateOffset);
+            } else if ("month".equals(dateUnit)) {
+                return dao.getChartDataByMonth(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), dateOffset);
+            } else if ("year".equals(dateUnit)) {
+                return dao.getChartDataByYear(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), dateOffset);
             } else {
-                return dao.getChartData(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), finalDateOffset);
+                return dao.getChartData(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), dateOffset);
             }
         });
 

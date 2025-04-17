@@ -15,6 +15,7 @@
  */
 package com.aspectran.appmon.service.websocket;
 
+import com.aspectran.appmon.config.CommandOptions;
 import com.aspectran.appmon.manager.AppMonManager;
 import com.aspectran.appmon.service.ExportService;
 import com.aspectran.appmon.service.ServiceSession;
@@ -24,7 +25,6 @@ import com.aspectran.core.component.bean.annotation.Destroy;
 import com.aspectran.core.component.bean.annotation.Initialize;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.annotation.jsr305.Nullable;
 import com.aspectran.utils.security.InvalidPBTokenException;
 import com.aspectran.web.websocket.jsr356.AspectranConfigurator;
 import com.aspectran.web.websocket.jsr356.SimplifiedEndpoint;
@@ -56,7 +56,7 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
 
     private static final String MESSAGE_ESTABLISHED = "established:";
 
-    private static final String MESSAGE_REFRESH = "refresh:";
+    private static final String COMMAND_REFRESH = "refresh";
 
     private final AppMonManager appMonManager;
 
@@ -104,20 +104,18 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
         if (MESSAGE_PING.equals(message)) {
             pong(session);
         } else if (message.startsWith(MESSAGE_JOIN)) {
-            join(session, message.substring(MESSAGE_JOIN.length()));
+            CommandOptions commandOptions = new CommandOptions(message.substring(MESSAGE_JOIN.length()));
+            join(session, commandOptions.getInstancesToJoin());
         } else if (MESSAGE_ESTABLISHED.equals(message)) {
             joinComplete(session);
-        } else if (message.startsWith(MESSAGE_REFRESH)) {
-            refreshData(session, parseOptions(message.substring(MESSAGE_REFRESH.length())));
         } else if (MESSAGE_LEAVE.equals(message)) {
             removeSession(session);
+        } else {
+            CommandOptions commandOptions = new CommandOptions(message);
+            if (commandOptions.hasCommand(COMMAND_REFRESH)) {
+                refreshData(session, commandOptions);
+            }
         }
-    }
-
-    @Nullable
-    private String[] parseOptions(@NonNull String optionsStr) {
-        String[] options = StringUtils.split(optionsStr, ';');
-        return (options.length > 0 ? options : null);
     }
 
     @Override
@@ -131,11 +129,11 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
         sendText(session, MESSAGE_PONG + newToken);
     }
 
-    private void join(Session session, String joinInstances) {
+    private void join(Session session, String instancesToJoin) {
         ServiceSession serviceSession = new WebsocketServiceSession(session);
-        String[] instanceNames = StringUtils.splitWithComma(joinInstances);
+        String[] instanceNames = StringUtils.splitWithComma(instancesToJoin);
         instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
-        if (!StringUtils.hasText(joinInstances) || instanceNames.length > 0) {
+        if (!StringUtils.hasText(instancesToJoin) || instanceNames.length > 0) {
             serviceSession.setJoinedInstances(instanceNames);
         }
         if (addSession(session)) {
@@ -152,9 +150,9 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
         }
     }
 
-    private void refreshData(@NonNull Session session, String[] options) {
+    private void refreshData(@NonNull Session session, CommandOptions commandOptions) {
         ServiceSession serviceSession = new WebsocketServiceSession(session);
-        List<String> messages = appMonManager.getExportServiceManager().getNewMessages(serviceSession, options);
+        List<String> messages = appMonManager.getExportServiceManager().getNewMessages(serviceSession, commandOptions);
         for (String message : messages) {
             sendText(session, message);
         }

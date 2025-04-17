@@ -15,6 +15,7 @@
  */
 package com.aspectran.appmon.service;
 
+import com.aspectran.appmon.config.CommandOptions;
 import com.aspectran.appmon.config.InstanceInfoHolder;
 import com.aspectran.appmon.exporter.ExporterManager;
 import com.aspectran.utils.annotation.jsr305.NonNull;
@@ -130,35 +131,28 @@ public class ExportServiceManager {
         }
     }
 
-    public List<String> getNewMessages(@NonNull ServiceSession session, String[] options) {
-        String instanceName = null;
-        if (options != null) {
-            for (String option : options) {
-                if (instanceName == null && option.startsWith("instance:")) {
-                    instanceName = option.substring("instance:".length());
-                }
-            }
-        }
+    public List<String> getNewMessages(@NonNull ServiceSession session, @NonNull CommandOptions commandOptions) {
+        String instanceName = commandOptions.getInstance();
         List<String> messages = new ArrayList<>();
         if (session.isValid()) {
             String[] instanceNames = session.getJoinedInstances();
             if (instanceNames != null && instanceNames.length > 0) {
                 for (String name : instanceNames) {
                     if (instanceName == null || name.equals(instanceName)) {
-                        collectNewMessages(name, messages, options);
+                        collectNewMessages(name, messages, commandOptions);
                     }
                 }
             } else {
-                collectNewMessages(instanceName, messages, options);
+                collectNewMessages(instanceName, messages, commandOptions);
             }
         }
         return messages;
     }
 
-    private void collectNewMessages(String instanceName, List<String> messages, String[] options) {
+    private void collectNewMessages(String instanceName, List<String> messages, CommandOptions commandOptions) {
         for (ExporterManager exporterManager : exporterManagers) {
             if (instanceName == null || exporterManager.getInstanceName().equals(instanceName)) {
-                exporterManager.collectNewMessages(messages, options);
+                exporterManager.collectNewMessages(messages, commandOptions);
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.aspectran.appmon.exporter;
 
+import com.aspectran.appmon.config.CommandOptions;
 import com.aspectran.utils.lifecycle.AbstractLifeCycle;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public abstract class AbstractExporter extends AbstractLifeCycle implements Expo
     }
 
     @Override
-    public void readIfChanged(List<String> messages, String[] options) {
+    public void readIfChanged(List<String> messages, CommandOptions commandOptions) {
     }
 
 }
