@@ -65,9 +65,9 @@ public class ExporterManager {
         return (V)exporter;
     }
 
-    public void collectMessages(List<String> messages) {
+    public void collectMessages(List<String> messages, CommandOptions commandOptions) {
         for (Exporter exporter : exporters.values()) {
-            exporter.read(messages);
+            exporter.read(messages, commandOptions);
         }
     }
 

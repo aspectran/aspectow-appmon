@@ -87,7 +87,13 @@ public class PollingExportService implements ExportService {
             return null;
         }
 
+
         PollingServiceSession serviceSession = sessionManager.createSession(translet, pollingConfig, instanceNames);
+        String timeZone = translet.getParameter("timeZone");
+        if (StringUtils.hasText(timeZone)) {
+            serviceSession.setTimeZone(timeZone);
+        }
+
         if (!appMonManager.getExportServiceManager().join(serviceSession)) {
             return null;
         }
@@ -118,6 +124,9 @@ public class PollingExportService implements ExportService {
 
         if (commands != null) {
             CommandOptions commandOptions = new CommandOptions(commands);
+            if (!commandOptions.hasTimeZone()) {
+                commandOptions.setTimeZone(serviceSession.getTimeZone());
+            }
             if (commandOptions.hasCommand(COMMAND_REFRESH)) {
                 List<String> newMessages = appMonManager.getExportServiceManager().getNewMessages(serviceSession, commandOptions);
                 for (String msg : newMessages) {

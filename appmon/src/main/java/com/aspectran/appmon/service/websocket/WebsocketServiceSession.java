@@ -24,6 +24,8 @@ public class WebsocketServiceSession extends WrappedSession implements ServiceSe
 
     private static final String JOINED_INSTANCES_PROPERTY = "appmon:JoinedInstances";
 
+    private static final String TIME_ZONE_PROPERTY = "appmon:timeZone";
+
     public WebsocketServiceSession(Session session) {
         super(session);
     }
@@ -42,6 +44,15 @@ public class WebsocketServiceSession extends WrappedSession implements ServiceSe
     @Override
     public void removeJoinedInstances() {
         getSession().getUserProperties().remove(JOINED_INSTANCES_PROPERTY);
+    }
+
+    @Override
+    public String getTimeZone() {
+        return (String)getSession().getUserProperties().get(TIME_ZONE_PROPERTY);
+    }
+
+    public void setTimeZone(String timeZone) {
+        getSession().getUserProperties().put(TIME_ZONE_PROPERTY, timeZone);
     }
 
     @Override

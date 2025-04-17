@@ -43,6 +43,8 @@ public class PollingServiceSession implements ServiceSession {
 
     private String[] joinedInstances;
 
+    private String timeZone;
+
     public PollingServiceSession(PollingServiceSessionManager sessionManager) {
         this.sessionManager = sessionManager;
         this.expiryTimer = new SessionExpiryTimer();
@@ -77,6 +79,15 @@ public class PollingServiceSession implements ServiceSession {
     @Override
     public void removeJoinedInstances() {
         this.joinedInstances = null;
+    }
+
+    @Override
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
     }
 
     public int getLastLineIndex() {

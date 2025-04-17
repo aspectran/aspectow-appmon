@@ -15,6 +15,7 @@
  */
 package com.aspectran.appmon.exporter.log;
 
+import com.aspectran.appmon.config.CommandOptions;
 import com.aspectran.appmon.config.LogInfo;
 import com.aspectran.appmon.exporter.AbstractExporter;
 import com.aspectran.appmon.exporter.ExporterManager;
@@ -82,7 +83,7 @@ public class LogExporter extends AbstractExporter {
     }
 
     @Override
-    public void read(@NonNull List<String> messages) {
+    public void read(@NonNull List<String> messages, CommandOptions commandOptions) {
         if (lastLines > 0) {
             try {
                 if (logFile.exists()) {

@@ -96,6 +96,10 @@ public class CommandOptions extends AbstractParameters {
         putValue(CommandOptions.instance, instance);
     }
 
+    public boolean hasTimeZone() {
+        return hasValue(timeZone);
+    }
+
     public String getTimeZone() {
         return getString(timeZone);
     }

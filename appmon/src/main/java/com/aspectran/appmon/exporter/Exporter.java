@@ -29,7 +29,7 @@ public interface Exporter extends LifeCycle {
 
     String getName();
 
-    void read(List<String> messages);
+    void read(List<String> messages, CommandOptions commandOptions);
 
     void readIfChanged(List<String> messages, CommandOptions commandOptions);
 

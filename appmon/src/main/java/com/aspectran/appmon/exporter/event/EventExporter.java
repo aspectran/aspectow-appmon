@@ -63,7 +63,7 @@ public class EventExporter extends AbstractExporter {
     }
 
     @Override
-    public void read(@NonNull List<String> messages) {
+    public void read(@NonNull List<String> messages, CommandOptions commandOptions) {
         String json = eventReader.read();
         if (json != null) {
             messages.add(prefix + json);

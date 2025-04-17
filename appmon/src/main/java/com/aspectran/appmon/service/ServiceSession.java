@@ -23,6 +23,8 @@ public interface ServiceSession {
 
     void removeJoinedInstances();
 
+    String getTimeZone();
+
     boolean isValid();
 
 }

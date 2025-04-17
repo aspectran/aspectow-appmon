@@ -105,7 +105,7 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
             pong(session);
         } else if (message.startsWith(MESSAGE_JOIN)) {
             CommandOptions commandOptions = new CommandOptions(message.substring(MESSAGE_JOIN.length()));
-            join(session, commandOptions.getInstancesToJoin());
+            join(session, commandOptions);
         } else if (MESSAGE_ESTABLISHED.equals(message)) {
             joinComplete(session);
         } else if (MESSAGE_LEAVE.equals(message)) {
@@ -129,8 +129,13 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
         sendText(session, MESSAGE_PONG + newToken);
     }
 
-    private void join(Session session, String instancesToJoin) {
-        ServiceSession serviceSession = new WebsocketServiceSession(session);
+    private void join(Session session, @NonNull CommandOptions commandOptions) {
+        WebsocketServiceSession serviceSession = new WebsocketServiceSession(session);
+        String timeZone = commandOptions.getTimeZone();
+        if (StringUtils.hasText(timeZone)) {
+            serviceSession.setTimeZone(timeZone);
+        }
+        String instancesToJoin = commandOptions.getInstancesToJoin();
         String[] instanceNames = StringUtils.splitWithComma(instancesToJoin);
         instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
         if (!StringUtils.hasText(instancesToJoin) || instanceNames.length > 0) {
@@ -150,8 +155,11 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
         }
     }
 
-    private void refreshData(@NonNull Session session, CommandOptions commandOptions) {
+    private void refreshData(@NonNull Session session, @NonNull CommandOptions commandOptions) {
         ServiceSession serviceSession = new WebsocketServiceSession(session);
+        if (!commandOptions.hasTimeZone()) {
+            commandOptions.setTimeZone(serviceSession.getTimeZone());
+        }
         List<String> messages = appMonManager.getExportServiceManager().getNewMessages(serviceSession, commandOptions);
         for (String message : messages) {
             sendText(session, message);

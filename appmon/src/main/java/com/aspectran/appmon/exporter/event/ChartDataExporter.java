@@ -29,7 +29,12 @@ import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.annotation.jsr305.Nullable;
 import com.aspectran.utils.json.JsonBuilder;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * <p>Created: 2024-12-18</p>
@@ -58,8 +63,8 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
     }
 
     @Override
-    public void read(@NonNull List<String> messages) {
-        messages.add(prefix + readChartData(null));
+    public void read(@NonNull List<String> messages, CommandOptions commandOptions) {
+        messages.add(prefix + readChartData(commandOptions));
     }
 
     @Override
@@ -82,19 +87,26 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
     }
 
     private String readChartData(@Nullable CommandOptions commandOptions) {
-        final String timeZone = (commandOptions != null ? commandOptions.getTimeZone() : null);
+        String timeZone = (commandOptions != null ? commandOptions.getTimeZone() : null);
+        final int zoneOffsetInSeconds;
+        if (timeZone != null) {
+            ZoneOffset zoneOffset = ZonedDateTime.now(ZoneId.of(timeZone)).getOffset();
+            zoneOffsetInSeconds = zoneOffset.getTotalSeconds();
+        } else {
+            zoneOffsetInSeconds = 0;
+        }
         final String dateUnit = (commandOptions != null ? commandOptions.getDateUnit() : null);
         final String dateOffset = (commandOptions != null ? commandOptions.getDateOffset() : null);
         EventCountMapper.Dao dao = exporterManager.getBean(EventCountMapper.Dao.class);
         List<EventCountVO> list = exporterManager.instantActivity(() -> {
             if ("hour".equals(dateUnit)) {
-                return dao.getChartDataByHour(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), dateOffset);
+                return dao.getChartDataByHour(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), zoneOffsetInSeconds, dateOffset);
             } else if ("day".equals(dateUnit)) {
-                return dao.getChartDataByDay(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), dateOffset);
+                return dao.getChartDataByDay(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), zoneOffsetInSeconds, dateOffset);
             } else if ("month".equals(dateUnit)) {
-                return dao.getChartDataByMonth(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), dateOffset);
+                return dao.getChartDataByMonth(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), zoneOffsetInSeconds, dateOffset);
             } else if ("year".equals(dateUnit)) {
-                return dao.getChartDataByYear(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), dateOffset);
+                return dao.getChartDataByYear(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), zoneOffsetInSeconds, dateOffset);
             } else {
                 return dao.getChartData(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), dateOffset);
             }

@@ -109,24 +109,26 @@ public class ExportServiceManager {
     }
 
     public List<String> getLastMessages(@NonNull ServiceSession session) {
+        CommandOptions commandOptions = new CommandOptions();
+        commandOptions.setTimeZone(session.getTimeZone());
         List<String> messages = new ArrayList<>();
         if (session.isValid()) {
             String[] instanceNames = session.getJoinedInstances();
             if (instanceNames != null && instanceNames.length > 0) {
                 for (String name : instanceNames) {
-                    collectLastMessages(name, messages);
+                    collectLastMessages(name, messages, commandOptions);
                 }
             } else {
-                collectLastMessages(null, messages);
+                collectLastMessages(null, messages, commandOptions);
             }
         }
         return messages;
     }
 
-    private void collectLastMessages(String instanceName, List<String> messages) {
+    private void collectLastMessages(String instanceName, List<String> messages, CommandOptions commandOptions) {
         for (ExporterManager exporterManager : exporterManagers) {
             if (instanceName == null || exporterManager.getInstanceName().equals(instanceName)) {
-                exporterManager.collectMessages(messages);
+                exporterManager.collectMessages(messages, commandOptions);
             }
         }
     }
