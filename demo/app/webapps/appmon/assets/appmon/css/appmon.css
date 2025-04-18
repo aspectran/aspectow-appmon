@@ -266,9 +266,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     text-wrap: nowrap;
-}
-.session-box .panel p.since .startTime {
-    font-size: .9em;
+    font-size: .85em;
 }
 .session-box dl.session-stats {
     margin-bottom: .3em;

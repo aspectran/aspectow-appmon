@@ -7,8 +7,8 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
     let retryCount = 0;
     let commands = [];
 
-    this.start = function (specificInstances) {
-        join(specificInstances);
+    this.start = function (instancesToJoin) {
+        join(instancesToJoin);
     };
 
     this.speed = function (speed) {
@@ -16,7 +16,12 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
     };
 
     this.refresh = function (options) {
-        withCommand("refresh:" + options||"");
+        withCommand("command:refresh");
+        if (options) {
+            for (let i = 0; i < options.length; i++) {
+                withCommand(options[i]);
+            }
+        }
     };
 
     const withCommand = function (command) {
@@ -25,13 +30,14 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
         }
     }
 
-    const join = function (specificInstances) {
+    const join = function (instancesToJoin) {
         $.ajax({
             url: domain.endpoint.url + "/" + domain.endpoint.token + "/polling/join",
             type: "post",
             dataType: "json",
             data: {
-                instances: specificInstances
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                instances: instancesToJoin
             },
             success: function (data) {
                 if (data) {
@@ -46,29 +52,29 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
                         onEstablished(domain);
                     }
                     viewer.printMessage("Polling every " + data.pollingInterval + " milliseconds.");
-                    polling(specificInstances);
+                    polling(instancesToJoin);
                 } else {
                     console.log(domain.name, "connection failed");
                     viewer.printErrorMessage("Connection failed.");
-                    rejoin(specificInstances);
+                    rejoin(instancesToJoin);
                 }
             },
             error: function (xhr, status, error) {
                 console.log(domain.name, "connection failed", error);
                 viewer.printErrorMessage("Connection failed.");
-                rejoin(specificInstances);
+                rejoin(instancesToJoin);
             }
         });
     };
 
-    const rejoin = function (specificInstances) {
+    const rejoin = function (instancesToJoin) {
         if (retryCount++ < MAX_RETRIES) {
             let retryInterval = (RETRY_INTERVAL * retryCount) + (domain.index * 200) + domain.random1000;
             let status = "(" + retryCount + "/" + MAX_RETRIES + ", interval=" + retryInterval + ")";
             console.log(domain.name, "trying to reconnect", status);
             viewer.printMessage("Trying to reconnect... " + status);
             setTimeout(function () {
-                join(specificInstances);
+                join(instancesToJoin);
             }, retryInterval);
         } else {
             viewer.printMessage("Max connection attempts exceeded.");
@@ -78,7 +84,7 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
         }
     };
 
-    const polling = function (specificInstances) {
+    const polling = function (instancesToJoin) {
         let withCommands = null;
         if (commands.length) {
             withCommands = commands.slice();
@@ -87,9 +93,9 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
         $.ajax({
             url: domain.endpoint.url + "/" + domain.endpoint.token + "/polling/pull",
             type: "get",
-            data: {
+            data: withCommands ? {
                 commands: withCommands
-            },
+            } : null,
             success: function (data) {
                 if (data && data.token && data.messages) {
                     domain.endpoint['token'] = data.token;
@@ -97,7 +103,7 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
                         viewer.processMessage(data.messages[key]);
                     }
                     setTimeout(function () {
-                        polling(specificInstances);
+                        polling(instancesToJoin);
                     }, domain.endpoint.pollingInterval);
                 } else {
                     console.log(domain.name, "connection lost");
@@ -105,7 +111,7 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
                     if (onClosed) {
                         onClosed(domain);
                     }
-                    rejoin(specificInstances);
+                    rejoin(instancesToJoin);
                 }
             },
             error: function (xhr, status, error) {
@@ -114,7 +120,7 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
                 if (onClosed) {
                     onClosed(domain);
                 }
-                rejoin(specificInstances);
+                rejoin(instancesToJoin);
             }
         });
     };

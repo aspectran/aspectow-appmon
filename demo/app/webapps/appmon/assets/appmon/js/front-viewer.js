@@ -553,21 +553,6 @@ function FrontViewer(sampleInterval) {
         return result;
     }
 
-    const toDatetime = function (label, dateUnit) {
-        switch (dateUnit) {
-            case "hour":
-                return dayjs.utc(label.substring(0, 10), "YYYYMMDDHH").local();
-            case "day":
-                return dayjs.utc(label.substring(0, 8), "YYYYMMDD").local();
-            case "month":
-                return dayjs.utc(label.substring(0, 6), "YYYYMM").local();
-            case "year":
-                return dayjs.utc(label.substring(0, 4), "YYYY").local();
-            default:
-                return dayjs.utc(label, "YYYYMMDDHHmm").local();
-        }
-    };
-
     const drawChart = function (eventName, canvas, dateUnit, labels, data1, data2, autoSkip) {
         let dataLabel1;
         let borderColor1;
@@ -604,7 +589,7 @@ function FrontViewer(sampleInterval) {
                             reverse: true,
                             callbacks: {
                                 title: function (tooltip) {
-                                    return toDatetime(labels[tooltip[0].dataIndex], dateUnit).format("LLL");
+                                    return dayjs.utc(labels[tooltip[0].dataIndex], "YYYYMMDDHHmm").local().format("LLL");
                                 }
                             }
                         }
@@ -618,9 +603,15 @@ function FrontViewer(sampleInterval) {
                             ticks: {
                                 autoSkip: autoSkip,
                                 callback: function (value, index) {
-                                    let datetime = toDatetime(labels[index], dateUnit);
-                                    let datetime2 = (index > 0 ? toDatetime(labels[index - 1], dateUnit) : null);
+                                    let datetime =  dayjs.utc(labels[index], "YYYYMMDDHHmm").local();
+                                    let datetime2 = (index > 0 ? dayjs.utc(labels[index - 1], "YYYYMMDDHHmm").local() : null);
                                     switch (dateUnit) {
+                                        case "hour":
+                                            if (datetime2 && datetime.isAfter(datetime2, "day")) {
+                                                return datetime.format("M/D HH:00");
+                                            } else {
+                                                return datetime.format("HH:00");
+                                            }
                                         case "day":
                                             if (datetime2 && datetime.isAfter(datetime2, "year")) {
                                                 return datetime.format("YYYY M/D");
