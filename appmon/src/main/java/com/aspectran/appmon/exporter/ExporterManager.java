@@ -15,8 +15,8 @@
  */
 package com.aspectran.appmon.exporter;
 
-import com.aspectran.appmon.config.CommandOptions;
 import com.aspectran.appmon.manager.AppMonManager;
+import com.aspectran.appmon.service.CommandOptions;
 import com.aspectran.core.activity.InstantAction;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import org.slf4j.Logger;

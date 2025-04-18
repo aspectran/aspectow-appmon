@@ -15,8 +15,8 @@
  */
 package com.aspectran.appmon.service.websocket;
 
-import com.aspectran.appmon.config.CommandOptions;
 import com.aspectran.appmon.manager.AppMonManager;
+import com.aspectran.appmon.service.CommandOptions;
 import com.aspectran.appmon.service.ExportService;
 import com.aspectran.appmon.service.ServiceSession;
 import com.aspectran.core.component.bean.annotation.Autowired;
@@ -44,19 +44,13 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
 
     private static final Logger logger = LoggerFactory.getLogger(WebsocketExportService.class);
 
-    private static final String MESSAGE_PING = "ping:";
+    private static final String COMMAND_PING = "ping";
+    private static final String COMMAND_JOIN = "join";
+    private static final String COMMAND_ESTABLISHED = "established";
+    private static final String COMMAND_REFRESH = "refresh";
 
     private static final String MESSAGE_PONG = "pong:";
-
-    private static final String MESSAGE_JOIN = "join:";
-
-    private static final String MESSAGE_LEAVE = "leave";
-
     private static final String MESSAGE_JOINED = "joined:";
-
-    private static final String MESSAGE_ESTABLISHED = "established:";
-
-    private static final String COMMAND_REFRESH = "refresh";
 
     private final AppMonManager appMonManager;
 
@@ -101,20 +95,19 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
         if (StringUtils.isEmpty(message)) {
             return;
         }
-        if (MESSAGE_PING.equals(message)) {
-            pong(session);
-        } else if (message.startsWith(MESSAGE_JOIN)) {
-            CommandOptions commandOptions = new CommandOptions(message.substring(MESSAGE_JOIN.length()));
-            join(session, commandOptions);
-        } else if (MESSAGE_ESTABLISHED.equals(message)) {
-            joinComplete(session);
-        } else if (MESSAGE_LEAVE.equals(message)) {
-            removeSession(session);
-        } else {
-            CommandOptions commandOptions = new CommandOptions(message);
-            if (commandOptions.hasCommand(COMMAND_REFRESH)) {
+        CommandOptions commandOptions = new CommandOptions(message);
+        switch (commandOptions.getCommand()) {
+            case COMMAND_PING:
+                pong(session);
+                break;
+            case COMMAND_JOIN:
+                join(session, commandOptions);
+                break;
+            case COMMAND_ESTABLISHED:
+                joinComplete(session);
+                break;
+            case COMMAND_REFRESH:
                 refreshData(session, commandOptions);
-            }
         }
     }
 

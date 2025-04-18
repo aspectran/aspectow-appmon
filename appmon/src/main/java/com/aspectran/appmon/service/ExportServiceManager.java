@@ -15,7 +15,6 @@
  */
 package com.aspectran.appmon.service;
 
-import com.aspectran.appmon.config.CommandOptions;
 import com.aspectran.appmon.config.InstanceInfoHolder;
 import com.aspectran.appmon.exporter.ExporterManager;
 import com.aspectran.utils.annotation.jsr305.NonNull;

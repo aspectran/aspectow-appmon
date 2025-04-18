@@ -1,6 +1,6 @@
 package com.aspectran.appmon.exporter;
 
-import com.aspectran.appmon.config.CommandOptions;
+import com.aspectran.appmon.service.CommandOptions;
 import com.aspectran.utils.lifecycle.AbstractLifeCycle;
 
 import java.util.List;

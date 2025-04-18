@@ -129,15 +129,15 @@
     <select id="getChartDataByHour" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
-                select ymdhh||'00' datetime, delta, error
+                select datetime, delta, error
                 from (
-                    select substr(datetime, 1, 10) ymdhh, sum(delta) delta, sum(error) error
+                    select min(datetime) as datetime, sum(delta) delta, sum(error) error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
                 <if test="dateOffset != null">
                     and datetime &lt; #{dateOffset}
                 </if>
-                    group by substr(datetime, 1, 10)
+                    group by to_char(to_date(datetime, 'YYYYMMDDHH24MI') + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYYMMDDHH24')
                     order by 1 desc
                 )
                 where rownum &lt;= 72
@@ -152,7 +152,7 @@
                 <if test="dateOffset != null">
                     and datetime &lt; #{dateOffset}
                 </if>
-                    group by substr(date_format(date_add(str_to_date(datetime, '%Y%m%d%H%i'), interval #{zoneOffset} second), '%Y%m%d%H%i'), 1, 10)
+                    group by date_format(date_add(str_to_date(datetime, '%Y%m%d%H%i'), interval #{zoneOffset} second), '%Y%m%d%H')
                     order by 1 desc
                     limit 72
                 ) as x
@@ -167,7 +167,7 @@
                 <if test="dateOffset != null">
                     and datetime &lt; #{dateOffset}
                 </if>
-                    group by substr(formatdatetime(dateadd(second, #{zoneOffset}, parsedatetime(datetime, 'yyyyMMddHHmm')), 'yyyyMMddHHmm'), 1, 10)
+                    group by formatdatetime(dateadd(second, #{zoneOffset}, parsedatetime(datetime, 'yyyyMMddHHmm')), 'yyyyMMddHH')
                     order by 1 desc
                     limit 72
                 ) as x
@@ -179,15 +179,15 @@
     <select id="getChartDataByDay" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
-                select ymd||'0000' datetime, delta, error
+                select datetime, delta, error
                 from (
-                    select substr(datetime, 1, 8) ymd, sum(delta) delta, sum(error) error
+                    select min(datetime) as datetime, sum(delta) delta, sum(error) error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
                 <if test="dateOffset != null">
                     and datetime &lt; #{dateOffset}
                 </if>
-                    group by substr(datetime, 1, 8)
+                    group by to_char(to_date(datetime, 'YYYYMMDDHH24MI') + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYYMMDD')
                     order by 1 desc
                 )
                 where rownum &lt;= 72
@@ -202,7 +202,7 @@
                 <if test="dateOffset != null">
                     and datetime &lt; #{dateOffset}
                 </if>
-                    group by substr(date_format(date_add(str_to_date(datetime, '%Y%m%d%H%i'), interval #{zoneOffset} second), '%Y%m%d%H%i'), 1, 8)
+                    group by date_format(date_add(str_to_date(datetime, '%Y%m%d%H%i'), interval #{zoneOffset} second), '%Y%m%d')
                     order by 1 desc
                     limit 72
                 ) as x
@@ -217,7 +217,7 @@
                 <if test="dateOffset != null">
                     and datetime &lt; #{dateOffset}
                 </if>
-                    group by substr(formatdatetime(dateadd(second, #{zoneOffset}, parsedatetime(datetime, 'yyyyMMddHHmm')), 'yyyyMMddHHmm'), 1, 8)
+                    group by formatdatetime(dateadd(second, #{zoneOffset}, parsedatetime(datetime, 'yyyyMMddHHmm')), 'yyyyMMdd')
                     order by 1 desc
                     limit 72
                 ) as x
@@ -229,15 +229,15 @@
     <select id="getChartDataByMonth" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
-                select ym||'010000' datetime, delta, error
+                select datetime, delta, error
                 from (
-                    select substr(datetime, 1, 6) ym, sum(delta) delta, sum(error) error
+                    select min(datetime) as datetime, sum(delta) delta, sum(error) error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
                 <if test="dateOffset != null">
                     and datetime &lt; #{dateOffset}
                 </if>
-                    group by substr(datetime, 1, 6)
+                    group by to_char(to_date(datetime, 'YYYYMMDDHH24MI') + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYYMM')
                     order by 1 desc
                 )
                 where rownum &lt;= 72
@@ -252,7 +252,7 @@
                 <if test="dateOffset != null">
                     and datetime &lt; #{dateOffset}
                 </if>
-                    group by substr(date_format(date_add(str_to_date(datetime, '%Y%m%d%H%i'), interval #{zoneOffset} second), '%Y%m%d%H%i'), 1, 6)
+                    group by date_format(date_add(str_to_date(datetime, '%Y%m%d%H%i'), interval #{zoneOffset} second), '%Y%m')
                     order by 1 desc
                     limit 72
                 ) as x
@@ -267,7 +267,7 @@
                 <if test="dateOffset != null">
                     and datetime &lt; #{dateOffset}
                 </if>
-                    group by substr(formatdatetime(dateadd(second, #{zoneOffset}, parsedatetime(datetime, 'yyyyMMddHHmm')), 'yyyyMMddHHmm'), 1, 6)
+                    group by formatdatetime(dateadd(second, #{zoneOffset}, parsedatetime(datetime, 'yyyyMMddHHmm')), 'yyyyMM')
                     order by 1 desc
                     limit 72
                 ) as x
@@ -279,15 +279,15 @@
     <select id="getChartDataByYear" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
-                select yy||'01010000' datetime, delta, error
+                select datetime, delta, error
                 from (
-                    select substr(datetime, 1, 4) yy, sum(delta) delta, sum(error) error
+                    select min(datetime) as datetime, sum(delta) delta, sum(error) error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
                 <if test="dateOffset != null">
                     and datetime &lt; #{dateOffset}
                 </if>
-                    group by substr(datetime, 1, 4)
+                    group by to_char(to_date(datetime, 'YYYYMMDDHH24MI') + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYY')
                     order by 1 desc
                 )
                 where rownum &lt;= 72
@@ -302,7 +302,7 @@
                 <if test="dateOffset != null">
                     and datetime &lt; #{dateOffset}
                 </if>
-                    group by substr(date_format(date_add(str_to_date(datetime, '%Y%m%d%H%i'), interval #{zoneOffset} second), '%Y%m%d%H%i'), 1, 4)
+                    group by date_format(date_add(str_to_date(datetime, '%Y%m%d%H%i'), interval #{zoneOffset} second), '%Y')
                     order by 1 desc
                     limit 72
                 ) as x
@@ -317,7 +317,7 @@
                 <if test="dateOffset != null">
                     and datetime &lt; #{dateOffset}
                 </if>
-                    group by substr(formatdatetime(dateadd(second, #{zoneOffset}, parsedatetime(datetime, 'yyyyMMddHHmm')), 'yyyyMMddHHmm'), 1, 4)
+                    group by formatdatetime(dateadd(second, #{zoneOffset}, parsedatetime(datetime, 'yyyyMMddHHmm')), 'yyyy')
                     order by 1 desc
                     limit 72
                 ) as x

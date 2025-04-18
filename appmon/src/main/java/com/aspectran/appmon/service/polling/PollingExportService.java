@@ -15,10 +15,10 @@
  */
 package com.aspectran.appmon.service.polling;
 
-import com.aspectran.appmon.config.CommandOptions;
 import com.aspectran.appmon.config.InstanceInfo;
 import com.aspectran.appmon.config.PollingConfig;
 import com.aspectran.appmon.manager.AppMonManager;
+import com.aspectran.appmon.service.CommandOptions;
 import com.aspectran.appmon.service.ExportService;
 import com.aspectran.appmon.service.ServiceSession;
 import com.aspectran.core.activity.Translet;
@@ -33,7 +33,6 @@ import com.aspectran.core.component.bean.annotation.Transform;
 import com.aspectran.core.context.rule.type.FormatType;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.annotation.jsr305.Nullable;
 import com.aspectran.utils.security.InvalidPBTokenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -179,12 +178,6 @@ public class PollingExportService implements ExportService {
     @Override
     public boolean isUsingInstance(String instanceName) {
         return sessionManager.isUsingInstance(instanceName);
-    }
-
-    @Nullable
-    private String[] parseOptions(@NonNull String optionsStr) {
-        String[] options = StringUtils.split(optionsStr, ';');
-        return (options.length > 0 ? options : null);
     }
 
     private boolean checkServiceAvailable(String token) {
