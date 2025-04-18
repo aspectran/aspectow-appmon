@@ -11,9 +11,9 @@ function FrontBuilder() {
             url: basePath + "/backend/" + token + "/config",
             type: "get",
             dataType: "json",
-            data: {
+            data: instancesToJoin ? {
                 instances: instancesToJoin
-            },
+            } : null,
             success: function (data) {
                 if (data) {
                     domains.length = 0;
