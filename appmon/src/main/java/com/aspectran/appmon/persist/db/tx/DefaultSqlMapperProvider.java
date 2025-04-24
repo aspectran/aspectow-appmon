@@ -18,17 +18,17 @@ package com.aspectran.appmon.persist.db.tx;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
-import com.aspectran.mybatis.SqlMapperAgent;
+import com.aspectran.mybatis.SqlMapperProvider;
 import org.apache.ibatis.session.SqlSession;
 
 @Component
 @Bean(lazyDestroy = true)
-public class DefaultSqlMapperAgent implements SqlMapperAgent {
+public class DefaultSqlMapperProvider implements SqlMapperProvider {
 
     private final SqlSession simpleSqlSession;
 
     @Autowired
-    public DefaultSqlMapperAgent(SimpleSqlSession simpleSqlSession) {
+    public DefaultSqlMapperProvider(SimpleSqlSession simpleSqlSession) {
         this.simpleSqlSession = simpleSqlSession;
     }
 

@@ -18,8 +18,8 @@ package com.aspectran.appmon.persist.db.mapper;
 import com.aspectran.appmon.persist.counter.EventCountVO;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
-import com.aspectran.mybatis.SqlMapperAgent;
-import com.aspectran.mybatis.SqlMapperDao;
+import com.aspectran.mybatis.SqlMapperProvider;
+import com.aspectran.mybatis.SqlMapperAccess;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -49,11 +49,11 @@ public interface EventCountMapper {
     List<EventCountVO> getChartDataByYear(String domain, String instance, String event, int zoneOffset, String dateOffset);
 
     @Component
-    class Dao extends SqlMapperDao<EventCountMapper> implements EventCountMapper {
+    class Dao extends SqlMapperAccess<EventCountMapper> implements EventCountMapper {
 
         @Autowired
-        public Dao(SqlMapperAgent mapperAgent) {
-            super(mapperAgent, EventCountMapper.class);
+        public Dao(SqlMapperProvider sqlMapperProvider) {
+            super(sqlMapperProvider, EventCountMapper.class);
         }
 
         @Override

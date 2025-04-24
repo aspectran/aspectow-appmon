@@ -25,7 +25,7 @@ import com.aspectran.core.component.bean.annotation.Finally;
 import com.aspectran.core.component.bean.annotation.Joinpoint;
 import com.aspectran.core.component.bean.annotation.Scope;
 import com.aspectran.core.context.rule.type.ScopeType;
-import com.aspectran.mybatis.SqlSessionTxAdvice;
+import com.aspectran.mybatis.SqlSessionAdvice;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 /**
@@ -51,7 +51,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
                 "+: **@simpleSqlSession"
         }
 )
-public class SimpleTxAspect extends SqlSessionTxAdvice {
+public class SimpleTxAspect extends SqlSessionAdvice {
 
     @Autowired
     public SimpleTxAspect(SqlSessionFactory sqlSessionFactory) {
