@@ -27,18 +27,9 @@ public class DefaultSqlMapperAgent implements SqlMapperAgent {
 
     private final SqlSession simpleSqlSession;
 
-    private final SqlSession batchSqlSession;
-
-    private final SqlSession reuseSqlSession;
-
     @Autowired
-    public DefaultSqlMapperAgent(
-            SimpleSqlSession simpleSqlSession,
-            BatchSqlSession batchSqlSession,
-            ReuseSqlSession reuseSqlSession) {
+    public DefaultSqlMapperAgent(SimpleSqlSession simpleSqlSession) {
         this.simpleSqlSession = simpleSqlSession;
-        this.batchSqlSession = batchSqlSession;
-        this.reuseSqlSession = reuseSqlSession;
     }
 
     @Override
@@ -48,27 +39,12 @@ public class DefaultSqlMapperAgent implements SqlMapperAgent {
 
     @Override
     public SqlSession getBatchSqlSession() {
-        return batchSqlSession;
+        throw new UnsupportedOperationException("Batch operation is not supported");
     }
 
     @Override
     public SqlSession getReuseSqlSession() {
-        return reuseSqlSession;
-    }
-
-    @Override
-    public <T> T simple(Class<T> type) {
-        return getSimpleSqlSession().getMapper(type);
-    }
-
-    @Override
-    public <T> T batch(Class<T> type) {
-        return getBatchSqlSession().getMapper(type);
-    }
-
-    @Override
-    public <T> T reuse(Class<T> type) {
-        return getReuseSqlSession().getMapper(type);
+        throw new UnsupportedOperationException("Reuse operation is not supported");
     }
 
 }

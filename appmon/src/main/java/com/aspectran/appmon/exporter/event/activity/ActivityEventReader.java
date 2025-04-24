@@ -85,8 +85,8 @@ public class ActivityEventReader extends AbstractEventReader {
             return activityEventAdvice;
         });
 
-        AspectAdviceRule afterAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.FINALLY);
-        afterAspectAdviceRule.setAdviceAction(activity -> {
+        AspectAdviceRule finallyAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.FINALLY);
+        finallyAspectAdviceRule.setAdviceAction(activity -> {
             ActivityEventAdvice activityEventAdvice = activity.getBeforeAdviceResult(aspectId);
             String json = activityEventAdvice.after(activity);
             getEventExporter().broadcast(json);

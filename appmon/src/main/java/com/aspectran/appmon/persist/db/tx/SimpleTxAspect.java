@@ -31,7 +31,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 /**
  * Advice to handle database transactions in simple mode.
  * <ul>
- * <li>A transaction scope will be started (i.e. NOT auto-commit).
+ * <li>A transaction scope will be started (i.e., NOT auto-commit).
  * <li>A Connection object will be acquired from the DataSource instance
  *     configured by the active environment.
  * <li>The transaction isolation level will be the default used by the driver or
