@@ -131,9 +131,4 @@ public class ActivityEventReader extends AbstractEventReader {
             .toString();
     }
 
-    @Override
-    public String readIfChanged() {
-        return null;
-    }
-
 }

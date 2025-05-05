@@ -129,27 +129,12 @@ public class SessionEventReader extends AbstractEventReader {
             return null;
         }
         try {
-            SessionEventData data = loadWithActiveSessions();
-            oldData = data;
-            return data.toJson();
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return null;
-        }
-    }
-
-    @Override
-    public String readIfChanged() {
-        if (sessionListener == null) {
-            return null;
-        }
-        try {
-            SessionEventData data = (oldData == null ? loadWithActiveSessions() : load());
-            if (!data.equals(oldData)) {
+            if (oldData != null) {
+                return oldData.toJson();
+            } else {
+                SessionEventData data = loadWithActiveSessions();
                 oldData = data;
                 return data.toJson();
-            } else {
-                return null;
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -234,9 +219,7 @@ public class SessionEventReader extends AbstractEventReader {
         data.setHighestNumberOfActives(statistics.getHighestNumberOfActives());
         data.setNumberOfUnmanaged(Math.abs(statistics.getNumberOfUnmanaged()));
         data.setNumberOfRejected(statistics.getNumberOfRejected());
-        if (oldData == null) {
-            data.setStartTime(formatTime(statistics.getStartTime()));
-        }
+        data.setStartTime(formatTime(statistics.getStartTime()));
         return data;
     }
 
