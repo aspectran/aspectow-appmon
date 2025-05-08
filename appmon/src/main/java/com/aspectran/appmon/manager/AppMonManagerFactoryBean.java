@@ -19,7 +19,6 @@ import com.aspectran.appmon.config.AppMonConfig;
 import com.aspectran.appmon.config.AppMonConfigBuilder;
 import com.aspectran.appmon.config.AppMonConfigResolver;
 import com.aspectran.core.component.bean.ablility.FactoryBean;
-import com.aspectran.core.component.bean.annotation.AvoidAdvice;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Initialize;
@@ -39,7 +38,6 @@ public class AppMonManagerFactoryBean implements ActivityContextAware, FactoryBe
     private AppMonManager appMonManager;
 
     @Override
-    @AvoidAdvice
     public void setActivityContext(@NonNull ActivityContext context) {
         this.context = context;
     }
