@@ -19,11 +19,10 @@ import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.persist.counter.AbstractEventCounter;
 import com.aspectran.core.adapter.SessionAdapter;
 import com.aspectran.core.context.ActivityContext;
-import com.aspectran.core.context.rule.AspectAdviceRule;
+import com.aspectran.core.context.rule.AdviceRule;
 import com.aspectran.core.context.rule.AspectRule;
 import com.aspectran.core.context.rule.JoinpointRule;
 import com.aspectran.core.context.rule.params.PointcutParameters;
-import com.aspectran.core.context.rule.type.AspectAdviceType;
 import com.aspectran.core.context.rule.type.JoinpointTargetType;
 import com.aspectran.core.service.CoreService;
 import com.aspectran.core.service.CoreServiceHolder;
@@ -84,8 +83,8 @@ public class ActivityEventCounter extends AbstractEventCounter {
             }
             aspectRule.setJoinpointRule(joinpointRule);
 
-            AspectAdviceRule afterAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.BEFORE);
-            afterAspectAdviceRule.setAdviceAction(activity -> {
+            AdviceRule afterAdviceRule = aspectRule.newBeforeAdviceRule();
+            afterAdviceRule.setAdviceAction(activity -> {
                 getEventCount().count();
                 if (activity.hasSessionAdapter()) {
                     SessionAdapter sessionAdapter = activity.getSessionAdapter();

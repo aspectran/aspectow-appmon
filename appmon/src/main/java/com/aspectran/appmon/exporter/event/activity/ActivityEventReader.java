@@ -22,11 +22,10 @@ import com.aspectran.appmon.exporter.event.EventExporter;
 import com.aspectran.appmon.persist.counter.EventCount;
 import com.aspectran.core.component.UnavailableException;
 import com.aspectran.core.context.ActivityContext;
-import com.aspectran.core.context.rule.AspectAdviceRule;
+import com.aspectran.core.context.rule.AdviceRule;
 import com.aspectran.core.context.rule.AspectRule;
 import com.aspectran.core.context.rule.JoinpointRule;
 import com.aspectran.core.context.rule.params.PointcutParameters;
-import com.aspectran.core.context.rule.type.AspectAdviceType;
 import com.aspectran.core.context.rule.type.JoinpointTargetType;
 import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
@@ -78,15 +77,15 @@ public class ActivityEventReader extends AbstractEventReader {
         }
         aspectRule.setJoinpointRule(joinpointRule);
 
-        AspectAdviceRule beforeAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.BEFORE);
-        beforeAspectAdviceRule.setAdviceAction(activity -> {
+        AdviceRule beforeAdviceRule = aspectRule.newBeforeAdviceRule();
+        beforeAdviceRule.setAdviceAction(activity -> {
             ActivityEventAdvice activityEventAdvice = new ActivityEventAdvice(ActivityEventReader.this);
             activityEventAdvice.before(activity);
             return activityEventAdvice;
         });
 
-        AspectAdviceRule finallyAspectAdviceRule = aspectRule.newAspectAdviceRule(AspectAdviceType.FINALLY);
-        finallyAspectAdviceRule.setAdviceAction(activity -> {
+        AdviceRule finallyAdviceRule = aspectRule.newFinallyAdviceRule();
+        finallyAdviceRule.setAdviceAction(activity -> {
             ActivityEventAdvice activityEventAdvice = activity.getBeforeAdviceResult(aspectId);
             String json = activityEventAdvice.after(activity);
             getEventExporter().broadcast(json);
