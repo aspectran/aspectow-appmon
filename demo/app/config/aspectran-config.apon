@@ -46,8 +46,7 @@ shell: {
         |{{GREEN  }}   /  _  \ |_) | |_) / /\/\ \ (_) | | | |
         |{{CYAN   }}   \_/ \_/ .__/| .__/\/    \/\___/|_| |_|   for Aspectow
         |{{CYAN   }}=========|_|===|_|=========================================
-        |{{reset  }}
-        |{{MAGENTA}}Welcome To Aspectow AppMon Demo #{class:com.aspectran.appmon.AboutMe^version}
+        |{{MAGENTA}}:: Built with Aspectran :: #{class:com.aspectran.core.AboutMe^version}
         |{{reset  }}
         |If you want a list of all supported built-in commands, type '{{GREEN}}help{{reset}}'.
         |To get help on a specific command, type '{{GREEN}}command_name -h{{reset}}'.
