@@ -48,7 +48,7 @@
         <properties>
             <item name="configLocation" value="classpath:com/aspectran/appmon/persist/db/mybatis-config.xml"/>
             <item name="environment" value="default"/>
-            <item name="properties" type="properties">
+            <item name="variables" type="properties">
                 <entry name="driver">#{appmonDBProperties^driver}</entry>
                 <entry name="url">#{appmonDBProperties^url}</entry>
                 <entry name="username">#{appmonDBProperties^username}</entry>
