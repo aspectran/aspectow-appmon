@@ -8,25 +8,25 @@
     <meta name="google" content="notranslate">
     <title>${empty page.title ? "Log Relay" : page.title}</title>
     <meta name="description" content="${empty page.description ? "Welcome to Log Relay" : page.description}">
-    <link rel="stylesheet" href="https://aspectran.com/assets/css/aspectran.css">
+    <link rel="stylesheet" href="https://assets.aspectran.com/foundation/css/aspectran.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap">
-    <script src="https://aspectran.com/assets/js/modernizr-custom.js"></script>
+    <script src="https://assets.aspectran.com/js/modernizr-custom.js"></script>
     <script src="https://aspectran.com/assets/js/jquery.min.js"></script>
-    <link rel="mask-icon" href="https://aspectran.com/assets/img/aspectran-logo.svg" color="#4B555A">
-    <link rel="apple-touch-icon" sizes="57x57" href="https://aspectran.com/assets/img/apple-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="https://aspectran.com/assets/img/apple-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="https://aspectran.com/assets/img/apple-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="https://aspectran.com/assets/img/apple-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="https://aspectran.com/assets/img/apple-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="https://aspectran.com/assets/img/apple-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="https://aspectran.com/assets/img/apple-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="https://aspectran.com/assets/img/apple-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://aspectran.com/assets/img/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192"  href="https://aspectran.com/assets/img/android-icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="https://aspectran.com/assets/img/favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="https://aspectran.com/assets/img/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="https://aspectran.com/assets/img/favicon-96x96.png">
-    <meta name="msapplication-TileImage" content="https://aspectran.com/assets/img/ms-icon-144x144.png">
+    <link rel="mask-icon" href="https://assets.aspectran.com/img/aspectran-logo.svg" color="#4B555A">
+    <link rel="apple-touch-icon" sizes="57x57" href="https://assets.aspectran.com/img/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="https://assets.aspectran.com/img/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="https://assets.aspectran.com/img/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="https://assets.aspectran.com/img/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="https://assets.aspectran.com/img/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="https://assets.aspectran.com/img/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="https://assets.aspectran.com/img/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://assets.aspectran.com/img/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://assets.aspectran.com/img/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="https://assets.aspectran.com/img/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://assets.aspectran.com/img/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://assets.aspectran.com/img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="https://assets.aspectran.com/img/favicon-96x96.png">
+    <meta name="msapplication-TileImage" content="https://assets.aspectran.com/img/ms-icon-144x144.png">
     <meta name="msapplication-TileColor" content="#4B555A">
     <script>
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -42,7 +42,7 @@
 <nav id="navigation" class="no-js">
     <div class="title-bar" data-responsive-toggle="gnb-menu" data-hide-for="large" style="display:none">
         <div class="title-bar-left">
-            <a class="logo" href="/" title="Aspectran"><img src="https://aspectran.com/assets/img/aspectran-site-logo.png" alt="Aspectran"/></a>
+            <a class="logo" href="/" title="Aspectran"><img src="https://assets.aspectran.com/img/aspectran-site-logo.png" alt="Aspectran"/></a>
         </div>
         <div class="title-bar-center">
             <a href="#top-of-page">Log Relay</a>
@@ -55,7 +55,7 @@
         <div class="grid-container ${page.style}">
             <div class="top-bar-logo">
                 <div class="circle">
-                    <a class="logo" href="/" title="Aspectran"><img src="https://aspectran.com/assets/img/aspectran-site-logo.png" alt="Aspectran"/></a>
+                    <a class="logo" href="/" title="Aspectran"><img src="https://assets.aspectran.com/img/aspectran-site-logo.png" alt="Aspectran"/></a>
                 </div>
             </div>
             <div class="top-bar-left show-for-large">
@@ -153,7 +153,7 @@
         <div class="grid-container ${page.style}">
             <div class="grid-x grid-padding-x">
                 <div class="medium-2 large-1 cell hide-for-small-only t5">
-                    <h5><a class="logo" title="Aspectran"><img src="https://aspectran.com/assets/img/aspectran-site-logo.png" width="90" height="90" alt="Aspectran" title="Aspectran"/></a></h5>
+                    <h5><a class="logo" title="Aspectran"><img src="https://assets.aspectran.com/img/aspectran-site-logo.png" width="90" height="90" alt="Aspectran" title="Aspectran"/></a></h5>
                 </div>
                 <div class="medium-4 large-4 cell">
                     <h5>Log Relay</h5>
@@ -183,7 +183,7 @@
         </div>
     </div>
 </footer>
-<script src="https://aspectran.com/assets/js/foundation.min.js"></script>
+<script src="https://assets.aspectran.com/foundation/js/foundation.min.js"></script>
 <script>
     $(document).foundation();
     $(function() {
