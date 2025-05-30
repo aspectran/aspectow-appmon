@@ -8,29 +8,31 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="google" content="notranslate">
-    <meta name="description" content="${empty page.description ? "Welcome to AppMon" : page.description}">
-    <meta name="msapplication-TileImage" content="https://assets.aspectran.com/img/ms-icon-144x144.png">
-    <meta name="msapplication-TileColor" content="#4B555A">
     <title>${empty page.title ? "AppMon" : page.title}</title>
-    <link rel="mask-icon" href="https://assets.aspectran.com/img/aspectran-logo.svg" color="#4B555A">
-    <link rel="apple-touch-icon" sizes="57x57" href="https://assets.aspectran.com/img/apple-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="https://assets.aspectran.com/img/apple-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="https://assets.aspectran.com/img/apple-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="https://assets.aspectran.com/img/apple-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="https://assets.aspectran.com/img/apple-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="https://assets.aspectran.com/img/apple-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="https://assets.aspectran.com/img/apple-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="https://assets.aspectran.com/img/apple-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://assets.aspectran.com/img/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192"  href="https://assets.aspectran.com/img/android-icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="https://assets.aspectran.com/img/favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="https://assets.aspectran.com/img/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="https://assets.aspectran.com/img/favicon-96x96.png">
-    <link rel="stylesheet" href="https://assets.aspectran.com/foundation/css/aspectran.css">
+    <meta name="description" content="${empty page.description ? "Welcome to AppMon" : page.description}">
+    <link rel="mask-icon" href="https://assets.aspectran.com/img/aspectran-logo.svg" color="#4B555A"/>
+    <link rel="apple-touch-icon" sizes="57x57" href="https://assets.aspectran.com/img/apple-icon-57x57.png"/>
+    <link rel="apple-touch-icon" sizes="60x60" href="https://assets.aspectran.com/img/apple-icon-60x60.png"/>
+    <link rel="apple-touch-icon" sizes="72x72" href="https://assets.aspectran.com/img/apple-icon-72x72.png"/>
+    <link rel="apple-touch-icon" sizes="76x76" href="https://assets.aspectran.com/img/apple-icon-76x76.png"/>
+    <link rel="apple-touch-icon" sizes="114x114" href="https://assets.aspectran.com/img/apple-icon-114x114.png"/>
+    <link rel="apple-touch-icon" sizes="120x120" href="https://assets.aspectran.com/img/apple-icon-120x120.png"/>
+    <link rel="apple-touch-icon" sizes="144x144" href="https://assets.aspectran.com/img/apple-icon-144x144.png"/>
+    <link rel="apple-touch-icon" sizes="152x152" href="https://assets.aspectran.com/img/apple-icon-152x152.png"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="https://assets.aspectran.com/img/apple-icon-180x180.png"/>
+    <link rel="icon" type="image/png" sizes="192x192"  href="https://assets.aspectran.com/img/android-icon-192x192.png"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="https://assets.aspectran.com/img/favicon-16x16.png"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="https://assets.aspectran.com/img/favicon-32x32.png"/>
+    <link rel="icon" type="image/png" sizes="96x96" href="https://assets.aspectran.com/img/favicon-96x96.png"/>
+    <meta name="msapplication-TileImage" content="https://assets.aspectran.com/img/ms-icon-144x144.png"/>
+    <meta name="msapplication-TileColor" content="#4B555A"/>
+    <link rel="stylesheet" type="text/css" href="https://assets.aspectran.com/bootstrap/css/aspectran.css"/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap">
     <script src="https://assets.aspectran.com/js/modernizr-custom.js"></script>
-    <script src="https://aspectran.com/assets/countries/countries.js"></script>
+    <script src="https://assets.aspectran.com/countries/countries.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/dayjs.min.js" integrity="sha512-FwNWaxyfy2XlEINoSnZh1JQ5TRRtGow0D6XcmAWmYCRgvqOUTnzCxPc9uF35u5ZEpirk1uhlPVA19tflhvnW1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/plugin/utc.min.js" integrity="sha512-z84O912dDT9nKqvpBnl1tri5IN0j/OEgMzLN1GlkpKLMscs5ZHVu+G2CYtA6dkS0YnOGi3cODt3BOPnYc8Agjg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -39,36 +41,38 @@
     <script>dayjs.extend(window.dayjs_plugin_localizedFormat)</script>
 </head>
 <body id="top-of-page" class="${page.style}" itemscope itemtype="https://schema.org/WebPage">
-<nav id="navigation" class="no-js">
-    <div class="title-bar" data-responsive-toggle="gnb-menu" data-hide-for="large" style="display:none">
+<nav id="navigation" class="navbar navbar-expand-lg navbar-dark">
+    <div class="title-bar">
         <div class="title-bar-left">
-            <a class="logo" href="/" title="Aspectran"><img src="https://assets.aspectran.com/img/aspectran-site-logo.png" alt="Aspectran"/></a>
+            <a class="logo" href="<aspectran:url value="/"/>" title="Aspectran"><img src="https://assets.aspectran.com/img/aspectran-site-logo.png" alt="Aspectran"/></a>
         </div>
         <div class="title-bar-center">
             <a href="#top-of-page">AppMon</a>
         </div>
-        <div class="title-bar-right" data-toggle="gnb-menu">
-            <a class="menu-icon" title="Menu"></a>
+        <div class="title-bar-right">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
         </div>
     </div>
-    <div class="top-bar" id="gnb-menu" style="display:none">
-        <div class="grid-container ${page.style}">
+    <div class="top-bar">
+        <div class="container collapse navbar-collapse" id="navbarSupportedContent">
             <div class="top-bar-logo">
                 <div class="circle">
-                    <a class="logo" href="/" title="Aspectran"><img src="https://assets.aspectran.com/img/aspectran-site-logo.png" alt="Aspectran"/></a>
+                    <a class="navbar-brand logo" href="<aspectran:url value="/"/>" title="Aspectran"><img src="https://assets.aspectran.com/img/aspectran-site-logo.png" alt="Aspectran"/></a>
                 </div>
             </div>
-            <div class="top-bar-left">
-                <ul class="dropdown menu">
-                    <li>
-                        <a href="<aspectran:url value="/../monitoring/"/>" title="AppMon">AppMon</a>
+            <div class="top-bar-left me-auto">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="<aspectran:url value="/../monitoring/"/>" title="AppMon">AppMon</a>
                     </li>
                 </ul>
             </div>
             <div class="top-bar-right">
-                <ul class="dropdown menu">
-                    <li>
-                        <a href="https://github.com/aspectran/aspectow-appmon" title="Get Involved">v${page.version}</a>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/aspectran/aspectow-appmon" title="Get Involved">v${page.version}</a>
                     </li>
                 </ul>
             </div>
@@ -76,79 +80,78 @@
     </div>
 </nav>
 <section itemscope itemtype="https://schema.org/Article">
-    <div id="masthead"<c:if test="${fn:contains(page.style, 'compact')}"> class="masthead-compact"</c:if>>
-        <div class="grid-container ${page.style}">
-            <div class="grid-x">
-                <div class="cell">
-                    <header>
-                        <c:if test="${not empty page.subheadline}">
-                            <p class="subheadline" itemprop="alternativeHeadline">${page.subheadline}</p>
-                        </c:if>
-                        <c:if test="${not empty page.headline}">
-                            <h1 itemprop="headline">${page.headline}</h1>
-                        </c:if>
-                        <c:if test="${not empty page.teaser}">
-                            <p class="teaser" itemprop="description">${page.teaser}</p>
-                        </c:if>
-                    </header>
-                    <c:if test="${not empty page.headinclude}">
-                        <jsp:include page="/WEB-INF/jsp/${page.headinclude}.jsp"/>
-                    </c:if>
-                    <c:if test="${not fn:contains(page.style, 'compact') and not empty page.headline}">
-                        <div class="hexagons">
-                            <div class="hexagon hex1"></div>
-                            <div class="hexagon hex2"></div>
-                            <div class="hexagon hex3"></div>
-                            <div class="hexagon hex5"></div>
-                            <div class="hexagon hex6"></div>
-                        </div>
-                    </c:if>
-                </div>
+    <div id="masthead" class="<c:if test="${fn:contains(page.style, 'compact')}">masthead-compact</c:if><c:if test="${not empty page.headimageinclude}">masthead-with-image</c:if>">
+        <div class="container ${page.style}">
+        <c:if test="${not empty page.headline}">
+            <header>
+                <c:if test="${not empty page.subheadline}">
+                    <p class="subheadline" itemprop="alternativeHeadline">${page.subheadline}</p>
+                </c:if>
+                <c:if test="${not empty page.headline}">
+                    <h1 itemprop="headline">${page.headline}</h1>
+                </c:if>
+                <c:if test="${not empty page.teaser}">
+                    <p class="teaser" itemprop="description">${page.teaser}</p>
+                </c:if>
+            </header>
+        </c:if>
+        <c:if test="${not empty page.headinclude}">
+            <jsp:include page="/WEB-INF/jsp/${page.headinclude}.jsp"/>
+        </c:if>
+        <c:if test="${not fn:contains(page.style, 'compact') and not empty page.headline}">
+            <div class="hexagons">
+                <div class="hexagon hex1"></div>
+                <div class="hexagon hex2"></div>
+                <div class="hexagon hex3"></div>
+                <div class="hexagon hex5"></div>
+                <div class="hexagon hex6"></div>
             </div>
+        </c:if>
         </div>
-        <div class="grid-container grid-x breadcrumbs-bar ${page.style}">
-            <div class="cell">
-                <nav role="navigation" aria-label="You are here:">
-                    <ul class="breadcrumbs" itemprop="breadcrumb">
-                        <li><a href="<aspectran:url value="/"/>">AppMon</a></li>
-                    </ul>
-                </nav>
-            </div>
+        <c:if test="${not empty page.headimageinclude}">
+            <jsp:include page="/WEB-INF/jsp/${page.headimageinclude}.jsp"/>
+        </c:if>
+        <div class="container breadcrumb-bar">
+            <nav role="navigation" aria-label="You are here:">
+                <ol class="breadcrumb" itemprop="breadcrumb">
+                    <li class="breadcrumb-item"><a href="<aspectran:url value="/"/>">AppMon</a></li>
+                </ol>
+            </nav>
         </div>
     </div>
-    <div class="grid-container ${page.style}">
+    <div class="container contour ${page.style}">
     <c:if test="${not empty page.include}">
         <jsp:include page="/WEB-INF/jsp/${page.include}.jsp"/>
     </c:if>
     </div>
 </section>
-<div class="grid-container ${page.style}">
-    <div id="up-to-top" class="grid-x">
-        <div class="small-12 cell" style="text-align: right;">
-            <a class="iconfont" href="#top-of-page">&#xf108;</a>
+<div class="container ${page.style}">
+    <div id="up-to-top" class="row">
+        <div class="col text-end">
+            <a href="#top-of-page"><i class="bi bi-chevron-up"></i></a>
         </div>
     </div>
 </div>
 <footer id="footer-content">
     <div id="footer">
-        <div class="grid-container">
-            <div class="grid-x grid-padding-x">
-                <div class="medium-2 large-1 cell hide-for-small-only t5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-2 col-lg-1 mt-1">
                     <h5><a class="logo" href="https://aspectran.com/en/aspectran/" title="Aspectran"><img src="https://assets.aspectran.com/img/aspectran-logo-grey-x100.png" width="100" height="100" alt="Aspectran" title="Aspectran"/></a></h5>
                 </div>
-                <div class="medium-4 large-4 cell">
+                <div class="col-md-4 col-lg-4">
                     <a href="https://aspectran.com/en/aspectran/"><h5>About Aspectran</h5></a>
                     <p><a href="https://aspectran.com/en/aspectran/">Aspectran is a framework for developing Java applications that can be used to build simple shell applications and large enterprise web applications.</a></p>
                 </div>
-                <div class="small-6 medium-3 large-3 large-offset-1 cell">
+                <div class="col-sm-6 col-md-3 col-lg-3 offset-lg-1">
                     <h5>Get Involved</h5>
-                    <ul class="no-bullet">
-                        <li class="icon-github"> <a href="https://github.com/aspectran" target="_blank" title="" class="external">GitHub</a></li>
+                    <ul class="list-unstyled">
+                        <li class="bi bi-github"> <a href="https://github.com/aspectran" target="_blank" title="" class="external">GitHub</a></li>
                     </ul>
                 </div>
-                <div class="small-6 medium-3 large-3 cell">
+                <div class="col-sm-6 col-md-3 col-lg-3">
                     <h5>Support</h5>
-                    <ul class="no-bullet">
+                    <ul class="list-unstyled">
                         <li><a href="https://aspectran.com/en/support/faq/" title="Frequently Asked Questions about Aspectran">FAQ</a></li>
                         <li><a href="https://aspectran.com/en/support/contact/" title="Contact Us">Contact Us</a></li>
                     </ul>
@@ -157,21 +160,19 @@
         </div>
     </div>
     <div id="subfooter">
-        <div class="grid-container">
-            <nav class="grid-x b30">
-                <section id="subfooter-left" class="medium-6 cell credits">
+        <div class="container">
+            <nav class="row mb-1">
+                <section id="subfooter-left" class="col-md-6 credits">
                     <p>Copyright © 2018-2025 The Aspectran Project</p>
                 </section>
-                <section id="subfooter-right" class="medium-6 cell social-icons text-right">
+                <section id="subfooter-right" class="col-md-6 social-icons text-end">
                     <%= com.aspectran.core.AboutMe.POWERED_BY_LINK %>
                 </section>
             </nav>
         </div>
     </div>
 </footer>
-<script src="https://assets.aspectran.com/foundation/js/foundation.min.js"></script>
 <script>
-    $(document).foundation();
     $(function() {
         let $win = $(window);
         let $nav = $("#navigation");
@@ -344,27 +345,30 @@
 </script>
 <script>
     $(function() {
-        let menuitem = $("#gnb-menu .dropdown li a[href='" + location.pathname + "']").last();
+        let menuitem = $("#navbarSupportedContent .navbar-nav a[href='" + decodeURI(location.pathname) + "']").last();
         if (menuitem.length > 0) {
             let arr = [];
             arr.push({'name': menuitem.text(), 'href': null});
-            menuitem.parentsUntil(".dropdown > li:eq(0)").each(function() {
-                if ($(this).hasClass("menu")) {
-                    let a2 = $(this).prev();
-                    if (a2.is("a")) {
-                        arr.push({'name': a2.text(), 'href': a2.attr("href") || ""});
-                    }
+            menuitem.parentsUntil(".navbar-nav").each(function() {
+                let a2 = $(this).find(".nav-link");
+                if (a2.is("a")) {
+                    arr.push({'name': a2.text(), 'href': a2.attr("href") || ""});
                 }
             });
             arr.reverse();
             for (let i in arr) {
                 let item = arr[i];
+                let li = $("<li class='breadcrumb-item'></li>");
                 if (i < arr.length - 1) {
-                    $(".breadcrumbs").append("<li><a href='" + item.href + "'>" + item.name + "</a></li>");
+                    $("<a/>").attr("href", item.href).text(item.name).appendTo(li);
                 } else {
-                    $(".breadcrumbs").append("<li><span class='show-for-sr'>Current: </span> <span class='current'>" + item.name + "</span></li>");
+                    li.addClass("active").text(item.name);
                 }
+                li.appendTo(".breadcrumb");
             }
+        }
+        if (!$(".breadcrumb li").length) {
+            $(".breadcrumb-bar").addClass("invisible");
         }
     });
 </script>

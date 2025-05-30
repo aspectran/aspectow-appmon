@@ -6,36 +6,39 @@
 <script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250418"/>"></script>
 <script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250418"/>"></script>
 <script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250418"/>"></script>
-<div class="grid-x">
-    <dl class="cell instance tabs t10 b0">
-        <dd class="tabs-title"><a><span class="bullet fi-marker"></span>
-            <span class="title"> </span> <span class="indicator fi-loop"></span></a>
-        </dd>
-    </dl>
-    <div class="cell control-bar">
+<div class="container">
+    <ul class="instance tabs nav nav-tabs mt-3">
+        <li class="tabs-title nav-item">
+            <a class="nav-link"><i class="bullet bi bi-cone"></i><span class="title">JPetStore</span> <i class="indicator bi bi-lightning-charge-fill"></i></a>
+        </li>
+        <li class="tabs-title nav-item available active">
+            <a class="nav-link"><i class="bullet bi bi-cone"></i><span class="title">PetClinic</span> <i class="indicator bi bi-lightning-charge-fill"></i></a>
+        </li>
+    </ul>
+    <div class="control-bar">
         <div class="options">
-            <div class="layout-options button-group tiny show-for-large" title="Layout options">
-                <span class="fi-layout"></span>
-                <a class="button compact on"> Compact</a>
+            <i class="bi bi-layout-wtf d-none d-lg-inline-block"></i>
+            <div class="layout-options btn-group d-none d-lg-inline-block" title="Layout options">
+                <a class="btn compact on"> Compact</a>
             </div>
-            <div class="date-unit-options button-group tiny" title="Date unit options">
-                <span class="fi-graph-bar"></span>
-                <a class="button default on">Default</a><a class="button hour" data-unit="hour">Hour</a><a class="button day" data-unit="day">Day</a><a class="button month" data-unit="month">Month</a><a class="button year" data-unit="year">Year</a>
+            <i class="bi bi-bar-chart-line"></i>
+            <div class="date-unit-options btn-group" title="Date unit options">
+                <a class="btn default on">Default</a><a class="btn hour" data-unit="hour">Hour</a><a class="btn day" data-unit="day">Day</a><a class="btn month" data-unit="month">Month</a><a class="btn year" data-unit="year">Year</a>
             </div>
-            <div class="date-offset-options button-group tiny" title="Date offset options">
-                <a class="button previous on" data-offset="previous" title="Previous"><span class="fi-previous"></span></a><a class="button current" data-offset="current" title="Next"><span class="fi-next"></span></a>
+            <div class="date-offset-options btn-group" title="Date offset options">
+                <a class="btn previous on" data-offset="previous" title="Previous"><i class="bi bi-skip-backward-fill"></i></a><a class="btn current" data-offset="current" title="Next"><i class="bi bi-skip-forward-fill"></i></a>
             </div>
-            <div class="speed-options button-group tiny hide" title="Speed options">
-                <a class="button fi-fast-forward faster" title="Set to poll every second. Turn this option on only when absolutely necessary."> Faster polling interval</a>
+            <div class="speed-options btn-group d-none" title="Speed options">
+                <a class="btn bi bi-fast-forward faster" title="Set to poll every second. Turn this option on only when absolutely necessary."> Faster polling interval</a>
             </div>
         </div>
     </div>
-    <div class="cell event-box large-6">
-        <div class="grid-x">
-            <div class="cell title-bar">
+    <div class="row g-0">
+        <div class="col-lg-6 event-box">
+            <div class="title-bar">
                 <h4 class="ellipses"></h4>
             </div>
-            <div class="cell track-box">
+            <div class="track-box">
                 <div class="track-stack">
                     <div class="activity-status-plate">
                         <div class="bottom-plate-left"></div>
@@ -50,9 +53,9 @@
                     </div>
                 </div>
             </div>
-            <div class="cell session-box">
-                <div class="grid-x">
-                    <div class="cell small-12 medium-4">
+            <div class="col session-box">
+                <div class="row g-0">
+                    <div class="col-sm-12 col-md-4">
                         <div class="panel status">
                             <dl class="session-stats">
                                 <dt title="The number of active sessions">Current Active Sessions</dt>
@@ -72,7 +75,7 @@
                             <div class="knob-bar"><div class="knob"></div></div>
                         </div>
                     </div>
-                    <div class="cell small-12 medium-8">
+                    <div class="col-sm-12 col-md-8">
                         <div class="panel ground">
                             <ul class="sessions"></ul>
                         </div>
@@ -80,27 +83,35 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="cell visual-box large-6">
-        <div class="chart-box">
-            <div class="chart">
+        <div class="col-lg-6 visual-box">
+            <div class="chart-box" style="display: none;">
+                <div class="chart">
+                </div>
+            </div>
+            <div class="chart-box available">
+                <div class="chart">
+                </div>
+            </div>
+            <div class="chart-box available">
+                <div class="chart">
+                </div>
             </div>
         </div>
-    </div>
-    <div class="cell console-box">
-        <div class="status-bar">
-            <h4 class="ellipses"></h4>
-            <a class="tailing-switch" title="Scroll to End of Log">
-                <span class="tailing-status"></span>
-            </a>
-            <a class="clear-screen" title="Clear screen">
-                <span class="icon fi-x"></span>
-            </a>
-            <a class="pause-switch" title="Pause log output">
-                <span class="icon fi-pause"></span>
-            </a>
+        <div class="col console-box">
+            <div class="status-bar">
+                <h4 class="ellipses"></h4>
+                <a class="tailing-switch" title="Scroll to End of Log">
+                    <i class="tailing-status"></i>
+                </a>
+                <a class="pause-switch" title="Pause log output">
+                    <i class="icon bi bi-pause"></i>
+                </a>
+                <a class="clear-screen" title="Clear screen">
+                    <i class="icon bi bi-trash"></i>
+                </a>
+            </div>
+            <pre class="console"></pre>
         </div>
-        <pre class="console"></pre>
     </div>
 </div>
 <script>

@@ -124,7 +124,7 @@ function FrontBuilder() {
         if (availableTabs <= 1) {
             return;
         }
-        let activeTabs = $(".domain.tabs .tabs-title.available.is-active").length;
+        let activeTabs = $(".domain.tabs .tabs-title.available.active").length;
         let domain = domains[domainIndex];
         if (activeTabs === 0) {
             for (let key in domains) {
@@ -161,11 +161,11 @@ function FrontBuilder() {
                 activeDomains++;
             }
         }
-        $(".domain.tabs .tabs-title.available").removeClass("is-active");
+        $(".domain.tabs .tabs-title.available").removeClass("active");
         if (availableTabs > activeDomains) {
             for (let key in domains) {
                 if (domains[key].active) {
-                    $(".domain.tabs .tabs-title[data-domain-index=" + domains[key].index + "]").addClass("is-active");
+                    $(".domain.tabs .tabs-title[data-domain-index=" + domains[key].index + "]").addClass("active");
                 }
             }
         }
@@ -222,13 +222,13 @@ function FrontBuilder() {
             if (instance.name === instanceName) {
                 instance.active = true;
                 showDomainInstance(instanceName);
-                if (!$tabTitle.hasClass("is-active")) {
-                    $tabTitle.addClass("is-active");
+                if (!$tabTitle.hasClass("active")) {
+                    $tabTitle.addClass("active");
                 }
                 exists = true;
             } else {
                 instance.active = false;
-                $tabTitle.removeClass("is-active");
+                $tabTitle.removeClass("active");
             }
         }
         if (!exists && instanceName) {
@@ -279,12 +279,12 @@ function FrontBuilder() {
             let $visualBox = $(".visual-box[data-instance-name=" + instance.name + "]");
             if ($eventBox.length && $visualBox.length) {
                 if ($eventBox.find(".session-box.available").length === 0) {
-                    $eventBox.removeClass("large-6").addClass("fixed-layout");
-                    $visualBox.removeClass("large-6").addClass("fixed-layout");
+                    $eventBox.removeClass("col-lg-6").addClass("fixed-layout");
+                    $visualBox.removeClass("col-lg-6").addClass("fixed-layout");
                 }
             } else {
-                $eventBox.removeClass("large-6").addClass("fixed-layout");
-                $visualBox.removeClass("large-6").addClass("fixed-layout");
+                $eventBox.removeClass("col-lg-6").addClass("fixed-layout");
+                $visualBox.removeClass("col-lg-6").addClass("fixed-layout");
             }
         }
     };
@@ -298,49 +298,49 @@ function FrontBuilder() {
             let instanceName = $(this).closest(".tabs-title").data("instance-name");
             changeInstance(instanceName);
         });
-        $(".layout-options .button").off().on("click", function() {
+        $(".layout-options .btn").off().on("click", function() {
             let instanceName = $(this).closest(".control-bar").data("instance-name");
             if (!$(this).hasClass("on")) {
                 if ($(this).hasClass("compact")) {
                     $(this).addClass("on");
-                    $(".event-box.available:not(.fixed-layout)[data-instance-name=" + instanceName + "]").addClass("large-6");
-                    $(".visual-box.available:not(.fixed-layout)[data-instance-name=" + instanceName + "]").addClass("large-6");
-                    $(".console-box.available[data-instance-name=" + instanceName + "]").addClass("large-6");
+                    $(".event-box.available:not(.fixed-layout)[data-instance-name=" + instanceName + "]").addClass("col-lg-6");
+                    $(".visual-box.available:not(.fixed-layout)[data-instance-name=" + instanceName + "]").addClass("col-lg-6");
+                    $(".console-box.available[data-instance-name=" + instanceName + "]").addClass("col-lg-6");
                 }
             } else {
                 if ($(this).hasClass("compact")) {
                     $(this).removeClass("on");
-                    $(".event-box.available:not(.fixed-layout)[data-instance-name=" + instanceName + "]").removeClass("large-6");
-                    $(".visual-box.available:not(.fixed-layout)[data-instance-name=" + instanceName + "]").removeClass("large-6");
-                    $(".console-box.available[data-instance-name=" + instanceName + "]").removeClass("large-6");
+                    $(".event-box.available:not(.fixed-layout)[data-instance-name=" + instanceName + "]").removeClass("col-lg-6");
+                    $(".visual-box.available:not(.fixed-layout)[data-instance-name=" + instanceName + "]").removeClass("col-lg-6");
+                    $(".console-box.available[data-instance-name=" + instanceName + "]").removeClass("col-lg-6");
                 }
             }
             refreshData(instanceName);
         });
-        $(".date-unit-options .button").off().on("click", function() {
+        $(".date-unit-options .btn").off().on("click", function() {
             let $controlBar = $(this).closest(".control-bar");
             let instanceName = $controlBar.data("instance-name");
             let unit = $(this).data("unit")||"";
-            $(this).parent().data("unit", unit).find(".button").removeClass("on");
+            $(this).parent().data("unit", unit).find(".btn").removeClass("on");
             $(this).addClass("on");
             $controlBar.find(".date-offset-options").data("offset", "");
-            $controlBar.find(".date-offset-options .button.current").removeClass("on");
+            $controlBar.find(".date-offset-options .btn.current").removeClass("on");
             refreshData(instanceName);
         });
-        $(".date-offset-options .button").off().on("click", function() {
+        $(".date-offset-options .btn").off().on("click", function() {
             let $controlBar = $(this).closest(".control-bar");
             let instanceName = $controlBar.data("instance-name");
             let offset = $(this).data("offset")||"";
             if (offset !== "current") {
-                $(this).parent().find(".button.current").addClass("on");
+                $(this).parent().find(".btn.current").addClass("on");
             } else {
-                $(this).parent().find(".button").addClass("on");
-                $(this).parent().find(".button.current").removeClass("on");
+                $(this).parent().find(".btn").addClass("on");
+                $(this).parent().find(".btn.current").removeClass("on");
             }
             $(this).parent().data("offset", offset);
             refreshData(instanceName, offset);
         });
-        $(".speed-options .button").off().on("click", function() {
+        $(".speed-options .btn").off().on("click", function() {
             let faster = !$(this).hasClass("on");
             if (faster) {
                 $(this).addClass("on");
@@ -418,7 +418,7 @@ function FrontBuilder() {
             if (maxStartDate) {
                 options.push("dateOffset:" + maxStartDate);
             } else {
-                $(".control-bar[data-instance-name=" + instanceName + "] .date-offset-options .button.previous").removeClass("on");
+                $(".control-bar[data-instance-name=" + instanceName + "] .date-offset-options .btn.previous").removeClass("on");
                 return;
             }
         }
@@ -436,6 +436,8 @@ function FrontBuilder() {
         $(".instance.tabs .tabs-title.available").remove();
         $(".instance.tabs .tabs-title").show();
         $(".event-box.available").remove();
+        $(".visual-box.available").remove();
+        $(".chart-box.available").remove();
         $(".console-box.available").remove();
         $(".console-box").show();
     };
@@ -536,7 +538,7 @@ function FrontBuilder() {
         let $newControlBar = $controlBar.first().hide().clone()
             .addClass("available")
             .attr("data-instance-name", instanceInfo.name);
-        $newControlBar.find(".button.default").text(sampleInterval + "min.");
+        $newControlBar.find(".btn.default").text(sampleInterval + "min.");
         return $newControlBar.insertAfter($controlBar.last());
     };
 
@@ -583,7 +585,7 @@ function FrontBuilder() {
     const addChartBox = function ($visualBox, domainInfo, instanceInfo, eventInfo) {
         let $chartBox = $visualBox.find(".chart-box");
         let $newBox = $chartBox.first().hide().clone()
-            .addClass("available large-6")
+            .addClass("available col-lg-6")
             .attr("data-domain-index", domainInfo.index)
             .attr("data-instance-name", instanceInfo.name)
             .attr("data-event-name", eventInfo.name);
@@ -595,7 +597,7 @@ function FrontBuilder() {
     const addConsoleBox = function (domainInfo, instanceInfo, logInfo) {
         let $consoleBox = $(".console-box");
         let $newBox = $consoleBox.first().hide().clone()
-            .addClass("available large-6")
+            .addClass("available col-lg-6")
             .attr("data-domain-index", domainInfo.index)
             .attr("data-instance-name", instanceInfo.name)
             .attr("data-log-name", logInfo.name);
