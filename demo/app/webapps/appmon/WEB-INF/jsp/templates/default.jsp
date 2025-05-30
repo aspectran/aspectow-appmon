@@ -73,15 +73,6 @@
                 </ul>
             </div>
         </div>
-        <div class="breadcrumbs-bar" style="display:none" data-hide-for="medium down">
-            <div class="grid-container ${page.style}">
-                <nav role="navigation" aria-label="You are here:">
-                    <ul class="breadcrumbs" itemprop="breadcrumb">
-                        <li><a href="<aspectran:url value="/"/>">AppMon</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
     </div>
 </nav>
 <section itemscope itemtype="https://schema.org/Article">
