@@ -9,10 +9,10 @@
 <div class="container">
     <ul class="instance tabs nav nav-tabs mt-3">
         <li class="tabs-title nav-item">
-            <a class="nav-link"><i class="bullet bi bi-cone"></i><span class="title">JPetStore</span> <i class="indicator bi bi-lightning-charge-fill"></i></a>
+            <a class="nav-link"><i class="bullet bi bi-modem"></i><span class="title">JPetStore</span> <i class="indicator bi bi-lightning-charge-fill"></i></a>
         </li>
         <li class="tabs-title nav-item available active">
-            <a class="nav-link"><i class="bullet bi bi-cone"></i><span class="title">PetClinic</span> <i class="indicator bi bi-lightning-charge-fill"></i></a>
+            <a class="nav-link"><i class="bullet bi bi-modem"></i><span class="title">PetClinic</span> <i class="indicator bi bi-lightning-charge-fill"></i></a>
         </li>
     </ul>
     <div class="control-bar">
@@ -26,7 +26,7 @@
                 <a class="btn default on">Default</a><a class="btn hour" data-unit="hour">Hour</a><a class="btn day" data-unit="day">Day</a><a class="btn month" data-unit="month">Month</a><a class="btn year" data-unit="year">Year</a>
             </div>
             <div class="date-offset-options btn-group" title="Date offset options">
-                <a class="btn previous on" data-offset="previous" title="Previous"><i class="bi bi-chevron-double-left"></i></a><a class="btn current" data-offset="current" title="Next"><i class="bi bi-chevron-double-right"></i></a>
+                <a class="btn previous on" data-offset="previous" title="Previous"><i class="bi bi-rewind-fill"></i></a><a class="btn current" data-offset="current" title="Next"><i class="bi bi-skip-forward-fill"></i></a>
             </div>
             <div class="speed-options btn-group d-none" title="Speed options">
                 <a class="btn bi bi-fast-forward faster" title="Set to poll every second. Turn this option on only when absolutely necessary."> Faster polling interval</a>
