@@ -42,8 +42,6 @@ public class ActivityEventReader extends AbstractEventReader {
 
     private final String aspectId;
 
-    private EventExporter eventExporter;
-
     public ActivityEventReader(@NonNull ExporterManager exporterManager,
                                @NonNull EventInfo eventInfo,
                                @NonNull EventCount eventCount) {

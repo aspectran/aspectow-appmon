@@ -61,8 +61,8 @@ public class HikariPoolEventReader extends AbstractMBeanEventReader {
             throw new Exception("Could not find ActivityContext named '" + getEventInfo().getTarget() + "'");
         }
 
-        mBeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName objectName = new ObjectName("com.zaxxer.hikari:type=Pool (" + poolName + ")");
+        mBeanServer = ManagementFactory.getPlatformMBeanServer();
         hikariPoolMXBean = JMX.newMBeanProxy(mBeanServer, objectName, HikariPoolMXBean.class);
     }
 
@@ -76,6 +76,9 @@ public class HikariPoolEventReader extends AbstractMBeanEventReader {
 
     @Override
     public String read() {
+        if (hikariPoolMXBean == null) {
+            return null;
+        }
         return new JsonBuilder()
                 .prettyPrint(false)
                 .nullWritable(false)
@@ -91,6 +94,9 @@ public class HikariPoolEventReader extends AbstractMBeanEventReader {
 
     @Override
     public String readIfChanged() {
+        if (hikariPoolMXBean == null) {
+            return null;
+        }
         boolean changed = (hikariPoolMXBean.getActiveConnections() != oldActiveConnections ||
                 hikariPoolMXBean.getIdleConnections() != oldIdleConnections ||
                 hikariPoolMXBean.getThreadsAwaitingConnection() != oldThreadsAwaitingConnection);

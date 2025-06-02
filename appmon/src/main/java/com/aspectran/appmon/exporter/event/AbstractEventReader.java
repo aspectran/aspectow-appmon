@@ -55,7 +55,7 @@ public abstract class AbstractEventReader implements EventReader {
         if (eventExporter == null) {
             synchronized (this) {
                 if (eventExporter == null) {
-                    eventExporter = getExporterManager().getExporter(getEventInfo().getName());
+                    eventExporter = exporterManager.getExporter(getEventInfo().getName());
                 }
             }
         }
