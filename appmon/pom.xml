@@ -70,6 +70,13 @@
             <version>2.3.232</version>
             <scope>runtime</scope>
         </dependency>
+        <!-- Optional dependencies -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>6.3.0</version>
+            <optional>true</optional>
+        </dependency>
         <!-- Additional testing dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

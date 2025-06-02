@@ -19,6 +19,7 @@ import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.ExporterManager;
 import com.aspectran.appmon.persist.counter.EventCount;
 import com.aspectran.utils.annotation.jsr305.NonNull;
+import com.aspectran.utils.annotation.jsr305.Nullable;
 
 /**
  * <p>Created: 2025. 1. 27.</p>
@@ -31,9 +32,16 @@ public abstract class AbstractEventReader implements EventReader {
 
     private final EventCount eventCount;
 
+    private volatile EventExporter eventExporter;
+
+    public AbstractEventReader(@NonNull ExporterManager exporterManager,
+                               @NonNull EventInfo eventInfo) {
+        this(exporterManager, eventInfo, null);
+    }
+
     public AbstractEventReader(@NonNull ExporterManager exporterManager,
                                @NonNull EventInfo eventInfo,
-                               @NonNull EventCount eventCount) {
+                               @Nullable EventCount eventCount) {
         this.exporterManager = exporterManager;
         this.eventInfo = eventInfo;
         this.eventCount = eventCount;
@@ -41,6 +49,17 @@ public abstract class AbstractEventReader implements EventReader {
 
     public ExporterManager getExporterManager() {
         return exporterManager;
+    }
+
+    protected EventExporter getEventExporter() {
+        if (eventExporter == null) {
+            synchronized (this) {
+                if (eventExporter == null) {
+                    eventExporter = getExporterManager().getExporter(getEventInfo().getName());
+                }
+            }
+        }
+        return eventExporter;
     }
 
     public EventInfo getEventInfo() {

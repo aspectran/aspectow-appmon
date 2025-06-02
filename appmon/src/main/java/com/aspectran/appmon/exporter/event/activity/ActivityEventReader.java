@@ -44,17 +44,11 @@ public class ActivityEventReader extends AbstractEventReader {
 
     private EventExporter eventExporter;
 
-    public ActivityEventReader(@NonNull ExporterManager exporterManager, @NonNull EventInfo eventInfo,
+    public ActivityEventReader(@NonNull ExporterManager exporterManager,
+                               @NonNull EventInfo eventInfo,
                                @NonNull EventCount eventCount) {
         super(exporterManager, eventInfo, eventCount);
         this.aspectId = getClass().getName() + ".ASPECT@" + hashCode() + "[" + eventInfo.getTarget() + "]";
-    }
-
-    EventExporter getEventExporter() {
-        if (eventExporter == null) {
-            eventExporter = getExporterManager().getExporter(getEventInfo().getName());
-        }
-        return eventExporter;
     }
 
     @Override

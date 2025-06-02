@@ -85,14 +85,19 @@ public abstract class AppMonManagerBuilder {
             eventInfo.validateRequiredParameters();
 
             EventCounter eventCounter = EventCounterBuilder.build(eventInfo);
-            appMonManager.getPersistManager().getCounterPersist().addEventCounter(eventCounter);
+            if (eventCounter != null) {
+                appMonManager.getPersistManager().getCounterPersist().addEventCounter(eventCounter);
 
-            EventExporter eventExporter = EventExporterBuilder.build(eventExporterManager, eventInfo, eventCounter.getEventCount());
-            eventExporterManager.addExporter(eventExporter);
+                EventExporter eventExporter = EventExporterBuilder.build(eventExporterManager, eventInfo, eventCounter.getEventCount());
+                eventExporterManager.addExporter(eventExporter);
 
-            ChartDataExporter chartDataExporter = ChartDataExporterBuilder.build(dataExporterManager, eventInfo);
-            eventCounter.addEventRollupListener(chartDataExporter);
-            dataExporterManager.addExporter(chartDataExporter);
+                ChartDataExporter chartDataExporter = ChartDataExporterBuilder.build(dataExporterManager, eventInfo);
+                eventCounter.addEventRollupListener(chartDataExporter);
+                dataExporterManager.addExporter(chartDataExporter);
+            } else {
+                EventExporter eventExporter = EventExporterBuilder.build(eventExporterManager, eventInfo, null);
+                eventExporterManager.addExporter(eventExporter);
+            }
         }
         appMonManager.getExportServiceManager().addExporterManager(eventExporterManager);
         appMonManager.getExportServiceManager().addExporterManager(dataExporterManager);

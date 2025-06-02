@@ -35,7 +35,8 @@ public class ActivityEventAdvice {
 
     private String sessionId;
 
-    public ActivityEventAdvice(ActivityEventReader activityEventReader) {
+    public ActivityEventAdvice(@NonNull ActivityEventReader activityEventReader) {
+        assert activityEventReader.getEventCount() != null;
         this.activityEventReader = activityEventReader;
     }
 
@@ -51,7 +52,7 @@ public class ActivityEventAdvice {
 
     public String after(@NonNull Activity activity) {
         Throwable error = activity.getRootCauseOfRaisedException();
-        if (error != null && activityEventReader.getEventCount() != null) {
+        if (error != null) {
             activityEventReader.getEventCount().error();
         }
 

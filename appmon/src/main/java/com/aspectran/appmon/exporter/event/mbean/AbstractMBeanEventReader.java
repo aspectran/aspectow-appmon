@@ -13,27 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.exporter.event;
+package com.aspectran.appmon.exporter.event.mbean;
 
+import com.aspectran.appmon.config.EventInfo;
+import com.aspectran.appmon.exporter.ExporterManager;
 import com.aspectran.appmon.exporter.ExporterType;
+import com.aspectran.appmon.exporter.event.AbstractEventReader;
+import com.aspectran.utils.annotation.jsr305.NonNull;
 
 /**
- * <p>Created: 2024-12-18</p>
+ * <p>Created: 2025-06-02</p>
  */
-public interface EventReader {
+public abstract class AbstractMBeanEventReader extends AbstractEventReader {
 
-    default ExporterType getType() {
-        return ExporterType.EVENT;
+    public AbstractMBeanEventReader(
+            @NonNull ExporterManager exporterManager,
+            @NonNull EventInfo eventInfo) {
+        super(exporterManager, eventInfo);
     }
 
-    void start() throws Exception;
-
-    void stop();
-
-    String read();
-
-    default String readIfChanged() {
-        return null;
+    @Override
+    public ExporterType getType() {
+        return ExporterType.MBEAN;
     }
 
 }

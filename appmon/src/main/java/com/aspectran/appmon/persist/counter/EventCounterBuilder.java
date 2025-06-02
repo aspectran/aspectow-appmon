@@ -21,6 +21,7 @@ import com.aspectran.appmon.persist.counter.session.SessionEventCounter;
 import com.aspectran.utils.ClassUtils;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
+import com.aspectran.utils.annotation.jsr305.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ public abstract class EventCounterBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(EventCounterBuilder.class);
 
-    @NonNull
+    @Nullable
     public static EventCounter build(EventInfo eventInfo) throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug(ToStringBuilder.toString("Create CounterPersist", eventInfo));
@@ -39,22 +40,24 @@ public abstract class EventCounterBuilder {
         return createEventCounter(eventInfo);
     }
 
-    @NonNull
+    @Nullable
     private static EventCounter createEventCounter(@NonNull EventInfo eventInfo) throws Exception {
         if (!eventInfo.hasCounter()) {
             if ("activity".equals(eventInfo.getName())) {
                 return new ActivityEventCounter(eventInfo);
             } else if ("session".equals(eventInfo.getName())) {
                 return new SessionEventCounter(eventInfo);
+            } else if (eventInfo.getReader() != null) {
+                return null;
             } else {
                 throw new IllegalArgumentException("No event counter specified for " + eventInfo.getName() + " " + eventInfo);
             }
         }
         try {
-            Class<EventCounter> readerType = ClassUtils.classForName(eventInfo.getCounter());
+            Class<EventCounter> counterType = ClassUtils.classForName(eventInfo.getCounter());
             Object[] args = { eventInfo };
             Class<?>[] argTypes = { EventInfo.class };
-            return ClassUtils.createInstance(readerType, args, argTypes);
+            return ClassUtils.createInstance(counterType, args, argTypes);
         } catch (Exception e) {
             throw new Exception(ToStringBuilder.toString("Failed to create event counter", eventInfo), e);
         }

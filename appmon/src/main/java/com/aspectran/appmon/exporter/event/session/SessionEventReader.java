@@ -54,8 +54,6 @@ public class SessionEventReader extends AbstractEventReader {
 
     private final String deploymentName;
 
-    private EventExporter eventExporter;
-
     private SessionManager sessionManager;
 
     private SessionEventReadingListener sessionListener;
@@ -70,13 +68,6 @@ public class SessionEventReader extends AbstractEventReader {
         String[] arr = StringUtils.divide(eventInfo.getTarget(), "/");
         this.serverId = arr[0];
         this.deploymentName = arr[1];
-    }
-
-    EventExporter getEventExporter() {
-        if (eventExporter == null) {
-            eventExporter = getExporterManager().getExporter(getEventInfo().getName());
-        }
-        return eventExporter;
     }
 
     @Override

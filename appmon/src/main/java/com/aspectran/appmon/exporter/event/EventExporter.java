@@ -18,7 +18,6 @@ package com.aspectran.appmon.exporter.event;
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.AbstractExporter;
 import com.aspectran.appmon.exporter.ExporterManager;
-import com.aspectran.appmon.exporter.ExporterType;
 import com.aspectran.appmon.service.CommandOptions;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
@@ -31,8 +30,6 @@ import java.util.TimerTask;
  * <p>Created: 2024-12-18</p>
  */
 public class EventExporter extends AbstractExporter {
-
-    private static final ExporterType TYPE = ExporterType.EVENT;
 
     private final ExporterManager exporterManager;
 
@@ -49,11 +46,11 @@ public class EventExporter extends AbstractExporter {
     public EventExporter(@NonNull ExporterManager exporterManager,
                          @NonNull EventInfo eventInfo,
                          @NonNull EventReader eventReader) {
-        super(TYPE);
+        super(eventReader.getType());
         this.exporterManager = exporterManager;
         this.eventInfo = eventInfo;
         this.eventReader = eventReader;
-        this.prefix = eventInfo.getInstanceName() + ":" + TYPE + ":" + eventInfo.getName() + ":";
+        this.prefix = eventInfo.getInstanceName() + ":" + getType() + ":" + eventInfo.getName() + ":";
         this.sampleInterval = eventInfo.getSampleInterval();
     }
 

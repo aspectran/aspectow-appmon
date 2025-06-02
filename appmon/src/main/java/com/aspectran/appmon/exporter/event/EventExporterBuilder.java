@@ -23,6 +23,7 @@ import com.aspectran.appmon.persist.counter.EventCount;
 import com.aspectran.utils.ClassUtils;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
+import com.aspectran.utils.annotation.jsr305.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ public abstract class EventExporterBuilder {
     public static EventExporter build(
             @NonNull ExporterManager exporterManager,
             @NonNull EventInfo eventInfo,
-            @NonNull EventCount eventCount) throws Exception {
+            @Nullable EventCount eventCount) throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug(ToStringBuilder.toString("Create EventExporter", eventInfo));
         }
