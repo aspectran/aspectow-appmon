@@ -1,5 +1,5 @@
 function FrontViewer(sampleInterval) {
-    const FLAGS_URL = "https://assets.aspectran.com/countries/flags/";
+    const FLAGS_URL = "https://cdn.jsdelivr.net/gh/aspectran/aspectran-assets/app/webroot/assets/countries/flags/";
     const TEMP_RESIDENT_INACTIVE_SECS = 30;
 
     let client = null;
