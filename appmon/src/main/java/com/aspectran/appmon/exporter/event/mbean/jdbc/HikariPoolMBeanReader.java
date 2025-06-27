@@ -17,7 +17,7 @@ package com.aspectran.appmon.exporter.event.mbean.jdbc;
 
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.ExporterManager;
-import com.aspectran.appmon.exporter.event.mbean.AbstractMBeanEventReader;
+import com.aspectran.appmon.exporter.event.mbean.AbstractMBeanReader;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
@@ -32,7 +32,7 @@ import java.lang.management.ManagementFactory;
 /**
  * <p>Created: 2025-06-02</p>
  */
-public class HikariPoolEventReader extends AbstractMBeanEventReader {
+public class HikariPoolMBeanReader extends AbstractMBeanReader {
 
     private final String poolName;
 
@@ -46,7 +46,7 @@ public class HikariPoolEventReader extends AbstractMBeanEventReader {
 
     private int oldThreadsAwaitingConnection;
 
-    public HikariPoolEventReader(
+    public HikariPoolMBeanReader(
             @NonNull ExporterManager exporterManager,
             @NonNull EventInfo eventInfo) {
         super(exporterManager, eventInfo);
@@ -79,15 +79,27 @@ public class HikariPoolEventReader extends AbstractMBeanEventReader {
         if (hikariPoolMXBean == null) {
             return null;
         }
+        int total = hikariPoolMXBean.getTotalConnections();
+        int active = hikariPoolMXBean.getActiveConnections();
+        int idle = hikariPoolMXBean.getIdleConnections();
+        int awaiting = hikariPoolMXBean.getThreadsAwaitingConnection();
+        int used = total - idle;
+        String value = used + "/" + total;
+
         return new JsonBuilder()
                 .prettyPrint(false)
                 .nullWritable(false)
                 .object()
-                    .put("poolName", poolName)
-                    .put("total", hikariPoolMXBean.getTotalConnections())
-                    .put("active", hikariPoolMXBean.getActiveConnections())
-                    .put("idle", hikariPoolMXBean.getIdleConnections())
-                    .put("awaiting", hikariPoolMXBean.getThreadsAwaitingConnection())
+                    .put("name", getEventInfo().getName())
+                    .put("title", getEventInfo().getTitle())
+                    .put("value", value)
+                    .object("data")
+                        .put("poolName", poolName)
+                        .put("total", total)
+                        .put("active", active)
+                        .put("idle", idle)
+                        .put("awaiting", awaiting)
+                    .endObject()
                 .endObject()
                 .toString();
     }

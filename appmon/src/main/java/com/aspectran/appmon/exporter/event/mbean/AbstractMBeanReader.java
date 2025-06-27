@@ -24,9 +24,9 @@ import com.aspectran.utils.annotation.jsr305.NonNull;
 /**
  * <p>Created: 2025-06-02</p>
  */
-public abstract class AbstractMBeanEventReader extends AbstractEventReader {
+public abstract class AbstractMBeanReader extends AbstractEventReader {
 
-    public AbstractMBeanEventReader(
+    public AbstractMBeanReader(
             @NonNull ExporterManager exporterManager,
             @NonNull EventInfo eventInfo) {
         super(exporterManager, eventInfo);
@@ -34,7 +34,7 @@ public abstract class AbstractMBeanEventReader extends AbstractEventReader {
 
     @Override
     public ExporterType getType() {
-        return ExporterType.MBEAN;
+        return ExporterType.STATUS;
     }
 
 }
