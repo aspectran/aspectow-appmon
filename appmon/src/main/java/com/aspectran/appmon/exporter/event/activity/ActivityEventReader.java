@@ -18,7 +18,6 @@ package com.aspectran.appmon.exporter.event.activity;
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.ExporterManager;
 import com.aspectran.appmon.exporter.event.AbstractEventReader;
-import com.aspectran.appmon.exporter.event.EventExporter;
 import com.aspectran.appmon.persist.counter.EventCount;
 import com.aspectran.core.component.UnavailableException;
 import com.aspectran.core.context.ActivityContext;
@@ -40,13 +39,18 @@ public class ActivityEventReader extends AbstractEventReader {
 
     private static final Logger logger = LoggerFactory.getLogger(ActivityEventReader.class);
 
-    private final String aspectId;
+    private String aspectId;
 
     public ActivityEventReader(@NonNull ExporterManager exporterManager,
                                @NonNull EventInfo eventInfo,
                                @NonNull EventCount eventCount) {
         super(exporterManager, eventInfo, eventCount);
-        this.aspectId = getClass().getName() + ".ASPECT@" + hashCode() + "[" + eventInfo.getTarget() + "]";
+    }
+
+    @Override
+    public void init() throws Exception {
+        getEventInfo().checkHasTargetParameter();
+        aspectId = getClass().getName() + ".ASPECT@" + hashCode() + "[" + getEventInfo().getTarget() + "]";
     }
 
     @Override

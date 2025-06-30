@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.exporter.event.mbean.jdbc;
+package com.aspectran.appmon.exporter.event.jmx.jdbc;
 
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.ExporterManager;
-import com.aspectran.appmon.exporter.event.mbean.AbstractMBeanReader;
-import com.aspectran.core.context.ActivityContext;
-import com.aspectran.core.service.CoreServiceHolder;
+import com.aspectran.appmon.exporter.event.jmx.AbstractMBeanReader;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.json.JsonBuilder;
 import com.zaxxer.hikari.HikariPoolMXBean;
@@ -34,42 +32,40 @@ import java.lang.management.ManagementFactory;
  */
 public class HikariPoolMBeanReader extends AbstractMBeanReader {
 
-    private final String poolName;
-
-    private MBeanServer mBeanServer;
+    private String poolName;
 
     private HikariPoolMXBean hikariPoolMXBean;
 
-    private int oldActiveConnections;
+    private int oldActive = -1;
 
-    private int oldIdleConnections;
+    private int oldIdle;
 
-    private int oldThreadsAwaitingConnection;
+    private int oldAwaiting;
 
     public HikariPoolMBeanReader(
             @NonNull ExporterManager exporterManager,
             @NonNull EventInfo eventInfo) {
         super(exporterManager, eventInfo);
-        this.poolName = (eventInfo.hasParameters() ?
-                eventInfo.getParameters().getString("poolName") : eventInfo.getTarget());
+    }
+
+    @Override
+    public void init() throws Exception {
+        if (!getEventInfo().hasParameters() || !getEventInfo().getParameters().hasValue("poolName")) {
+            throw new IllegalArgumentException("Missing value of required parameter: poolName");
+        }
+        poolName = getEventInfo().getParameters().getString("poolName");
     }
 
     @Override
     public void start() throws Exception {
-        ActivityContext context = CoreServiceHolder.findActivityContext(getEventInfo().getTarget());
-        if (context == null) {
-            throw new Exception("Could not find ActivityContext named '" + getEventInfo().getTarget() + "'");
-        }
-
         ObjectName objectName = new ObjectName("com.zaxxer.hikari:type=Pool (" + poolName + ")");
-        mBeanServer = ManagementFactory.getPlatformMBeanServer();
+        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
         hikariPoolMXBean = JMX.newMBeanProxy(mBeanServer, objectName, HikariPoolMXBean.class);
     }
 
     @Override
     public void stop() {
-        if (mBeanServer != null) {
-            mBeanServer = null;
+        if (hikariPoolMXBean != null) {
             hikariPoolMXBean = null;
         }
     }
@@ -109,13 +105,13 @@ public class HikariPoolMBeanReader extends AbstractMBeanReader {
         if (hikariPoolMXBean == null) {
             return null;
         }
-        boolean changed = (hikariPoolMXBean.getActiveConnections() != oldActiveConnections ||
-                hikariPoolMXBean.getIdleConnections() != oldIdleConnections ||
-                hikariPoolMXBean.getThreadsAwaitingConnection() != oldThreadsAwaitingConnection);
+        boolean changed = (hikariPoolMXBean.getActiveConnections() != oldActive ||
+                hikariPoolMXBean.getIdleConnections() != oldIdle ||
+                hikariPoolMXBean.getThreadsAwaitingConnection() != oldAwaiting);
         if (changed) {
-            oldActiveConnections = hikariPoolMXBean.getActiveConnections();
-            oldIdleConnections = hikariPoolMXBean.getIdleConnections();
-            oldThreadsAwaitingConnection = hikariPoolMXBean.getThreadsAwaitingConnection();
+            oldActive = hikariPoolMXBean.getActiveConnections();
+            oldIdle = hikariPoolMXBean.getIdleConnections();
+            oldAwaiting = hikariPoolMXBean.getThreadsAwaitingConnection();
             return read();
         } else {
             return null;

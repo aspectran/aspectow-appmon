@@ -43,6 +43,7 @@ public abstract class EventExporterBuilder {
             logger.debug(ToStringBuilder.toString("Create EventExporter", eventInfo));
         }
         EventReader eventReader = createEventReader(exporterManager, eventInfo, eventCount);
+        eventReader.init();
         return new EventExporter(exporterManager, eventInfo, eventReader);
     }
 

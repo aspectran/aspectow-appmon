@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -33,7 +34,7 @@ public class ExportServiceManager {
 
     private final Set<ExportService> exportServices = new CopyOnWriteArraySet<>();
 
-    private final List<ExporterManager> exporterManagers = new ArrayList<>();
+    private final List<ExporterManager> exporterManagers = new CopyOnWriteArrayList<>();
 
     private final InstanceInfoHolder instanceInfoHolder;
 
@@ -201,6 +202,13 @@ public class ExportServiceManager {
         } else {
             return null;
         }
+    }
+
+    public void destroy() {
+        for (ExporterManager exporterManager : exporterManagers) {
+            exporterManager.stop();
+        }
+        exporterManagers.clear();
     }
 
 }

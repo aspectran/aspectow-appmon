@@ -34,6 +34,12 @@ instance: {
         name: session
         target: tow.server/root
     }
+    event: {
+        name: mbean1
+        title: Heap
+        reader: com.aspectran.appmon.exporter.event.jmx.jvm.HeapMemoryUsageReader
+        sampleInterval: 500
+    }
     log: {
         name: app
         file: /logs/root.log
@@ -60,6 +66,12 @@ instance: {
     event: {
         name: session
         target: tow.server/appmon
+    }
+    event: {
+        name: mbean1
+        title: Heap
+        reader: com.aspectran.appmon.exporter.event.jmx.jvm.HeapMemoryUsageReader
+        sampleInterval: 500
     }
     log: {
         name: app

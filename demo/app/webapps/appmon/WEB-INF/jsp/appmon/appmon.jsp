@@ -1,11 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
-<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250418"/>">
-<script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20250418"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250418"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250418"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250418"/>"></script>
+<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250630"/>">
+<script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20250630"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250630"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250630"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250630"/>"></script>
 <div class="container">
     <ul class="instance tabs nav nav-tabs mt-3">
         <li class="tabs-title nav-item">
@@ -53,7 +53,15 @@
                     </div>
                 </div>
             </div>
-            <div class="col session-box">
+            <div class="status-bar">
+                <div class="status">
+                    <dl>
+                        <dt></dt>
+                        <dd></dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="session-box">
                 <div class="row g-0">
                     <div class="col-sm-12 col-md-4">
                         <div class="panel status">

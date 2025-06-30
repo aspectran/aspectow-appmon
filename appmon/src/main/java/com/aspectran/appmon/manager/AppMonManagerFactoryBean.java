@@ -18,6 +18,7 @@ package com.aspectran.appmon.manager;
 import com.aspectran.appmon.config.AppMonConfig;
 import com.aspectran.appmon.config.AppMonConfigBuilder;
 import com.aspectran.appmon.config.AppMonConfigResolver;
+import com.aspectran.core.component.bean.ablility.DisposableBean;
 import com.aspectran.core.component.bean.ablility.FactoryBean;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
@@ -31,7 +32,7 @@ import com.aspectran.utils.annotation.jsr305.NonNull;
  */
 @Component
 @Bean(id = "appMonManager", lazyDestroy = true)
-public class AppMonManagerFactoryBean implements ActivityContextAware, FactoryBean<AppMonManager> {
+public class AppMonManagerFactoryBean implements ActivityContextAware, FactoryBean<AppMonManager>, DisposableBean {
 
     private ActivityContext context;
 
@@ -57,6 +58,13 @@ public class AppMonManagerFactoryBean implements ActivityContextAware, FactoryBe
     @Override
     public AppMonManager getObject() {
         return appMonManager;
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        if (appMonManager != null) {
+            appMonManager.getExportServiceManager().destroy();
+        }
     }
 
 }

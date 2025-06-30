@@ -18,7 +18,6 @@ package com.aspectran.appmon.exporter.event.session;
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.ExporterManager;
 import com.aspectran.appmon.exporter.event.AbstractEventReader;
-import com.aspectran.appmon.exporter.event.EventExporter;
 import com.aspectran.appmon.persist.counter.EventCount;
 import com.aspectran.core.component.UnavailableException;
 import com.aspectran.core.component.session.ManagedSession;
@@ -50,9 +49,9 @@ public class SessionEventReader extends AbstractEventReader {
     public static final String USER_COUNTRY_CODE = "user.countryCode";
     public static final String USER_ACTIVITY_COUNT = "user.activityCount";
 
-    private final String serverId;
+    private String serverId;
 
-    private final String deploymentName;
+    private String deploymentName;
 
     private SessionManager sessionManager;
 
@@ -64,10 +63,14 @@ public class SessionEventReader extends AbstractEventReader {
                               @NonNull EventInfo eventInfo,
                               @NonNull EventCount eventCount) {
         super(exporterManager, eventInfo, eventCount);
+    }
 
-        String[] arr = StringUtils.divide(eventInfo.getTarget(), "/");
-        this.serverId = arr[0];
-        this.deploymentName = arr[1];
+    @Override
+    public void init() throws Exception {
+        getEventInfo().checkHasTargetParameter();
+        String[] arr = StringUtils.divide(getEventInfo().getTarget(), "/");
+        serverId = arr[0];
+        deploymentName = arr[1];
     }
 
     @Override

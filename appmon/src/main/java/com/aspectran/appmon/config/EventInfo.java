@@ -150,6 +150,9 @@ public class EventInfo extends AbstractParameters {
 
     public void validateRequiredParameters() {
         Assert.hasLength(getString(name), "Missing value of required parameter: " + getQualifiedName(name));
+    }
+
+    public void checkHasTargetParameter() {
         Assert.hasLength(getString(target), "Missing value of required parameter: " + getQualifiedName(target));
     }
 
