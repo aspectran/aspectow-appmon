@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.exporter.event.jmx.jdbc;
+package com.aspectran.appmon.exporter.event.status.jdbc;
 
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.ExporterManager;
-import com.aspectran.appmon.exporter.event.jmx.AbstractMBeanReader;
+import com.aspectran.appmon.exporter.event.status.AbstractStatusReader;
+import com.aspectran.appmon.exporter.event.status.StatusInfo;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.json.JsonBuilder;
 import com.zaxxer.hikari.HikariPoolMXBean;
 
 import javax.management.JMX;
@@ -30,7 +30,7 @@ import java.lang.management.ManagementFactory;
 /**
  * <p>Created: 2025-06-02</p>
  */
-public class HikariPoolMBeanReader extends AbstractMBeanReader {
+public class HikariPoolMBeanReader extends AbstractStatusReader {
 
     private String poolName;
 
@@ -71,50 +71,45 @@ public class HikariPoolMBeanReader extends AbstractMBeanReader {
     }
 
     @Override
-    public String read() {
+    protected StatusInfo getStatusInfo() {
         if (hikariPoolMXBean == null) {
             return null;
         }
+
         int total = hikariPoolMXBean.getTotalConnections();
         int active = hikariPoolMXBean.getActiveConnections();
         int idle = hikariPoolMXBean.getIdleConnections();
         int awaiting = hikariPoolMXBean.getThreadsAwaitingConnection();
         int used = total - idle;
-        String value = used + "/" + total;
 
-        return new JsonBuilder()
-                .prettyPrint(false)
-                .nullWritable(false)
-                .object()
-                    .put("name", getEventInfo().getName())
-                    .put("title", getEventInfo().getTitle())
-                    .put("value", value)
-                    .object("data")
-                        .put("poolName", poolName)
-                        .put("total", total)
-                        .put("active", active)
-                        .put("idle", idle)
-                        .put("awaiting", awaiting)
-                    .endObject()
-                .endObject()
-                .toString();
+        String text = used + "/" + total;
+
+        return new StatusInfo(getEventInfo())
+                .setText(text)
+                .putData("poolName", poolName)
+                .putData("total", total)
+                .putData("active", active)
+                .putData("idle", idle)
+                .putData("awaiting", awaiting);
     }
 
     @Override
-    public String readIfChanged() {
+    protected boolean hasChanges() {
         if (hikariPoolMXBean == null) {
-            return null;
+            return false;
         }
+
         boolean changed = (hikariPoolMXBean.getActiveConnections() != oldActive ||
                 hikariPoolMXBean.getIdleConnections() != oldIdle ||
                 hikariPoolMXBean.getThreadsAwaitingConnection() != oldAwaiting);
+
         if (changed) {
             oldActive = hikariPoolMXBean.getActiveConnections();
             oldIdle = hikariPoolMXBean.getIdleConnections();
             oldAwaiting = hikariPoolMXBean.getThreadsAwaitingConnection();
-            return read();
+            return true;
         } else {
-            return null;
+            return false;
         }
     }
 

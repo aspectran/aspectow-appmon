@@ -1,8 +1,67 @@
+.tabs > .tabs-title .indicator {
+    padding: 0;
+}
 .domain.tabs .tabs-title .indicator.disconnected {
     color: #ff9900;
 }
 .domain.tabs .tabs-title .indicator.error {
     color: #a01f27;
+}
+
+.status-bar {
+    background-color: #d3d3d3;
+    height: 28px;
+    text-align: center;
+}
+.status-bar .status {
+    display: inline-block;
+    @media screen and (max-width: 576px) {
+        display: block;
+    }
+}
+.status-bar .status:hover dl dt {
+    border-left: 3px solid #bbb;
+    padding-left: 7px;
+}
+.status-bar .status dl {
+    display: flex;
+    height: 28px;
+    margin: 0;
+    @media screen and (max-width: 576px) {
+        display: inline-flex;
+    }
+}
+.status-bar .status dl dt {
+    margin: 0;
+    padding: 0 5px 0 10px;
+    align-content: center;
+    font-weight: normal;
+    font-size: .9em;
+}
+.status-bar .status dl dd {
+    margin: 0;
+    padding: 0 5px 0 0;
+    align-content: center;
+    font-weight: bold;
+}
+.domain.status-bar {
+    position: relative;
+    height: unset;
+    margin-top: 7px;
+    padding: 0 30px;
+    border-bottom: 1px solid #ccc;
+    background-color: unset;
+    box-shadow: 0 8px 15px -10px rgba(50, 50, 50, .33);
+}
+.domain.status-bar .title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30px;
+    height: 28px;
+    align-content: center;
+    font-weight: bold;
+    color: #677278;
 }
 
 .control-bar {
@@ -12,6 +71,9 @@
     box-shadow: 0 6px 10px -10px rgba(50, 50, 50, 0.45);
     text-align: right;
     border-top-right-radius: 3px;
+    @media screen and (max-width: 768px) {
+        border-top-left-radius: 3px;
+    }
 }
 .control-bar .options > .bi {
     color: #d6e5e4;
@@ -21,7 +83,6 @@
     display: inline-block;
     margin: 0;
 }
-
 .control-bar .options .btn-group .btn {
     padding: 3px 8px;
     font-size: .9em;
@@ -50,6 +111,7 @@
     font-size: .9em;
     font-weight: normal;
     margin: 0;
+    display: inline;
 }
 .track-box {
     position: relative;
@@ -210,40 +272,6 @@
     width: 100%;
 }
 
-.status-bar {
-    background-color: #d3d3d3;
-    height: 28px;
-    text-align: center;
-}
-.status-bar .status {
-    display: inline-block;
-}
-.status-bar .status:hover {
-    background-color: #f5f5f5;
-}
-.status-bar .status:hover dl dt {
-    border-left: 3px solid #bbb;
-    padding-left: 7px;
-}
-.status-bar .status dl {
-    display: flex;
-    height: 28px;
-    margin: 0;
-}
-.status-bar .status dl dt {
-    margin: 0;
-    padding: 0 5px 0 10px;
-    align-content: center;
-    font-weight: normal;
-    font-size: .9em;
-}
-.status-bar .status dl dd {
-    margin: 0;
-    padding: 0 5px 0 0;
-    align-content: center;
-    font-weight: bold;
-}
-
 .session-box {
     display: none;
 }
@@ -262,7 +290,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 10px;
+    height: 20px;
     display: none;
 }
 .session-box .panel.status .knob {
@@ -275,7 +303,7 @@
     background-color: #69899c;
     border-radius: 10px 10px 0 0;
 }
-@media screen and (max-width: 40em) {
+@media screen and (max-width: 768px) {
     .session-box .panel.status {
         height: 34px;
         overflow-y: hidden;

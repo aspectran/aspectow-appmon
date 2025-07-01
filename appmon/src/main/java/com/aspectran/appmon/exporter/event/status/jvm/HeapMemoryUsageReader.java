@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.exporter.event.jmx.jvm;
+package com.aspectran.appmon.exporter.event.status.jvm;
 
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.ExporterManager;
-import com.aspectran.appmon.exporter.event.jmx.AbstractMBeanReader;
+import com.aspectran.appmon.exporter.event.status.AbstractStatusReader;
+import com.aspectran.appmon.exporter.event.status.StatusInfo;
 import com.aspectran.utils.StringUtils;
-import com.aspectran.utils.json.JsonBuilder;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -28,7 +28,7 @@ import java.lang.management.MemoryUsage;
 /**
  * <p>Created: 2025-06-30</p>
  */
-public class HeapMemoryUsageReader extends AbstractMBeanReader {
+public class HeapMemoryUsageReader extends AbstractStatusReader {
 
     private MemoryMXBean memoryMXBean;
 
@@ -55,51 +55,44 @@ public class HeapMemoryUsageReader extends AbstractMBeanReader {
     }
 
     @Override
-    public String read() {
+    protected StatusInfo getStatusInfo() {
         if (memoryMXBean == null) {
             return null;
         }
+
         MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
         long init = memoryUsage.getInit() >> 10;
         long used = memoryUsage.getUsed() >> 10;
         long committed = memoryUsage.getCommitted() >> 10;
         long max = memoryUsage.getMax() >> 10;
 
-        String value = StringUtils.toHumanFriendlyByteSize(memoryUsage.getUsed()) +
+        String text = StringUtils.toHumanFriendlyByteSize(memoryUsage.getUsed()) +
                 "/" + StringUtils.toHumanFriendlyByteSize(memoryUsage.getMax());
 
-        return new JsonBuilder()
-                .prettyPrint(false)
-                .nullWritable(false)
-                .object()
-                    .put("name", getEventInfo().getName())
-                    .put("title", getEventInfo().getTitle())
-                    .put("value", value)
-                    .object("data")
-                        .put("init", init)
-                        .put("used", used)
-                        .put("committed", committed)
-                        .put("max", max)
-                    .endObject()
-                .endObject()
-                .toString();
+        return new StatusInfo(getEventInfo())
+                .setText(text)
+                .putData("init", init)
+                .putData("used", used)
+                .putData("committed", committed)
+                .putData("max", max);
     }
 
     @Override
-    public String readIfChanged() {
+    protected boolean hasChanges() {
         if (memoryMXBean == null) {
-            return null;
+            return false;
         }
-        MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
 
+        MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
         boolean changed = (memoryUsage.getUsed() != oldUsed ||
                 memoryUsage.getMax() != oldMax);
+
         if (changed) {
             oldUsed = memoryUsage.getUsed();
             oldMax = memoryUsage.getMax();
-            return read();
+            return true;
         } else {
-            return null;
+            return false;
         }
     }
 

@@ -36,9 +36,10 @@ instance: {
         target: tow.server/root
     }
     event: {
-        name: mbean1
+        name: status1
         title: Heap
-        reader: com.aspectran.appmon.exporter.event.jmx.jvm.HeapMemoryUsageReader
+        reader: com.aspectran.appmon.exporter.event.status.jvm.HeapMemoryUsageReader
+        typical: true
         sampleInterval: 500
     }
     log: {
@@ -63,12 +64,6 @@ instance: {
         parameters: {
             +: /**
         }
-    }
-    event: {
-        name: mbean1
-        title: Heap
-        reader: com.aspectran.appmon.exporter.event.jmx.jvm.HeapMemoryUsageReader
-        sampleInterval: 500
     }
     event: {
         name: session

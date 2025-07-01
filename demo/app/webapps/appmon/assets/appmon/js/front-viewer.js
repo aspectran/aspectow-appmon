@@ -151,10 +151,9 @@ function FrontViewer(sampleInterval) {
                 }
                 break;
             case "status":
-                console.log(message);
                 if (messageText.length) {
-                    let statusData = JSON.parse(messageText);
-                    processStatusData(instanceName, messageType, nameOfEventOrLog, messagePrefix, statusData);
+                    let statusInfo = JSON.parse(messageText);
+                    processStatusInfo(instanceName, messageType, nameOfEventOrLog, messagePrefix, statusInfo);
                 }
                 break;
             case "log":
@@ -211,10 +210,10 @@ function FrontViewer(sampleInterval) {
         }
     }
 
-    const processStatusData = function (instanceName, messageType, eventName, messagePrefix, statusData) {
+    const processStatusInfo = function (instanceName, messageType, eventName, messagePrefix, statusInfo) {
         let $status = getStatus(messagePrefix);
         if ($status) {
-            $status.find("dd").text(statusData.value).attr("title", JSON.stringify(statusData, null, 2));
+            $status.find("dd").text(statusInfo.text).attr("title", JSON.stringify(statusInfo.data, null, 2));
         }
     }
 

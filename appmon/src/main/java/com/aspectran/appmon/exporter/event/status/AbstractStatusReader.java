@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.exporter.event.jmx;
+package com.aspectran.appmon.exporter.event.status;
 
 import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.exporter.ExporterManager;
 import com.aspectran.appmon.exporter.ExporterType;
 import com.aspectran.appmon.exporter.event.AbstractEventReader;
 import com.aspectran.utils.annotation.jsr305.NonNull;
+import com.aspectran.utils.json.JsonBuilder;
 
 /**
  * <p>Created: 2025-06-02</p>
  */
-public abstract class AbstractMBeanReader extends AbstractEventReader {
+public abstract class AbstractStatusReader extends AbstractEventReader {
 
-    public AbstractMBeanReader(
+    public AbstractStatusReader(
             @NonNull ExporterManager exporterManager,
             @NonNull EventInfo eventInfo) {
         super(exporterManager, eventInfo);
@@ -35,6 +36,31 @@ public abstract class AbstractMBeanReader extends AbstractEventReader {
     @Override
     public ExporterType getType() {
         return ExporterType.STATUS;
+    }
+
+    abstract protected StatusInfo getStatusInfo();
+
+    abstract protected boolean hasChanges();
+
+    @Override
+    public String read() {
+        StatusInfo statusInfo = getStatusInfo();
+        if (statusInfo == null) {
+            return null;
+        }
+        return new JsonBuilder()
+                .prettyPrint(false)
+                .nullWritable(false)
+                .put(statusInfo)
+                .toString();
+    }
+
+    @Override
+    public String readIfChanged() {
+        if (!hasChanges()) {
+            return null;
+        }
+        return read();
     }
 
 }
