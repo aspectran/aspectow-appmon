@@ -6,7 +6,9 @@ on:
 jobs:
   deploy:
     if: github.repository_owner == 'aspectran' && !contains(toJSON(github.event.head_commit.message), '[maven-release-plugin]')
+    name: Deploy
     runs-on: ubuntu-latest
+    environment: sonatype
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,11 +18,11 @@ jobs:
           java-version: 17
           distribution: temurin
           cache: 'maven'
-          server-id: central
-          server-username: CENTRAL_USERNAME # env variable for username in deploy
-          server-password: CENTRAL_PASSWORD # env variable for token in deploy
-          gpg-private-key: "${{ secrets.GPG_SIGNING_KEY }}"
-          overwrite-settings: false
+          #server-id: central
+          #server-username: CENTRAL_USERNAME # env variable for username in deploy
+          #server-password: CENTRAL_PASSWORD # env variable for token in deploy
+          #gpg-private-key: "${{ secrets.GPG_SIGNING_KEY }}"
+          #overwrite-settings: false
       - name: Deploy snapshot artifacts
         env:
           CI_DEPLOY_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
