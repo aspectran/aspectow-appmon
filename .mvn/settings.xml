@@ -17,9 +17,5 @@
             <username>${env.CENTRAL_USERNAME}</username>
             <password>${env.CENTRAL_PASSWORD}</password>
         </server>
-        <server>
-            <id>gpg.passphrase</id>
-            <passphrase>${env.GPG_PASSPHRASE}</passphrase>
-        </server>
     </servers>
 </settings>
