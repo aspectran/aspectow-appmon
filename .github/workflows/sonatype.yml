@@ -25,4 +25,5 @@ jobs:
         env:
           CI_DEPLOY_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CI_DEPLOY_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: mvn deploy -B -V -U -ntp --batch-mode --settings .mvn/settings.xml -Dpgp.keyname=${{ secrets.GPG_KEY_NAME }} -DskipTests=true -D"license.skip=true" -Prelease
