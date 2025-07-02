@@ -39,7 +39,7 @@ public class StatusInfo  extends AbstractParameters {
         super(parameterKeys);
         putValue(name, eventInfo.getName());
         putValue(title, eventInfo.getTitle());
-        putValue(typical, eventInfo.getTypical());
+        putValue(typical, eventInfo.getLeading());
     }
 
     public StatusInfo setText(String text) {

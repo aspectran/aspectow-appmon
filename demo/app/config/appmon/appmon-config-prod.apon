@@ -39,7 +39,7 @@ instance: {
         name: status1
         title: Heap
         reader: com.aspectran.appmon.exporter.event.status.jvm.HeapMemoryUsageReader
-        typical: true
+        leading: true
         sampleInterval: 500
     }
     log: {

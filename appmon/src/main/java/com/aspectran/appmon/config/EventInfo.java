@@ -31,9 +31,9 @@ public class EventInfo extends AbstractParameters {
     private static final ParameterKey reader;
     private static final ParameterKey counter;
     private static final ParameterKey target;
-    private static final ParameterKey typical;
     private static final ParameterKey parameters;
     private static final ParameterKey sampleInterval;
+    private static final ParameterKey leading;
 
     private static final ParameterKey[] parameterKeys;
 
@@ -43,9 +43,9 @@ public class EventInfo extends AbstractParameters {
         reader = new ParameterKey("reader", ValueType.STRING);
         counter = new ParameterKey("counter", ValueType.STRING);
         target = new ParameterKey("target", ValueType.STRING);
-        typical = new ParameterKey("typical", ValueType.BOOLEAN);
         parameters = new ParameterKey("parameters", ValueType.PARAMETERS);
         sampleInterval = new ParameterKey("sampleInterval", ValueType.INT);
+        leading = new ParameterKey("leading", ValueType.BOOLEAN);
 
         parameterKeys = new ParameterKey[] {
                 name,
@@ -53,9 +53,9 @@ public class EventInfo extends AbstractParameters {
                 reader,
                 counter,
                 target,
-                typical,
                 parameters,
-                sampleInterval
+                sampleInterval,
+                leading
         };
     }
 
@@ -131,18 +131,6 @@ public class EventInfo extends AbstractParameters {
         putValue(EventInfo.target, target);
     }
 
-    public boolean isTypical() {
-        return getBoolean(typical, false);
-    }
-
-    public Boolean getTypical() {
-        return getBoolean(typical);
-    }
-
-    public void setTypical(boolean typical) {
-        putValue(EventInfo.typical, typical);
-    }
-
     public boolean hasParameters() {
         return hasValue(parameters);
     }
@@ -161,6 +149,18 @@ public class EventInfo extends AbstractParameters {
 
     public void setSampleInterval(int sampleInterval) {
         putValue(EventInfo.sampleInterval, sampleInterval);
+    }
+
+    public boolean isLeading() {
+        return getBoolean(leading, false);
+    }
+
+    public Boolean getLeading() {
+        return getBoolean(leading);
+    }
+
+    public void setLeading(boolean leading) {
+        putValue(EventInfo.leading, leading);
     }
 
     public void validateRequiredParameters() {

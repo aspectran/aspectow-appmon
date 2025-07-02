@@ -486,7 +486,7 @@ function FrontBuilder() {
                             let $sessionBox = addSessionBox($eventBox, domain, instance, event);
                             viewers[domain.index].putDisplay(instance.name, event.name, $sessionBox);
                         } else if (event.name.startsWith("status")) {
-                            if (event.typical) {
+                            if (event.leading) {
                                 let $status = addDomainStatus(domain, event);
                                 viewers[domain.index].putStatus(instance.name, event.name, $status);
                             } else {
