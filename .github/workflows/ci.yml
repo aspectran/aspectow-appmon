@@ -19,14 +19,8 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
           distribution: ${{ matrix.distribution }}
+          cache: 'maven'
       - name: Print JDK Version
         run: java -version
-      - name: Cache local Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-m2
       - name: Test with Maven
-        run: ./mvnw test -B -V -U -ntp -D"license.skip=true" -D"jacoco.skip=true"
+        run: mvn test -B -V -U -ntp -D"license.skip=true" -D"jacoco.skip=true"

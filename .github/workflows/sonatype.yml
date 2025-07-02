@@ -4,7 +4,7 @@ on:
     branches:
       - master
 jobs:
-  build:
+  deploy:
     if: github.repository_owner == 'aspectran' && !contains(toJSON(github.event.head_commit.message), '[maven-release-plugin]')
     runs-on: ubuntu-latest
     steps:
@@ -15,8 +15,14 @@ jobs:
         with:
           java-version: 17
           distribution: temurin
-      - name: Deploy to Sonatype
-        run: ./mvnw deploy -DskipTests -B -V -U -ntp --settings ./.mvn/settings.xml -Dlicense.skip=true
+          cache: 'maven'
+          server-id: central
+          server-username: CENTRAL_USERNAME # env variable for username in deploy
+          server-password: CENTRAL_PASSWORD # env variable for token in deploy
+          gpg-private-key: "${{ secrets.GPG_SIGNING_KEY }}"
+          overwrite-settings: false
+      - name: Deploy snapshot artifacts
         env:
           CI_DEPLOY_USERNAME: ${{ secrets.CI_DEPLOY_USERNAME }}
           CI_DEPLOY_PASSWORD: ${{ secrets.CI_DEPLOY_PASSWORD }}
+        run: mvn deploy -B -V -U -ntp --batch-mode --settings .mvn/settings.xml -Dpgp.keyname=${{ secrets.GPG_KEY_NAME }} -DskipTests=true -D"license.skip=true" -Prelease-sign-artifacts
