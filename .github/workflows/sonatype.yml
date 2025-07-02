@@ -20,6 +20,6 @@ jobs:
           cache: 'maven'
       - name: Deploy snapshot artifacts
         env:
-          CI_DEPLOY_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
-          CI_DEPLOY_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
         run: mvn deploy -B -V -U -ntp --batch-mode --settings .mvn/settings.xml -DskipTests=true -D"license.skip=true"
