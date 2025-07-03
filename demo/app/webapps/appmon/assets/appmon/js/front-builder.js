@@ -169,6 +169,12 @@ function FrontBuilder() {
                 }
             }
         }
+        console.log("activeDomains", activeDomains);
+        if (availableTabs === activeDomains) {
+            $(".domain.status-bar.available").removeClass("full-width");
+        } else {
+            $(".domain.status-bar.available").addClass("full-width");
+        }
     };
 
     const showDomain = function (domain) {
@@ -184,9 +190,6 @@ function FrontBuilder() {
             viewers[domain.index].setVisible(true);
             viewers[domain.index].refreshConsole();
             $(".domain.status-bar[data-domain-index=" + domain.index + "]").show();
-            if (domains.length >= 1) {
-                $(".domain.status-bar").addClass("full-width");
-            }
         } else {
             viewers[domain.index].setVisible(false);
             for (let key in instances) {
@@ -198,9 +201,6 @@ function FrontBuilder() {
                 }
             }
             $(".domain.status-bar[data-domain-index=" + domain.index + "]").hide();
-            if (domains.length >= 1) {
-                $(".domain.status-bar").removeClass("full-width");
-            }
         }
     }
 
