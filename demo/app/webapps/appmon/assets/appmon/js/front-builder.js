@@ -565,6 +565,8 @@ function FrontBuilder() {
             .attr("data-domain-index", domainInfo.index)
         if (domains.length > 1) {
             $newStatusBar.find(".number").text(" " + (domainInfo.index + 1));
+        } else {
+            $newStatusBar.addClass("full-width");
         }
         return $newStatusBar.insertAfter($statusBar.last());
     };
