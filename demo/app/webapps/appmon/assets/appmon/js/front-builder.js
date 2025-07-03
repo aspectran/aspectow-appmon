@@ -198,6 +198,9 @@ function FrontBuilder() {
                 }
             }
             $(".domain.status-bar[data-domain-index=" + domain.index + "]").hide();
+            if (domains.length >= 1) {
+                $(".domain.status-bar").removeClass("full-width");
+            }
         }
     }
 
