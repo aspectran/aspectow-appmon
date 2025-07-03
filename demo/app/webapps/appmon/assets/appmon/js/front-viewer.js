@@ -19,6 +19,9 @@ function FrontViewer(sampleInterval) {
 
     this.setEnable = function (flag) {
         enable = !!flag;
+        if (enable) {
+            resetAllInterimTimers();
+        }
     };
 
     this.setVisible = function (flag) {
@@ -345,6 +348,15 @@ function FrontViewer(sampleInterval) {
         }
     }
 
+    const resetAllInterimTimers = function () {
+        for (let key in $indicators) {
+            let $activityStatus = getIndicator(key);
+            if ($activityStatus.hasClass("activity-status")) {
+                resetInterimTimer(key);
+            }
+        }
+    }
+
     const printCurrentActivityCount = function (messagePrefix, count) {
         let $activityStatus = getIndicator(messagePrefix);
         if ($activityStatus) {
@@ -467,11 +479,12 @@ function FrontViewer(sampleInterval) {
         }
         let chart = $chart.data("chart");
         if (eventName === "activity") {
+            let prefix = instanceName + ":event:" + eventName;
             if (!chart) {
-                resetInterimTimer(instanceName + ":event:" + eventName);
+                resetInterimTimer(prefix);
             } else if (chartData.rolledUp) {
-                resetInterimTimer(instanceName + ":event:" + eventName);
-                resetInterimActivityStatus(instanceName + ":event:" + eventName, chartData.rolledUp);
+                resetInterimTimer(prefix);
+                resetInterimActivityStatus(prefix);
             }
         }
         let dateUnit = (chartData.rolledUp ? $chart.data("dateUnit") : chartData.dateUnit);
@@ -518,11 +531,13 @@ function FrontViewer(sampleInterval) {
 
     const updateChartAfterRolledUp = function (eventName, chart, labels, data1, data2) {
         if (chart.data.labels.length > 0) {
+            console.log("chart.data.labels", chart.data.labels);
+            console.log("labels", labels);
             let lastIndex = chart.data.labels.length - 1;
             if (chart.data.labels[lastIndex] >= labels[0]) {
-                chart.data.labels.splice(0, lastIndex);
-                chart.data.datasets[0].data.splice(0, lastIndex);
-                chart.data.datasets[1].data.splice(0, lastIndex);
+                chart.data.labels.splice(lastIndex, lastIndex + 1);
+                chart.data.datasets[0].data.splice(lastIndex, lastIndex + 1);
+                chart.data.datasets[1].data.splice(lastIndex, lastIndex + 1);
             }
         }
         chart.data.labels.push(...labels);
@@ -547,11 +562,13 @@ function FrontViewer(sampleInterval) {
             }
         }
         let maxLabels = (canvasWidth > 0 ? Math.floor(canvasWidth / 21) : 0);
-        if (maxLabels > 0 && labels.length > maxLabels) {
+        if (maxLabels > 0) {
             let cnt = labels.length - maxLabels;
-            labels.splice(0, cnt);
-            data1.splice(0, cnt);
-            data2.splice(0, cnt);
+            if (cnt > 0) {
+                labels.splice(0, cnt);
+                data1.splice(0, cnt);
+                data2.splice(0, cnt);
+            }
         }
         return maxLabels;
     };

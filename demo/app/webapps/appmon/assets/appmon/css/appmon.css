@@ -11,7 +11,9 @@
 .status-bar {
     background-color: #d3d3d3;
     height: 28px;
-    text-align: center;
+    @media screen and (max-width: 992px) {
+        text-align: center;
+    }
 }
 .status-bar .status {
     display: inline-block;
@@ -51,7 +53,7 @@
     padding: 0 30px;
     border-bottom: 1px solid #ccc;
     background-color: unset;
-    box-shadow: 0 8px 15px -10px rgba(50, 50, 50, .33);
+    box-shadow: 0 6px 15px -10px rgba(50, 50, 50, .33);
 }
 .domain.status-bar .title {
     position: absolute;

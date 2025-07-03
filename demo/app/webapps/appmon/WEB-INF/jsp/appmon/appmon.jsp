@@ -1,21 +1,23 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
-<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250701"/>">
-<script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20250701"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250701"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250701"/>"></script>
-<script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250701"/>"></script>
+<link rel="stylesheet" href="<aspectran:url value="/assets/appmon/css/appmon.css?20250703"/>">
+<script src="<aspectran:url value="/assets/appmon/js/front-builder.js?20250703"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/front-viewer.js?20250703"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/websocket-client.js?20250703"/>"></script>
+<script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250703"/>"></script>
 <div class="container">
-    <div class="domain status-bar">
-        <div class="title">
-            <i class="bi bi-pc-display-horizontal"></i><span class="number"></span>
-        </div>
-        <div class="status">
-            <dl>
-                <dt></dt>
-                <dd></dd>
-            </dl>
+    <div class="row g-0">
+        <div class="col-lg-6 domain status-bar">
+            <div class="title">
+                <i class="bi bi-pc-display-horizontal"></i><span class="number"></span>
+            </div>
+            <div class="status">
+                <dl>
+                    <dt></dt>
+                    <dd></dd>
+                </dl>
+            </div>
         </div>
     </div>
     <ul class="instance tabs nav nav-tabs mt-3">
