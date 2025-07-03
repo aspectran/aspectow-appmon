@@ -184,6 +184,9 @@ function FrontBuilder() {
             viewers[domain.index].setVisible(true);
             viewers[domain.index].refreshConsole();
             $(".domain.status-bar[data-domain-index=" + domain.index + "]").show();
+            if (domains.length >= 1) {
+                $(".domain.status-bar").addClass("full-width");
+            }
         } else {
             viewers[domain.index].setVisible(false);
             for (let key in instances) {

@@ -8,7 +8,7 @@
 <script src="<aspectran:url value="/assets/appmon/js/polling-client.js?20250703"/>"></script>
 <div class="container">
     <div class="row g-0">
-        <div class="col-lg-6 domain status-bar">
+        <div class="domain status-bar">
             <div class="title">
                 <i class="bi bi-pc-display-horizontal"></i><span class="number"></span>
             </div>
