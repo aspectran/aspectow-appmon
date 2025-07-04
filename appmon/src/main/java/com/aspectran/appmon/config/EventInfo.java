@@ -28,6 +28,7 @@ public class EventInfo extends AbstractParameters {
 
     private static final ParameterKey name;
     private static final ParameterKey title;
+    private static final ParameterKey description;
     private static final ParameterKey reader;
     private static final ParameterKey counter;
     private static final ParameterKey target;
@@ -40,6 +41,7 @@ public class EventInfo extends AbstractParameters {
     static {
         name = new ParameterKey("name", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
+        description = new ParameterKey("description", ValueType.STRING);
         reader = new ParameterKey("reader", ValueType.STRING);
         counter = new ParameterKey("counter", ValueType.STRING);
         target = new ParameterKey("target", ValueType.STRING);
@@ -50,6 +52,7 @@ public class EventInfo extends AbstractParameters {
         parameterKeys = new ParameterKey[] {
                 name,
                 title,
+                description,
                 reader,
                 counter,
                 target,
@@ -97,6 +100,14 @@ public class EventInfo extends AbstractParameters {
 
     public void setTitle(String title) {
         putValue(EventInfo.title, title);
+    }
+
+    public String getDescription() {
+        return getString(description);
+    }
+
+    public void setDescription(String description) {
+        putValue(EventInfo.description, description);
     }
 
     public String getReader() {

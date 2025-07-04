@@ -531,8 +531,6 @@ function FrontViewer(sampleInterval) {
 
     const updateChartAfterRolledUp = function (eventName, chart, labels, data1, data2) {
         if (chart.data.labels.length > 0) {
-            console.log("chart.data.labels", chart.data.labels);
-            console.log("labels", labels);
             let lastIndex = chart.data.labels.length - 1;
             if (chart.data.labels[lastIndex] >= labels[0]) {
                 chart.data.labels.splice(lastIndex, lastIndex + 1);

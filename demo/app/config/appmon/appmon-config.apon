@@ -37,6 +37,7 @@ instance: {
     event: {
         name: status1
         title: Heap
+        description: Shows JVM Heap memory usage status
         reader: com.aspectran.appmon.exporter.event.status.jvm.HeapMemoryUsageReader
         leading: true
         sampleInterval: 500
