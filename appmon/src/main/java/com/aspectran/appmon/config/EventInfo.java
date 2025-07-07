@@ -34,7 +34,7 @@ public class EventInfo extends AbstractParameters {
     private static final ParameterKey target;
     private static final ParameterKey parameters;
     private static final ParameterKey sampleInterval;
-    private static final ParameterKey leading;
+    private static final ParameterKey heading;
 
     private static final ParameterKey[] parameterKeys;
 
@@ -47,7 +47,7 @@ public class EventInfo extends AbstractParameters {
         target = new ParameterKey("target", ValueType.STRING);
         parameters = new ParameterKey("parameters", ValueType.PARAMETERS);
         sampleInterval = new ParameterKey("sampleInterval", ValueType.INT);
-        leading = new ParameterKey("leading", ValueType.BOOLEAN);
+        heading = new ParameterKey("heading", ValueType.BOOLEAN);
 
         parameterKeys = new ParameterKey[] {
                 name,
@@ -58,7 +58,7 @@ public class EventInfo extends AbstractParameters {
                 target,
                 parameters,
                 sampleInterval,
-                leading
+                heading
         };
     }
 
@@ -162,16 +162,16 @@ public class EventInfo extends AbstractParameters {
         putValue(EventInfo.sampleInterval, sampleInterval);
     }
 
-    public boolean isLeading() {
-        return getBoolean(leading, false);
+    public boolean isHeading() {
+        return getBoolean(heading, false);
     }
 
-    public Boolean getLeading() {
-        return getBoolean(leading);
+    public Boolean getHeading() {
+        return getBoolean(heading);
     }
 
-    public void setLeading(boolean leading) {
-        putValue(EventInfo.leading, leading);
+    public void setHeading(boolean heading) {
+        putValue(EventInfo.heading, heading);
     }
 
     public void validateRequiredParameters() {

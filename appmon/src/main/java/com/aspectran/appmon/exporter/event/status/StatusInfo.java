@@ -13,7 +13,7 @@ public class StatusInfo  extends AbstractParameters {
 
     private static final ParameterKey name;
     private static final ParameterKey title;
-    private static final ParameterKey typical;
+    private static final ParameterKey heading;
     private static final ParameterKey text;
     private static final ParameterKey data;
 
@@ -22,14 +22,14 @@ public class StatusInfo  extends AbstractParameters {
     static {
         name = new ParameterKey("name", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
-        typical = new ParameterKey("typical", ValueType.BOOLEAN);
+        heading = new ParameterKey("heading", ValueType.BOOLEAN);
         text = new ParameterKey("text", ValueType.STRING);
         data = new ParameterKey("data", ValueType.PARAMETERS);
 
         parameterKeys = new ParameterKey[] {
                 name,
                 title,
-                typical,
+                heading,
                 text,
                 data
         };
@@ -39,7 +39,7 @@ public class StatusInfo  extends AbstractParameters {
         super(parameterKeys);
         putValue(name, eventInfo.getName());
         putValue(title, eventInfo.getTitle());
-        putValue(typical, eventInfo.getLeading());
+        putValue(heading, eventInfo.getHeading());
     }
 
     public StatusInfo setText(String text) {
