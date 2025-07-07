@@ -59,9 +59,10 @@ public class SessionEventReader extends AbstractEventReader {
 
     private volatile SessionEventData oldData;
 
-    public SessionEventReader(@NonNull ExporterManager exporterManager,
-                              @NonNull EventInfo eventInfo,
-                              @NonNull EventCount eventCount) {
+    public SessionEventReader(
+            @NonNull ExporterManager exporterManager,
+            @NonNull EventInfo eventInfo,
+            @NonNull EventCount eventCount) {
         super(exporterManager, eventInfo, eventCount);
     }
 
@@ -94,10 +95,10 @@ public class SessionEventReader extends AbstractEventReader {
             if (sessionListener != null) {
                 try {
                     getSessionListenerRegistration().remove(sessionListener, deploymentName);
-                    sessionListener = null;
                 } catch (UnavailableException e) {
                     // ignored
                 }
+                sessionListener = null;
             }
         }
     }

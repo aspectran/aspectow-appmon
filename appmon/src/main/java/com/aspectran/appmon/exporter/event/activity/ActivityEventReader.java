@@ -41,9 +41,10 @@ public class ActivityEventReader extends AbstractEventReader {
 
     private String aspectId;
 
-    public ActivityEventReader(@NonNull ExporterManager exporterManager,
-                               @NonNull EventInfo eventInfo,
-                               @NonNull EventCount eventCount) {
+    public ActivityEventReader(
+            @NonNull ExporterManager exporterManager,
+            @NonNull EventInfo eventInfo,
+            @NonNull EventCount eventCount) {
         super(exporterManager, eventInfo, eventCount);
     }
 
