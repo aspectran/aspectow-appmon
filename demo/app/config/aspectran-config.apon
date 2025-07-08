@@ -1,6 +1,8 @@
 system: {
     properties: {
         aspectran.encryption.password: demo!
+        jboss.threads.eqe.statistics: true
+        jboss.threads.eqe.statistics.active-count: true
     }
 }
 context: {

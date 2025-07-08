@@ -43,6 +43,15 @@ instance: {
         heading: true
         sampleInterval: 500
     }
+    event: {
+        name: status2
+        title: Undertow TP
+        description: Metrics of Undertow thread pool resources
+        reader: com.aspectran.appmon.exporter.event.status.undertow.NioWorkerMetricsReader
+        target: tow.server
+        heading: true
+        sampleInterval: 500
+    }
     log: {
         name: app
         file: /logs/root.log
