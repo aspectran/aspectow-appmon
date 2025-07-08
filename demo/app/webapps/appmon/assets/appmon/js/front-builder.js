@@ -171,9 +171,9 @@ function FrontBuilder() {
         }
         console.log("activeDomains", activeDomains);
         if (availableTabs === activeDomains) {
-            $(".domain.status-bar.available").removeClass("full-width");
+            $(".domain.metrics-bar.available").removeClass("full-width");
         } else {
-            $(".domain.status-bar.available").addClass("full-width");
+            $(".domain.metrics-bar.available").addClass("full-width");
         }
     };
 
@@ -189,7 +189,7 @@ function FrontBuilder() {
             }
             viewers[domain.index].setVisible(true);
             viewers[domain.index].refreshConsole();
-            $(".domain.status-bar[data-domain-index=" + domain.index + "]").show();
+            $(".domain.metrics-bar[data-domain-index=" + domain.index + "]").show();
         } else {
             viewers[domain.index].setVisible(false);
             for (let key in instances) {
@@ -200,7 +200,7 @@ function FrontBuilder() {
                     $(".console-box[data-domain-index=" + domain.index + "][data-instance-name=" + instance.name + "]").hide();
                 }
             }
-            $(".domain.status-bar[data-domain-index=" + domain.index + "]").hide();
+            $(".domain.metrics-bar[data-domain-index=" + domain.index + "]").hide();
         }
     }
 
@@ -443,9 +443,9 @@ function FrontBuilder() {
         $(".domain.tabs .tabs-title").show();
         $(".instance.tabs .tabs-title.available").remove();
         $(".instance.tabs .tabs-title").show();
-        $(".domain.status-bar.available").remove();
-        $(".instance.status-bar.available").remove();
-        $(".instance.status-bar").show();
+        $(".domain.metrics-bar.available").remove();
+        $(".instance.metrics-bar.available").remove();
+        $(".instance.metrics-bar").show();
         $(".event-box.available").remove();
         $(".visual-box.available").remove();
         $(".chart-box.available").remove();
@@ -467,9 +467,9 @@ function FrontBuilder() {
             let domain = domains[key];
             let $titleTab = addDomainTab(domain);
             let $domainIndicator = $titleTab.find(".indicator");
-            viewers[domain.index].putIndicator("domain", "event", "", $domainIndicator);
+            viewers[domain.index].putIndicator$("domain", "event", "", $domainIndicator);
             sampleInterval = Math.max(domain.sampleInterval, sampleInterval);
-            addDomainStatusBar(domain);
+            addDomainMetricsBar(domain);
         }
         for (let key in instances) {
             let instance = instances[key];
@@ -478,7 +478,7 @@ function FrontBuilder() {
             addControlBar(instance, sampleInterval);
             for (let key in domains) {
                 let domain = domains[key];
-                viewers[domain.index].putIndicator("instance", "event", instance.name, $instanceIndicator);
+                viewers[domain.index].putIndicator$("instance", "event", instance.name, $instanceIndicator);
                 if (instance.events && instance.events.length) {
                     let $eventBox = addEventBox(domain, instance);
                     for (let key in instance.events) {
@@ -486,19 +486,11 @@ function FrontBuilder() {
                         if (event.name === "activity") {
                             let $trackBox = addTrackBox($eventBox, domain, instance, event);
                             let $activityStatus = $trackBox.find(".activity-status");
-                            viewers[domain.index].putDisplay(instance.name, event.name, $trackBox);
-                            viewers[domain.index].putIndicator(instance.name, "event", event.name, $activityStatus);
+                            viewers[domain.index].putDisplay$(instance.name, event.name, $trackBox);
+                            viewers[domain.index].putIndicator$(instance.name, "event", event.name, $activityStatus);
                         } else if (event.name === "session") {
                             let $sessionBox = addSessionBox($eventBox, domain, instance, event);
-                            viewers[domain.index].putDisplay(instance.name, event.name, $sessionBox);
-                        } else if (event.name.startsWith("status")) {
-                            if (event.heading) {
-                                let $status = addDomainStatus(domain, event);
-                                viewers[domain.index].putStatus(instance.name, event.name, $status);
-                            } else {
-                                let $status = addInstanceStatus($eventBox, domain, instance, event);
-                                viewers[domain.index].putStatus(instance.name, event.name, $status);
-                            }
+                            viewers[domain.index].putDisplay$(instance.name, event.name, $sessionBox);
                         }
                     }
                     let $visualBox = addVisualBox(domain, instance);
@@ -506,7 +498,20 @@ function FrontBuilder() {
                         let event = instance.events[key];
                         if (event.name === "activity" || event.name === "session") {
                             let $chartBox = addChartBox($visualBox, domain, instance, event);
-                            viewers[domain.index].putChart(instance.name, event.name, $chartBox.find(".chart"));
+                            viewers[domain.index].putChart$(instance.name, event.name, $chartBox.find(".chart"));
+                        }
+                    }
+                }
+                if (instance.metrics && instance.metrics.length) {
+                    let $eventBox = $(".event-box[data-domain-index=" + domain.index + "][data-instance-name=" + instance.name + "]");
+                    for (let key in instance.metrics) {
+                        let metric = instance.metrics[key];
+                        if (metric.heading || !$eventBox.length) {
+                            let $metric = addDomainMetric(domain, metric);
+                            viewers[domain.index].putMetric$(instance.name, metric.name, $metric);
+                        } else {
+                            let $metric = addInstanceMetric($eventBox, domain, instance, metric);
+                            viewers[domain.index].putMetric$(instance.name, metric.name, $metric);
                         }
                     }
                 }
@@ -515,9 +520,9 @@ function FrontBuilder() {
                     let $consoleBox = addConsoleBox(domain, instance, logInfo);
                     let $console = $consoleBox.find(".console").data("tailing", true);
                     $consoleBox.find(".tailing-status").addClass("on");
-                    viewers[domain.index].putConsole(instance.name, logInfo.name, $console);
+                    viewers[domain.index].putConsole$(instance.name, logInfo.name, $console);
                     let $logIndicator = $consoleBox.find(".status-bar");
-                    viewers[domain.index].putIndicator(instance.name, "log", logInfo.name, $logIndicator);
+                    viewers[domain.index].putIndicator$(instance.name, "log", logInfo.name, $logIndicator);
                 }
             }
         }
@@ -558,26 +563,26 @@ function FrontBuilder() {
         return $tab;
     };
 
-    const addDomainStatusBar = function (domainInfo) {
-        let $statusBar = $(".domain.status-bar");
-        let $newStatusBar = $statusBar.first().hide().clone()
+    const addDomainMetricsBar = function (domainInfo) {
+        let $metricsBar = $(".domain.metrics-bar");
+        let $newMetricsBar = $metricsBar.first().hide().clone()
             .addClass("available")
             .attr("data-domain-index", domainInfo.index)
         if (domains.length > 1) {
-            $newStatusBar.find(".number").text(" " + (domainInfo.index + 1));
+            $newMetricsBar.find(".number").text(" " + (domainInfo.index + 1));
         } else {
-            $newStatusBar.addClass("full-width");
+            $newMetricsBar.addClass("full-width");
         }
-        return $newStatusBar.insertAfter($statusBar.last());
+        return $newMetricsBar.insertAfter($metricsBar.last());
     };
 
-    const addDomainStatus = function (domainInfo, eventInfo) {
-        let $statusBar = $(".domain.status-bar[data-domain-index=" + domainInfo.index + "]").show();
-        let $status = $statusBar.find(".status").first().hide().clone()
+    const addDomainMetric = function (domainInfo, metricInfo) {
+        let $metricsBar = $(".domain.metrics-bar[data-domain-index=" + domainInfo.index + "]").show();
+        let $metric = $metricsBar.find(".metric").first().hide().clone()
             .addClass("available")
-        $status.find("dt").text(eventInfo.title);
-        $status.find("dd").text("");
-        return $status.appendTo($statusBar).show();
+        $metric.find("dt").text(metricInfo.title);
+        $metric.find("dd").text("");
+        return $metric.appendTo($metricsBar).show();
     };
 
     const addControlBar = function (instanceInfo, sampleInterval) {
@@ -613,16 +618,16 @@ function FrontBuilder() {
         return $newBox.insertAfter($trackBox.last()).show();
     };
 
-    const addInstanceStatus = function ($eventBox, domainInfo, instanceInfo, eventInfo) {
-        let $statusBar = $eventBox.find(".status-bar").show();
-        let $status = $statusBar.find(".status").first().hide().clone()
+    const addInstanceMetric = function ($eventBox, domainInfo, instanceInfo, metricInfo) {
+        let $metricsBar = $eventBox.find(".metrics-bar").show();
+        let $metric = $metricsBar.find(".metric").first().hide().clone()
             .addClass("available")
             .attr("data-domain-index", domainInfo.index)
             .attr("data-instance-name", instanceInfo.name)
-            .attr("data-event-name", eventInfo.name);
-        $status.find("dt").text(eventInfo.title);
-        $status.find("dd").text("N/A");
-        return $status.appendTo($statusBar).show();
+            .attr("data-metric-name", metricInfo.name);
+        $metric.find("dt").text(metricInfo.title);
+        $metric.find("dd").text("");
+        return $metric.appendTo($metricsBar).show();
     };
 
     const addSessionBox = function ($eventBox, domainInfo, instanceInfo, eventInfo) {

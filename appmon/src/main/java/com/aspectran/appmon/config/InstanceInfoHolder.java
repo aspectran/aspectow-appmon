@@ -38,6 +38,13 @@ public class InstanceInfoHolder {
                     eventInfo.setInstanceName(instanceInfo.getName());
                 }
             }
+            List<MetricInfo> metricInfoList = instanceInfo.getMetricInfoList();
+            if (metricInfoList != null) {
+                for (MetricInfo metricInfo : metricInfoList) {
+                    metricInfo.setDomainName(domainName);
+                    metricInfo.setInstanceName(instanceInfo.getName());
+                }
+            }
             List<LogInfo> logInfoList = instanceInfo.getLogInfoList();
             if (logInfoList != null) {
                 for (LogInfo logInfo : logInfoList) {

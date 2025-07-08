@@ -87,6 +87,16 @@ public class AppMonConfig extends AbstractParameters {
         return null;
     }
 
+    public List<MetricInfo> getMetricInfoList(String instanceName) {
+        Assert.notNull(instanceName, "instanceName must not be null");
+        for (InstanceInfo instanceInfo : getInstanceInfoList()) {
+            if (instanceName.equals(instanceInfo.getName())) {
+                return instanceInfo.getMetricInfoList();
+            }
+        }
+        return null;
+    }
+
     public List<LogInfo> getLogInfoList(String instanceName) {
         Assert.notNull(instanceName, "instanceName must not be null");
         for (InstanceInfo instanceInfo : getInstanceInfoList()) {

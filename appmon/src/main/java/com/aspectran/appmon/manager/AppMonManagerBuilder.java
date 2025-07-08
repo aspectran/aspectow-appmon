@@ -21,6 +21,7 @@ import com.aspectran.appmon.config.EventInfo;
 import com.aspectran.appmon.config.InstanceInfo;
 import com.aspectran.appmon.config.InstanceInfoHolder;
 import com.aspectran.appmon.config.LogInfo;
+import com.aspectran.appmon.config.MetricInfo;
 import com.aspectran.appmon.config.PollingConfig;
 import com.aspectran.appmon.exporter.ExporterManager;
 import com.aspectran.appmon.exporter.event.ChartDataExporter;
@@ -29,6 +30,8 @@ import com.aspectran.appmon.exporter.event.EventExporter;
 import com.aspectran.appmon.exporter.event.EventExporterBuilder;
 import com.aspectran.appmon.exporter.log.LogExporter;
 import com.aspectran.appmon.exporter.log.LogExporterBuilder;
+import com.aspectran.appmon.exporter.metric.MetricExporter;
+import com.aspectran.appmon.exporter.metric.MetricExporterBuilder;
 import com.aspectran.appmon.persist.counter.EventCounter;
 import com.aspectran.appmon.persist.counter.EventCounterBuilder;
 import com.aspectran.core.context.ActivityContext;
@@ -64,6 +67,11 @@ public abstract class AppMonManagerBuilder {
             List<EventInfo> eventInfoList = appMonConfig.getEventInfoList(instanceName);
             if (eventInfoList != null && !eventInfoList.isEmpty()) {
                 buildEventExporters(appMonManager, instanceName, eventInfoList);
+            }
+
+            List<MetricInfo> metricInfoList = appMonConfig.getMetricInfoList(instanceName);
+            if (metricInfoList != null && !metricInfoList.isEmpty()) {
+                buildMetricExporters(appMonManager, instanceName, metricInfoList);
             }
 
             List<LogInfo> logInfoList = appMonConfig.getLogInfoList(instanceName);
@@ -103,6 +111,20 @@ public abstract class AppMonManagerBuilder {
         appMonManager.getExportServiceManager().addExporterManager(dataExporterManager);
     }
 
+    private static void buildMetricExporters(
+            AppMonManager appMonManager,
+            String instanceName,
+            @NonNull List<MetricInfo> metricInfoList) throws Exception {
+        ExporterManager metricExporterManager = new ExporterManager(appMonManager, instanceName);
+        for (MetricInfo metricInfo : metricInfoList) {
+            metricInfo.validateRequiredParameters();
+
+            MetricExporter eventExporter = MetricExporterBuilder.build(metricExporterManager, metricInfo);
+            metricExporterManager.addExporter(eventExporter);
+        }
+        appMonManager.getExportServiceManager().addExporterManager(metricExporterManager);
+    }
+
     private static void buildLogExporters(
             AppMonManager appMonManager,
             String instanceName,
@@ -112,7 +134,6 @@ public abstract class AppMonManagerBuilder {
             logInfo.validateRequiredParameters();
 
             LogExporter logExporter = LogExporterBuilder.build(logExporterManager, logInfo);
-
             logExporterManager.addExporter(logExporter);
         }
         appMonManager.getExportServiceManager().addExporterManager(logExporterManager);

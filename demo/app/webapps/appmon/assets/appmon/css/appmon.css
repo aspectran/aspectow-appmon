@@ -8,36 +8,36 @@
     color: #a01f27;
 }
 
-.status-bar {
+.metrics-bar {
     background-color: #d3d3d3;
     height: 28px;
 }
-.status-bar .status {
+.metrics-bar .metric {
     display: inline-block;
 }
-.status-bar .status:hover dl dt {
+.metrics-bar .metric:hover dl dt {
     border-left: 3px solid #ddd;
     padding-left: 7px;
 }
-.status-bar .status dl {
+.metrics-bar .metric dl {
     display: flex;
     height: 28px;
     margin: 0;
 }
-.status-bar .status dl dt {
+.metrics-bar .metric dl dt {
     margin: 0;
     padding: 0 5px 0 10px;
     align-content: center;
     font-weight: normal;
     font-size: .9em;
 }
-.status-bar .status dl dd {
+.metrics-bar .metric dl dd {
     margin: 0;
     padding: 0 5px 0 0;
     align-content: center;
     font-weight: bold;
 }
-.domain.status-bar {
+.domain.metrics-bar {
     position: relative;
     height: unset;
     padding: 0 50px;
@@ -52,10 +52,13 @@
         width: 50%;
     }
 }
-.domain.status-bar.full-width {
+.instance.metrics-bar {
+    text-align: center;
+}
+.domain.metrics-bar.full-width {
     width: 100%;
 }
-.domain.status-bar .title {
+.domain.metrics-bar .title {
     position: absolute;
     top: 0;
     left: 13px;
@@ -66,13 +69,13 @@
     font-weight: bold;
     color: #677278;
 }
-.domain.status-bar .status {
+.domain.metrics-bar .metric {
     border-left: 1px solid #ccc;
     @media screen and (max-width: 576px) {
         display: block;
     }
 }
-.domain.status-bar .status dl {
+.domain.metrics-bar .metric dl {
     @media screen and (max-width: 576px) {
         display: inline-flex;
     }

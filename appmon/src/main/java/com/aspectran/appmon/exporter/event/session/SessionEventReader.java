@@ -68,7 +68,6 @@ public class SessionEventReader extends AbstractEventReader {
 
     @Override
     public void init() throws Exception {
-        getEventInfo().checkHasTargetParameter();
         String[] arr = StringUtils.divide(getEventInfo().getTarget(), "/");
         serverId = arr[0];
         deploymentName = arr[1];

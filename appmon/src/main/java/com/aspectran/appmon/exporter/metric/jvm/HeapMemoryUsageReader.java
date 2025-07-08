@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.exporter.event.status.jvm;
+package com.aspectran.appmon.exporter.metric.jvm;
 
-import com.aspectran.appmon.config.EventInfo;
+import com.aspectran.appmon.config.MetricInfo;
 import com.aspectran.appmon.exporter.ExporterManager;
-import com.aspectran.appmon.exporter.event.status.AbstractStatusReader;
-import com.aspectran.appmon.exporter.event.status.StatusInfo;
+import com.aspectran.appmon.exporter.metric.AbstractMetricReader;
+import com.aspectran.appmon.exporter.metric.MetricData;
 import com.aspectran.utils.StringUtils;
 
 import java.lang.management.ManagementFactory;
@@ -28,7 +28,7 @@ import java.lang.management.MemoryUsage;
 /**
  * <p>Created: 2025-06-30</p>
  */
-public class HeapMemoryUsageReader extends AbstractStatusReader {
+public class HeapMemoryUsageReader extends AbstractMetricReader {
 
     private MemoryMXBean memoryMXBean;
 
@@ -38,8 +38,8 @@ public class HeapMemoryUsageReader extends AbstractStatusReader {
 
     public HeapMemoryUsageReader(
             ExporterManager exporterManager,
-            EventInfo eventInfo) {
-        super(exporterManager, eventInfo);
+            MetricInfo metricInfo) {
+        super(exporterManager, metricInfo);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class HeapMemoryUsageReader extends AbstractStatusReader {
     }
 
     @Override
-    protected StatusInfo getStatusInfo() {
+    protected MetricData getMetricData() {
         if (memoryMXBean == null) {
             return null;
         }
@@ -66,15 +66,17 @@ public class HeapMemoryUsageReader extends AbstractStatusReader {
         long committed = memoryUsage.getCommitted() >> 10;
         long max = memoryUsage.getMax() >> 10;
 
-        String text = StringUtils.toHumanFriendlyByteSize(memoryUsage.getUsed()) +
-                "/" + StringUtils.toHumanFriendlyByteSize(memoryUsage.getMax());
+        String usedKB = StringUtils.toHumanFriendlyByteSize(memoryUsage.getUsed());
+        String maxKB = StringUtils.toHumanFriendlyByteSize(memoryUsage.getMax());
 
-        return new StatusInfo(getEventInfo())
-                .setText(text)
+        return new MetricData(getMetricInfo())
+                .setFormat("{usedKB}/{maxKB}")
                 .putData("init", init)
                 .putData("used", used)
+                .putData("usedKB", usedKB)
                 .putData("committed", committed)
-                .putData("max", max);
+                .putData("max", max)
+                .putData("maxKB", maxKB);
     }
 
     @Override

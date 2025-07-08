@@ -24,16 +24,17 @@ import com.aspectran.utils.apon.ValueType;
 /**
  * <p>Created: 2020/02/12</p>
  */
-public class EventInfo extends AbstractParameters {
+public class MetricInfo extends AbstractParameters {
 
     private static final ParameterKey name;
     private static final ParameterKey title;
     private static final ParameterKey description;
     private static final ParameterKey reader;
-    private static final ParameterKey counter;
     private static final ParameterKey target;
     private static final ParameterKey parameters;
     private static final ParameterKey sampleInterval;
+    private static final ParameterKey heading;
+    private static final ParameterKey format;
 
     private static final ParameterKey[] parameterKeys;
 
@@ -42,20 +43,22 @@ public class EventInfo extends AbstractParameters {
         title = new ParameterKey("title", ValueType.STRING);
         description = new ParameterKey("description", ValueType.STRING);
         reader = new ParameterKey("reader", ValueType.STRING);
-        counter = new ParameterKey("counter", ValueType.STRING);
         target = new ParameterKey("target", ValueType.STRING);
         parameters = new ParameterKey("parameters", ValueType.PARAMETERS);
         sampleInterval = new ParameterKey("sampleInterval", ValueType.INT);
+        heading = new ParameterKey("heading", ValueType.BOOLEAN);
+        format = new ParameterKey("format", ValueType.STRING);
 
         parameterKeys = new ParameterKey[] {
                 name,
                 title,
                 description,
                 reader,
-                counter,
                 target,
                 parameters,
-                sampleInterval
+                sampleInterval,
+                heading,
+                format
         };
     }
 
@@ -63,7 +66,7 @@ public class EventInfo extends AbstractParameters {
 
     private String instanceName;
 
-    public EventInfo() {
+    public MetricInfo() {
         super(parameterKeys);
     }
 
@@ -88,7 +91,7 @@ public class EventInfo extends AbstractParameters {
     }
 
     public void setName(String name) {
-        putValue(EventInfo.name, name);
+        putValue(MetricInfo.name, name);
     }
 
     public String getTitle() {
@@ -96,7 +99,7 @@ public class EventInfo extends AbstractParameters {
     }
 
     public void setTitle(String title) {
-        putValue(EventInfo.title, title);
+        putValue(MetricInfo.title, title);
     }
 
     public String getDescription() {
@@ -104,7 +107,7 @@ public class EventInfo extends AbstractParameters {
     }
 
     public void setDescription(String description) {
-        putValue(EventInfo.description, description);
+        putValue(MetricInfo.description, description);
     }
 
     public String getReader() {
@@ -112,23 +115,11 @@ public class EventInfo extends AbstractParameters {
     }
 
     public void setReader(String reader) {
-        putValue(EventInfo.reader, reader);
+        putValue(MetricInfo.reader, reader);
     }
 
     public boolean hasReader() {
-        return hasValue(EventInfo.reader);
-    }
-
-    public String getCounter() {
-        return getString(counter);
-    }
-
-    public void setCounter(String counter) {
-        putValue(EventInfo.counter, counter);
-    }
-
-    public boolean hasCounter() {
-        return hasValue(EventInfo.counter);
+        return hasValue(MetricInfo.reader);
     }
 
     public String getTarget() {
@@ -136,7 +127,7 @@ public class EventInfo extends AbstractParameters {
     }
 
     public void setTarget(String target) {
-        putValue(EventInfo.target, target);
+        putValue(MetricInfo.target, target);
     }
 
     public boolean hasParameters() {
@@ -148,7 +139,7 @@ public class EventInfo extends AbstractParameters {
     }
 
     public void setParameters(Parameters parameters) {
-        putValue(EventInfo.parameters, parameters);
+        putValue(MetricInfo.parameters, parameters);
     }
 
     public int getSampleInterval() {
@@ -156,11 +147,40 @@ public class EventInfo extends AbstractParameters {
     }
 
     public void setSampleInterval(int sampleInterval) {
-        putValue(EventInfo.sampleInterval, sampleInterval);
+        putValue(MetricInfo.sampleInterval, sampleInterval);
+    }
+
+    public boolean isHeading() {
+        return getBoolean(heading, false);
+    }
+
+    public Boolean getHeading() {
+        return getBoolean(heading);
+    }
+
+    public void setHeading(boolean heading) {
+        putValue(MetricInfo.heading, heading);
+    }
+
+    public boolean hasFormat() {
+        return hasValue(format);
+    }
+
+    public String getFormat() {
+        return getString(format);
+    }
+
+    public void setFormat(String format) {
+        putValue(MetricInfo.format, format);
     }
 
     public void validateRequiredParameters() {
         Assert.hasLength(getString(name), "Missing value of required parameter: " + getQualifiedName(name));
+        Assert.hasLength(getString(title), "Missing value of required parameter: " + getQualifiedName(title));
+        Assert.hasLength(getString(reader), "Missing value of required parameter: " + getQualifiedName(reader));
+    }
+
+    public void checkHasTargetParameter() {
         Assert.hasLength(getString(target), "Missing value of required parameter: " + getQualifiedName(target));
     }
 

@@ -50,7 +50,6 @@ public class ActivityEventReader extends AbstractEventReader {
 
     @Override
     public void init() throws Exception {
-        getEventInfo().checkHasTargetParameter();
         aspectId = getClass().getName() + ".ASPECT@" + hashCode() + "[" + getEventInfo().getTarget() + "]";
     }
 

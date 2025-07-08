@@ -34,22 +34,22 @@ instance: {
         name: session
         target: tow.server/root
     }
-    event: {
-        name: status1
+    metric: {
+        name: heap
         title: Heap
         description: Shows JVM Heap memory usage status
-        reader: com.aspectran.appmon.exporter.event.status.jvm.HeapMemoryUsageReader
-        heading: true
+        reader: com.aspectran.appmon.exporter.metric.jvm.HeapMemoryUsageReader
         sampleInterval: 500
+        heading: true
     }
-    event: {
-        name: status2
+    metric: {
+        name: undertow-tp
         title: Undertow TP
         description: Metrics of Undertow thread pool resources
-        reader: com.aspectran.appmon.exporter.event.status.undertow.NioWorkerMetricsReader
+        reader: com.aspectran.appmon.exporter.metric.undertow.NioWorkerMetricsReader
         target: tow.server
-        heading: true
         sampleInterval: 500
+        heading: true
     }
     log: {
         name: app

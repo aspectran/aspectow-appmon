@@ -6,7 +6,7 @@ function FrontViewer(sampleInterval) {
     let enable = false;
     let visible = false;
     let $displays = {};
-    let $statuses = {};
+    let $metrics = {};
     let $charts = {};
     let $consoles = {};
     let $indicators = {};
@@ -31,43 +31,43 @@ function FrontViewer(sampleInterval) {
         }
     };
 
-    this.putDisplay = function (instanceName, eventName, $display) {
+    this.putDisplay$ = function (instanceName, eventName, $display) {
         $displays[instanceName + ":event:" + eventName] = $display;
     };
 
-    this.putStatus = function (instanceName, eventName, $status) {
-        $statuses[instanceName + ":status:" + eventName] = $status;
+    this.putMetric$ = function (instanceName, metricName, $metric) {
+        $metrics[instanceName + ":metric:" + metricName] = $metric;
     };
 
-    this.putChart = function (instanceName, eventName, $chart) {
+    this.putChart$ = function (instanceName, eventName, $chart) {
         $charts[instanceName + ":data:" + eventName] = $chart;
     };
 
-    this.putConsole = function (instanceName, logName, $console) {
+    this.putConsole$ = function (instanceName, logName, $console) {
         $consoles[instanceName + ":log:" + logName] = $console;
     };
 
-    this.putIndicator = function (instanceName, messageType, nameOfEventOrLog, $indicator) {
-        $indicators[instanceName + ":" + messageType + ":" + nameOfEventOrLog] = $indicator;
+    this.putIndicator$ = function (instanceName, exporterType, exporterName, $indicator) {
+        $indicators[instanceName + ":" + exporterType + ":" + exporterName] = $indicator;
     };
 
-    const getDisplay = function (key) {
+    const getDisplay$ = function (key) {
         return ($displays && key ? $displays[key] : null);
     };
 
-    const getStatus = function (key) {
-        return ($statuses && key ? $statuses[key] : null);
+    const getMetric$ = function (key) {
+        return ($metrics && key ? $metrics[key] : null);
     };
 
-    const getChart = function (key) {
+    const getChart$ = function (key) {
         return ($charts && key ? $charts[key] : null);
     };
 
-    const getConsole = function (key) {
+    const getConsole$ = function (key) {
         return ($consoles && key ? $consoles[key] : null);
     };
 
-    const getIndicator = function (key) {
+    const getIndicator$ = function (key) {
         return ($indicators && key ? $indicators[key] : null);
     }
 
@@ -107,7 +107,7 @@ function FrontViewer(sampleInterval) {
 
     this.printMessage = function (message, consoleName) {
         if (consoleName) {
-            let $console = getConsole(consoleName);
+            let $console = getConsole$(consoleName);
             $("<p/>").addClass("event ellipses").html(message).appendTo($console);
             scrollToBottom($console);
         } else {
@@ -119,7 +119,7 @@ function FrontViewer(sampleInterval) {
 
     this.printErrorMessage = function (message, consoleName) {
         if (consoleName || !Object.keys($consoles).length) {
-            let $console = getConsole(consoleName);
+            let $console = getConsole$(consoleName);
             $("<p/>").addClass("event error").html(message).appendTo($console);
             scrollToBottom($console);
         } else {
@@ -134,55 +134,55 @@ function FrontViewer(sampleInterval) {
         let idx2 = message.indexOf(":", idx1 + 1);
         let idx3 = message.indexOf(":", idx2 + 1);
         let instanceName = message.substring(0, idx1);
-        let messageType = message.substring(idx1 + 1, idx2);
-        let nameOfEventOrLog = message.substring(idx2 + 1, idx3);
+        let exporterType = message.substring(idx1 + 1, idx2);
+        let exporterName = message.substring(idx2 + 1, idx3);
         let messagePrefix = message.substring(0, idx3);
         let messageText = message.substring(idx3 + 1);
-        switch (messageType) {
+        switch (exporterType) {
             case "event":
                 if (messageText.length) {
                     let eventData = JSON.parse(messageText);
-                    processEventData(instanceName, messageType, nameOfEventOrLog, messagePrefix, eventData);
+                    processEventData(instanceName, exporterType, exporterName, messagePrefix, eventData);
                 }
                 break;
             case "data":
                 if (messageText.length) {
                     let eventData = JSON.parse(messageText);
                     if (eventData.chartData) {
-                        processChartData(instanceName, messageType, nameOfEventOrLog, messagePrefix, eventData.chartData);
+                        processChartData(instanceName, exporterType, exporterName, messagePrefix, eventData.chartData);
                     }
                 }
                 break;
-            case "status":
+            case "metric":
                 if (messageText.length) {
-                    let statusInfo = JSON.parse(messageText);
-                    processStatusInfo(instanceName, messageType, nameOfEventOrLog, messagePrefix, statusInfo);
+                    let metricData = JSON.parse(messageText);
+                    processMetricData(instanceName, exporterType, exporterName, messagePrefix, metricData);
                 }
                 break;
             case "log":
-                printLogMessage(instanceName, messageType, nameOfEventOrLog, messagePrefix, messageText);
+                printLogMessage(instanceName, exporterType, exporterName, messagePrefix, messageText);
                 break;
         }
     };
 
-    const printLogMessage = function (instanceName, messageType, logName , messagePrefix, messageText) {
-        indicate(instanceName, messageType, logName);
-        let $console = getConsole(messagePrefix);
+    const printLogMessage = function (instanceName, exporterType, logName , messagePrefix, messageText) {
+        indicate(instanceName, exporterType, logName);
+        let $console = getConsole$(messagePrefix);
         if ($console && !$console.data("pause")) {
             $("<p/>").text(messageText).appendTo($console);
             scrollToBottom($console);
         }
     };
 
-    const processEventData = function (instanceName, messageType, eventName, messagePrefix, eventData) {
+    const processEventData = function (instanceName, exporterType, eventName, messagePrefix, eventData) {
         switch (eventName) {
             case "activity":
-                indicate(instanceName, messageType, eventName);
+                indicate(instanceName, exporterType, eventName);
                 if (eventData.activities) {
                     printActivityStatus(messagePrefix, eventData.activities);
                 }
                 if (visible) {
-                    let $track = getDisplay(messagePrefix);
+                    let $track = getDisplay$(messagePrefix);
                     if ($track) {
                         let varName = messagePrefix.replace(':', '_');
                         if (!currentActivityCounts[varName]) {
@@ -203,7 +203,7 @@ function FrontViewer(sampleInterval) {
                     printCurrentActivityCount(messagePrefix, 0);
                 }
                 updateActivityCount(
-                    instanceName + ":" + messageType + ":session",
+                    instanceName + ":" + exporterType + ":session",
                     eventData.sessionId,
                     eventData.activityCount||0);
                 break;
@@ -213,10 +213,16 @@ function FrontViewer(sampleInterval) {
         }
     }
 
-    const processStatusInfo = function (instanceName, messageType, eventName, messagePrefix, statusInfo) {
-        let $status = getStatus(messagePrefix);
-        if ($status) {
-            $status.find("dd").text(statusInfo.text).attr("title", JSON.stringify(statusInfo.data, null, 2));
+    const processMetricData = function (instanceName, exporterType, metricName, messagePrefix, metricData) {
+        let $metric = getMetric$(messagePrefix);
+        if ($metric) {
+            let formatted = metricData.format;
+            for (let key in metricData.data) {
+                formatted = formatted.replace("{" + key + "}", metricData.data[key]);
+            }
+            $metric.find("dd")
+                .text(formatted)
+                .attr("title", JSON.stringify(metricData.data, null, 2));
         }
     }
 
@@ -269,14 +275,14 @@ function FrontViewer(sampleInterval) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     };
 
-    const indicate = function (instanceName, messageType, nameOfEventOrLog) {
-        let $indicator1 = getIndicator("domain:event:");
+    const indicate = function (instanceName, exporterType, exporterName) {
+        let $indicator1 = getIndicator$("domain:event:");
         blink($indicator1);
         if (visible) {
-            let $indicator2 = getIndicator("instance:event:" + instanceName);
+            let $indicator2 = getIndicator$("instance:event:" + instanceName);
             blink($indicator2);
-            if (messageType === "log") {
-                let $indicator3 = getIndicator(instanceName + ":log:" + nameOfEventOrLog);
+            if (exporterType === "log") {
+                let $indicator3 = getIndicator$(instanceName + ":log:" + exporterName);
                 blink($indicator3);
             }
         }
@@ -292,7 +298,7 @@ function FrontViewer(sampleInterval) {
     }
 
     const printActivityStatus = function (messagePrefix, activities) {
-        let $activityStatus = getIndicator(messagePrefix);
+        let $activityStatus = getIndicator$(messagePrefix);
         if ($activityStatus) {
             let separator = (activities.errors > 0 ? " / " : (activities.interim > 0 ? "+" : "-"));
             $activityStatus.find(".interim .separator").text(separator);
@@ -303,7 +309,7 @@ function FrontViewer(sampleInterval) {
     }
 
     const resetInterimActivityStatus = function (messagePrefix) {
-        let $activityStatus = getIndicator(messagePrefix);
+        let $activityStatus = getIndicator$(messagePrefix);
         if ($activityStatus) {
             $activityStatus.find(".interim .separator").text("");
             $activityStatus.find(".interim .total").text(0);
@@ -313,7 +319,7 @@ function FrontViewer(sampleInterval) {
 
     const resetInterimTimer = function (messagePrefix) {
         if (sampleInterval) {
-            let $activityStatus = getIndicator(messagePrefix);
+            let $activityStatus = getIndicator$(messagePrefix);
             if ($activityStatus) {
                 let $samplingTimerBar = $activityStatus.find(".sampling-timer-bar");
                 let $samplingTimerStatus = $activityStatus.find(".sampling-timer-status");
@@ -350,7 +356,7 @@ function FrontViewer(sampleInterval) {
 
     const resetAllInterimTimers = function () {
         for (let key in $indicators) {
-            let $activityStatus = getIndicator(key);
+            let $activityStatus = getIndicator$(key);
             if ($activityStatus.hasClass("activity-status")) {
                 resetInterimTimer(key);
             }
@@ -358,14 +364,14 @@ function FrontViewer(sampleInterval) {
     }
 
     const printCurrentActivityCount = function (messagePrefix, count) {
-        let $activityStatus = getIndicator(messagePrefix);
+        let $activityStatus = getIndicator$(messagePrefix);
         if ($activityStatus) {
             $activityStatus.find(".current .total").text(count);
         }
     }
 
     const printSessionEventData = function (messagePrefix, eventData) {
-        let $display = getDisplay(messagePrefix);
+        let $display = getDisplay$(messagePrefix);
         if ($display) {
             $display.find(".numberOfCreated").text(eventData.numberOfCreated);
             $display.find(".numberOfExpired").text(eventData.numberOfExpired);
@@ -461,7 +467,7 @@ function FrontViewer(sampleInterval) {
     };
 
     const updateActivityCount = function (messagePrefix, sessionId, activityCount) {
-        let $display = getDisplay(messagePrefix);
+        let $display = getDisplay$(messagePrefix);
         if ($display) {
             let $li = $display.find("ul.sessions li[data-sid='" + sessionId + "']");
             let $count = $li.find(".count").text(activityCount);
@@ -472,8 +478,8 @@ function FrontViewer(sampleInterval) {
         }
     };
 
-    const processChartData = function (instanceName, messageType, eventName, messagePrefix, chartData) {
-        let $chart = getChart(messagePrefix);
+    const processChartData = function (instanceName, exporterType, eventName, messagePrefix, chartData) {
+        let $chart = getChart$(messagePrefix);
         if (!$chart) {
             return;
         }

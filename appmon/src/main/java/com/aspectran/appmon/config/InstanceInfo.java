@@ -30,6 +30,7 @@ public class InstanceInfo extends AbstractParameters {
     private static final ParameterKey title;
     private static final ParameterKey hidden;
     private static final ParameterKey event;
+    private static final ParameterKey metric;
     private static final ParameterKey log;
 
     private static final ParameterKey[] parameterKeys;
@@ -39,6 +40,7 @@ public class InstanceInfo extends AbstractParameters {
         title = new ParameterKey("title", ValueType.STRING);
         hidden = new ParameterKey("hidden", ValueType.BOOLEAN);
         event = new ParameterKey("events", new String[] {"event"}, EventInfo.class, true, true);
+        metric = new ParameterKey("metrics", new String[] {"metric"}, MetricInfo.class, true, true);
         log = new ParameterKey("logs", new String[] {"log"}, LogInfo.class, true, true);
 
         parameterKeys = new ParameterKey[] {
@@ -46,6 +48,7 @@ public class InstanceInfo extends AbstractParameters {
                 title,
                 hidden,
                 event,
+                metric,
                 log
         };
     }
@@ -94,6 +97,14 @@ public class InstanceInfo extends AbstractParameters {
 
     public void setEventInfoList(List<EventInfo> eventInfoList) {
         putValue(InstanceInfo.event, eventInfoList);
+    }
+
+    public List<MetricInfo> getMetricInfoList() {
+        return getParametersList(metric);
+    }
+
+    public void setMetricInfoList(List<MetricInfo> metricInfoList) {
+        putValue(InstanceInfo.metric, metricInfoList);
     }
 
     public List<LogInfo> getLogInfoList() {

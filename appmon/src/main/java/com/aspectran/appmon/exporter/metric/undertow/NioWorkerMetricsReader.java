@@ -1,9 +1,9 @@
-package com.aspectran.appmon.exporter.event.status.undertow;
+package com.aspectran.appmon.exporter.metric.undertow;
 
-import com.aspectran.appmon.config.EventInfo;
+import com.aspectran.appmon.config.MetricInfo;
 import com.aspectran.appmon.exporter.ExporterManager;
-import com.aspectran.appmon.exporter.event.status.AbstractStatusReader;
-import com.aspectran.appmon.exporter.event.status.StatusInfo;
+import com.aspectran.appmon.exporter.metric.AbstractMetricReader;
+import com.aspectran.appmon.exporter.metric.MetricData;
 import com.aspectran.undertow.server.TowServer;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import io.undertow.Undertow;
@@ -27,7 +27,7 @@ import org.xnio.management.XnioWorkerMXBean;
  *
  * <p>Created: 2025-07-07</p>
  */
-public class NioWorkerMetricsReader extends AbstractStatusReader {
+public class NioWorkerMetricsReader extends AbstractMetricReader {
 
     private String serverId;
 
@@ -39,14 +39,14 @@ public class NioWorkerMetricsReader extends AbstractStatusReader {
 
     public NioWorkerMetricsReader(
             @NonNull ExporterManager exporterManager,
-            @NonNull EventInfo eventInfo) {
-        super(exporterManager, eventInfo);
+            @NonNull MetricInfo metricInfo) {
+        super(exporterManager, metricInfo);
     }
 
     @Override
     public void init() throws Exception {
-        getEventInfo().checkHasTargetParameter();
-        serverId = getEventInfo().getTarget();
+        getMetricInfo().checkHasTargetParameter();
+        serverId = getMetricInfo().getTarget();
     }
 
     @Override
@@ -56,7 +56,7 @@ public class NioWorkerMetricsReader extends AbstractStatusReader {
             Undertow undertow = towServer.getUndertow();
             metrics = undertow.getWorker().getMXBean();
         } catch (Exception e) {
-            throw new RuntimeException("Cannot resolve session manager with " + getEventInfo().getTarget(), e);
+            throw new RuntimeException("Cannot resolve session manager with " + getMetricInfo().getTarget(), e);
         }
     }
 
@@ -68,7 +68,7 @@ public class NioWorkerMetricsReader extends AbstractStatusReader {
     }
 
     @Override
-    protected StatusInfo getStatusInfo() {
+    protected MetricData getMetricData() {
         if (metrics == null) {
             return null;
         }
@@ -77,10 +77,8 @@ public class NioWorkerMetricsReader extends AbstractStatusReader {
         int poolSize = metrics.getWorkerPoolSize();
         int maxPoolSize = metrics.getMaxWorkerPoolSize();
 
-        String text = activeCount + "/" + poolSize;
-
-        return new StatusInfo(getEventInfo())
-                .setText(text)
+        return new MetricData(getMetricInfo())
+                .setFormat("{activeCount}/{poolSize}")
                 .putData("workerName", metrics.getName())
                 .putData("activeCount", activeCount)
                 .putData("poolSize", poolSize)

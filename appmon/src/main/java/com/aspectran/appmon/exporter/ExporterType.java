@@ -21,8 +21,8 @@ public enum ExporterType {
 
     DATA("data"),
     EVENT("event"),
-    STATUS("status"),
-    LOG("log");
+    LOG("log"),
+    METRIC("metric");
 
     private final String alias;
 

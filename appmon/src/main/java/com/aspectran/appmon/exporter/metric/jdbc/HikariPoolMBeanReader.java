@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.exporter.event.status.jdbc;
+package com.aspectran.appmon.exporter.metric.jdbc;
 
-import com.aspectran.appmon.config.EventInfo;
+import com.aspectran.appmon.config.MetricInfo;
 import com.aspectran.appmon.exporter.ExporterManager;
-import com.aspectran.appmon.exporter.event.status.AbstractStatusReader;
-import com.aspectran.appmon.exporter.event.status.StatusInfo;
+import com.aspectran.appmon.exporter.metric.AbstractMetricReader;
+import com.aspectran.appmon.exporter.metric.MetricData;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.zaxxer.hikari.HikariPoolMXBean;
 
@@ -30,7 +30,7 @@ import java.lang.management.ManagementFactory;
 /**
  * <p>Created: 2025-06-02</p>
  */
-public class HikariPoolMBeanReader extends AbstractStatusReader {
+public class HikariPoolMBeanReader extends AbstractMetricReader {
 
     private String poolName;
 
@@ -44,16 +44,16 @@ public class HikariPoolMBeanReader extends AbstractStatusReader {
 
     public HikariPoolMBeanReader(
             @NonNull ExporterManager exporterManager,
-            @NonNull EventInfo eventInfo) {
-        super(exporterManager, eventInfo);
+            @NonNull MetricInfo metricInfo) {
+        super(exporterManager, metricInfo);
     }
 
     @Override
     public void init() throws Exception {
-        if (!getEventInfo().hasParameters() || !getEventInfo().getParameters().hasValue("poolName")) {
+        if (!getMetricInfo().hasParameters() || !getMetricInfo().getParameters().hasValue("poolName")) {
             throw new IllegalArgumentException("Missing value of required parameter: poolName");
         }
-        poolName = getEventInfo().getParameters().getString("poolName");
+        poolName = getMetricInfo().getParameters().getString("poolName");
     }
 
     @Override
@@ -71,7 +71,7 @@ public class HikariPoolMBeanReader extends AbstractStatusReader {
     }
 
     @Override
-    protected StatusInfo getStatusInfo() {
+    protected MetricData getMetricData() {
         if (hikariPoolMXBean == null) {
             return null;
         }
@@ -82,15 +82,14 @@ public class HikariPoolMBeanReader extends AbstractStatusReader {
         int awaiting = hikariPoolMXBean.getThreadsAwaitingConnection();
         int used = total - idle;
 
-        String text = used + "/" + total;
-
-        return new StatusInfo(getEventInfo())
-                .setText(text)
+        return new MetricData(getMetricInfo())
+                .setFormat("{used}/{total}")
                 .putData("poolName", poolName)
                 .putData("total", total)
                 .putData("active", active)
                 .putData("idle", idle)
-                .putData("awaiting", awaiting);
+                .putData("awaiting", awaiting)
+                .putData("used", used);
     }
 
     @Override
