@@ -580,7 +580,7 @@ function FrontBuilder() {
         let $metricsBar = $(".domain.metrics-bar[data-domain-index=" + domainInfo.index + "]").show();
         let $metric = $metricsBar.find(".metric").first().hide().clone()
             .addClass("available")
-        $metric.find("dt").text(metricInfo.title);
+        $metric.find("dt").text(metricInfo.title).attr("title", metricInfo.description);
         $metric.find("dd").text("");
         return $metric.appendTo($metricsBar).show();
     };
@@ -625,7 +625,7 @@ function FrontBuilder() {
             .attr("data-domain-index", domainInfo.index)
             .attr("data-instance-name", instanceInfo.name)
             .attr("data-metric-name", metricInfo.name);
-        $metric.find("dt").text(metricInfo.title);
+        $metric.find("dt").text(metricInfo.title).attr("title", metricInfo.description);
         $metric.find("dd").text("");
         return $metric.appendTo($metricsBar).show();
     };
