@@ -104,16 +104,16 @@ public class MetricExporter extends AbstractExporter {
     @Override
     protected void doStart() throws Exception {
         metricReader.start();
-        if (sampleInterval > 0 && timer == null) {
-            timer = new MetricExportTimer(exporterManager.getScheduler(), this, sampleInterval, exportInterval);
-            timer.schedule();
+        if (sampleInterval > 0) {
+            timer = new MetricExportTimer(exporterManager.getScheduler(), this);
+            timer.schedule(sampleInterval, exportInterval);
         }
     }
 
     @Override
     protected void doStop() throws Exception {
         if (timer != null) {
-            timer.cancel();
+            timer.destroy();
             timer = null;
         }
         metricReader.stop();

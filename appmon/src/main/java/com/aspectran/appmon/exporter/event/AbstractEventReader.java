@@ -35,11 +35,6 @@ public abstract class AbstractEventReader implements EventReader {
     private volatile EventExporter eventExporter;
 
     public AbstractEventReader(@NonNull ExporterManager exporterManager,
-                               @NonNull EventInfo eventInfo) {
-        this(exporterManager, eventInfo, null);
-    }
-
-    public AbstractEventReader(@NonNull ExporterManager exporterManager,
                                @NonNull EventInfo eventInfo,
                                @Nullable EventCount eventCount) {
         this.exporterManager = exporterManager;

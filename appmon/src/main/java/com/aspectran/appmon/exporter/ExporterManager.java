@@ -88,11 +88,7 @@ public class ExporterManager {
         }
     }
 
-    public void start() {
-        if (scheduler != null) {
-            scheduler.stop();
-            scheduler = null;
-        }
+    public synchronized void start() {
         scheduler = new ScheduledExecutorScheduler(exporterType + "ExportScheduler", false);
         scheduler.start();
         for (Exporter exporter : exporters.values()) {
@@ -104,7 +100,7 @@ public class ExporterManager {
         }
     }
 
-    public void stop() {
+    public synchronized void stop() {
         for (Exporter exporter : exporters.values()) {
             try {
                 exporter.stop();

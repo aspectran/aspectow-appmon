@@ -14,23 +14,32 @@ import java.util.concurrent.TimeUnit;
  */
 public class MetricExportTimer {
 
-    private final CyclicTimeout samplingTimer;
-
-    private final CyclicTimeout exportTimer;
+    private final Scheduler scheduler;
 
     private final MetricExporter metricExporter;
 
     private final MetricReader metricReader;
 
-    private final int sampleInterval;
+    private int sampleInterval;
 
-    private final int exportInterval;
+    private int exportInterval;
+
+    private CyclicTimeout samplingTimer;
+
+    private CyclicTimeout exportTimer;
 
     private MetricData metricData;
 
-    public MetricExportTimer(
-            Scheduler scheduler, @NonNull MetricExporter metricExporter,
-            int sampleInterval, int exportInterval) {
+    public MetricExportTimer(Scheduler scheduler, @NonNull MetricExporter metricExporter) {
+        this.scheduler = scheduler;
+        this.metricExporter = metricExporter;
+        this.metricReader = metricExporter.getMetricReader();
+    }
+
+    public void schedule(int sampleInterval, int exportInterval) {
+        this.sampleInterval = sampleInterval;
+        this.exportInterval = exportInterval;
+
         this.samplingTimer = new CyclicTimeout(scheduler) {
             @Override
             public void onTimeoutExpired() {
@@ -38,31 +47,44 @@ public class MetricExportTimer {
                 if (exportInterval <= sampleInterval) {
                     exportMetricData();
                 }
-                MetricExportTimer.this.schedule();
+                scheduleSampling();
             }
         };
+
         if (exportInterval > sampleInterval) {
             this.exportTimer = new CyclicTimeout(scheduler) {
                 @Override
                 public void onTimeoutExpired() {
                     exportMetricData();
-                    MetricExportTimer.this.schedule();
+                    scheduleExporting();
                 }
             };
         } else {
             this.exportTimer = null;
         }
-        this.metricExporter = metricExporter;
-        this.metricReader = metricExporter.getMetricReader();
-        this.sampleInterval = sampleInterval;
-        this.exportInterval = exportInterval;
+
+        scheduleSampling();
+        scheduleExporting();
+    }
+
+    private void scheduleSampling() {
+        samplingTimer.schedule(sampleInterval, TimeUnit.MILLISECONDS);
+    }
+
+    private void scheduleExporting() {
+        if (exportTimer != null) {
+            exportTimer.schedule(exportInterval, TimeUnit.MILLISECONDS);
+        }
     }
 
     private void saveMetricData() {
         if (this.metricData == null) {
-            this.metricData = metricReader.getMetricData();
+            this.metricData = metricReader.getMetricData(false);
         } else {
-            this.metricData = metricReader.getMetricData(true);
+            MetricData metricData = metricReader.getMetricData(true);
+            if (metricData != null) {
+                this.metricData = metricData;
+            }
         }
     }
 
@@ -73,27 +95,13 @@ public class MetricExportTimer {
         }
     }
 
-    public void schedule() {
-        samplingTimer.schedule(sampleInterval, TimeUnit.MILLISECONDS);
-        if (exportTimer != null) {
-            exportTimer.schedule(exportInterval, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    public void cancel() {
-        if (samplingTimer != null) {
-            samplingTimer.cancel();
-        }
-        if (exportTimer != null) {
-            exportTimer.cancel();
-        }
-    }
-
     public void destroy() {
         if (samplingTimer != null) {
+            samplingTimer.cancel();
             samplingTimer.destroy();
         }
         if (exportTimer != null) {
+            exportTimer.cancel();
             exportTimer.destroy();
         }
     }

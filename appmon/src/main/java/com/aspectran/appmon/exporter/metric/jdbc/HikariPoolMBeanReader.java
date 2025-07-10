@@ -77,7 +77,7 @@ public class HikariPoolMBeanReader extends AbstractMetricReader {
         }
 
         int idle = hikariPoolMXBean.getIdleConnections();
-        if (greater && idle <= oldIdle) {
+        if (greater && idle >= oldIdle) {
             return null;
         }
 
