@@ -33,6 +33,7 @@ public class MetricInfo extends AbstractParameters {
     private static final ParameterKey target;
     private static final ParameterKey parameters;
     private static final ParameterKey sampleInterval;
+    private static final ParameterKey exportInterval;
     private static final ParameterKey heading;
     private static final ParameterKey format;
 
@@ -46,6 +47,7 @@ public class MetricInfo extends AbstractParameters {
         target = new ParameterKey("target", ValueType.STRING);
         parameters = new ParameterKey("parameters", ValueType.PARAMETERS);
         sampleInterval = new ParameterKey("sampleInterval", ValueType.INT);
+        exportInterval = new ParameterKey("exportInterval", ValueType.INT);
         heading = new ParameterKey("heading", ValueType.BOOLEAN);
         format = new ParameterKey("format", ValueType.STRING);
 
@@ -57,6 +59,7 @@ public class MetricInfo extends AbstractParameters {
                 target,
                 parameters,
                 sampleInterval,
+                exportInterval,
                 heading,
                 format
         };
@@ -148,6 +151,14 @@ public class MetricInfo extends AbstractParameters {
 
     public void setSampleInterval(int sampleInterval) {
         putValue(MetricInfo.sampleInterval, sampleInterval);
+    }
+
+    public int getExportInterval() {
+        return getInt(exportInterval, 0);
+    }
+
+    public void setExportInterval(int exportInterval) {
+        putValue(MetricInfo.exportInterval, exportInterval);
     }
 
     public boolean isHeading() {

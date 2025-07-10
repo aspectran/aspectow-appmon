@@ -24,6 +24,7 @@ import com.aspectran.appmon.config.LogInfo;
 import com.aspectran.appmon.config.MetricInfo;
 import com.aspectran.appmon.config.PollingConfig;
 import com.aspectran.appmon.exporter.ExporterManager;
+import com.aspectran.appmon.exporter.ExporterType;
 import com.aspectran.appmon.exporter.event.ChartDataExporter;
 import com.aspectran.appmon.exporter.event.ChartDataExporterBuilder;
 import com.aspectran.appmon.exporter.event.EventExporter;
@@ -87,8 +88,8 @@ public abstract class AppMonManagerBuilder {
             AppMonManager appMonManager,
             String instanceName,
             @NonNull List<EventInfo> eventInfoList) throws Exception {
-        ExporterManager eventExporterManager = new ExporterManager(appMonManager, instanceName);
-        ExporterManager dataExporterManager = new ExporterManager(appMonManager, instanceName);
+        ExporterManager eventExporterManager = new ExporterManager(ExporterType.EVENT, appMonManager, instanceName);
+        ExporterManager dataExporterManager = new ExporterManager(ExporterType.DATA, appMonManager, instanceName);
         for (EventInfo eventInfo : eventInfoList) {
             eventInfo.validateRequiredParameters();
 
@@ -115,7 +116,7 @@ public abstract class AppMonManagerBuilder {
             AppMonManager appMonManager,
             String instanceName,
             @NonNull List<MetricInfo> metricInfoList) throws Exception {
-        ExporterManager metricExporterManager = new ExporterManager(appMonManager, instanceName);
+        ExporterManager metricExporterManager = new ExporterManager(ExporterType.METRIC, appMonManager, instanceName);
         for (MetricInfo metricInfo : metricInfoList) {
             metricInfo.validateRequiredParameters();
 
@@ -129,7 +130,7 @@ public abstract class AppMonManagerBuilder {
             AppMonManager appMonManager,
             String instanceName,
             @NonNull List<LogInfo> logInfoList) throws Exception {
-        ExporterManager logExporterManager = new ExporterManager(appMonManager, instanceName);
+        ExporterManager logExporterManager = new ExporterManager(ExporterType.LOG, appMonManager, instanceName);
         for (LogInfo logInfo : logInfoList) {
             logInfo.validateRequiredParameters();
 

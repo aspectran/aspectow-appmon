@@ -19,6 +19,8 @@ import com.aspectran.appmon.manager.AppMonManager;
 import com.aspectran.appmon.service.CommandOptions;
 import com.aspectran.core.activity.InstantAction;
 import com.aspectran.utils.annotation.jsr305.NonNull;
+import com.aspectran.utils.thread.ScheduledExecutorScheduler;
+import com.aspectran.utils.thread.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +37,16 @@ public class ExporterManager {
 
     private final Map<String, Exporter> exporters = new LinkedHashMap<>();
 
+    private final ExporterType exporterType;
+
     private final AppMonManager appMonManager;
 
     private final String instanceName;
 
-    public ExporterManager(AppMonManager appMonManager, String instanceName) {
+    private Scheduler scheduler;
+
+    public ExporterManager(ExporterType exporterType, AppMonManager appMonManager, String instanceName) {
+        this.exporterType = exporterType;
         this.appMonManager = appMonManager;
         this.instanceName = instanceName;
     }
@@ -52,6 +59,10 @@ public class ExporterManager {
         return instanceName;
     }
 
+    public Scheduler getScheduler() {
+        return scheduler;
+    }
+
     public void addExporter(Exporter exporter) {
         exporters.put(exporter.getName(), exporter);
     }
@@ -60,7 +71,7 @@ public class ExporterManager {
     public <V extends Exporter> V getExporter(String name) {
         Exporter exporter = exporters.get(name);
         if (exporter == null) {
-            throw new IllegalArgumentException("No exporter found for name '" + name + "'");
+            throw new IllegalArgumentException("No exporter named '" + name + "' found");
         }
         return (V)exporter;
     }
@@ -78,6 +89,12 @@ public class ExporterManager {
     }
 
     public void start() {
+        if (scheduler != null) {
+            scheduler.stop();
+            scheduler = null;
+        }
+        scheduler = new ScheduledExecutorScheduler(exporterType + "ExportScheduler", false);
+        scheduler.start();
         for (Exporter exporter : exporters.values()) {
             try {
                 exporter.start();
@@ -94,6 +111,10 @@ public class ExporterManager {
             } catch (Exception e) {
                 logger.warn(e.getMessage(), e);
             }
+        }
+        if (scheduler != null) {
+            scheduler.stop();
+            scheduler = null;
         }
     }
 

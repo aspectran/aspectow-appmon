@@ -68,14 +68,21 @@ public class NioWorkerMetricsReader extends AbstractMetricReader {
     }
 
     @Override
-    protected MetricData getMetricData() {
+    public MetricData getMetricData(boolean greater) {
         if (metrics == null) {
             return null;
         }
 
         int activeCount = metrics.getBusyWorkerThreadCount();
+        if (greater && activeCount <= oldActiveCount) {
+            return null;
+        }
+
         int poolSize = metrics.getWorkerPoolSize();
         int maxPoolSize = metrics.getMaxWorkerPoolSize();
+
+        oldActiveCount = activeCount;
+        oldPoolSize = poolSize;
 
         return new MetricData(getMetricInfo())
                 .setFormat("{activeCount}/{poolSize}")
@@ -86,21 +93,12 @@ public class NioWorkerMetricsReader extends AbstractMetricReader {
     }
 
     @Override
-    protected boolean hasChanges() {
+    public boolean hasChanges() {
         if (metrics == null) {
             return false;
         }
-
-        boolean changed = (metrics.getBusyWorkerThreadCount() != oldActiveCount ||
+        return (metrics.getBusyWorkerThreadCount() != oldActiveCount ||
                 metrics.getWorkerPoolSize() != oldPoolSize);
-
-        if (changed) {
-            oldActiveCount = metrics.getBusyWorkerThreadCount();
-            oldPoolSize = metrics.getWorkerPoolSize();
-            return true;
-        } else {
-            return false;
-        }
     }
 
 }

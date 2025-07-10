@@ -69,28 +69,28 @@ public class EventExporter extends AbstractExporter {
 
     @Override
     public void readIfChanged(@NonNull List<String> messages, CommandOptions commandOptions) {
-        String json = eventReader.readIfChanged();
-        if (json != null) {
-            messages.add(prefix + json);
+        if (eventReader.hasChanges()) {
+            read(messages, commandOptions);
         }
     }
 
     @Override
     public void broadcast(String message) {
-        exporterManager.broadcast(prefix + message);
+        if (message != null) {
+            exporterManager.broadcast(prefix + message);
+        }
     }
 
     private void broadcastIfChanged() {
-        String data = eventReader.readIfChanged();
-        if (data != null) {
-            broadcast(data);
+        if (eventReader.hasChanges()) {
+            broadcast(eventReader.read());
         }
     }
 
     @Override
     protected void doStart() throws Exception {
+        eventReader.start();
         if (sampleInterval > 0) {
-            eventReader.start();
             if (timer == null) {
                 String name = new ToStringBuilder("EventReadingTimer")
                         .append("eventReader", eventReader)
@@ -104,8 +104,6 @@ public class EventExporter extends AbstractExporter {
                     }
                 }, 0, sampleInterval);
             }
-        } else {
-            eventReader.start();
         }
     }
 

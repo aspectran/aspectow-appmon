@@ -33,10 +33,12 @@ public interface MetricReader {
 
     void stop();
 
-    String read();
-
-    default String readIfChanged() {
-        return null;
+    default MetricData getMetricData() {
+        return getMetricData(false);
     }
+
+    MetricData getMetricData(boolean greater);
+
+    boolean hasChanges();
 
 }

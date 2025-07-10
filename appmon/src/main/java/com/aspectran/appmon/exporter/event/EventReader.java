@@ -35,8 +35,8 @@ public interface EventReader {
 
     String read();
 
-    default String readIfChanged() {
-        return null;
+    default boolean hasChanges() {
+        return false;
     }
 
 }

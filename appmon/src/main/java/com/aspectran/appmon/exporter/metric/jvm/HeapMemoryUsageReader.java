@@ -55,16 +55,23 @@ public class HeapMemoryUsageReader extends AbstractMetricReader {
     }
 
     @Override
-    protected MetricData getMetricData() {
+    public MetricData getMetricData(boolean greater) {
         if (memoryMXBean == null) {
             return null;
         }
 
         MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
-        long init = memoryUsage.getInit() >> 10;
         long used = memoryUsage.getUsed() >> 10;
+        if (greater && used <= oldUsed) {
+            return null;
+        }
+
+        long init = memoryUsage.getInit() >> 10;
         long committed = memoryUsage.getCommitted() >> 10;
         long max = memoryUsage.getMax() >> 10;
+
+        oldUsed = used;
+        oldMax = max;
 
         String usedKB = StringUtils.toHumanFriendlyByteSize(memoryUsage.getUsed());
         String maxKB = StringUtils.toHumanFriendlyByteSize(memoryUsage.getMax());
@@ -80,22 +87,13 @@ public class HeapMemoryUsageReader extends AbstractMetricReader {
     }
 
     @Override
-    protected boolean hasChanges() {
+    public boolean hasChanges() {
         if (memoryMXBean == null) {
             return false;
         }
-
         MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
-        boolean changed = (memoryUsage.getUsed() != oldUsed ||
+        return (memoryUsage.getUsed() != oldUsed ||
                 memoryUsage.getMax() != oldMax);
-
-        if (changed) {
-            oldUsed = memoryUsage.getUsed();
-            oldMax = memoryUsage.getMax();
-            return true;
-        } else {
-            return false;
-        }
     }
 
 }

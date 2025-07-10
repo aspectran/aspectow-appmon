@@ -18,7 +18,6 @@ package com.aspectran.appmon.exporter.metric;
 import com.aspectran.appmon.config.MetricInfo;
 import com.aspectran.appmon.exporter.ExporterManager;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.json.JsonBuilder;
 
 /**
  * <p>Created: 2025. 1. 27.</p>
@@ -54,31 +53,6 @@ public abstract class AbstractMetricReader implements MetricReader {
 
     public MetricInfo getMetricInfo() {
         return metricInfo;
-    }
-
-    abstract protected MetricData getMetricData();
-
-    abstract protected boolean hasChanges();
-
-    @Override
-    public String read() {
-        MetricData metricData = getMetricData();
-        if (metricData == null) {
-            return null;
-        }
-        return new JsonBuilder()
-                .prettyPrint(false)
-                .nullWritable(false)
-                .put(metricData)
-                .toString();
-    }
-
-    @Override
-    public String readIfChanged() {
-        if (!hasChanges()) {
-            return null;
-        }
-        return read();
     }
 
 }

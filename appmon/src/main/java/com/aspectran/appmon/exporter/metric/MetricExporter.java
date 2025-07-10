@@ -18,13 +18,12 @@ package com.aspectran.appmon.exporter.metric;
 import com.aspectran.appmon.config.MetricInfo;
 import com.aspectran.appmon.exporter.AbstractExporter;
 import com.aspectran.appmon.exporter.ExporterManager;
+import com.aspectran.appmon.exporter.MetricExportTimer;
 import com.aspectran.appmon.service.CommandOptions;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * <p>Created: 2024-12-18</p>
@@ -41,7 +40,9 @@ public class MetricExporter extends AbstractExporter {
 
     private final int sampleInterval;
 
-    private Timer timer;
+    private final int exportInterval;
+
+    private MetricExportTimer timer;
 
     public MetricExporter(@NonNull ExporterManager exporterManager,
                           @NonNull MetricInfo metricInfo,
@@ -51,7 +52,19 @@ public class MetricExporter extends AbstractExporter {
         this.metricInfo = metricInfo;
         this.metricReader = metricReader;
         this.prefix = metricInfo.getInstanceName() + ":" + getType() + ":" + metricInfo.getName() + ":";
-        this.sampleInterval = metricInfo.getSampleInterval();
+
+        int sampleInterval = metricInfo.getSampleInterval();
+        int exportInterval = metricInfo.getExportInterval();
+        if (sampleInterval <= 0 && exportInterval <= 0) {
+            this.sampleInterval = 0;
+            this.exportInterval = 0;
+        } else if (sampleInterval > exportInterval) {
+            this.sampleInterval = sampleInterval;
+            this.exportInterval = 0;
+        } else {
+            this.sampleInterval = sampleInterval;
+            this.exportInterval = exportInterval;
+        }
     }
 
     @Override
@@ -59,53 +72,41 @@ public class MetricExporter extends AbstractExporter {
         return metricInfo.getName();
     }
 
+    public MetricReader getMetricReader() {
+        return metricReader;
+    }
+
     @Override
     public void read(@NonNull List<String> messages, CommandOptions commandOptions) {
-        String json = metricReader.read();
-        if (json != null) {
-            messages.add(prefix + json);
+        MetricData metricData = metricReader.getMetricData();
+        if (metricData != null) {
+            String json = metricData.toJson();
+            if (json != null) {
+                messages.add(prefix + json);
+            }
         }
     }
 
     @Override
     public void readIfChanged(@NonNull List<String> messages, CommandOptions commandOptions) {
-        String json = metricReader.readIfChanged();
-        if (json != null) {
-            messages.add(prefix + json);
+        if (metricReader.hasChanges()) {
+            read(messages, commandOptions);
         }
     }
 
     @Override
     public void broadcast(String message) {
-        exporterManager.broadcast(prefix + message);
-    }
-
-    private void broadcastIfChanged() {
-        String data = metricReader.readIfChanged();
-        if (data != null) {
-            broadcast(data);
+        if (message != null) {
+            exporterManager.broadcast(prefix + message);
         }
     }
 
     @Override
     protected void doStart() throws Exception {
-        if (sampleInterval > 0) {
-            metricReader.start();
-            if (timer == null) {
-                String name = new ToStringBuilder("MetricReadingTimer")
-                        .append("metricReader", metricReader)
-                        .append("sampleInterval", sampleInterval)
-                        .toString();
-                timer = new Timer(name);
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        broadcastIfChanged();
-                    }
-                }, 0, sampleInterval);
-            }
-        } else {
-            metricReader.start();
+        metricReader.start();
+        if (sampleInterval > 0 && timer == null) {
+            timer = new MetricExportTimer(exporterManager.getScheduler(), this, sampleInterval, exportInterval);
+            timer.schedule();
         }
     }
 

@@ -2,59 +2,60 @@ package com.aspectran.appmon.exporter.metric;
 
 import com.aspectran.appmon.config.MetricInfo;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.apon.AbstractParameters;
-import com.aspectran.utils.apon.ParameterKey;
-import com.aspectran.utils.apon.ValueType;
+import com.aspectran.utils.json.JsonBuilder;
+
+import java.util.LinkedHashMap;
 
 /**
  * <p>Created: 2025-07-01</p>
  */
-public class MetricData extends AbstractParameters {
+public class MetricData {
 
-    private static final ParameterKey name;
-    private static final ParameterKey title;
-    private static final ParameterKey heading;
-    private static final ParameterKey format;
-    private static final ParameterKey data;
+    private final String name;
 
-    private static final ParameterKey[] parameterKeys;
+    private final String title;
 
-    static {
-        name = new ParameterKey("name", ValueType.STRING);
-        title = new ParameterKey("title", ValueType.STRING);
-        heading = new ParameterKey("heading", ValueType.BOOLEAN);
-        format = new ParameterKey("format", ValueType.STRING);
-        data = new ParameterKey("data", ValueType.PARAMETERS);
+    private final boolean heading;
 
-        parameterKeys = new ParameterKey[] {
-                name,
-                title,
-                heading,
-                format,
-                data
-        };
-    }
+    private String format;
+
+    private final LinkedHashMap<String, Object> data = new LinkedHashMap<>();
 
     public MetricData(@NonNull MetricInfo metricInfo) {
-        super(parameterKeys);
-        putValue(name, metricInfo.getName());
-        putValue(title, metricInfo.getTitle());
-        putValue(heading, metricInfo.getHeading());
-        if (metricInfo.hasFormat()) {
-            putValue(format, metricInfo.getFormat());
-        }
+        this.name = metricInfo.getName();
+        this.title = metricInfo.getTitle();
+        this.heading = metricInfo.isHeading();
+        this.format = metricInfo.getFormat();
     }
 
     public MetricData setFormat(String format) {
-        if (!hasValue(MetricData.format)) {
-            putValue(MetricData.format, format);
+        if (this.format == null) {
+            this.format = format;
         }
         return this;
     }
 
+    public Object getData(String name) {
+        return data.get(name);
+    }
+
     public MetricData putData(String name, Object value) {
-        touchParameters(MetricData.data).putValue(name, value);
+        data.put(name, value);
         return this;
+    }
+
+    public String toJson() {
+        return new JsonBuilder()
+                .prettyPrint(false)
+                .nullWritable(false)
+                .object()
+                    .put("name", name)
+                    .put("title", title)
+                    .put("heading", heading)
+                    .put("format", format)
+                    .put("data", data)
+                .endObject()
+                .toString();
     }
 
 }

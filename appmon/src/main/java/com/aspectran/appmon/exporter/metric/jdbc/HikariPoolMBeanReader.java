@@ -71,16 +71,24 @@ public class HikariPoolMBeanReader extends AbstractMetricReader {
     }
 
     @Override
-    protected MetricData getMetricData() {
+    public MetricData getMetricData(boolean greater) {
         if (hikariPoolMXBean == null) {
+            return null;
+        }
+
+        int idle = hikariPoolMXBean.getIdleConnections();
+        if (greater && idle <= oldIdle) {
             return null;
         }
 
         int total = hikariPoolMXBean.getTotalConnections();
         int active = hikariPoolMXBean.getActiveConnections();
-        int idle = hikariPoolMXBean.getIdleConnections();
         int awaiting = hikariPoolMXBean.getThreadsAwaitingConnection();
         int used = total - idle;
+
+        oldActive = hikariPoolMXBean.getActiveConnections();
+        oldIdle = hikariPoolMXBean.getIdleConnections();
+        oldAwaiting = hikariPoolMXBean.getThreadsAwaitingConnection();
 
         return new MetricData(getMetricInfo())
                 .setFormat("{used}/{total}")
@@ -93,23 +101,13 @@ public class HikariPoolMBeanReader extends AbstractMetricReader {
     }
 
     @Override
-    protected boolean hasChanges() {
+    public boolean hasChanges() {
         if (hikariPoolMXBean == null) {
             return false;
         }
-
-        boolean changed = (hikariPoolMXBean.getActiveConnections() != oldActive ||
+        return (hikariPoolMXBean.getActiveConnections() != oldActive ||
                 hikariPoolMXBean.getIdleConnections() != oldIdle ||
                 hikariPoolMXBean.getThreadsAwaitingConnection() != oldAwaiting);
-
-        if (changed) {
-            oldActive = hikariPoolMXBean.getActiveConnections();
-            oldIdle = hikariPoolMXBean.getIdleConnections();
-            oldAwaiting = hikariPoolMXBean.getThreadsAwaitingConnection();
-            return true;
-        } else {
-            return false;
-        }
     }
 
 }
