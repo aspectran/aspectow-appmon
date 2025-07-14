@@ -36,11 +36,7 @@ public class HikariPoolMBeanReader extends AbstractMetricReader {
 
     private HikariPoolMXBean hikariPoolMXBean;
 
-    private int oldActive = -1;
-
-    private int oldIdle;
-
-    private int oldAwaiting;
+    private int oldUsed;
 
     public HikariPoolMBeanReader(
             @NonNull ExporterManager exporterManager,
@@ -76,19 +72,17 @@ public class HikariPoolMBeanReader extends AbstractMetricReader {
             return null;
         }
 
+        int total = hikariPoolMXBean.getTotalConnections();
         int idle = hikariPoolMXBean.getIdleConnections();
-        if (greater && idle >= oldIdle) {
+        int used = total - idle;
+        if (greater && used <= oldUsed) {
             return null;
         }
 
-        int total = hikariPoolMXBean.getTotalConnections();
         int active = hikariPoolMXBean.getActiveConnections();
         int awaiting = hikariPoolMXBean.getThreadsAwaitingConnection();
-        int used = total - idle;
 
-        oldActive = hikariPoolMXBean.getActiveConnections();
-        oldIdle = hikariPoolMXBean.getIdleConnections();
-        oldAwaiting = hikariPoolMXBean.getThreadsAwaitingConnection();
+        oldUsed = used;
 
         return new MetricData(getMetricInfo())
                 .setFormat("{used}/{total}")
@@ -105,9 +99,10 @@ public class HikariPoolMBeanReader extends AbstractMetricReader {
         if (hikariPoolMXBean == null) {
             return false;
         }
-        return (hikariPoolMXBean.getActiveConnections() != oldActive ||
-                hikariPoolMXBean.getIdleConnections() != oldIdle ||
-                hikariPoolMXBean.getThreadsAwaitingConnection() != oldAwaiting);
+        int total = hikariPoolMXBean.getTotalConnections();
+        int idle = hikariPoolMXBean.getIdleConnections();
+        int used = total - idle;
+        return (used != oldUsed);
     }
 
 }

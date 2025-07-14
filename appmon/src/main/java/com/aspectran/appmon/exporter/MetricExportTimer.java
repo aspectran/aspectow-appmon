@@ -28,7 +28,7 @@ public class MetricExportTimer {
 
     private CyclicTimeout exportTimer;
 
-    private MetricData metricData;
+    private MetricData sampledMetricData;
 
     public MetricExportTimer(Scheduler scheduler, @NonNull MetricExporter metricExporter) {
         this.scheduler = scheduler;
@@ -78,20 +78,22 @@ public class MetricExportTimer {
     }
 
     private void saveMetricData() {
-        if (this.metricData == null) {
-            this.metricData = metricReader.getMetricData(false);
+        if (sampledMetricData == null) {
+            if (metricReader.hasChanges()) {
+                sampledMetricData = metricReader.getMetricData(false);
+            }
         } else {
             MetricData metricData = metricReader.getMetricData(true);
             if (metricData != null) {
-                this.metricData = metricData;
+                sampledMetricData = metricData;
             }
         }
     }
 
     private void exportMetricData() {
-        if (metricData != null) {
-            metricExporter.broadcast(metricData.toJson());
-            metricData = null;
+        if (sampledMetricData != null) {
+            metricExporter.broadcast(sampledMetricData.toJson());
+            sampledMetricData = null;
         }
     }
 

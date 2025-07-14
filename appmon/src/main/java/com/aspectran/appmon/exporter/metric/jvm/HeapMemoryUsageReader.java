@@ -34,8 +34,6 @@ public class HeapMemoryUsageReader extends AbstractMetricReader {
 
     private long oldUsed = -1L;
 
-    private long oldMax;
-
     public HeapMemoryUsageReader(
             ExporterManager exporterManager,
             MetricInfo metricInfo) {
@@ -61,8 +59,10 @@ public class HeapMemoryUsageReader extends AbstractMetricReader {
         }
 
         MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
-        long used = memoryUsage.getUsed() >> 10;
-        if (greater && used <= oldUsed) {
+        long used0 = memoryUsage.getUsed();
+        long used = used0 >> 10;
+        long usedToCompare = used >> 10;
+        if (greater && usedToCompare == oldUsed) {
             return null;
         }
 
@@ -70,8 +70,7 @@ public class HeapMemoryUsageReader extends AbstractMetricReader {
         long committed = memoryUsage.getCommitted() >> 10;
         long max = memoryUsage.getMax() >> 10;
 
-        oldUsed = used;
-        oldMax = max;
+        oldUsed = usedToCompare;
 
         String usedKB = StringUtils.toHumanFriendlyByteSize(memoryUsage.getUsed());
         String maxKB = StringUtils.toHumanFriendlyByteSize(memoryUsage.getMax());
@@ -92,8 +91,8 @@ public class HeapMemoryUsageReader extends AbstractMetricReader {
             return false;
         }
         MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
-        return (memoryUsage.getUsed() != oldUsed ||
-                memoryUsage.getMax() != oldMax);
+        long usedToCompare = memoryUsage.getUsed() >> 20;
+        return (usedToCompare != oldUsed);
     }
 
 }

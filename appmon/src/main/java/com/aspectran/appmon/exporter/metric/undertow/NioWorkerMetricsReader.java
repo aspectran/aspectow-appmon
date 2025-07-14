@@ -33,8 +33,6 @@ public class NioWorkerMetricsReader extends AbstractMetricReader {
 
     private XnioWorkerMXBean metrics;
 
-    private int oldPoolSize;
-
     private int oldActiveCount;
 
     public NioWorkerMetricsReader(
@@ -82,7 +80,6 @@ public class NioWorkerMetricsReader extends AbstractMetricReader {
         int maxPoolSize = metrics.getMaxWorkerPoolSize();
 
         oldActiveCount = activeCount;
-        oldPoolSize = poolSize;
 
         return new MetricData(getMetricInfo())
                 .setFormat("{activeCount}/{poolSize}")
@@ -97,8 +94,7 @@ public class NioWorkerMetricsReader extends AbstractMetricReader {
         if (metrics == null) {
             return false;
         }
-        return (metrics.getBusyWorkerThreadCount() != oldActiveCount ||
-                metrics.getWorkerPoolSize() != oldPoolSize);
+        return (metrics.getBusyWorkerThreadCount() != oldActiveCount);
     }
 
 }
