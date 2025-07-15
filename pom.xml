@@ -19,7 +19,7 @@
 
     <groupId>com.aspectran</groupId>
     <artifactId>aspectow-appmon-project</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>Aspectow AppMon Project</name>
@@ -59,7 +59,7 @@
         <url>https://github.com/aspectran/appmon</url>
         <connection>scm:git:ssh://git@github.com/aspectran/appmon.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/aspectran/appmon.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v1.0.0</tag>
     </scm>
 
     <issueManagement>
@@ -106,7 +106,7 @@
 
     <properties>
         <main.basedir>${project.basedir}</main.basedir>
-        <automatic.module.name/>
+        <automatic.module.name />
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
