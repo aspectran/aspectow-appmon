@@ -9,7 +9,7 @@
     <meta name="google" content="notranslate">
     <title>${empty page.title ? "Log Relay" : page.title}</title>
     <meta name="description" content="${empty page.description ? "Welcome to Log Relay" : page.description}">
-    <link rel="stylesheet" href="https://assets.aspectran.com/foundation/css/aspectran.css">
+    <link rel="stylesheet" href="https://assets.aspectran.com/foundation@6.9.0/css/aspectran.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap">
     <script src="https://assets.aspectran.com/js/modernizr-custom.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>

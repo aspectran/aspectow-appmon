@@ -614,8 +614,8 @@ function FrontViewer(sampleInterval) {
             default:
                 dataLabel1 = "";
         }
-        let chartType = (!dateUnit || dateUnit === "hour" ? "line" : "bar");
-        return new Chart(
+        const chartType = (!dateUnit || dateUnit === "hour" ? "line" : "bar");
+        const chart = new Chart(
             canvas,
             {
                 type: chartType,
@@ -630,10 +630,49 @@ function FrontViewer(sampleInterval) {
                         tooltip: {
                             enabled: true,
                             reverse: true,
+                            mode: 'x',
+                            intersect: false,
                             callbacks: {
                                 title: function (tooltip) {
                                     return dayjs.utc(labels[tooltip[0].dataIndex], "YYYYMMDDHHmm").local().format("LLL");
                                 }
+                            }
+                        },
+                        zoom: {
+                            zoom: {
+                                wheel: {
+                                    enabled: false
+                                },
+                                pinch: {
+                                    enabled: false
+                                },
+                                drag: {
+                                    enabled: true,
+                                    backgroundColor: "rgba(225,225,225,0.35)",
+                                    borderColor: "rgba(225,225,225)",
+                                    borderWidth: 1
+                                },
+                                mode: "x",
+                                onZoomComplete: function () {
+                                    if (chart.isZoomedOrPanned()) {
+                                        $(canvas).parent().find(".reset-zoom")
+                                            .off("click")
+                                            .on("click", function () {
+                                                chart.resetZoom();
+                                            }).show();
+                                    } else {
+                                        $(canvas).parent().find(".reset-zoom").hide();
+                                    }
+                                }
+                            }
+                        },
+                        crosshair: {
+                            line: {
+                                color: "#ccc",
+                                width: 1
+                            },
+                            zoom: {
+                                enabled: false
                             }
                         }
                     },
@@ -738,5 +777,9 @@ function FrontViewer(sampleInterval) {
                 }
             }
         );
+        if (!chart.isZoomedOrPanned()) {
+            $(canvas).parent().find(".reset-zoom").hide();
+        }
+        return chart;
     };
 }
