@@ -684,18 +684,19 @@ function FrontViewer(sampleInterval) {
                             },
                             ticks: {
                                 autoSkip: autoSkip,
+                                includeBounds: false,
                                 callback: function (value, index) {
-                                    let datetime =  dayjs.utc(labels[index], "YYYYMMDDHHmm").local();
-                                    let datetime2 = (index > 0 ? dayjs.utc(labels[index - 1], "YYYYMMDDHHmm").local() : null);
+                                    let datetime =  dayjs.utc(labels[value], "YYYYMMDDHHmm").local();
+                                    let datetime2 = (value > 0 ? dayjs.utc(labels[value - 1], "YYYYMMDDHHmm").local() : null);
                                     switch (dateUnit) {
                                         case "hour":
-                                            if (datetime2 && datetime.isAfter(datetime2, "day")) {
+                                            if (index === 0 || datetime2 && datetime.isAfter(datetime2, "day")) {
                                                 return datetime.format("M/D HH:00");
                                             } else {
                                                 return datetime.format("HH:00");
                                             }
                                         case "day":
-                                            if (datetime2 && datetime.isAfter(datetime2, "year")) {
+                                            if (index === 0 || datetime2 && datetime.isAfter(datetime2, "year")) {
                                                 return datetime.format("YYYY M/D");
                                             } else {
                                                 return datetime.format("M/D");
@@ -705,7 +706,7 @@ function FrontViewer(sampleInterval) {
                                         case "year":
                                             return datetime.format("YYYY");
                                         default:
-                                            if (datetime2 && datetime.isAfter(datetime2, "day")) {
+                                            if (index === 0 || datetime2 && datetime.isAfter(datetime2, "day")) {
                                                 return datetime.format("M/D HH:mm");
                                             } else {
                                                 return datetime.format("HH:mm");
