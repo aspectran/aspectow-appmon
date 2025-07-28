@@ -634,7 +634,19 @@ function FrontViewer(sampleInterval) {
                             intersect: false,
                             callbacks: {
                                 title: function (tooltip) {
-                                    return dayjs.utc(labels[tooltip[0].dataIndex], "YYYYMMDDHHmm").local().format("LLL");
+                                    let datetime = dayjs.utc(labels[tooltip[0].dataIndex], "YYYYMMDDHHmm").local();
+                                    switch (dateUnit) {
+                                        case "hour":
+                                            return datetime.format("LL HH:00");
+                                        case "day":
+                                            return datetime.format("LL");
+                                        case "month":
+                                            return datetime.format("LL").replace(/\b\s*\d{1,2}\s*\b/g, "");
+                                        case "year":
+                                            return datetime.format("YYYY");
+                                        default:
+                                            return datetime.format("LLL");
+                                    }
                                 }
                             }
                         },
