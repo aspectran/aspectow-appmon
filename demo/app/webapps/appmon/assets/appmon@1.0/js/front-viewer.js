@@ -641,7 +641,7 @@ function FrontViewer(sampleInterval) {
                                         case "day":
                                             return datetime.format("LL");
                                         case "month":
-                                            return datetime.format("LL").replace(/\b\s*\d{1,2}\s*\b/g, "");
+                                            return datetime.date(1).format("LL");
                                         case "year":
                                             return datetime.format("YYYY");
                                         default:
