@@ -614,7 +614,7 @@ function FrontViewer(sampleInterval) {
             default:
                 dataLabel1 = "";
         }
-        const chartType = (!dateUnit || dateUnit === "hour" ? "line" : "bar");
+        const chartType = (!dateUnit ? "line" : "bar");
         const chart = new Chart(
             canvas,
             {
