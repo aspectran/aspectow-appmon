@@ -1,11 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
-<link rel="stylesheet" href="<aspectran:token type='bean' expression='appmonAssets^url'/>/css/appmon.css?20250728b">
-<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/front-builder.js?20250728b"></script>
-<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/front-viewer.js?20250728b"></script>
-<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/websocket-client.js?20250728b"></script>
-<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/polling-client.js?20250728b"></script>
+<link rel="stylesheet" href="<aspectran:token type='bean' expression='appmonAssets^url'/>/css/appmon.css?20250729">
+<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/front-builder.js?20250729"></script>
+<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/front-viewer.js?20250729"></script>
+<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/websocket-client.js?20250729"></script>
+<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/polling-client.js?20250729"></script>
 <div class="container">
     <div class="row g-0">
         <div class="domain metrics-bar">

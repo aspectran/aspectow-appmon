@@ -660,6 +660,7 @@ function FrontViewer(sampleInterval) {
                                 },
                                 drag: {
                                     enabled: true,
+                                    threshold: 21,
                                     backgroundColor: "rgba(225,225,225,0.35)",
                                     borderColor: "rgba(225,225,225)",
                                     borderWidth: 1
@@ -676,6 +677,11 @@ function FrontViewer(sampleInterval) {
                                         $(canvas).parent().find(".reset-zoom").hide();
                                     }
                                 }
+                            },
+                            pan: {
+                                enabled: true,
+                                mode: "x",
+                                modifierKey: "ctrl"
                             }
                         },
                         crosshair: {
