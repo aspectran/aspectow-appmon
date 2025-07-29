@@ -656,7 +656,7 @@ function FrontViewer(sampleInterval) {
                                     enabled: false
                                 },
                                 pinch: {
-                                    enabled: false
+                                    enabled: true
                                 },
                                 drag: {
                                     enabled: true,
