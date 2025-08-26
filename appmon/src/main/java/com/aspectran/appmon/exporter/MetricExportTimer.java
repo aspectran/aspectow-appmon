@@ -4,7 +4,7 @@ import com.aspectran.appmon.exporter.metric.MetricData;
 import com.aspectran.appmon.exporter.metric.MetricExporter;
 import com.aspectran.appmon.exporter.metric.MetricReader;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.thread.Scheduler;
+import com.aspectran.utils.scheduling.Scheduler;
 import com.aspectran.utils.timer.CyclicTimeout;
 
 import java.util.concurrent.TimeUnit;

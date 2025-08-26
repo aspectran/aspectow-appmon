@@ -16,7 +16,7 @@
 package com.aspectran.appmon.service.polling;
 
 import com.aspectran.appmon.service.ServiceSession;
-import com.aspectran.utils.thread.AutoLock;
+import com.aspectran.utils.concurrent.AutoLock;
 import com.aspectran.utils.timer.CyclicTimeout;
 
 import java.util.concurrent.TimeUnit;
