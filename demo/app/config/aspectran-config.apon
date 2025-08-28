@@ -1,6 +1,7 @@
 system: {
     properties: {
         aspectran.encryption.password: demo!
+        aspectran.encryption.algorithm: PBEWithMD5AndTripleDES
         jboss.threads.eqe.statistics: true
         jboss.threads.eqe.statistics.active-count: true
     }
