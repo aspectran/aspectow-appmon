@@ -142,6 +142,14 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
     }
 
     @Override
+    protected void doStart() throws Exception {
+    }
+
+    @Override
+    protected void doStop() throws Exception {
+    }
+
+    @Override
     public String toString() {
         if (isStopped()) {
             return ToStringBuilder.toString(super.toString(), eventInfo);
