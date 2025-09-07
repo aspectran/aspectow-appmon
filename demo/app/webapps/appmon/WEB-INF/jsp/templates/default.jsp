@@ -140,11 +140,11 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-2 col-lg-1 mt-1">
-                    <h5><a class="logo" href="https://aspectran.com/en/aspectran/" title="Aspectran"><img src="https://assets.aspectran.com/img/aspectran-logo-grey-x100.png" width="100" height="100" alt="Aspectran" title="Aspectran"/></a></h5>
+                    <h5><a class="logo" href="https://aspectran.com/aspectran/" title="Aspectran"><img src="https://assets.aspectran.com/img/aspectran-logo-grey-x100.png" width="100" height="100" alt="Aspectran" title="Aspectran"/></a></h5>
                 </div>
                 <div class="col-md-4 col-lg-4">
-                    <a href="https://aspectran.com/en/aspectran/"><h5>About Aspectran</h5></a>
-                    <p><a href="https://aspectran.com/en/aspectran/">Aspectran is a framework for developing Java applications that can be used to build simple shell applications and large enterprise web applications.</a></p>
+                    <a href="https://aspectran.com/aspectran/"><h5>About Aspectran</h5></a>
+                    <p><a href="https://aspectran.com/aspectran/">Aspectran is a framework for developing Java applications that can be used to build simple shell applications and large enterprise web applications.</a></p>
                 </div>
                 <div class="col-sm-6 col-md-3 col-lg-3 offset-lg-1">
                     <h5>Get Involved</h5>
@@ -155,8 +155,8 @@
                 <div class="col-sm-6 col-md-3 col-lg-3">
                     <h5>Support</h5>
                     <ul class="list-unstyled">
-                        <li><a href="https://aspectran.com/en/support/faq/" title="Frequently Asked Questions about Aspectran">FAQ</a></li>
-                        <li><a href="https://aspectran.com/en/support/contact/" title="Contact Us">Contact Us</a></li>
+                        <li><a href="https://aspectran.com/support/faq/" title="Frequently Asked Questions about Aspectran">FAQ</a></li>
+                        <li><a href="https://aspectran.com/support/contact/" title="Contact Us">Contact Us</a></li>
                     </ul>
                 </div>
             </div>

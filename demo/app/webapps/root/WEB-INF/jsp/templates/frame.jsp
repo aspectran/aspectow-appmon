@@ -124,7 +124,7 @@
             <div class="cell">
                 <nav role="navigation" aria-label="You are here:">
                     <ul class="breadcrumbs" itemprop="breadcrumb">
-                        <li><a href="https://aspectran.com/en/">Aspectran</a></li>
+                        <li><a href="https://aspectran.com/">Aspectran</a></li>
                         <li><a href="/">Log Relay</a></li>
                     </ul>
                 </nav>
