@@ -152,13 +152,6 @@
                         <li class="bi bi-github"> <a href="https://github.com/aspectran" target="_blank" title="" class="external">GitHub</a></li>
                     </ul>
                 </div>
-                <div class="col-sm-6 col-md-3 col-lg-3">
-                    <h5>Support</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="https://aspectran.com/support/faq/" title="Frequently Asked Questions about Aspectran">FAQ</a></li>
-                        <li><a href="https://aspectran.com/support/contact/" title="Contact Us">Contact Us</a></li>
-                    </ul>
-                </div>
             </div>
         </div>
     </div>
