@@ -50,7 +50,7 @@
   </div>
 </div>
 <script>
-  $(function() {
+  $(function () {
     $(".undercon").on("click", function () {
       $(this).fadeOut(300, function () {
         setTimeout(function () {
