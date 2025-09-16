@@ -6,6 +6,25 @@
 <html class="no-js">
 <head>
     <meta charset="utf-8">
+    <script>
+        (() => {
+            const getStoredTheme = () => localStorage.getItem('theme');
+            const getPreferredTheme = () => {
+                const storedTheme = getStoredTheme();
+                if (storedTheme) {
+                    return storedTheme;
+                }
+                return 'auto';
+            };
+            const setTheme = theme => {
+                const newTheme = theme === 'auto'
+                    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                    : theme;
+                document.documentElement.setAttribute('data-bs-theme', newTheme);
+            };
+            setTheme(getPreferredTheme());
+        })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="google" content="notranslate">
     <title>${empty page.title ? "AppMon" : page.title}</title>
@@ -26,7 +45,7 @@
     <link rel="icon" type="image/png" sizes="96x96" href="https://assets.aspectran.com/img/favicon-96x96.png"/>
     <meta name="msapplication-TileImage" content="https://assets.aspectran.com/img/ms-icon-144x144.png"/>
     <meta name="msapplication-TileColor" content="#4B555A"/>
-    <link rel="stylesheet" type="text/css" href="https://assets.aspectran.com/bootstrap@5.3.8/css/aspectran.css"/>
+    <link rel="stylesheet" type="text/css" href="https://assets.aspectran.com/bootstrap@5.3.8/css/aspectran.css?20250916"/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap">
     <script src="https://assets.aspectran.com/js/modernizr-custom.js"></script>
     <script src="https://assets.aspectran.com/countries/countries.js"></script>
@@ -72,12 +91,42 @@
                     </li>
                 </ul>
             </div>
-            <div class="top-bar-right">
+            <div class="top-bar-right d-lg-flex align-items-center gap-3">
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="https://github.com/aspectran/aspectow-appmon" title="Get Involved">v${page.version}</a>
                     </li>
                 </ul>
+                <div class="settings">
+                    <div class="theme-toggler dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="theme-toggler-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Toggle theme">
+                            <i class="bi theme-icon-active"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="theme-toggler-btn">
+                            <li>
+                                <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light">
+                                    <i class="bi bi-sun-fill me-2 opacity-50"></i>
+                                    Light
+                                    <i class="bi bi-check2 ms-auto d-none"></i>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark">
+                                    <i class="bi bi-moon-stars-fill me-2 opacity-50"></i>
+                                    Dark
+                                    <i class="bi bi-check2 ms-auto d-none"></i>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto">
+                                    <i class="bi bi-circle-half me-2 opacity-50"></i>
+                                    Auto
+                                    <i class="bi bi-check2 ms-auto d-none"></i>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -122,16 +171,16 @@
             </nav>
         </div>
     </div>
-    <div class="container contour ${page.style}">
+    <div class="container contour">
     <c:if test="${not empty page.include}">
         <jsp:include page="/WEB-INF/jsp/${page.include}.jsp"/>
     </c:if>
     </div>
 </section>
-<div class="container ${page.style}">
+<div class="container">
     <div id="up-to-top" class="row">
         <div class="col text-end">
-            <a href="#top-of-page"><i class="bi bi-chevron-up"></i></a>
+            <a class="btn" href="#top-of-page"><i class="bi bi-chevron-up"></i></a>
         </div>
     </div>
 </div>
@@ -168,6 +217,58 @@
         </div>
     </div>
 </footer>
+<script>
+    $(function () {
+        const getStoredTheme = () => localStorage.getItem('theme');
+        const setStoredTheme = theme => localStorage.setItem('theme', theme);
+
+        const getPreferredTheme = () => {
+            const storedTheme = getStoredTheme();
+            if (storedTheme) {
+                return storedTheme;
+            }
+            return 'auto';
+        };
+
+        const setTheme = theme => {
+            const newTheme = theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme;
+            $('html').attr('data-bs-theme', newTheme);
+        };
+
+        const showActiveTheme = (theme) => {
+            const $themeToggler = $('.theme-toggler');
+            if (!$themeToggler.length) {
+                return;
+            }
+
+            $themeToggler.find('.dropdown-item.active').removeClass('active');
+            $themeToggler.find('.dropdown-item .bi-check2').addClass('d-none');
+
+            const $activeItem = $themeToggler.find('[data-bs-theme-value="' + theme + '"]');
+            $activeItem.addClass('active');
+            $activeItem.find('.bi-check2').removeClass('d-none');
+
+            const iconClass = $activeItem.find('.bi:first').attr('class').match(/bi-[^\s]+/)[0];
+            $themeToggler.find('.theme-icon-active').attr('class', 'bi theme-icon-active ' + iconClass);
+        };
+
+        showActiveTheme(getPreferredTheme());
+
+        $(window.matchMedia('(prefers-color-scheme: dark)')).on('change', () => {
+            const storedTheme = getStoredTheme();
+            if (storedTheme === 'auto' || !storedTheme) {
+                setTheme('auto');
+            }
+        });
+
+        $('.theme-toggler [data-bs-theme-value]').on('click', function() {
+            const theme = $(this).data('bs-theme-value');
+            setStoredTheme(theme);
+            setTheme(theme);
+            showActiveTheme(theme);
+        });
+    });
+</script>
 <script>
     $(function () {
         let $win = $(window);
