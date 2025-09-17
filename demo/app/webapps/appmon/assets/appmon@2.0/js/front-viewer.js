@@ -529,7 +529,7 @@ function FrontViewer(sampleInterval) {
                     let options = [];
                     options.push("instance:" + instanceName);
                     options.push("dateUnit:" + dateUnit);
-                    client.refresh(options.join(";"));
+                    client.refresh(options);
                 }, 900);
             }
         }
