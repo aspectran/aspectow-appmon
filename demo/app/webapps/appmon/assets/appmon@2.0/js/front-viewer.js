@@ -603,13 +603,13 @@ function FrontViewer(sampleInterval) {
         switch (eventName) {
             case "activity":
                 dataLabel1 = "Activities";
-                borderColor1 = "#36a2eb";
+                borderColor1 = "#4493c8";
                 backgroundColor1 = "#cce0fa";
                 break;
             case "session":
                 dataLabel1 = "Sessions";
-                borderColor1 = "#7794a5";
-                backgroundColor1 = "#cbe3f4";
+                borderColor1 = "#44c577";
+                backgroundColor1 = "#bcefd0";
                 break;
             default:
                 dataLabel1 = "";

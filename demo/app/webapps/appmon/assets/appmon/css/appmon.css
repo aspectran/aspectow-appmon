@@ -305,13 +305,12 @@
     display: none;
 }
 .session-box .panel {
-    border: 1px solid #ccc;
-    border-bottom: 2px solid #ccc;
+    border: none;
     border-radius: 0;
     height: 200px;
     padding: 5px;
     overflow-y: auto;
-    background-color: #d9e9f4;
+    background-color: #9fbbbb;
     position: relative;
 }
 .session-box .panel.status .knob-bar {
@@ -450,7 +449,7 @@
 }
 .session-box ul.sessions li.designated {
     padding: 0 0 3px 0;
-    border-radius: 5px;
+    border-radius: 3px;
     background-color: #fff;
     border: 1px solid #748fa0;
 }

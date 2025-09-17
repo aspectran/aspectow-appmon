@@ -1,11 +1,12 @@
 [data-bs-theme=dark] {
+    canvas {
+        filter: invert(1) hue-rotate(180deg);
+    }
     .metrics-bar {
         background-color: #52595e;
-        height: 28px;
     }
     .metrics-bar .metric:hover dl dt {
         border-left: 3px solid #353b3e;
-        padding-left: 7px;
     }
     .domain.metrics-bar {
         border-bottom: 1px solid #353b3e;
@@ -100,9 +101,7 @@
         color: #fff;
     }
     .session-box .panel {
-        border: 1px solid #393c3e;
-        border-bottom: 2px solid #393c3e;
-        background-color: #1a252d;
+        background-color: #212c28;
     }
     .session-box .panel.status .knob {
         background-color: #567181;
@@ -111,21 +110,7 @@
         background-color: #191c1d;
     }
     .session-box ul.sessions li {
-        list-style-type: none;
-        display: inline-table;
-        padding: 0;
-        margin-right: 5px;
-        margin-bottom: 5px;
-        height: 25px;
-        line-height: 25px;
-        border-radius: 5px;
         background-color: #fff;
-    }
-    .session-box ul.sessions li.inactive {
-        opacity: .475;
-    }
-    .session-box ul.sessions li.hidden {
-        display: none;
     }
     .session-box ul.sessions li .count {
         background-color: #8396a2;
@@ -205,8 +190,5 @@
         background-color: #3e132d;
         border: 1px solid #db7093;
         color: #fff;
-    }
-    canvas {
-        filter: invert(1) hue-rotate(180deg);
     }
 }
