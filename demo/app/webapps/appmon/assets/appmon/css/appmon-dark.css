@@ -148,15 +148,15 @@
         background-color: #525552;
     }
     .session-box ul.sessions li .detail {
-        border-top: 1px solid #638499;
+        border-top: 1px solid #336382;
     }
     .session-box ul.sessions li.designated {
-        background-color: #fff;
-        border: 1px solid #748fa0;
+        background-color: #1a252d;
+        border: 1px solid #293438;
     }
     .session-box ul.sessions li .detail p:first-child {
-        background-color: #517386;
-        color: #fff;
+        background-color: #18486b;
+        color: #b1aeae;
     }
     .console-box .status-bar {
         background-color: #677278;
