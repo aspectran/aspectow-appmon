@@ -321,21 +321,6 @@
 </script>
 <script>
     $(function () {
-        $("#masthead h1, article h1, article h2, article h3").each(function (index, item) {
-            let tagn = item.localName;
-            let anchor = "top-of-page";
-            if (tagn !== "h1") {
-                anchor = "anchor-" + (index + 1);
-                $(this).before("<a class='toc-anchor " + anchor + "' id='" + anchor + "' name='" + anchor + "'></a>");
-            }
-            $("<li class='toc-" + tagn + "'></li>")
-                .append($("<a anchor='" + anchor + "' href='#" + anchor + "'/>").text($(item).text()))
-                .appendTo("#toc ul");
-        });
-    });
-</script>
-<script>
-    $(function () {
         $(".lazy-sticky").each(function () {
             const $win = $(window);
             const $this = $(this);
