@@ -153,6 +153,7 @@
                 <div class="hexagon hex1"></div>
                 <div class="hexagon hex2"></div>
                 <div class="hexagon hex3"></div>
+                <div class="hexagon hex4"></div>
                 <div class="hexagon hex5"></div>
                 <div class="hexagon hex6"></div>
             </div>
