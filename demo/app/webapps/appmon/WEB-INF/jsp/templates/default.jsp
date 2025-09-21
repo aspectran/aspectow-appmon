@@ -431,14 +431,17 @@
 </script>
 <script>
     $(function () {
-        let menuitem = $("#navbarSupportedContent .navbar-nav a[href='" + decodeURI(location.pathname) + "']").last();
-        if (menuitem.length > 0) {
+        let links = $("#navbarSupportedContent .navbar-nav a[href='" + decodeURI(location.pathname) + "']").last();
+        if (links.length > 0) {
             let arr = [];
-            arr.push({'name': menuitem.text(), 'href': null});
-            menuitem.parentsUntil(".navbar-nav").each(function () {
+            arr.push({'name': links.text(), 'href': location.pathname});
+            links.parentsUntil(".navbar-nav").each(function () {
                 let a2 = $(this).find(".nav-link");
                 if (a2.is("a")) {
-                    arr.push({'name': a2.text(), 'href': a2.attr("href") || ""});
+                    let href = a2.attr("href");
+                    if (href !== location.pathname) {
+                        arr.push({'name': a2.text(), 'href': href || ""});
+                    }
                 }
             });
             arr.reverse();
