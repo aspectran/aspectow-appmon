@@ -45,7 +45,7 @@
     <link rel="icon" type="image/png" sizes="96x96" href="https://assets.aspectran.com/img/favicon-96x96.png"/>
     <meta name="msapplication-TileImage" content="https://assets.aspectran.com/img/ms-icon-144x144.png"/>
     <meta name="msapplication-TileColor" content="#4B555A"/>
-    <link rel="stylesheet" type="text/css" href="https://assets.aspectran.com/bootstrap@5.3.8/css/aspectran.css?v=20250921"/>
+    <link rel="stylesheet" type="text/css" href="https://assets.aspectran.com/bootstrap@5.3.8/css/aspectran.css?v=20250922"/>
 <%--    <link rel="stylesheet" type="text/css" href="http://localhost:8090/assets/bootstrap@5.3.8/css/aspectran.css?20250917"/>--%>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap">
     <script src="https://assets.aspectran.com/js/modernizr-custom.js"></script>
@@ -98,7 +98,7 @@
                         <a class="nav-link" href="https://github.com/aspectran/aspectow-appmon" title="Get Involved">v${page.version}</a>
                     </li>
                 </ul>
-                <div class="settings d-flex align-items-center justify-content-end gap-1 gap-2 mx-3 my-1 m-lg-0">
+                <div class="settings d-flex align-items-center justify-content-end gap-2 m-2 mx-md-0 mb-md-2 m-lg-0">
                     <div class="theme-toggler dropdown">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="theme-toggler-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Toggle theme">
                             <i class="bi theme-icon-active"></i>
