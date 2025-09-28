@@ -1,4 +1,7 @@
 #!/bin/sh
+# The target script for the systemd service to stop the application.
+
+set -e
 
 . ./app.conf
 

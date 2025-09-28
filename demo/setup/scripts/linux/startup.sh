@@ -1,4 +1,7 @@
 #!/bin/sh
+# The target script for the systemd service to start the application.
+
+set -e
 
 . ./app.conf
 
