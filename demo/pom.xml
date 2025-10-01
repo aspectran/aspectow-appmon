@@ -28,7 +28,7 @@
     <packaging>jar</packaging>
 
     <name>Aspectow AppMon Demo</name>
-    <description>Demo application for Aspectow AppMon</description>
+    <description>A demonstration web application to showcase the features and usage of Aspectow AppMon.</description>
 
     <properties>
         <main.basedir>${project.parent.basedir}</main.basedir>
