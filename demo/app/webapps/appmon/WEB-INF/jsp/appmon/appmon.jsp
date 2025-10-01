@@ -1,19 +1,19 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
-<link rel="stylesheet" href="<aspectran:token type='bean' expression='appmonAssets^url'/>/css/appmon.css?<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">
-<link rel="stylesheet" href="<aspectran:token type='bean' expression='appmonAssets^url'/>/css/appmon-dark.css?<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">
-<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/front-builder.js?<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
-<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/front-viewer.js?<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
-<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/websocket-client.js?<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
-<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/polling-client.js?<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
+<link rel="stylesheet" href="<aspectran:token type='bean' expression='appmonAssets^url'/>/css/appmon.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">
+<link rel="stylesheet" href="<aspectran:token type='bean' expression='appmonAssets^url'/>/css/appmon-dark.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">
+<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/front-builder.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
+<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/front-viewer.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
+<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/websocket-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
+<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/polling-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
 <script>
     if (typeof FrontBuilder === "undefined") {
-        document.write('<link rel="stylesheet" href="https://appmon-assets.aspectran.com/appmon/css/appmon.css?<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">');
-        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/front-builder.js?<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
-        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/front-viewer.js?<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
-        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/websocket-client.js?<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
-        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/polling-client.js?<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<link rel="stylesheet" href="https://appmon-assets.aspectran.com/appmon/css/appmon.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">');
+        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/front-builder.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/front-viewer.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/websocket-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/polling-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
     }
 </script>
 <div class="container">
