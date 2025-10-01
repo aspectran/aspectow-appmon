@@ -180,4 +180,5 @@ public class CounterPersistSchedule {
         eventCountVO.setDatetime(datetime);
         return eventCountVO;
     }
+
 }
