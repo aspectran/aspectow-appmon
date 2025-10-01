@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.agent.action;
+package com.aspectran.appmon.agent.activity;
 
 import com.aspectran.appmon.config.DomainInfo;
 import com.aspectran.appmon.config.InstanceInfo;
@@ -39,14 +39,14 @@ import java.util.Map;
  * <p>Created: 2020/02/23</p>
  */
 @Component("/backend")
-public class BackendAction {
+public class BackendActivity {
 
-    private static final Logger logger = LoggerFactory.getLogger(BackendAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(BackendActivity.class);
 
     private final AppMonManager appMonManager;
 
     @Autowired
-    public BackendAction(AppMonManager appMonManager) {
+    public BackendActivity(AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
     }
 

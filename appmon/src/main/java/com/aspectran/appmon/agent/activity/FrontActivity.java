@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.agent.action;
+package com.aspectran.appmon.agent.activity;
 
 import com.aspectran.appmon.AboutMe;
 import com.aspectran.appmon.manager.AppMonManager;
@@ -37,9 +37,9 @@ import java.util.Map;
  * <p>Created: 2020/02/23</p>
  */
 @Component
-public class FrontAction {
+public class FrontActivity {
 
-    private static final Logger logger = LoggerFactory.getLogger(FrontAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(FrontActivity.class);
 
     /**
      * Handles the root request and displays the main home page.
