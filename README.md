@@ -1,8 +1,12 @@
 # Aspectow AppMon
 
-Aspectow AppMon is a powerful monitoring tool that provides an integrated, real-time view of logs, events, and metrics for your Aspectran-based application servers. It helps you observe and analyze the behavior of your applications, making it easier to debug issues, optimize performance, and ensure stability.
+[![Build Status](https://github.com/aspectran/aspectow-appmon/workflows/Java%20CI/badge.svg)](https://github.com/aspectran/aspectow-appmon/actions?query=workflow%3A%22Java+CI%22)
+[![Maven Central Version](https://img.shields.io/maven-central/v/com.aspectran/aspectow-appmon)](https://central.sonatype.com/artifact/com.aspectran/aspectow-appmon)
+[![javadoc](https://javadoc.io/badge2/com.aspectran/aspectow-appmon/javadoc.svg)](https://javadoc.io/doc/com.aspectran/aspectow-appmon)
+[![License](https://img.shields.io/:license-apache-brightgreen.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
----
+
+Aspectow AppMon is a powerful monitoring tool that provides an integrated, real-time view of logs, events, and metrics for your Aspectran-based application servers. It helps you observe and analyze the behavior of your applications, making it easier to debug issues, optimize performance, and ensure stability.
 
 ## Features
 
