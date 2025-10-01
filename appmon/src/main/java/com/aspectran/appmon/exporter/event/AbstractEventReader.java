@@ -22,6 +22,9 @@ import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.annotation.jsr305.Nullable;
 
 /**
+ * Abstract base class for {@link EventReader} implementations.
+ * Provides common functionalities for event readers.
+ *
  * <p>Created: 2025. 1. 27.</p>
  */
 public abstract class AbstractEventReader implements EventReader {
@@ -34,6 +37,12 @@ public abstract class AbstractEventReader implements EventReader {
 
     private volatile EventExporter eventExporter;
 
+    /**
+     * Instantiates a new AbstractEventReader.
+     * @param exporterManager the exporter manager
+     * @param eventInfo the event configuration
+     * @param eventCount the event counter, can be {@code null}
+     */
     public AbstractEventReader(@NonNull ExporterManager exporterManager,
                                @NonNull EventInfo eventInfo,
                                @Nullable EventCount eventCount) {
@@ -42,10 +51,18 @@ public abstract class AbstractEventReader implements EventReader {
         this.eventCount = eventCount;
     }
 
+    /**
+     * Gets the exporter manager.
+     * @return the exporter manager
+     */
     public ExporterManager getExporterManager() {
         return exporterManager;
     }
 
+    /**
+     * Gets the associated event exporter.
+     * @return the event exporter
+     */
     protected EventExporter getEventExporter() {
         if (eventExporter == null) {
             synchronized (this) {
@@ -57,10 +74,18 @@ public abstract class AbstractEventReader implements EventReader {
         return eventExporter;
     }
 
+    /**
+     * Gets the event configuration.
+     * @return the event info
+     */
     public EventInfo getEventInfo() {
         return eventInfo;
     }
 
+    /**
+     * Gets the event counter.
+     * @return the event count, or {@code null} if not configured
+     */
     public EventCount getEventCount() {
         return eventCount;
     }

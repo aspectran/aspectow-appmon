@@ -21,12 +21,19 @@ import com.aspectran.utils.lifecycle.AbstractLifeCycle;
 import java.util.List;
 
 /**
+ * Abstract base class for {@link Exporter} implementations.
+ * Provides a skeletal implementation of the Exporter interface to minimize the effort required to implement it.
+ *
  * <p>Created: 2025-04-07</p>
  */
 public abstract class AbstractExporter extends AbstractLifeCycle implements Exporter {
 
     private final ExporterType type;
 
+    /**
+     * Instantiates a new AbstractExporter.
+     * @param type the type of the exporter
+     */
     public AbstractExporter(ExporterType type) {
         this.type = type;
     }
@@ -36,6 +43,13 @@ public abstract class AbstractExporter extends AbstractLifeCycle implements Expo
         return type;
     }
 
+    /**
+     * This implementation is empty.
+     * Subclasses should override this method if they need to implement logic
+     * for reading data only when it has changed.
+     * @param messages a list to which the read messages will be added
+     * @param commandOptions options for the command, can be {@code null}
+     */
     @Override
     public void readIfChanged(List<String> messages, CommandOptions commandOptions) {
     }

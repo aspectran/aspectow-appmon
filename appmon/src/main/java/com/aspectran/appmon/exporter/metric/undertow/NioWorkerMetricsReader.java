@@ -1,19 +1,9 @@
-package com.aspectran.appmon.exporter.metric.undertow;
-
-import com.aspectran.appmon.config.MetricInfo;
-import com.aspectran.appmon.exporter.ExporterManager;
-import com.aspectran.appmon.exporter.metric.AbstractMetricReader;
-import com.aspectran.appmon.exporter.metric.MetricData;
-import com.aspectran.undertow.server.TowServer;
-import com.aspectran.utils.annotation.jsr305.NonNull;
-import io.undertow.Undertow;
-import org.xnio.management.XnioWorkerMXBean;
-
 /**
- * The following JVM system properties must be set:
+ * A {@link com.aspectran.appmon.exporter.metric.MetricReader} for monitoring Undertow's NIO worker threads.
+ * It requires specific JVM system properties to be enabled for statistics collection.
  * <pre>
-*   -Djboss.threads.eqe.statistics=true
-*   -Djboss.threads.eqe.statistics.active-count=true
+ *   -Djboss.threads.eqe.statistics=true
+ *   -Djboss.threads.eqe.statistics.active-count=true
  * </pre>
  * Or to set the system parameters in aspectran-config.apon:
  * <pre>
@@ -35,6 +25,11 @@ public class NioWorkerMetricsReader extends AbstractMetricReader {
 
     private int oldActive;
 
+    /**
+     * Instantiates a new NioWorkerMetricsReader.
+     * @param exporterManager the exporter manager
+     * @param metricInfo the metric configuration
+     */
     public NioWorkerMetricsReader(
             @NonNull ExporterManager exporterManager,
             @NonNull MetricInfo metricInfo) {

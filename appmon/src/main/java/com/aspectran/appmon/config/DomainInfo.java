@@ -20,6 +20,9 @@ import com.aspectran.utils.apon.ParameterKey;
 import com.aspectran.utils.apon.ValueType;
 
 /**
+ * Contains information about a monitored domain.
+ * A domain represents a logical grouping of application instances.
+ *
  * <p>Created: 2020/02/12</p>
  */
 public class DomainInfo extends AbstractParameters {
@@ -45,38 +48,73 @@ public class DomainInfo extends AbstractParameters {
         };
     }
 
+    /**
+     * Instantiates a new DomainInfo.
+     */
     public DomainInfo() {
         super(parameterKeys);
     }
 
+    /**
+     * Gets the name of the domain.
+     * @return the domain name
+     */
     public String getName() {
         return getString(name);
     }
 
+    /**
+     * Sets the name of the domain.
+     * @param name the domain name
+     */
     public void setName(String name) {
         putValue(DomainInfo.name, name);
     }
 
+    /**
+     * Gets the display title of the domain.
+     * @return the domain title
+     */
     public String getTitle() {
         return getString(title);
     }
 
+    /**
+     * Sets the display title of the domain.
+     * @param title the domain title
+     */
     public void setTitle(String title) {
         putValue(DomainInfo.title, title);
     }
 
+    /**
+     * Gets the endpoint information for the domain.
+     * @return the endpoint information
+     */
     public EndpointInfo getEndpointInfo() {
         return getParameters(endpoint);
     }
 
+    /**
+     * Sets the endpoint information for the domain.
+     * @param endpointInfo the endpoint information
+     */
     public void setEndpointInfo(EndpointInfo endpointInfo) {
         putValue(DomainInfo.endpoint, endpointInfo);
     }
 
+    /**
+     * Gets the default sample interval in seconds for this domain.
+     * @return the sample interval
+     */
     public int getSampleInterval() {
         return getInt(sampleInterval, 0);
     }
 
+    /**
+     * Sets the default sample interval in seconds for this domain.
+     * @param sampleInterval the sample interval
+     */
     public void setSampleInterval(int sampleInterval) {
         putValue(DomainInfo.sampleInterval, sampleInterval);
     }

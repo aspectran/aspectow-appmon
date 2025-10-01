@@ -26,12 +26,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * A builder for creating {@link EventCounter} instances.
+ * It determines the appropriate {@link EventCounter} implementation based on the configuration.
+ *
  * <p>Created: 2025. 2. 12.</p>
  */
 public abstract class EventCounterBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(EventCounterBuilder.class);
 
+    /**
+     * Builds a new {@link EventCounter}.
+     * @param eventInfo the event configuration
+     * @return a new {@link EventCounter} instance, or {@code null} if no counter is needed
+     * @throws Exception if the counter cannot be built
+     */
     @Nullable
     public static EventCounter build(EventInfo eventInfo) throws Exception {
         if (logger.isDebugEnabled()) {

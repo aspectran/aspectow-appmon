@@ -40,6 +40,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Reads session statistics and events from a {@link SessionManager}.
+ * It registers a {@link SessionListener} to receive real-time session lifecycle events.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 public class SessionEventReader extends AbstractEventReader {
 
     private static final Logger logger = LoggerFactory.getLogger(SessionEventReader.class);
@@ -59,6 +65,12 @@ public class SessionEventReader extends AbstractEventReader {
 
     private volatile SessionEventData oldData;
 
+    /**
+     * Instantiates a new SessionEventReader.
+     * @param exporterManager the exporter manager
+     * @param eventInfo the event configuration
+     * @param eventCount the event counter
+     */
     public SessionEventReader(
             @NonNull ExporterManager exporterManager,
             @NonNull EventInfo eventInfo,

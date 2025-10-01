@@ -45,6 +45,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 /**
+ * A builder for creating and configuring the main {@link AppMonManager} instance.
+ * It orchestrates the entire setup process, including the creation of exporters and other sub-components.
+ *
  * <p>Created: 2024-12-17</p>
  */
 public abstract class AppMonManagerBuilder {
@@ -55,6 +58,13 @@ public abstract class AppMonManagerBuilder {
 
     public static final String DEFAULT_DOMAIN = "localhost";
 
+    /**
+     * Builds a fully configured {@link AppMonManager} instance.
+     * @param context the activity context
+     * @param appMonConfig the application monitoring configuration
+     * @return a new, fully initialized {@link AppMonManager} instance
+     * @throws Exception if the build process fails
+     */
     @NonNull
     public static AppMonManager build(ActivityContext context, AppMonConfig appMonConfig) throws Exception {
         Assert.notNull(context, "context must not be null");

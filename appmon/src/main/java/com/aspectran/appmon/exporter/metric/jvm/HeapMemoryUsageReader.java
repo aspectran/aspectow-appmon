@@ -26,6 +26,9 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 
 /**
+ * A {@link com.aspectran.appmon.exporter.metric.MetricReader} for monitoring JVM heap memory usage.
+ * It uses the {@link java.lang.management.MemoryMXBean} to get memory statistics.
+ *
  * <p>Created: 2025-06-30</p>
  */
 public class HeapMemoryUsageReader extends AbstractMetricReader {
@@ -34,6 +37,11 @@ public class HeapMemoryUsageReader extends AbstractMetricReader {
 
     private long oldUsed = -1L;
 
+    /**
+     * Instantiates a new HeapMemoryUsageReader.
+     * @param exporterManager the exporter manager
+     * @param metricInfo the metric configuration
+     */
     public HeapMemoryUsageReader(
             ExporterManager exporterManager,
             MetricInfo metricInfo) {

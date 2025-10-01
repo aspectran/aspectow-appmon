@@ -22,12 +22,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * A thread-safe buffer for storing and retrieving messages for polling clients.
+ * It allows multiple clients to pull messages from the point they last read.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 public class BufferedMessages {
 
     private final AtomicInteger lineCounter = new AtomicInteger(0);
 
     private final List<String> buffer;
 
+    /**
+     * Instantiates a new BufferedMessages.
+     * @param initialBufferSize the initial size of the buffer
+     */
     public BufferedMessages(int initialBufferSize) {
         if (initialBufferSize > 0) {
             this.buffer = new ArrayList<>(initialBufferSize);
@@ -36,6 +46,11 @@ public class BufferedMessages {
         }
     }
 
+    /**
+     * Pushes a new message (line) into the buffer.
+     * @param line the message to add
+     * @return the new line index
+     */
     public int push(String line) {
         synchronized (buffer) {
             buffer.add(line);
@@ -43,6 +58,11 @@ public class BufferedMessages {
         }
     }
 
+    /**
+     * Pops new messages for a given session since its last read.
+     * @param session the polling session
+     * @return an array of new messages, or {@code null} if none are available
+     */
     @Nullable
     public String[] pop(@NonNull PollingServiceSession session) {
         synchronized (buffer) {
@@ -71,6 +91,10 @@ public class BufferedMessages {
         }
     }
 
+    /**
+     * Shrinks the buffer by removing messages that are no longer needed by any session.
+     * @param minLineIndex the minimum line index currently held by any active session
+     */
     public void shrink(int minLineIndex) {
         synchronized (buffer) {
             int lines = lineCounter.get() - minLineIndex + 1;
@@ -82,6 +106,9 @@ public class BufferedMessages {
         }
     }
 
+    /**
+     * Clears the entire message buffer.
+     */
     public void clear() {
         synchronized (buffer) {
             buffer.clear();

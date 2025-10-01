@@ -15,8 +15,17 @@
  */
 package com.aspectran.appmon.persist.counter;
 
+/**
+ * A listener for receiving notifications when an {@link EventCount} is rolled up.
+ *
+ * <p>Created: 2025. 2. 12.</p>
+ */
 public interface EventCountRollupListener {
 
+    /**
+     * Called when an event count is rolled up.
+     * @param eventCount the event count that was rolled up
+     */
     void onRolledUp(EventCount eventCount);
 
 }

@@ -33,11 +33,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import static com.aspectran.appmon.exporter.event.session.SessionEventReader.USER_IP_ADDRESS;
 
 /**
+ * A listener that tracks user information by listening to session events.
+ * It captures the user's IP address when a session is created.
+ *
  * <p>Created: 2024-12-13</p>
  */
 @Component
 public class UserTrackingListener extends InstantActivitySupport implements SessionListener, InitializableBean {
 
+    /**
+     * Called when a session is created. It retrieves the remote IP address
+     * from the current activity and stores it in the session.
+     * @param session the session that was created
+     */
     @Override
     public void sessionCreated(@NonNull Session session) {
         Activity activity = getCurrentActivity();
@@ -47,6 +55,10 @@ public class UserTrackingListener extends InstantActivitySupport implements Sess
         }
     }
 
+    /**
+     * Initializes the listener by registering it with the session management framework.
+     * @throws Exception if initialization fails
+     */
     @Override
     public void initialize() throws Exception {
         SessionListenerRegistration sessionListenerRegistration;
@@ -68,6 +80,11 @@ public class UserTrackingListener extends InstantActivitySupport implements Sess
         sessionListenerRegistration.register(this, getActivityContext().getName());
     }
 
+    /**
+     * Gets the remote address from the translet, considering the X-Forwarded-For header.
+     * @param translet the current translet
+     * @return the remote IP address
+     */
     public static String getRemoteAddr(@NonNull Translet translet) {
         String remoteAddr = translet.getRequestAdapter().getHeader(HttpHeaders.X_FORWARDED_FOR);
         if (StringUtils.hasLength(remoteAddr)) {

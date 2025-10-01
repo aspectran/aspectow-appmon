@@ -29,14 +29,16 @@ import com.aspectran.mybatis.SqlSessionAdvice;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 /**
- * Advice to handle database transactions in simple mode.
+ * An aspect for handling simple database transactions.
+ * It advises methods annotated with {@code @simpleSqlSession} to manage the lifecycle
+ * of a {@link org.apache.ibatis.session.SqlSession}.
  * <ul>
- * <li>A transaction scope will be started (i.e., NOT auto-commit).
+ * <li>A transaction scope will be started (i.e., NOT auto-commit).</li>
  * <li>A Connection object will be acquired from the DataSource instance
- *     configured by the active environment.
+ *     configured by the active environment.</li>
  * <li>The transaction isolation level will be the default used by the driver or
- *     data source.
- * <li>No PreparedStatements will be reused, and no updates will be batched.
+ *     data source.</li>
+ * <li>No PreparedStatements will be reused, and no updates will be batched.</li>
  * </ul>
  */
 @Component

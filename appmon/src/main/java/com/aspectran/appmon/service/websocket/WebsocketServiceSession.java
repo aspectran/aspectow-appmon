@@ -20,12 +20,22 @@ import com.aspectran.utils.Assert;
 import com.aspectran.web.websocket.jsr356.WrappedSession;
 import jakarta.websocket.Session;
 
+/**
+ * A {@link ServiceSession} implementation that wraps a JSR-356 {@link Session}.
+ * It stores session-specific data, like joined instances, in the WebSocket session's user properties.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 public class WebsocketServiceSession extends WrappedSession implements ServiceSession {
 
     private static final String JOINED_INSTANCES_PROPERTY = "appmon:JoinedInstances";
 
     private static final String TIME_ZONE_PROPERTY = "appmon:timeZone";
 
+    /**
+     * Instantiates a new WebsocketServiceSession.
+     * @param session the underlying WebSocket session
+     */
     public WebsocketServiceSession(Session session) {
         super(session);
     }

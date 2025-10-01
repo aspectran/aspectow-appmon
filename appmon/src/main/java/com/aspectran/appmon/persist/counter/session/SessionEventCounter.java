@@ -30,6 +30,9 @@ import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 
 /**
+ * An {@link com.aspectran.appmon.persist.counter.EventCounter} for counting session creation events.
+ * It registers a {@link SessionListener} to receive notifications when sessions are created.
+ *
  * <p>Created: 2025-02-12</p>
  */
 public class SessionEventCounter extends AbstractEventCounter {
@@ -38,6 +41,10 @@ public class SessionEventCounter extends AbstractEventCounter {
 
     private final String deploymentName;
 
+    /**
+     * Instantiates a new SessionEventCounter.
+     * @param eventInfo the event configuration
+     */
     public SessionEventCounter(@NonNull EventInfo eventInfo) {
         super(eventInfo);
 
@@ -95,6 +102,9 @@ public class SessionEventCounter extends AbstractEventCounter {
         return sessionListenerRegistration;
     }
 
+    /**
+     * Called by {@link SessionEventCountingListener} when a session is created.
+     */
     void sessionCreated() {
         getEventCount().count();
     }

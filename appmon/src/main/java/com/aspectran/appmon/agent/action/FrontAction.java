@@ -31,6 +31,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 /**
+ * Handles requests from the frontend user interface.
+ * This class is responsible for dispatching views and preparing data for the UI.
+ *
  * <p>Created: 2020/02/23</p>
  */
 @Component
@@ -38,17 +41,25 @@ public class FrontAction {
 
     private static final Logger logger = LoggerFactory.getLogger(FrontAction.class);
 
+    /**
+     * Handles the root request and displays the main home page.
+     * @return a map of attributes for rendering the view
+     */
     @Request("/")
     @Dispatch("templates/default")
     @Action("page")
     public Map<String, String> home() {
         return Map.of(
-            "include", "home/main",
-            "style", "fluid compact",
-            "version", AboutMe.getVersion()
-            );
+                "include", "home/main",
+                "style", "fluid compact",
+                "version", AboutMe.getVersion()
+        );
     }
 
+    /**
+     * Handles any other top-level requests and redirects to the home page.
+     * @return a map of attributes for rendering the view
+     */
     @Request("/${ignore}")
     @Dispatch("templates/default")
     @Action("page")
@@ -56,6 +67,13 @@ public class FrontAction {
         return home();
     }
 
+    /**
+     * Displays the main monitoring page after validating the token.
+     * @param translet the current translet
+     * @param token the security token for access
+     * @param instances the comma-separated list of instances to monitor
+     * @return a map of attributes for rendering the view, or {@code null} if redirected
+     */
     @Request("/front/${token}/${instances}")
     @Dispatch("templates/default")
     @Action("page")

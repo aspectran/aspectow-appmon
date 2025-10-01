@@ -20,6 +20,9 @@ import com.aspectran.appmon.exporter.ExporterManager;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 
 /**
+ * Abstract base class for {@link MetricReader} implementations.
+ * Provides common functionalities for metric readers.
+ *
  * <p>Created: 2025. 1. 27.</p>
  */
 public abstract class AbstractMetricReader implements MetricReader {
@@ -30,16 +33,29 @@ public abstract class AbstractMetricReader implements MetricReader {
 
     private volatile MetricExporter metricExporter;
 
+    /**
+     * Instantiates a new AbstractMetricReader.
+     * @param exporterManager the exporter manager
+     * @param metricInfo the metric configuration
+     */
     public AbstractMetricReader(@NonNull ExporterManager exporterManager,
                                 @NonNull MetricInfo metricInfo) {
         this.exporterManager = exporterManager;
         this.metricInfo = metricInfo;
     }
 
+    /**
+     * Gets the exporter manager.
+     * @return the exporter manager
+     */
     public ExporterManager getExporterManager() {
         return exporterManager;
     }
 
+    /**
+     * Gets the associated metric exporter.
+     * @return the metric exporter
+     */
     protected MetricExporter getMetricExporter() {
         if (metricExporter == null) {
             synchronized (this) {
@@ -51,6 +67,10 @@ public abstract class AbstractMetricReader implements MetricReader {
         return metricExporter;
     }
 
+    /**
+     * Gets the metric configuration.
+     * @return the metric info
+     */
     public MetricInfo getMetricInfo() {
         return metricInfo;
     }

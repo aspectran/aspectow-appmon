@@ -33,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Handles requests from backend agents (monitored applications).
+ * This class provides configuration data to the agents.
+ *
  * <p>Created: 2020/02/23</p>
  */
 @Component("/backend")
@@ -47,6 +50,12 @@ public class BackendAction {
         this.appMonManager = appMonManager;
     }
 
+    /**
+     * Provides configuration data to a backend agent after validating the token.
+     * @param token the security token for access
+     * @param instances a comma-separated list of instance names to get configuration for
+     * @return a {@link RestResponse} containing the configuration data
+     */
     @RequestToGet("/${token}/config")
     public RestResponse getConfigData(@Required String token, String instances) {
         try {

@@ -24,16 +24,34 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
 
+/**
+ * A builder class for creating {@link AppMonConfig} instances.
+ * This class provides static methods to build the configuration from various sources.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 public abstract class AppMonConfigBuilder {
 
     private static final String DEFAULT_BACKEND_CONFIG_RESOURCE = "com/aspectran/appmon/context/appmon-config.apon";
 
+    /**
+     * Builds the default {@link AppMonConfig} from the classpath resource.
+     * @return a new {@link AppMonConfig} instance
+     * @throws IOException if the resource cannot be read
+     */
     @NonNull
     public static AppMonConfig build() throws IOException {
         Reader reader = ResourceUtils.getResourceAsReader(DEFAULT_BACKEND_CONFIG_RESOURCE);
         return new AppMonConfig(reader);
     }
 
+    /**
+     * Builds an {@link AppMonConfig} from the specified URI location.
+     * @param configLocation the URI of the configuration file
+     * @param encoding the character encoding of the file
+     * @return a new {@link AppMonConfig} instance
+     * @throws IOException if the resource cannot be read
+     */
     @NonNull
     public static AppMonConfig build(URI configLocation, String encoding) throws IOException {
         Assert.notNull(configLocation, "configLocation must not be null");
@@ -41,6 +59,12 @@ public abstract class AppMonConfigBuilder {
         return new AppMonConfig(reader);
     }
 
+    /**
+     * Builds an {@link AppMonConfig} from the specified file.
+     * @param configFile the configuration file
+     * @return a new {@link AppMonConfig} instance
+     * @throws IOException if the file cannot be read
+     */
     @NonNull
     public static AppMonConfig build(File configFile) throws IOException {
         return new AppMonConfig(configFile);

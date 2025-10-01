@@ -35,6 +35,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Manages {@link PollingServiceSession} instances for the polling export service.
+ * It handles session creation, retrieval, and expiration, as well as managing a central message buffer.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 public class PollingServiceSessionManager extends AbstractComponent {
 
     private static final String SESSION_ID_COOKIE_NAME = PollingServiceSessionManager.class.getName() + ".SESSION_ID";
@@ -51,6 +57,10 @@ public class PollingServiceSessionManager extends AbstractComponent {
 
     private final BufferedMessages bufferedMessages;
 
+    /**
+     * Instantiates a new PollingServiceSessionManager.
+     * @param appMonManager the main application manager
+     */
     public PollingServiceSessionManager(@NonNull AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
 
@@ -58,6 +68,13 @@ public class PollingServiceSessionManager extends AbstractComponent {
         this.bufferedMessages = new BufferedMessages(pollingConfig.getInitialBufferSize());
     }
 
+    /**
+     * Creates a new polling session or retrieves an existing one.
+     * @param translet the current translet
+     * @param pollingConfig the polling configuration
+     * @param instanceNames the names of the instances to join
+     * @return a new or existing {@link PollingServiceSession}
+     */
     public PollingServiceSession createSession(
             @NonNull Translet translet, @NonNull PollingConfig pollingConfig, String[] instanceNames) {
         int pollingInterval = pollingConfig.getPollingInterval();
@@ -91,6 +108,11 @@ public class PollingServiceSessionManager extends AbstractComponent {
         }
     }
 
+    /**
+     * Gets the polling session associated with the current request.
+     * @param translet the current translet
+     * @return the {@link PollingServiceSession}, or {@code null} if not found
+     */
     public PollingServiceSession getSession(@NonNull Translet translet) {
         String sessionId = getSessionId(translet, false);
         if (sessionId == null) {
@@ -121,12 +143,21 @@ public class PollingServiceSessionManager extends AbstractComponent {
         return sessionId;
     }
 
+    /**
+     * Pushes a message to the central buffer to be pulled by clients.
+     * @param message the message to push
+     */
     public void push(String message) {
         if (!sessions.isEmpty()) {
             bufferedMessages.push(message);
         }
     }
 
+    /**
+     * Pulls new messages from the buffer for a specific session.
+     * @param session the session pulling the messages
+     * @return an array of new messages, or {@code null} if there are no new messages
+     */
     public String[] pull(PollingServiceSession session) {
         String[] messages = bufferedMessages.pop(session);
         if (messages != null && messages.length > 0) {
@@ -174,6 +205,9 @@ public class PollingServiceSessionManager extends AbstractComponent {
         return false;
     }
 
+    /**
+     * Scavenges for and removes expired sessions.
+     */
     protected void scavenge() {
         List<String> expiredSessions = new ArrayList<>();
         for (Map.Entry<String, PollingServiceSession> entry : sessions.entrySet()) {

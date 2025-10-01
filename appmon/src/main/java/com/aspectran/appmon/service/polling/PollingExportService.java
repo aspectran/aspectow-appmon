@@ -41,6 +41,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * An {@link ExportService} implementation based on HTTP long-polling.
+ * Clients connect to join, then periodically pull for new messages.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 @Component("/backend")
 public class PollingExportService implements ExportService {
 
@@ -58,18 +64,31 @@ public class PollingExportService implements ExportService {
         this.sessionManager = new PollingServiceSessionManager(appMonManager);
     }
 
+    /**
+     * Initializes the service by registering it with the {@link com.aspectran.appmon.service.ExportServiceManager}.
+     */
     @Initialize
     public void registerExportService() throws Exception {
         sessionManager.initialize();
         appMonManager.getExportServiceManager().addExportService(this);
     }
 
+    /**
+     * Destroys the service, cleaning up resources and unregistering from the manager.
+     */
     @Destroy
     public void destroy() throws Exception {
         sessionManager.destroy();
         appMonManager.getExportServiceManager().removeExportService(this);
     }
 
+    /**
+     * Allows a client to join and start a polling session.
+     * @param translet the current translet
+     * @param token the security token
+     * @return a map containing the new token, instance info, and initial messages
+     * @throws IOException if an I/O error occurs
+     */
     @RequestToPost("/${token}/polling/join")
     @Transform(FormatType.JSON)
     public Map<String, Object> join(@NonNull Translet translet, String token) throws IOException {
@@ -107,6 +126,14 @@ public class PollingExportService implements ExportService {
         );
     }
 
+    /**
+     * Allows a client to pull new messages from the server.
+     * @param translet the current translet
+     * @param token the security token
+     * @param commands an array of commands from the client
+     * @return a map containing the new token and any new messages
+     * @throws IOException if an I/O error occurs
+     */
     @RequestToGet("/${token}/polling/pull")
     @Transform(FormatType.JSON)
     public Map<String, Object> pull(@NonNull Translet translet,
@@ -142,6 +169,13 @@ public class PollingExportService implements ExportService {
         );
     }
 
+    /**
+     * Adjusts the polling interval for a client session.
+     * @param translet the current translet
+     * @param token the security token
+     * @param speed the desired speed multiplier (1 for fast)
+     * @return a map containing the new polling interval
+     */
     @RequestToPost("/${token}/polling/interval")
     @Transform(FormatType.JSON)
     public Map<String, Object> pollingInterval(@NonNull Translet translet, String token, int speed) {
@@ -173,6 +207,7 @@ public class PollingExportService implements ExportService {
 
     @Override
     public void broadcast(ServiceSession serviceSession, String message) {
+        // Not applicable for polling service
     }
 
     @Override

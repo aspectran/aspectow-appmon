@@ -28,6 +28,9 @@ import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
 
 /**
+ * A {@link com.aspectran.appmon.exporter.metric.MetricReader} for monitoring a HikariCP connection pool via JMX.
+ * It connects to the {@link com.zaxxer.hikari.HikariPoolMXBean} to read connection statistics.
+ *
  * <p>Created: 2025-06-02</p>
  */
 public class HikariPoolMBeanReader extends AbstractMetricReader {
@@ -38,6 +41,11 @@ public class HikariPoolMBeanReader extends AbstractMetricReader {
 
     private int oldUsed;
 
+    /**
+     * Instantiates a new HikariPoolMBeanReader.
+     * @param exporterManager the exporter manager
+     * @param metricInfo the metric configuration
+     */
     public HikariPoolMBeanReader(
             @NonNull ExporterManager exporterManager,
             @NonNull MetricInfo metricInfo) {

@@ -28,12 +28,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * A builder for creating {@link EventExporter} instances.
+ * It determines the appropriate {@link EventReader} based on the configuration and constructs the exporter.
+ *
  * <p>Created: 2024-12-18</p>
  */
 public abstract class EventExporterBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(EventExporterBuilder.class);
 
+    /**
+     * Builds a new {@link EventExporter}.
+     * @param exporterManager the exporter manager
+     * @param eventInfo the event configuration
+     * @param eventCount the event counter, can be {@code null}
+     * @return a new {@link EventExporter} instance
+     * @throws Exception if the exporter cannot be built
+     */
     @NonNull
     public static EventExporter build(
             @NonNull ExporterManager exporterManager,

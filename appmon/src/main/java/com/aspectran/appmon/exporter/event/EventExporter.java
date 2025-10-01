@@ -27,6 +27,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
+ * An exporter for collecting and broadcasting event data.
+ * It uses an {@link EventReader} to read data and can periodically broadcast changes.
+ *
  * <p>Created: 2024-12-18</p>
  */
 public class EventExporter extends AbstractExporter {
@@ -43,6 +46,12 @@ public class EventExporter extends AbstractExporter {
 
     private Timer timer;
 
+    /**
+     * Instantiates a new EventExporter.
+     * @param exporterManager the exporter manager
+     * @param eventInfo the event configuration
+     * @param eventReader the reader for the event data
+     */
     public EventExporter(@NonNull ExporterManager exporterManager,
                          @NonNull EventInfo eventInfo,
                          @NonNull EventReader eventReader) {

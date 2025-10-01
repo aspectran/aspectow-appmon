@@ -19,12 +19,19 @@ import com.aspectran.core.component.session.Session;
 import com.aspectran.core.component.session.SessionListener;
 
 /**
+ * A listener for session lifecycle events, specifically for counting.
+ * It forwards session creation events to the {@link SessionEventCounter}.
+ *
  * <p>Created: 2024-12-13</p>
  */
 public class SessionEventCountingListener implements SessionListener {
 
     private final SessionEventCounter sessionEventCounter;
 
+    /**
+     * Instantiates a new SessionEventCountingListener.
+     * @param sessionEventCounter the counter to which events will be forwarded
+     */
     public SessionEventCountingListener(SessionEventCounter sessionEventCounter) {
         this.sessionEventCounter = sessionEventCounter;
     }

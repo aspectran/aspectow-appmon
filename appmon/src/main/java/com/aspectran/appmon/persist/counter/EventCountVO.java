@@ -19,6 +19,8 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
+ * A Value Object (VO) representing event count data for database persistence.
+ *
  * <p>Created: 2025-02-14</p>
  */
 public class EventCountVO implements Serializable {

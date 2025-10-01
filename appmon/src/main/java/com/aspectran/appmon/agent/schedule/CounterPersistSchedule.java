@@ -41,6 +41,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 /**
+ * A scheduled job that periodically persists event counter data to the database.
+ * It also initializes the counters from the database on startup and saves them on shutdown.
+ *
  * <p>Created: 2025-02-12</p>
  */
 @Component
@@ -78,6 +81,10 @@ public class CounterPersistSchedule {
         this.dao = dao;
     }
 
+    /**
+     * Initializes the event counters by loading their last state from the database.
+     * @throws Exception if initialization fails
+     */
     @Initialize
     public void initialize() throws Exception {
         appMonManager.instantActivity(() -> {
@@ -96,6 +103,9 @@ public class CounterPersistSchedule {
         });
     }
 
+    /**
+     * Persists the final event counts to the database on shutdown.
+     */
     @Destroy
     public void destroy() {
         try {
@@ -108,6 +118,9 @@ public class CounterPersistSchedule {
         }
     }
 
+    /**
+     * The main job method, called by the scheduler to roll up and save the counters.
+     */
     @Request("appmon/persist/counter/rollup.job")
     public void rollup() {
         rollupAndSave(true);

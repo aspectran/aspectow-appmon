@@ -7,6 +7,9 @@ import com.aspectran.utils.json.JsonBuilder;
 import java.util.LinkedHashMap;
 
 /**
+ * A data transfer object (DTO) for collected metric data.
+ * It holds the metric's identity, formatting options, and the actual data points.
+ *
  * <p>Created: 2025-07-01</p>
  */
 public class MetricData {
@@ -21,6 +24,10 @@ public class MetricData {
 
     private final LinkedHashMap<String, Object> data = new LinkedHashMap<>();
 
+    /**
+     * Instantiates a new MetricData.
+     * @param metricInfo the metric configuration
+     */
     public MetricData(@NonNull MetricInfo metricInfo) {
         this.name = metricInfo.getName();
         this.title = metricInfo.getTitle();
@@ -28,6 +35,11 @@ public class MetricData {
         this.format = metricInfo.getFormat();
     }
 
+    /**
+     * Sets the format string for the metric data, if not already set.
+     * @param format the format string
+     * @return this MetricData instance
+     */
     public MetricData setFormat(String format) {
         if (this.format == null) {
             this.format = format;
@@ -35,15 +47,30 @@ public class MetricData {
         return this;
     }
 
+    /**
+     * Gets a data point by its name.
+     * @param name the name of the data point
+     * @return the value of the data point
+     */
     public Object getData(String name) {
         return data.get(name);
     }
 
+    /**
+     * Adds a data point to this metric data.
+     * @param name the name of the data point
+     * @param value the value of the data point
+     * @return this MetricData instance
+     */
     public MetricData putData(String name, Object value) {
         data.put(name, value);
         return this;
     }
 
+    /**
+     * Converts this object to its JSON representation.
+     * @return a JSON string
+     */
     public String toJson() {
         return new JsonBuilder()
                 .prettyPrint(false)

@@ -25,10 +25,23 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
+/**
+ * A builder for creating {@link LogExporter} instances.
+ * It resolves the log file path and constructs the exporter.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 public abstract class LogExporterBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(LogExporterBuilder.class);
 
+    /**
+     * Builds a new {@link LogExporter}.
+     * @param logExporterManager the exporter manager for logs
+     * @param logInfo the log configuration
+     * @return a new {@link LogExporter} instance
+     * @throws Exception if the exporter cannot be built
+     */
     @NonNull
     public static LogExporter build(@NonNull ExporterManager logExporterManager,
                                     @NonNull LogInfo logInfo) throws Exception {

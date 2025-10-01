@@ -35,6 +35,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+/**
+ * An {@link ExportService} implementation based on the WebSocket protocol (JSR-356).
+ * It provides real-time, bidirectional communication with clients.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 @Component
 @ServerEndpoint(
         value = "/backend/{token}/websocket",
@@ -59,11 +65,17 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
         this.appMonManager = appMonManager;
     }
 
+    /**
+     * Initializes the service by registering it with the {@link com.aspectran.appmon.service.ExportServiceManager}.
+     */
     @Initialize
     public void registerExportService() {
         appMonManager.getExportServiceManager().addExportService(this);
     }
 
+    /**
+     * Destroys the service, unregistering from the manager.
+     */
     @Destroy
     public void destroy() throws Exception {
         appMonManager.getExportServiceManager().removeExportService(this);

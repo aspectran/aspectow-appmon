@@ -29,7 +29,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * Shutdown H2 database programmatically.
+ * A component to shut down the H2 database gracefully upon application context destruction.
+ * This is typically used for embedded H2 databases.
+ *
  * <p>Created: 2025. 2. 15.</p>
  */
 @Component
@@ -40,11 +42,19 @@ public final class H2DatabaseShutdown {
 
     private final SqlSessionFactory sqlSessionFactory;
 
+    /**
+     * Instantiates a new H2DatabaseShutdown.
+     * @param sqlSessionFactory the MyBatis SqlSessionFactory
+     */
     @Autowired(required = false)
     public H2DatabaseShutdown(SqlSessionFactory sqlSessionFactory) {
         this.sqlSessionFactory = sqlSessionFactory;
     }
 
+    /**
+     * Executes the H2 database shutdown command.
+     * This method is invoked when the bean is destroyed.
+     */
     @Destroy(profile = "h2")
     public void shutdown() {
         if (sqlSessionFactory != null) {
@@ -58,6 +68,11 @@ public final class H2DatabaseShutdown {
         }
     }
 
+    /**
+     * Executes the 'SHUTDOWN' command on the given database connection if it is an H2 database.
+     * @param connection the database connection
+     * @throws SQLException if a database access error occurs
+     */
     public void executeShutdown(@NonNull Connection connection) throws SQLException {
         if (connection.getMetaData().getDatabaseProductName().equals("H2")) {
             logger.info("Shutting down H2 database");

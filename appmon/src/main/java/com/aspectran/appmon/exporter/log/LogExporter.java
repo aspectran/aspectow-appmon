@@ -35,6 +35,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * An exporter that tails a log file and broadcasts new lines.
+ * It uses Apache Commons IO's {@link Tailer} for efficient file monitoring.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 public class LogExporter extends AbstractExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(LogExporter.class);
@@ -64,6 +70,12 @@ public class LogExporter extends AbstractExporter {
 
     private Tailer tailer;
 
+    /**
+     * Instantiates a new LogExporter.
+     * @param exporterManager the exporter manager
+     * @param logInfo the log configuration
+     * @param logFile the log file to tail
+     */
     public LogExporter(@NonNull ExporterManager exporterManager,
                        @NonNull LogInfo logInfo,
                        @NonNull File logFile) {

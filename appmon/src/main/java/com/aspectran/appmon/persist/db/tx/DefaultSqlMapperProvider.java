@@ -21,6 +21,12 @@ import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.mybatis.SqlMapperProvider;
 import org.apache.ibatis.session.SqlSession;
 
+/**
+ * The default provider for {@link SqlSession} instances.
+ * It supplies the simple, auto-committing SqlSession for database operations.
+ *
+ * <p>Created: 2025. 2. 15.</p>
+ */
 @Component
 @Bean(lazyDestroy = true)
 public class DefaultSqlMapperProvider implements SqlMapperProvider {

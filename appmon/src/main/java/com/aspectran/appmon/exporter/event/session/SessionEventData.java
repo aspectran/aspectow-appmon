@@ -19,6 +19,9 @@ import com.aspectran.utils.json.JsonBuilder;
 import com.aspectran.utils.json.JsonString;
 
 /**
+ * A data transfer object (DTO) for session-related event data.
+ * It holds statistics and lists of recent session activities.
+ *
  * <p>Created: 2020/01/11</p>
  */
 public class SessionEventData {
@@ -149,6 +152,10 @@ public class SessionEventData {
                 that.numberOfRejected == numberOfRejected);
     }
 
+    /**
+     * Converts this object to its JSON representation.
+     * @return a JSON string
+     */
     public String toJson() {
         return new JsonBuilder()
                 .prettyPrint(false)

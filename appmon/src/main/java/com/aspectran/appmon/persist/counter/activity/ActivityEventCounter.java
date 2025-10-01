@@ -34,12 +34,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.aspectran.appmon.exporter.event.session.SessionEventReader.USER_ACTIVITY_COUNT;
 
 /**
+ * An {@link com.aspectran.appmon.persist.counter.EventCounter} for counting Aspectran's Activity events.
+ * It dynamically registers an aspect to intercept and count activity executions.
+ *
  * <p>Created: 2025-02-12</p>
  */
 public class ActivityEventCounter extends AbstractEventCounter {
 
     private final String aspectId;
 
+    /**
+     * Instantiates a new ActivityEventCounter.
+     * @param eventInfo the event configuration
+     */
     public ActivityEventCounter(@NonNull EventInfo eventInfo) {
         super(eventInfo);
         this.aspectId = getClass().getName() + ".ASPECT@" + hashCode() + "[" + eventInfo.getTarget() + "]";

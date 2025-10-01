@@ -18,23 +18,49 @@ package com.aspectran.appmon.exporter.event;
 import com.aspectran.appmon.exporter.ExporterType;
 
 /**
+ * An interface for reading event data from a source.
+ * Implementations of this interface are responsible for collecting specific types of events.
+ *
  * <p>Created: 2024-12-18</p>
  */
 public interface EventReader {
 
+    /**
+     * Returns the type of the exporter, which is always {@link ExporterType#EVENT}.
+     * @return the exporter type
+     */
     default ExporterType getType() {
         return ExporterType.EVENT;
     }
 
+    /**
+     * Initializes the event reader.
+     * @throws Exception if initialization fails
+     */
     default void init() throws Exception {
     }
 
+    /**
+     * Starts the event reader.
+     * @throws Exception if starting fails
+     */
     void start() throws Exception;
 
+    /**
+     * Stops the event reader and releases any resources.
+     */
     void stop();
 
+    /**
+     * Reads the current event data and returns it as a JSON string.
+     * @return a JSON string representing the event data, or {@code null} if no data is available
+     */
     String read();
 
+    /**
+     * Checks if the event data has changed since the last read.
+     * @return {@code true} if the data has changed, {@code false} otherwise
+     */
     default boolean hasChanges() {
         return false;
     }

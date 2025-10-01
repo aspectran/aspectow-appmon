@@ -35,6 +35,10 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
+ * An exporter that generates chart data from event counts.
+ * It can query historical data from the database and also listen for real-time
+ * rollup events from an {@link EventCount} instance.
+ *
  * <p>Created: 2024-12-18</p>
  */
 public class ChartDataExporter extends AbstractExporter implements EventCountRollupListener {
@@ -47,6 +51,11 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
 
     private final String prefix;
 
+    /**
+     * Instantiates a new ChartDataExporter.
+     * @param exporterManager the exporter manager
+     * @param eventInfo the event configuration
+     */
     public ChartDataExporter(@NonNull ExporterManager exporterManager,
                              @NonNull EventInfo eventInfo) {
         super(TYPE);
@@ -75,6 +84,10 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
         exporterManager.broadcast(prefix + message);
     }
 
+    /**
+     * Called when an event count is rolled up. Broadcasts the new data point.
+     * @param eventCount the event count that was rolled up
+     */
     @Override
     public void onRolledUp(@NonNull EventCount eventCount) {
         String[] labels = new String[] { eventCount.getTallied().getDatetime() };
@@ -143,10 +156,12 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
 
     @Override
     protected void doStart() throws Exception {
+        // Not used
     }
 
     @Override
     protected void doStop() throws Exception {
+        // Not used
     }
 
     @Override

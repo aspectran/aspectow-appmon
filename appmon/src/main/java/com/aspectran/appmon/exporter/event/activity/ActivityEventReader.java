@@ -33,6 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Reads Aspectran's activity events by dynamically adding an aspect.
+ * This reader injects an advice into the target ActivityContext to capture
+ * activity lifecycle events and broadcast them.
+ *
  * <p>Created: 2024-12-18</p>
  */
 public class ActivityEventReader extends AbstractEventReader {
@@ -41,6 +45,12 @@ public class ActivityEventReader extends AbstractEventReader {
 
     private String aspectId;
 
+    /**
+     * Instantiates a new ActivityEventReader.
+     * @param exporterManager the exporter manager
+     * @param eventInfo the event configuration
+     * @param eventCount the event counter
+     */
     public ActivityEventReader(
             @NonNull ExporterManager exporterManager,
             @NonNull EventInfo eventInfo,

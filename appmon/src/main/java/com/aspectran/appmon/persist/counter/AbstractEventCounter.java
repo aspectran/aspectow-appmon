@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Abstract base class for {@link EventCounter} implementations.
+ * Provides common functionalities for event counters, including listener management and rollup logic.
+ *
  * <p>Created: 2025. 1. 27.</p>
  */
 public abstract class AbstractEventCounter implements EventCounter {
@@ -34,6 +37,10 @@ public abstract class AbstractEventCounter implements EventCounter {
 
     private final EventCount eventCount = new EventCount();
 
+    /**
+     * Instantiates a new AbstractEventCounter.
+     * @param eventInfo the event configuration
+     */
     public AbstractEventCounter(@NonNull EventInfo eventInfo) {
         this.eventInfo = eventInfo;
         this.eventName = eventInfo.getName();
@@ -49,6 +56,10 @@ public abstract class AbstractEventCounter implements EventCounter {
         return eventName;
     }
 
+    /**
+     * Gets the event configuration.
+     * @return the event info
+     */
     public EventInfo getEventInfo() {
         return eventInfo;
     }

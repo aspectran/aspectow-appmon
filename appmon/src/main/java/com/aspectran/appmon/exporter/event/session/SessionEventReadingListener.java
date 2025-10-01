@@ -20,12 +20,19 @@ import com.aspectran.core.component.session.SessionListener;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 
 /**
+ * A listener for session lifecycle events.
+ * It forwards session events to the {@link SessionEventReader} for processing.
+ *
  * <p>Created: 2024-12-13</p>
  */
 public class SessionEventReadingListener implements SessionListener {
 
     private final SessionEventReader eventReader;
 
+    /**
+     * Instantiates a new SessionEventReadingListener.
+     * @param eventReader the reader to which events will be forwarded
+     */
     public SessionEventReadingListener(SessionEventReader eventReader) {
         this.eventReader = eventReader;
     }

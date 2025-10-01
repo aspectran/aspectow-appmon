@@ -18,12 +18,19 @@ package com.aspectran.appmon.persist;
 import com.aspectran.appmon.persist.counter.CounterPersist;
 
 /**
+ * Manages persistence-related components.
+ * This class serves as a central point of access for various persistence services.
+ *
  * <p>Created: 2025-02-12</p>
  */
 public class PersistManager {
 
     private final CounterPersist counterPersist = new CounterPersist();
 
+    /**
+     * Gets the manager for counter persistence.
+     * @return the counter persist manager
+     */
     public CounterPersist getCounterPersist() {
         return counterPersist;
     }

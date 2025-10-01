@@ -19,6 +19,13 @@ import com.aspectran.utils.apon.AbstractParameters;
 import com.aspectran.utils.apon.ParameterKey;
 import com.aspectran.utils.apon.ValueType;
 
+/**
+ * Configuration for the polling service.
+ * This class holds settings that control the behavior of the polling mechanism,
+ * such as intervals and timeouts.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 public class PollingConfig extends AbstractParameters {
 
     private static final ParameterKey pollingInterval;
@@ -43,26 +50,50 @@ public class PollingConfig extends AbstractParameters {
         super(parameterKeys);
     }
 
+    /**
+     * Gets the polling interval in seconds.
+     * @return the polling interval
+     */
     public int getPollingInterval() {
         return getInt(pollingInterval, 0);
     }
 
+    /**
+     * Sets the polling interval in seconds.
+     * @param pollingInterval the polling interval
+     */
     public void setPollingInterval(int pollingInterval) {
         putValue(PollingConfig.pollingInterval, pollingInterval);
     }
 
+    /**
+     * Gets the session timeout in seconds.
+     * @return the session timeout
+     */
     public int getSessionTimeout() {
         return getInt(sessionTimeout, 0);
     }
 
+    /**
+     * Sets the session timeout in seconds.
+     * @param sessionTimeout the session timeout
+     */
     public void setSessionTimeout(int sessionTimeout) {
         putValue(PollingConfig.sessionTimeout, sessionTimeout);
     }
 
+    /**
+     * Gets the initial buffer size for polling messages.
+     * @return the initial buffer size
+     */
     public int getInitialBufferSize() {
         return getInt(initialBufferSize, 0);
     }
 
+    /**
+     * Sets the initial buffer size for polling messages.
+     * @param initialBufferSize the initial buffer size
+     */
     public void setInitialBufferSize(int initialBufferSize) {
         putValue(PollingConfig.initialBufferSize, initialBufferSize);
     }

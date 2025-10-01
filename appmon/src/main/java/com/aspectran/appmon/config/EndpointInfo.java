@@ -20,6 +20,9 @@ import com.aspectran.utils.apon.ParameterKey;
 import com.aspectran.utils.apon.ValueType;
 
 /**
+ * Contains information about a service endpoint.
+ * This typically includes the mode of operation (e.g., 'polling', 'websocket') and the URL.
+ *
  * <p>Created: 2025-02-13</p>
  */
 public class EndpointInfo extends AbstractParameters {
@@ -39,22 +42,41 @@ public class EndpointInfo extends AbstractParameters {
         };
     }
 
+    /**
+     * Instantiates a new EndpointInfo.
+     */
     public EndpointInfo() {
         super(parameterKeys);
     }
 
+    /**
+     * Gets the mode of the endpoint (e.g., 'polling', 'websocket').
+     * @return the endpoint mode
+     */
     public String getMode() {
         return getString(EndpointInfo.mode);
     }
 
+    /**
+     * Sets the mode of the endpoint.
+     * @param mode the endpoint mode
+     */
     public void setMode(String mode) {
         putValue(EndpointInfo.mode, mode);
     }
 
+    /**
+     * Gets the URL of the endpoint.
+     * @return the endpoint URL
+     */
     public String getUrl() {
         return getString(url);
     }
 
+    /**
+     * Sets the URL of the endpoint.
+     * @param url the endpoint URL
+     */
     public void setUrl(String url) {
         putValue(EndpointInfo.url, url);
     }

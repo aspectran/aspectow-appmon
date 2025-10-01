@@ -22,20 +22,39 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A holder for managing a collection of {@link DomainInfo} objects.
+ * Provides convenient access to domain information.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 public class DomainInfoHolder {
 
     private final Map<String, DomainInfo> domainInfoMap = new LinkedHashMap<>();
 
+    /**
+     * Instantiates a new DomainInfoHolder.
+     * @param domainInfoList the list of domain information to hold
+     */
     public DomainInfoHolder(@NonNull List<DomainInfo> domainInfoList) {
         for (DomainInfo info : domainInfoList) {
             domainInfoMap.put(info.getName(), info);
         }
     }
 
+    /**
+     * Gets the list of all held domain information.
+     * @return a list of {@link DomainInfo} objects
+     */
     public List<DomainInfo> getDomainInfoList() {
         return new ArrayList<>(domainInfoMap.values());
     }
 
+    /**
+     * Checks if a domain with the specified name exists.
+     * @param domain the name of the domain
+     * @return {@code true} if the domain exists, {@code false} otherwise
+     */
     public boolean hasDomain(String domain) {
         return domainInfoMap.containsKey(domain);
     }

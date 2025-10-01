@@ -28,6 +28,9 @@ import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 
 /**
+ * A {@link FactoryBean} for creating and managing the singleton {@link AppMonManager} instance
+ * within the Aspectran framework. It handles the lifecycle of the AppMonManager.
+ *
  * <p>Created: 2024-12-17</p>
  */
 @Component
@@ -43,6 +46,10 @@ public class AppMonManagerFactoryBean implements ActivityContextAware, FactoryBe
         this.context = context;
     }
 
+    /**
+     * Initializes the factory bean by creating the {@link AppMonManager} instance.
+     * @throws Exception if the manager cannot be created
+     */
     @Initialize
     public void createAppMonManager() throws Exception {
         AppMonConfig appMonConfig;

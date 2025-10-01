@@ -25,7 +25,8 @@ import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 
 /**
- * The Interface CounterMapper.
+ * The MyBatis mapper interface for event count data.
+ * Defines methods for CRUD operations on event count records in the database.
  *
  * @author Juho Jeong
  */
@@ -48,6 +49,10 @@ public interface EventCountMapper {
 
     List<EventCountVO> getChartDataByYear(String domain, String instance, String event, int zoneOffset, String dateOffset);
 
+    /**
+     * Data Access Object (DAO) for {@link EventCountMapper}.
+     * Provides a convenient way to access the mapper methods.
+     */
     @Component
     class Dao extends SqlMapperAccess<EventCountMapper> implements EventCountMapper {
 

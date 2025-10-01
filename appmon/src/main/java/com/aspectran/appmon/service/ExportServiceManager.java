@@ -28,6 +28,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
+ * Manages all {@link ExportService} and {@link ExporterManager} instances.
+ * This class is a central hub for handling client sessions (join/release),
+ * collecting messages from exporters, and broadcasting them to clients.
+ *
  * <p>Created: 2025-02-12</p>
  */
 public class ExportServiceManager {
@@ -38,34 +42,65 @@ public class ExportServiceManager {
 
     private final InstanceInfoHolder instanceInfoHolder;
 
+    /**
+     * Instantiates a new ExportServiceManager.
+     * @param instanceInfoHolder the holder for instance information
+     */
     public ExportServiceManager(InstanceInfoHolder instanceInfoHolder) {
         this.instanceInfoHolder = instanceInfoHolder;
     }
 
+    /**
+     * Adds an export service to the manager.
+     * @param exportService the export service to add
+     */
     public void addExportService(ExportService exportService) {
         exportServices.add(exportService);
     }
 
+    /**
+     * Removes an export service from the manager.
+     * @param exportService the export service to remove
+     */
     public void removeExportService(ExportService exportService) {
         exportServices.remove(exportService);
     }
 
+    /**
+     * Adds an exporter manager to this manager.
+     * @param exporterManager the exporter manager to add
+     */
     public void addExporterManager(ExporterManager exporterManager) {
         exporterManagers.add(exporterManager);
     }
 
+    /**
+     * Broadcasts a message to all registered export services.
+     * @param message the message to broadcast
+     */
     public void broadcast(String message) {
         for (ExportService exportService : exportServices) {
             exportService.broadcast(message);
         }
     }
 
+    /**
+     * Broadcasts a message to a specific session via all registered export services.
+     * @param session the target service session
+     * @param message the message to broadcast
+     */
     public void broadcast(ServiceSession session, String message) {
         for (ExportService exportService : exportServices) {
             exportService.broadcast(session, message);
         }
     }
 
+    /**
+     * Handles a client joining to monitor instances.
+     * Starts the necessary exporters for the joined instances.
+     * @param session the client session that is joining
+     * @return {@code true} if the join was successful, {@code false} otherwise
+     */
     public synchronized boolean join(@NonNull ServiceSession session) {
         if (session.isValid()) {
             String[] instanceNames = session.getJoinedInstances();
@@ -90,6 +125,11 @@ public class ExportServiceManager {
         }
     }
 
+    /**
+     * Handles a client releasing its monitoring session.
+     * Stops exporters that are no longer being monitored by any client.
+     * @param session the client session that is being released
+     */
     public synchronized void release(ServiceSession session) {
         String[] instanceNames = getUnusedInstances(session);
         if (instanceNames != null) {
@@ -108,6 +148,11 @@ public class ExportServiceManager {
         }
     }
 
+    /**
+     * Gets the last known messages for the instances joined by the session.
+     * @param session the client session
+     * @return a list of messages
+     */
     public List<String> getLastMessages(@NonNull ServiceSession session) {
         CommandOptions commandOptions = new CommandOptions();
         commandOptions.setTimeZone(session.getTimeZone());
@@ -133,6 +178,12 @@ public class ExportServiceManager {
         }
     }
 
+    /**
+     * Gets new or changed messages based on the provided command options.
+     * @param session the client session
+     * @param commandOptions the command options specifying what to refresh
+     * @return a list of new messages
+     */
     public List<String> getNewMessages(@NonNull ServiceSession session, @NonNull CommandOptions commandOptions) {
         String instanceName = commandOptions.getInstance();
         List<String> messages = new ArrayList<>();
@@ -204,6 +255,9 @@ public class ExportServiceManager {
         }
     }
 
+    /**
+     * Destroys the manager, stopping all exporters.
+     */
     public void destroy() {
         for (ExporterManager exporterManager : exporterManagers) {
             exporterManager.stop();

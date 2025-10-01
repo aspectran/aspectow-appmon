@@ -24,12 +24,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * A builder for creating {@link MetricExporter} instances.
+ * It determines the appropriate {@link MetricReader} based on the configuration and constructs the exporter.
+ *
  * <p>Created: 2024-12-18</p>
  */
 public abstract class MetricExporterBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(MetricExporterBuilder.class);
 
+    /**
+     * Builds a new {@link MetricExporter}.
+     * @param exporterManager the exporter manager
+     * @param metricInfo the metric configuration
+     * @return a new {@link MetricExporter} instance
+     * @throws Exception if the exporter cannot be built
+     */
     @NonNull
     public static MetricExporter build(
             @NonNull ExporterManager exporterManager,

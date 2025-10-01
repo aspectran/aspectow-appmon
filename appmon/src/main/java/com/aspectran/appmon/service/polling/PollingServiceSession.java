@@ -21,6 +21,12 @@ import com.aspectran.utils.timer.CyclicTimeout;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Represents a client session for the {@link PollingExportService}.
+ * It manages session-specific state like timeouts, polling intervals, and joined instances.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 public class PollingServiceSession implements ServiceSession {
 
     private static final int MIN_POLLING_INTERVAL = 500;
@@ -45,6 +51,10 @@ public class PollingServiceSession implements ServiceSession {
 
     private String timeZone;
 
+    /**
+     * Instantiates a new PollingServiceSession.
+     * @param sessionManager the session manager that created this session
+     */
     public PollingServiceSession(PollingServiceSessionManager sessionManager) {
         this.sessionManager = sessionManager;
         this.expiryTimer = new SessionExpiryTimer();
@@ -90,6 +100,10 @@ public class PollingServiceSession implements ServiceSession {
         this.timeZone = timeZone;
     }
 
+    /**
+     * Gets the index of the last message line that was sent to this session.
+     * @return the last line index
+     */
     public int getLastLineIndex() {
         return lastLineIndex;
     }
@@ -98,6 +112,10 @@ public class PollingServiceSession implements ServiceSession {
         this.lastLineIndex = lastLineIndex;
     }
 
+    /**
+     * Updates the session's last access time and schedules the next expiry check.
+     * @param create {@code true} if the session is being created
+     */
     protected void access(boolean create) {
         try (AutoLock ignored = autoLock.lock()) {
             if (isValid()) {
@@ -109,6 +127,9 @@ public class PollingServiceSession implements ServiceSession {
         }
     }
 
+    /**
+     * Destroys this session and its expiry timer.
+     */
     protected void destroy() {
         try (AutoLock ignored = autoLock.lock()) {
             expiryTimer.destroy();
@@ -139,6 +160,9 @@ public class PollingServiceSession implements ServiceSession {
         }
     }
 
+    /**
+     * A timer to handle session expiration.
+     */
     public class SessionExpiryTimer {
 
         private final CyclicTimeout timer;

@@ -21,6 +21,10 @@ import com.aspectran.utils.annotation.jsr305.NonNull;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
+ * Holds and manages the count data for a specific event.
+ * It separates counts into a short-term 'tallying' period and a long-term 'tallied' aggregate.
+ * This class is thread-safe.
+ *
  * <p>Created: 2025-02-12</p>
  */
 public class EventCount {
@@ -31,26 +35,48 @@ public class EventCount {
 
     private volatile boolean updated;
 
+    /**
+     * Increments the event count.
+     */
     public void count() {
         tallying.count();
     }
 
+    /**
+     * Increments the error count.
+     */
     public void error() {
         tallying.error();
     }
 
+    /**
+     * Gets the current tallying data.
+     * @return the tallying data
+     */
     public Tallying getTallying() {
         return tallying;
     }
 
+    /**
+     * Gets the last tallied (rolled up) data.
+     * @return the tallied data
+     */
     public Tallied getTallied() {
         return tallied;
     }
 
+    /**
+     * Checks if the count has been updated since the last rollup.
+     * @return {@code true} if updated, {@code false} otherwise
+     */
     public boolean isUpdated() {
         return updated;
     }
 
+    /**
+     * Rolls up the current tallying counts into the tallied counts.
+     * @param datetime the datetime for the rollup (format: yyyyMMddHHmm)
+     */
     synchronized void rollup(String datetime) {
         Assert.notNull(datetime, "datetime must not be null");
         Assert.isTrue(datetime.length() == 12, "datetime length must be 12");
@@ -58,6 +84,13 @@ public class EventCount {
         tallying.reset();
     }
 
+    /**
+     * Resets the counter with the given values.
+     * @param datetime the datetime for the reset (format: yyyyMMddHHmm)
+     * @param total the total count
+     * @param delta the delta count
+     * @param error the error count
+     */
     synchronized void reset(String datetime, long total, long delta, long error) {
         Assert.isTrue(total >= 0, "total must be positive");
         Assert.isTrue(delta >= 0, "delta must be positive");
@@ -67,28 +100,48 @@ public class EventCount {
         updated = false;
     }
 
+    /**
+     * Holds the counts for the current, short-term tallying period.
+     */
     public static class Tallying {
 
         private final LongAdder total = new LongAdder();
 
         private final LongAdder error = new LongAdder();
 
+        /**
+         * Increments the total count.
+         */
         public void count() {
             total.increment();
         }
 
+        /**
+         * Increments the error count.
+         */
         public void error() {
             error.increment();
         }
 
+        /**
+         * Gets the total count for the current period.
+         * @return the total count
+         */
         public long getTotal() {
             return total.sum();
         }
 
+        /**
+         * Gets the error count for the current period.
+         * @return the error count
+         */
         public long getError() {
             return error.sum();
         }
 
+        /**
+         * Resets all counts for the current period to zero.
+         */
         public void reset() {
             total.reset();
             error.reset();
@@ -96,6 +149,9 @@ public class EventCount {
 
     }
 
+    /**
+     * Holds the aggregated counts from previous tallying periods.
+     */
     public static class Tallied {
 
         private String datetime;
@@ -106,18 +162,34 @@ public class EventCount {
 
         private long error;
 
+        /**
+         * Gets the datetime of the last rollup.
+         * @return the datetime string
+         */
         public String getDatetime() {
             return datetime;
         }
 
+        /**
+         * Gets the overall total count.
+         * @return the total count
+         */
         public long getTotal() {
             return total;
         }
 
+        /**
+         * Gets the count since the last rollup (the delta).
+         * @return the delta count
+         */
         public long getDelta() {
             return delta;
         }
 
+        /**
+         * Gets the overall error count.
+         * @return the error count
+         */
         public long getError() {
             return error;
         }

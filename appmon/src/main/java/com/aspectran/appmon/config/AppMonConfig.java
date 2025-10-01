@@ -25,6 +25,11 @@ import java.io.Reader;
 import java.util.List;
 
 /**
+ * The main configuration class for Aspectow AppMon.
+ * It defines and holds all the necessary settings for the monitoring application,
+ * such as polling configuration, domain information, and instance details.
+ * This class is based on APON (Aspectran Object Notation).
+ *
  * <p>Created: 2024/12/17</p>
  */
 public class AppMonConfig extends AbstractParameters {
@@ -47,36 +52,70 @@ public class AppMonConfig extends AbstractParameters {
         };
     }
 
+    /**
+     * Instantiates a new AppMonConfig.
+     */
     public AppMonConfig() {
         super(parameterKeys);
     }
 
+    /**
+     * Instantiates a new AppMonConfig and reads configuration from the given reader.
+     * @param reader the reader to read the configuration from
+     * @throws IOException if an I/O error occurs
+     */
     public AppMonConfig(Reader reader) throws IOException {
         this();
         readFrom(reader);
     }
 
+    /**
+     * Instantiates a new AppMonConfig and reads configuration from the given file.
+     * @param configFile the file to read the configuration from
+     * @throws IOException if an I/O error occurs
+     */
     public AppMonConfig(File configFile) throws IOException {
         this();
         readFrom(configFile);
     }
 
+    /**
+     * Gets the polling configuration.
+     * @return the polling configuration
+     */
     public PollingConfig getPollingConfig() {
         return getParameters(pollingConfig);
     }
 
+    /**
+     * Sets the polling configuration.
+     * @param pollingConfig the polling configuration
+     */
     public void setPollingConfig(PollingConfig pollingConfig) {
         putValue(AppMonConfig.pollingConfig, pollingConfig);
     }
 
+    /**
+     * Gets the list of domain information.
+     * @return the list of domain information
+     */
     public List<DomainInfo> getDomainInfoList() {
         return getParametersList(domain);
     }
 
+    /**
+     * Gets the list of instance information.
+     * @return the list of instance information
+     */
     public List<InstanceInfo> getInstanceInfoList() {
         return getParametersList(instance);
     }
 
+    /**
+     * Gets the list of event information for a specific instance.
+     * @param instanceName the name of the instance
+     * @return the list of event information, or {@code null} if the instance is not found
+     */
     public List<EventInfo> getEventInfoList(String instanceName) {
         Assert.notNull(instanceName, "instanceName must not be null");
         for (InstanceInfo instanceInfo : getInstanceInfoList()) {
@@ -87,6 +126,11 @@ public class AppMonConfig extends AbstractParameters {
         return null;
     }
 
+    /**
+     * Gets the list of metric information for a specific instance.
+     * @param instanceName the name of the instance
+     * @return the list of metric information, or {@code null} if the instance is not found
+     */
     public List<MetricInfo> getMetricInfoList(String instanceName) {
         Assert.notNull(instanceName, "instanceName must not be null");
         for (InstanceInfo instanceInfo : getInstanceInfoList()) {
@@ -97,6 +141,11 @@ public class AppMonConfig extends AbstractParameters {
         return null;
     }
 
+    /**
+     * Gets the list of log information for a specific instance.
+     * @param instanceName the name of the instance
+     * @return the list of log information, or {@code null} if the instance is not found
+     */
     public List<LogInfo> getLogInfoList(String instanceName) {
         Assert.notNull(instanceName, "instanceName must not be null");
         for (InstanceInfo instanceInfo : getInstanceInfoList()) {

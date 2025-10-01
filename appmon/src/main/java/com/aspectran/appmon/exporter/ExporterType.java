@@ -17,11 +17,24 @@ package com.aspectran.appmon.exporter;
 
 import com.aspectran.utils.annotation.jsr305.Nullable;
 
+/**
+ * An enumeration for the types of exporters.
+ * This helps in categorizing and managing different data sources like events, logs, and metrics.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 public enum ExporterType {
 
+    /** For chart data */
     DATA("data"),
+
+    /** For general events */
     EVENT("event"),
+
+    /** For log tailing */
     LOG("log"),
+
+    /** For performance metrics */
     METRIC("metric");
 
     private final String alias;
@@ -36,10 +49,10 @@ public enum ExporterType {
     }
 
     /**
-     * Returns an {@code ActionType} with a value represented
+     * Returns an {@code ExporterType} with a value represented
      * by the specified {@code String}.
-     * @param alias the action type as a {@code String}
-     * @return an {@code ActionType}, may be {@code null}
+     * @param alias the exporter type as a {@code String}
+     * @return an {@code ExporterType}, may be {@code null}
      */
     @Nullable
     public static ExporterType resolve(String alias) {

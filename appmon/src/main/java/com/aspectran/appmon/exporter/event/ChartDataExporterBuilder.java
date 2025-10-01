@@ -23,12 +23,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * A builder for creating {@link ChartDataExporter} instances.
+ *
  * <p>Created: 2024-12-18</p>
  */
 public abstract class ChartDataExporterBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(ChartDataExporterBuilder.class);
 
+    /**
+     * Builds a new {@link ChartDataExporter}.
+     * @param exporterManager the exporter manager
+     * @param eventInfo the event configuration
+     * @return a new {@link ChartDataExporter} instance
+     * @throws Exception if the exporter cannot be built
+     */
     @NonNull
     public static ChartDataExporter build(
             @NonNull ExporterManager exporterManager,

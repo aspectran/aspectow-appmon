@@ -18,33 +18,64 @@ package com.aspectran.appmon.exporter.log;
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
 
+/**
+ * A listener for {@link Tailer} events.
+ * It forwards new log lines to the {@link LogExporter} to be broadcast.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 public class LogTailerListener implements TailerListener {
 
     private final LogExporter logExporter;
 
+    /**
+     * Instantiates a new LogTailerListener.
+     * @param logExporter the exporter to which new log lines will be sent
+     */
     public LogTailerListener(LogExporter logExporter) {
         this.logExporter = logExporter;
     }
 
+    /**
+     * This method is called if the tailed file is not found.
+     */
     @Override
     public void init(Tailer tailer) {
+        // Not used
     }
 
+    /**
+     * This method is called if the tailed file is not found.
+     */
     @Override
     public void fileNotFound() {
+        // Not used
     }
 
+    /**
+     * Called if a file rotation is detected.
+     */
     @Override
     public void fileRotated() {
+        // Not used
     }
 
+    /**
+     * Handles a new line from the tailed file.
+     * @param line the new line
+     */
     @Override
     public void handle(String line) {
         logExporter.broadcast(line);
     }
 
+    /**
+     * Handles an exception thrown by the Tailer.
+     * @param e the exception
+     */
     @Override
     public void handle(Exception e) {
+        // Not used
     }
 
 }

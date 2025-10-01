@@ -26,6 +26,9 @@ import com.aspectran.utils.annotation.jsr305.NonNull;
 import java.util.List;
 
 /**
+ * An exporter for collecting and broadcasting metric data.
+ * It uses a {@link MetricReader} to read data and can periodically sample and export it.
+ *
  * <p>Created: 2024-12-18</p>
  */
 public class MetricExporter extends AbstractExporter {
@@ -44,6 +47,12 @@ public class MetricExporter extends AbstractExporter {
 
     private MetricExportTimer timer;
 
+    /**
+     * Instantiates a new MetricExporter.
+     * @param exporterManager the exporter manager
+     * @param metricInfo the metric configuration
+     * @param metricReader the reader for the metric data
+     */
     public MetricExporter(@NonNull ExporterManager exporterManager,
                           @NonNull MetricInfo metricInfo,
                           @NonNull MetricReader metricReader) {
@@ -72,6 +81,10 @@ public class MetricExporter extends AbstractExporter {
         return metricInfo.getName();
     }
 
+    /**
+     * Gets the metric reader used by this exporter.
+     * @return the metric reader
+     */
     public MetricReader getMetricReader() {
         return metricReader;
     }

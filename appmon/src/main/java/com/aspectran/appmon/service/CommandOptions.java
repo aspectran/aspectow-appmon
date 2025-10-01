@@ -22,6 +22,12 @@ import com.aspectran.utils.apon.AponParseException;
 import com.aspectran.utils.apon.ParameterKey;
 import com.aspectran.utils.apon.ValueType;
 
+/**
+ * Parses and holds command options sent from clients.
+ * This class is based on APON (Aspectran Object Notation) to handle key-value pairs.
+ *
+ * <p>Created: 2020. 12. 24.</p>
+ */
 public class CommandOptions extends AbstractParameters {
 
     private static final ParameterKey command;
@@ -51,14 +57,25 @@ public class CommandOptions extends AbstractParameters {
         };
     }
 
+    /**
+     * Instantiates a new CommandOptions.
+     */
     public CommandOptions() {
         super(parameterKeys);
     }
 
+    /**
+     * Instantiates a new CommandOptions from a semicolon-delimited string.
+     * @param text the command string
+     */
     public CommandOptions(String text) {
         this(StringUtils.split(text, ";"));
     }
 
+    /**
+     * Instantiates a new CommandOptions from an array of command lines.
+     * @param lines the command lines
+     */
     public CommandOptions(String[] lines) {
         super(parameterKeys);
         try {

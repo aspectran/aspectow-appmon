@@ -28,6 +28,9 @@ import java.net.URISyntaxException;
 import static com.aspectran.utils.ResourceUtils.CLASSPATH_URL_PREFIX;
 
 /**
+ * Resolves the location of the AppMon configuration file and builds the {@link AppMonConfig} object.
+ * It can handle both classpath resources and file system paths.
+ *
  * <p>Created: 2025. 1. 18.</p>
  */
 public class AppMonConfigResolver implements ApplicationAdapterAware {
@@ -38,6 +41,10 @@ public class AppMonConfigResolver implements ApplicationAdapterAware {
 
     private String encoding;
 
+    /**
+     * Gets the application adapter.
+     * @return the application adapter
+     */
     public ApplicationAdapter getApplicationAdapter() {
         Assert.state(applicationAdapter != null, "ApplicationAdapter is not set");
         return applicationAdapter;
@@ -48,14 +55,30 @@ public class AppMonConfigResolver implements ApplicationAdapterAware {
         this.applicationAdapter = applicationAdapter;
     }
 
+    /**
+     * Sets the location of the configuration file.
+     * It can be a classpath resource (e.g., "classpath:config.apon") or a file path.
+     * @param configLocation the configuration file location
+     */
     public void setConfigLocation(String configLocation) {
         this.configLocation = configLocation;
     }
 
+    /**
+     * Sets the character encoding of the configuration file.
+     * @param encoding the character encoding
+     */
     public void setEncoding(String encoding) {
         this.encoding = encoding;
     }
 
+    /**
+     * Resolves the configuration from the specified location and builds the {@link AppMonConfig}.
+     * If no location is specified, it loads the default configuration.
+     * @return a new {@link AppMonConfig} instance
+     * @throws IOException if the configuration file cannot be read
+     * @throws URISyntaxException if the configuration location is invalid
+     */
     public AppMonConfig resolveConfig() throws IOException, URISyntaxException {
         if (StringUtils.hasLength(configLocation)) {
             URI uri;

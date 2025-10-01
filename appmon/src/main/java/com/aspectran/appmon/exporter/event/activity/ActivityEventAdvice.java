@@ -25,6 +25,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.aspectran.appmon.exporter.event.session.SessionEventReader.USER_ACTIVITY_COUNT;
 
 /**
+ * An advice class that captures events before and after an Activity executes.
+ * It measures execution time, counts errors, and gathers session information.
+ *
  * <p>Created: 2024-12-19</p>
  */
 public class ActivityEventAdvice {
@@ -35,11 +38,20 @@ public class ActivityEventAdvice {
 
     private String sessionId;
 
+    /**
+     * Instantiates a new ActivityEventAdvice.
+     * @param activityEventReader the reader that will process the captured event data
+     */
     public ActivityEventAdvice(@NonNull ActivityEventReader activityEventReader) {
         assert activityEventReader.getEventCount() != null;
         this.activityEventReader = activityEventReader;
     }
 
+    /**
+     * Called before the advised activity executes.
+     * Records the start time and session ID.
+     * @param activity the activity that is about to be executed
+     */
     public void before(@NonNull Activity activity) {
         startTime = System.currentTimeMillis();
 
@@ -50,6 +62,13 @@ public class ActivityEventAdvice {
         }
     }
 
+    /**
+     * Called after the advised activity has finished.
+     * Calculates execution time, updates error counts, and generates a JSON
+     * representation of the event.
+     * @param activity the activity that has finished executing
+     * @return a JSON string representing the captured event data
+     */
     public String after(@NonNull Activity activity) {
         Throwable error = activity.getRootCauseOfRaisedException();
         if (error != null) {
