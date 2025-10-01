@@ -19,7 +19,7 @@
 
     <groupId>com.aspectran</groupId>
     <artifactId>aspectow-appmon-project</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0</version>
     <packaging>pom</packaging>
 
     <name>Aspectow AppMon Project</name>
@@ -59,7 +59,7 @@
         <url>https://github.com/aspectran/appmon</url>
         <connection>scm:git:ssh://git@github.com/aspectran/appmon.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/aspectran/appmon.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v2.0.0</tag>
     </scm>
 
     <issueManagement>
