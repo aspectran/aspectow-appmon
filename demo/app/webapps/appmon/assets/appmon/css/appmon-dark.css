@@ -146,10 +146,10 @@
     .console-box .status-bar {
         background-color: #2f3437;
         color: #eee;
-        box-shadow: -20px 20px 20px -20px #394e59 inset;
+        box-shadow: -20px 20px 20px -20px #131719 inset;
     }
     .console-box .status-bar.on {
-        background-color: #709185;
+        background-color: #394a54;
     }
     .console-box .status-bar a {
         color: #fff;

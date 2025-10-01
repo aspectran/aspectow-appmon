@@ -18,6 +18,8 @@ package com.aspectran.appmon;
 import com.aspectran.utils.Assert;
 
 import java.io.PrintStream;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Provides information about the AppMon build.
@@ -106,19 +108,34 @@ public abstract class AboutMe {
     }
 
     /**
-     * Prints the Aspectran and AppMon versions and system information in a pretty format to the specified {@link PrintStream}.
+     * Prints the Aspectran version and system information in a pretty format to the specified {@link PrintStream}.
      * @param output a {@link PrintStream} object to print to
      */
     public static void printPretty(PrintStream output) {
         Assert.notNull(output, "output must not be null");
-        output.println("---------------------------------------------------------------------------------");
-        output.printf(" %1$-9s : %2$s%n", "Aspectran", com.aspectran.core.AboutMe.getVersionDetail());
-        output.printf(" %1$-9s : %2$s%n", "AppMon", getVersionDetail());
-        output.printf(" %1$-9s : %2$s%n", "JVM", System.getProperty("java.vm.name") + " (build " +
+
+        Map<String, String> info = new LinkedHashMap<>();
+        info.put("Aspectran", getVersionDetail());
+        info.put("JVM", System.getProperty("java.vm.name") + " (build " +
                 System.getProperty("java.vm.version") + ", " + System.getProperty("java.vm.info") + ")");
-        output.printf(" %1$-9s : %2$s%n", "OS", System.getProperty("os.name") + " " +
+        info.put("OS", System.getProperty("os.name") + " " +
                 System.getProperty("os.version") + " " + System.getProperty("os.arch"));
-        output.println("---------------------------------------------------------------------------------");
+
+        int maxKeyLength = 0;
+        for (String key : info.keySet()) {
+            if (key.length() > maxKeyLength) {
+                maxKeyLength = key.length();
+            }
+        }
+
+        String format = " %1$-" + maxKeyLength + "s : %2$s%n";
+        String line = "-".repeat(80);
+
+        output.println(line);
+        for (Map.Entry<String, String> entry : info.entrySet()) {
+            output.printf(format, entry.getKey(), entry.getValue());
+        }
+        output.println(line);
     }
 
     /**

@@ -545,16 +545,16 @@
     background-color: #222;
     border: none;
     border-radius: 0;
-    box-shadow: inset -20px 20px 60px -20px #0d1939;
+    box-shadow: inset -20px 20px 30px -15px #1a243d;
 }
 .console-box .console:hover {
-    box-shadow: inset 0 0 6px 3px #667178;
+    box-shadow: inset 0 0 6px 3px #2e414c;
 }
 .console-box .console p {
     font-size: 12px;
     line-height: 16px;
     white-space: nowrap;
-    color: #f1f1f1;
+    color: #e1e1e1;
     margin: 0;
     padding: 0;
 }
