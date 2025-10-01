@@ -30,6 +30,7 @@ import com.aspectran.core.component.bean.annotation.Initialize;
 import com.aspectran.core.component.bean.annotation.Job;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.Schedule;
+import com.aspectran.core.context.rule.ScheduleRule;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,7 @@ import java.time.temporal.ChronoUnit;
     id = "counterPersistSchedule",
     scheduler = "appmonScheduler",
     cronTrigger = @CronTrigger(
-        expression = "0 */" + CounterPersistSchedule.SAMPLE_INTERVAL_IN_MINUTES + " * * * ?"
+        expression = "0 */" + CounterPersistSchedule.DEFAULT_SAMPLE_INTERVAL_IN_MINUTES + " * * * ?"
     ),
     jobs = {
         @Job(translet = "appmon/persist/counter/rollup.job")
@@ -62,7 +63,7 @@ public class CounterPersistSchedule {
 
     private static final Logger logger = LoggerFactory.getLogger(CounterPersistSchedule.class);
 
-    protected static final int SAMPLE_INTERVAL_IN_MINUTES = 5; // every 5 minutes
+    public static final int DEFAULT_SAMPLE_INTERVAL_IN_MINUTES = 5; // every 5 minutes
 
     private final AppMonManager appMonManager;
 
@@ -101,6 +102,17 @@ public class CounterPersistSchedule {
             }
             return null;
         });
+
+        int interval = appMonManager.getCounterPersistInterval();
+        if (interval > 0) {
+            ScheduleRule scheduleRule = appMonManager.getActivityContext()
+                    .getScheduleRuleRegistry().getScheduleRule("counterPersistSchedule");
+            if (scheduleRule != null && scheduleRule.getTriggerExpressionParameters() != null) {
+                String cronExpression = "0 */" + interval + " * * * ?";
+                scheduleRule.getTriggerExpressionParameters().putValue("expression", cronExpression);
+                logger.info("CounterPersistSchedule is dynamically set to run every {} minutes", interval);
+            }
+        }
     }
 
     /**
@@ -150,9 +162,10 @@ public class CounterPersistSchedule {
     @NonNull
     private String getDatetime(boolean scheduled) {
         Instant instant = Instant.now();
-        if (!scheduled) {
-            int next = instant.atZone(ZoneOffset.UTC).getMinute() + SAMPLE_INTERVAL_IN_MINUTES;
-            int offset = SAMPLE_INTERVAL_IN_MINUTES - next % SAMPLE_INTERVAL_IN_MINUTES;
+        int interval = appMonManager.getCounterPersistInterval();
+        if (!scheduled && interval > 0) {
+            int next = instant.atZone(ZoneOffset.UTC).getMinute() + interval;
+            int offset = interval - next % interval;
             instant = instant.plus(offset, ChronoUnit.MINUTES);
         }
         LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
@@ -167,5 +180,4 @@ public class CounterPersistSchedule {
         eventCountVO.setDatetime(datetime);
         return eventCountVO;
     }
-
 }

@@ -67,6 +67,10 @@ public class BackendActivity {
             return new DefaultRestResponse().forbidden();
         }
 
+        Map<String, Object> settings = Map.of(
+                "counterPersistInterval", appMonManager.getCounterPersistInterval()
+        );
+
         List<DomainInfo> domainInfoList = appMonManager.getDomainInfoList();
 
         String[] instanceNames = StringUtils.splitWithComma(instances);
@@ -75,6 +79,7 @@ public class BackendActivity {
 
         Map<String, Object> data = Map.of(
                 "token", AppMonManager.issueToken(),
+                "settings", settings,
                 "domains", domainInfoList,
                 "instances", instanceInfoList
         );

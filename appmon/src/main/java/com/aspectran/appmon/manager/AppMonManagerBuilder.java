@@ -44,6 +44,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static com.aspectran.appmon.agent.schedule.CounterPersistSchedule.DEFAULT_SAMPLE_INTERVAL_IN_MINUTES;
+
 /**
  * A builder for creating and configuring the main {@link AppMonManager} instance.
  * It orchestrates the entire setup process, including the creation of exporters and other sub-components.
@@ -57,6 +59,8 @@ public abstract class AppMonManagerBuilder {
     public static final String APPMON_DOMAIN_PROPERTY_NAME = "appmon.domain";
 
     public static final String DEFAULT_DOMAIN = "localhost";
+
+    private static final int DEFAULT_COUNTER_PERSIST_INTERVAL = 5;
 
     /**
      * Builds a fully configured {@link AppMonManager} instance.
@@ -159,6 +163,8 @@ public abstract class AppMonManagerBuilder {
             pollingConfig = new PollingConfig();
         }
 
+        int counterPersistInterval = appMonConfig.getCounterPersistInterval(DEFAULT_SAMPLE_INTERVAL_IN_MINUTES);
+
         DomainInfoHolder domainInfoHolder = new DomainInfoHolder(appMonConfig.getDomainInfoList());
 
         String currentDomain = resolveCurrentDomain();
@@ -169,7 +175,8 @@ public abstract class AppMonManagerBuilder {
 
         InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(currentDomain, appMonConfig.getInstanceInfoList());
 
-        AppMonManager appMonManager = new AppMonManager(currentDomain, pollingConfig, domainInfoHolder, instanceInfoHolder);
+        AppMonManager appMonManager = new AppMonManager(currentDomain, pollingConfig, counterPersistInterval,
+                domainInfoHolder, instanceInfoHolder);
         appMonManager.setActivityContext(context);
         return appMonManager;
     }

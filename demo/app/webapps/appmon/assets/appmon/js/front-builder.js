@@ -1,5 +1,6 @@
 function FrontBuilder() {
 
+    const settings = [];
     const domains = [];
     const instances = [];
     const viewers = [];
@@ -16,10 +17,14 @@ function FrontBuilder() {
             } : null,
             success: function (data) {
                 if (data) {
+                    settings.length = 0;
                     domains.length = 0;
                     instances.length = 0;
                     viewers.length = 0;
                     clients.length = 0;
+                    for (let key in data.settings) {
+                        settings[key] = data.settings[key];
+                    }
                     let index = 0;
                     let random1000 = random(1, 1000);
                     for (let key in data.domains) {
@@ -33,7 +38,7 @@ function FrontBuilder() {
                             establishCount: 0
                         };
                         domains.push(domain);
-                        viewers[domain.index] = new FrontViewer(domain.sampleInterval * 60);
+                        viewers[domain.index] = new FrontViewer(settings.counterPersistInterval * 60);
                         console.log("domain", domain);
                     }
                     for (let key in data.instances) {
@@ -462,20 +467,18 @@ function FrontBuilder() {
     };
 
     const buildView = function () {
-        let sampleInterval = 0;
         for (let key in domains) {
             let domain = domains[key];
             let $titleTab = addDomainTab(domain);
             let $domainIndicator = $titleTab.find(".indicator");
             viewers[domain.index].putIndicator$("domain", "event", "", $domainIndicator);
-            sampleInterval = Math.max(domain.sampleInterval, sampleInterval);
             addDomainMetricsBar(domain);
         }
         for (let key in instances) {
             let instance = instances[key];
             let $instanceTab = addInstanceTab(instance);
             let $instanceIndicator = $instanceTab.find(".indicator");
-            addControlBar(instance, sampleInterval);
+            addControlBar(instance);
             for (let key in domains) {
                 let domain = domains[key];
                 viewers[domain.index].putIndicator$("instance", "event", instance.name, $instanceIndicator);
@@ -585,12 +588,12 @@ function FrontBuilder() {
         return $metric.appendTo($metricsBar).show();
     };
 
-    const addControlBar = function (instanceInfo, sampleInterval) {
+    const addControlBar = function (instanceInfo) {
         let $controlBar = $(".control-bar");
         let $newControlBar = $controlBar.first().hide().clone()
             .addClass("available")
             .attr("data-instance-name", instanceInfo.name);
-        $newControlBar.find(".btn.default").text(sampleInterval + "min.");
+        $newControlBar.find(".btn.default").text(settings.counterPersistInterval + "min.");
         return $newControlBar.insertAfter($controlBar.last());
     };
 

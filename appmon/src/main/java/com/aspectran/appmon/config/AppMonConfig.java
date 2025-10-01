@@ -18,6 +18,7 @@ package com.aspectran.appmon.config;
 import com.aspectran.utils.Assert;
 import com.aspectran.utils.apon.AbstractParameters;
 import com.aspectran.utils.apon.ParameterKey;
+import com.aspectran.utils.apon.ValueType;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +36,7 @@ import java.util.List;
 public class AppMonConfig extends AbstractParameters {
 
     private static final ParameterKey pollingConfig;
+    private static final ParameterKey counterPersistInterval;
     private static final ParameterKey domain;
     private static final ParameterKey instance;
 
@@ -42,11 +44,13 @@ public class AppMonConfig extends AbstractParameters {
 
     static {
         pollingConfig = new ParameterKey("pollingConfig", PollingConfig.class);
+        counterPersistInterval = new ParameterKey("counterPersistInterval", ValueType.INT);
         domain = new ParameterKey("domains", new String[] {"domain"}, DomainInfo.class, true, true);
         instance = new ParameterKey("instances", new String[] {"instance"}, InstanceInfo.class, true, true);
 
         parameterKeys = new ParameterKey[] {
                 pollingConfig,
+                counterPersistInterval,
                 domain,
                 instance
         };
@@ -93,6 +97,15 @@ public class AppMonConfig extends AbstractParameters {
      */
     public void setPollingConfig(PollingConfig pollingConfig) {
         putValue(AppMonConfig.pollingConfig, pollingConfig);
+    }
+
+    /**
+     * Gets the counter persistence interval in minutes.
+     * @param defaultValue the default value to return if the interval is not set
+     * @return the interval in minutes
+     */
+    public int getCounterPersistInterval(int defaultValue) {
+        return getInt(counterPersistInterval, defaultValue);
     }
 
     /**

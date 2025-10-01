@@ -3,6 +3,7 @@ pollingConfig: {
     sessionTimeout: 10000
     initialBufferSize: 9999
 }
+counterPersistInterval: 1
 domain: {
     name: backend1
     title: Localhost(Websocket Mode)
@@ -10,7 +11,6 @@ domain: {
         mode: auto
         url: /appmon/backend
     }
-    sampleInterval: 5
 }
 #domain: {
 #    name: backend2
