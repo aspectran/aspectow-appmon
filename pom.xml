@@ -56,10 +56,10 @@
     </developers>
 
     <scm>
-        <url>https://github.com/aspectran/appmon</url>
-        <connection>scm:git:ssh://git@github.com/aspectran/appmon.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/aspectran/appmon.git</developerConnection>
-        <tag>v2.0.0</tag>
+        <url>https://github.com/aspectran/aspectow-appmon</url>
+        <connection>scm:git:ssh://git@github.com/aspectran/aspectow-appmon.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/aspectran/aspectow-appmon.git</developerConnection>
+        <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
