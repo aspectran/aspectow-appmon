@@ -481,7 +481,7 @@
     overflow: auto;
     padding : 0 7px 0 10px;
     height: 29px;
-    box-shadow: -20px 20px 20px -20px #394e59 inset;
+    box-shadow: -20px 20px 20px -20px #3e5763 inset;
 }
 .console-box .status-bar.on {
     background-color: #709185;
@@ -491,7 +491,7 @@
     width: 70%;
     height: 29px;
     line-height: 29px;
-    font-size: .9em;
+    font-size: .88em;
     font-weight: normal;
     margin: 0;
 }
@@ -501,11 +501,11 @@
     margin-left: 10px;
     color: #fff;
 }
-.console-box .status-bar a:hover {
-    color: red;
+.console-box .status-bar a:hover, .console-box .status-bar a:visited {
+    color: #d1b605;
 }
 .console-box .status-bar a.on {
-    color: #980000;
+    color: #ffeb00;
 }
 .console-box .status-bar .tailing-switch {
     line-height: 26px;

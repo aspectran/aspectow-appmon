@@ -97,8 +97,10 @@
         box-shadow: 0 6px 10px -10px rgba(50, 50, 50, 0.45);
     }
     .visual-box .chart-box .chart .reset-zoom {
-        background-color: #bbb;
+        background-color: #744065;
         color: #fff;
+        border-radius: 3px 0 0 3px;
+        z-index: 1;
     }
     .session-box .panel {
         background-color: #212c28;
@@ -146,7 +148,7 @@
     .console-box .status-bar {
         background-color: #2f3437;
         color: #eee;
-        box-shadow: -20px 20px 20px -20px #131719 inset;
+        box-shadow: -20px 20px 20px -20px #1c2225 inset;
     }
     .console-box .status-bar.on {
         background-color: #394a54;
@@ -155,10 +157,10 @@
         color: #fff;
     }
     .console-box .status-bar a:hover {
-        color: red;
+        color: #d1b605;
     }
     .console-box .status-bar a.on {
-        color: #980000;
+        color: #ffeb00;
     }
     .console-box .status-bar .tailing-switch .tailing-status::after {
         background: #f1f1f1;
