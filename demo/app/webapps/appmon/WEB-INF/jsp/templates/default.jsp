@@ -60,7 +60,6 @@
     <script>dayjs.extend(window.dayjs_plugin_utc)</script>
     <script>dayjs.extend(window.dayjs_plugin_localizedFormat)</script>
     <script src="https://assets.aspectran.com/js/navigation.js?20250923"></script>
-    <script src="https://assets.aspectran.com/js/modernizr-custom.js"></script>
     <script src="https://assets.aspectran.com/countries/countries.js"></script>
 </head>
 <body id="top-of-page" class="${page.style}" itemscope itemtype="https://schema.org/WebPage">
