@@ -60,8 +60,6 @@ public abstract class AppMonManagerBuilder {
 
     public static final String DEFAULT_DOMAIN = "localhost";
 
-    private static final int DEFAULT_COUNTER_PERSIST_INTERVAL = 5;
-
     /**
      * Builds a fully configured {@link AppMonManager} instance.
      * @param context the activity context
