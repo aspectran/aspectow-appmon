@@ -112,6 +112,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <maven.compiler.release>21</maven.compiler.release>
+        <!-- [Critical] Must be 'true' to preserve method parameter names, which Aspectran requires for runtime argument mapping. -->
+        <maven.compiler.parameters>true</maven.compiler.parameters>
 
         <javadoc.title>${project.name} API Reference (${project.version})</javadoc.title>
         <javadoc.locale>en_US</javadoc.locale>
@@ -244,7 +246,6 @@
                     <compilerArgs>
                         <arg>-Xlint:-try,-path,-options</arg>
                     </compilerArgs>
-                    <parameters>true</parameters>
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
                     <meminitial>256m</meminitial>
