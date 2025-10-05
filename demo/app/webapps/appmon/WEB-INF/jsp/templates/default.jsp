@@ -46,7 +46,7 @@
     <meta name="msapplication-TileImage" content="https://assets.aspectran.com/img/ms-icon-144x144.png"/>
     <meta name="msapplication-TileColor" content="#4B555A"/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap">
-    <link rel="stylesheet" type="text/css" href="https://assets.aspectran.com/bootstrap@5.3.8/css/aspectran.css?20250923"/>
+    <link rel="stylesheet" type="text/css" href="https://assets.aspectran.com/bootstrap@5.3.8/css/aspectran.css?v=20251005"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" integrity="sha256-pdY4ejLKO67E0CM2tbPtq1DJ3VGDVVdqAR6j3ZwdiE4=" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
@@ -59,7 +59,8 @@
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.18/plugin/localizedFormat.js"></script>
     <script>dayjs.extend(window.dayjs_plugin_utc)</script>
     <script>dayjs.extend(window.dayjs_plugin_localizedFormat)</script>
-    <script src="https://assets.aspectran.com/js/navigation.js?20250923"></script>
+    <script src="https://assets.aspectran.com/js/navigation.js?v=20250923"></script>
+    <script src="https://assets.aspectran.com/js/theme-toggler.js?v=20251005"></script>
     <script src="https://assets.aspectran.com/countries/countries.js"></script>
 </head>
 <body id="top-of-page" class="${page.style}" itemscope itemtype="https://schema.org/WebPage">
@@ -218,58 +219,6 @@
         </div>
     </div>
 </footer>
-<script>
-    $(function () {
-        const getStoredTheme = () => localStorage.getItem('theme');
-        const setStoredTheme = theme => localStorage.setItem('theme', theme);
-
-        const getPreferredTheme = () => {
-            const storedTheme = getStoredTheme();
-            if (storedTheme) {
-                return storedTheme;
-            }
-            return 'auto';
-        };
-
-        const setTheme = theme => {
-            const newTheme = theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme;
-            $('html').attr('data-bs-theme', newTheme);
-        };
-
-        const showActiveTheme = (theme) => {
-            const $themeToggler = $('.theme-toggler');
-            if (!$themeToggler.length) {
-                return;
-            }
-
-            $themeToggler.find('.dropdown-item.active').removeClass('active');
-            $themeToggler.find('.dropdown-item .bi-check2').addClass('d-none');
-
-            const $activeItem = $themeToggler.find('[data-bs-theme-value="' + theme + '"]');
-            $activeItem.addClass('active');
-            $activeItem.find('.bi-check2').removeClass('d-none');
-
-            const iconClass = $activeItem.find('.bi:first').attr('class').match(/bi-[^\s]+/)[0];
-            $themeToggler.find('.theme-icon-active').attr('class', 'bi theme-icon-active ' + iconClass);
-        };
-
-        showActiveTheme(getPreferredTheme());
-
-        $(window.matchMedia('(prefers-color-scheme: dark)')).on('change', () => {
-            const storedTheme = getStoredTheme();
-            if (storedTheme === 'auto' || !storedTheme) {
-                setTheme('auto');
-            }
-        });
-
-        $('.theme-toggler [data-bs-theme-value]').on('click', function() {
-            const theme = $(this).data('bs-theme-value');
-            setStoredTheme(theme);
-            setTheme(theme);
-            showActiveTheme(theme);
-        });
-    });
-</script>
 <script>
     $(function () {
         /* google search */
