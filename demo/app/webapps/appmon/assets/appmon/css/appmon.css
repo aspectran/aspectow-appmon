@@ -405,27 +405,25 @@
 }
 .session-box ul.sessions li .count {
     display: inline-block;
+    width: 3px;
     height: 25px;
     line-height: 25px;
     vertical-align: top;
     color: transparent;
     background-color: #8396a2;
-    border-left: 3px solid #009400;
-    padding: 0 8px 0 6px;
+    border-left: 3px solid #008100;
     font-size: .85em;
 }
 .session-box ul.sessions li .count.active {
     background-color: #02b502;
 }
 .session-box ul.sessions li .count.counting {
+    width: auto;
+    padding: 0 8px 0 6px;
     color: #fff;
 }
 .session-box ul.sessions li.inactive .count.counting {
-    border-left: 3px solid #090909;
-    color: #fff;
-}
-.session-box ul.sessions li.inactive .count.active {
-    border-left: 3px solid #009400;
+    border-left-color: #595858;
 }
 .session-box ul.sessions li .flag {
     height: 25px;
@@ -440,7 +438,7 @@
     padding-left: 6px;
     padding-right: 6px;
     font-size: .85em;
-    background-color: #e6e8e6;
+    background-color: #d3d3d3;
 }
 .session-box ul.sessions li .detail {
     display: none;

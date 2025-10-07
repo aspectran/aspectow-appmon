@@ -421,7 +421,7 @@ function FrontViewer(sampleInterval) {
             }
         }).remove();
         let $count = $("<div class='count'></div>").text(session.activityCount||0);
-        if (session.activityCount > 0) {
+        if (session.activityCount > 1) {
             $count.addClass("counting");
         }
         if (session.username) {
@@ -429,7 +429,6 @@ function FrontViewer(sampleInterval) {
         }
         let $li = $("<li/>")
             .attr("data-sid", session.sessionId)
-            .attr("data-temp-resident", session.tempResident)
             .attr("data-inactive-interval", session.inactiveInterval)
             .append($count);
         if (session.tempResident) {
@@ -471,7 +470,7 @@ function FrontViewer(sampleInterval) {
         if ($display) {
             let $li = $display.find("ul.sessions li[data-sid='" + sessionId + "']");
             let $count = $li.find(".count").text(activityCount);
-            if (activityCount > 0) {
+            if (activityCount > 1) {
                 $count.addClass("counting");
             }
             $li.stop().hide().fadeIn(250);
