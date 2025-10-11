@@ -20,7 +20,7 @@ Aspectow AppMon is a powerful monitoring tool that provides an integrated, real-
 ## Requirements
 
 - Java 21 or later
-- Maven 3.6.3 or later (the included Maven wrapper is recommended)
+- Maven 3.9.4 or later (the included Maven wrapper is recommended)
 
 ## Building from Source
 
