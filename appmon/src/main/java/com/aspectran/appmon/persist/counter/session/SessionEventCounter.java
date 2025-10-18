@@ -60,7 +60,7 @@ public class SessionEventCounter extends AbstractEventCounter {
         if (context != null) {
             registerSessionListener(context, sessionListener);
         } else {
-            CoreServiceHolder.addServiceHolingListener(new ServiceHoldingListener() {
+            CoreServiceHolder.addServiceHoldingListener(new ServiceHoldingListener() {
                 @Override
                 public void afterServiceHolding(CoreService service) {
                     if (service.getActivityContext() != null) {

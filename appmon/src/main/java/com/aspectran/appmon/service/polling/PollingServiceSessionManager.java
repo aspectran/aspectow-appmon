@@ -137,7 +137,7 @@ public class PollingServiceSessionManager extends AbstractComponent {
             sessionId = cookie.getValue();
         }
         if (sessionId == null && create) {
-            sessionId = sessionIdGenerator.createSessionId(hashCode());
+            sessionId = sessionIdGenerator.createSessionId();
             sessionIdCookieGenerator.addCookie(response, sessionId);
         }
         return sessionId;

@@ -58,7 +58,7 @@ public class ActivityEventCounter extends AbstractEventCounter {
         if (context != null) {
             registerAspect(context);
         } else {
-            CoreServiceHolder.addServiceHolingListener(new ServiceHoldingListener() {
+            CoreServiceHolder.addServiceHoldingListener(new ServiceHoldingListener() {
                 @Override
                 public void afterServiceHolding(CoreService service) {
                     if (service.getActivityContext() != null) {
