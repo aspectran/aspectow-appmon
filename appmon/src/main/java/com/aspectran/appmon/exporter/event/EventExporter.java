@@ -23,8 +23,6 @@ import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * An exporter for collecting and broadcasting event data.
@@ -44,7 +42,7 @@ public class EventExporter extends AbstractExporter {
 
     private final int sampleInterval;
 
-    private Timer timer;
+    private EventExportTimer timer;
 
     /**
      * Instantiates a new EventExporter.
@@ -90,7 +88,7 @@ public class EventExporter extends AbstractExporter {
         }
     }
 
-    private void broadcastIfChanged() {
+    void broadcastIfChanged() {
         if (eventReader.hasChanges()) {
             broadcast(eventReader.read());
         }
@@ -101,17 +99,8 @@ public class EventExporter extends AbstractExporter {
         eventReader.start();
         if (sampleInterval > 0) {
             if (timer == null) {
-                String name = new ToStringBuilder("EventReadingTimer")
-                        .append("eventReader", eventReader)
-                        .append("sampleInterval", sampleInterval)
-                        .toString();
-                timer = new Timer(name);
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        broadcastIfChanged();
-                    }
-                }, 0, sampleInterval);
+                timer = new EventExportTimer(exporterManager, this, sampleInterval);
+                timer.schedule();
             }
         }
     }
@@ -119,7 +108,7 @@ public class EventExporter extends AbstractExporter {
     @Override
     protected void doStop() throws Exception {
         if (timer != null) {
-            timer.cancel();
+            timer.destroy();
             timer = null;
         }
         eventReader.stop();

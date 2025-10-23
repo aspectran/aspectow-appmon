@@ -18,7 +18,6 @@ package com.aspectran.appmon.exporter.metric;
 import com.aspectran.appmon.config.MetricInfo;
 import com.aspectran.appmon.exporter.AbstractExporter;
 import com.aspectran.appmon.exporter.ExporterManager;
-import com.aspectran.appmon.exporter.MetricExportTimer;
 import com.aspectran.appmon.service.CommandOptions;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.annotation.jsr305.NonNull;
