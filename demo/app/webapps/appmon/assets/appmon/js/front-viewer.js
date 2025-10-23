@@ -421,7 +421,7 @@ function FrontViewer(sampleInterval) {
             }
         }).remove();
         let $count = $("<div class='count'></div>").text(session.activityCount||0);
-        if (session.activityCount > 1) {
+        if (session.activityCount > 1 || !session.countryCode) {
             $count.addClass("counting");
         }
         if (session.username) {
