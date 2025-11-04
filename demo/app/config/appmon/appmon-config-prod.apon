@@ -37,7 +37,7 @@ instance: {
         name: heap
         title: Heap
         description: Shows JVM Heap memory usage status
-        reader: com.aspectran.appmon.exporter.metric.jvm.HeapMemoryUsageReader
+        reader: com.aspectran.appmon.engine.exporter.metric.jvm.HeapMemoryUsageReader
         sampleInterval: 500
         heading: true
     }
@@ -45,7 +45,7 @@ instance: {
         name: undertow-tp
         title: Undertow TP
         description: Metrics of Undertow thread pool resources
-        reader: com.aspectran.appmon.exporter.metric.undertow.NioWorkerMetricsReader
+        reader: com.aspectran.appmon.engine.exporter.metric.undertow.NioWorkerMetricsReader
         target: tow.server
         sampleInterval: 30
         exportInterval: 900

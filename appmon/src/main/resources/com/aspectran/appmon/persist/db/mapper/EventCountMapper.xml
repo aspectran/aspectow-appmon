@@ -2,11 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.aspectran.appmon.persist.db.mapper.EventCountMapper">
+<mapper namespace="com.aspectran.appmon.engine.persist.db.mapper.EventCountMapper">
 
     <cache />
 
-    <select id="getLastEventCount" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
+    <select id="getLastEventCount" resultType="com.aspectran.appmon.engine.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'mysql'">
                 select domain, instance, event, datetime, total, delta, error
@@ -21,7 +21,7 @@
         </choose>
     </select>
 
-    <update id="updateLastEventCount" parameterType="com.aspectran.appmon.persist.counter.EventCountVO">
+    <update id="updateLastEventCount" parameterType="com.aspectran.appmon.engine.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'mysql'">
                 insert into appmon_event_count_last (domain, instance, event, datetime, total, delta, error)
@@ -57,7 +57,7 @@
         </choose>
     </update>
 
-    <insert id="insertEventCount" parameterType="com.aspectran.appmon.persist.counter.EventCountVO">
+    <insert id="insertEventCount" parameterType="com.aspectran.appmon.engine.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'mysql'">
                 insert into appmon_event_count (domain, instance, event, datetime, total, delta, error)
@@ -93,7 +93,7 @@
         </choose>
     </insert>
 
-    <select id="getChartData" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
+    <select id="getChartData" resultType="com.aspectran.appmon.engine.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
                 select datetime, delta, error
@@ -126,7 +126,7 @@
         </choose>
     </select>
 
-    <select id="getChartDataByHour" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
+    <select id="getChartDataByHour" resultType="com.aspectran.appmon.engine.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
                 select datetime, delta, error
@@ -176,7 +176,7 @@
         </choose>
     </select>
 
-    <select id="getChartDataByDay" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
+    <select id="getChartDataByDay" resultType="com.aspectran.appmon.engine.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
                 select datetime, delta, error
@@ -226,7 +226,7 @@
         </choose>
     </select>
 
-    <select id="getChartDataByMonth" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
+    <select id="getChartDataByMonth" resultType="com.aspectran.appmon.engine.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
                 select datetime, delta, error
@@ -276,7 +276,7 @@
         </choose>
     </select>
 
-    <select id="getChartDataByYear" resultType="com.aspectran.appmon.persist.counter.EventCountVO">
+    <select id="getChartDataByYear" resultType="com.aspectran.appmon.engine.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
                 select datetime, delta, error

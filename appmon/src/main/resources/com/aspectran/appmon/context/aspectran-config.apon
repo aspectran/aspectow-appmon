@@ -2,11 +2,14 @@ context: {
     name: appmon
     rules: classpath:com/aspectran/appmon/context/root-context.xml
     scan: [
-        com.aspectran.appmon.agent
-        com.aspectran.appmon.manager
-        com.aspectran.appmon.persist.db
-        com.aspectran.appmon.service.polling
-        com.aspectran.appmon.service.websocket
+        com.aspectran.appmon.engine.manager
+        com.aspectran.appmon.engine.persist.db
+        com.aspectran.appmon.engine.service.polling
+        com.aspectran.appmon.engine.service.websocket
+        com.aspectran.appmon.engine.schedule
+        com.aspectran.appmon.common
+        com.aspectran.appmon.dashboard
+        com.aspectran.appmon.anatomy
     ]
     profiles: {
         base: [

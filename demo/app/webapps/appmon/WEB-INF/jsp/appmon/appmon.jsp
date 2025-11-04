@@ -151,8 +151,7 @@
 <script>
     $(function () {
         const BASE_PATH = "${pageContext.request.contextPath}";
-        const TOKEN = "${page.token}";
         const INSTANCES = "${page.instances}";
-        new FrontBuilder().build(BASE_PATH, TOKEN, INSTANCES);
+        new FrontBuilder().build(BASE_PATH, INSTANCES);
     });
 </script>

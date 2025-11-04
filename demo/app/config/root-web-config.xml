@@ -34,7 +34,7 @@
         </settings>
     </aspect>
 
-    <bean class="com.aspectran.appmon.config.AppMonConfigResolver">
+    <bean class="com.aspectran.appmon.engine.config.AppMonConfigResolver">
         <properties profile="!prod">
             <item name="configLocation">/config/appmon/appmon-config.apon</item>
         </properties>
@@ -47,11 +47,14 @@
         <redirect path="/monitoring/"/>
     </translet>
 
+    <bean id="appMonCookieIssuer" class="com.aspectran.appmon.common.auth.AppMonCookieIssuer"/>
+
     <translet name="/monitoring/${instances}">
-        <attributes>
-            <item name="token">#{class:com.aspectran.utils.security.TimeLimitedPBTokenIssuer^token}</item>
-        </attributes>
-        <redirect path="/appmon/front/@{token}/${instances}"/>
+        <action bean="appMonCookieIssuer" method="issueCookie">
+            <argument>/appmon</argument>
+            <argument valueType="int">3600</argument>
+        </action>
+        <redirect path="/appmon/dashboard/"/>
     </translet>
 
 </aspectran>

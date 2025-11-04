@@ -6,10 +6,10 @@ function FrontBuilder() {
     const viewers = [];
     const clients = [];
 
-    this.build = function (basePath, token, instancesToJoin) {
+    this.build = function (basePath, instancesToJoin) {
         clearView();
         $.ajax({
-            url: basePath + "/backend/" + token + "/config",
+            url: basePath + "/dashboard/config",
             type: "get",
             dataType: "json",
             data: instancesToJoin ? {
