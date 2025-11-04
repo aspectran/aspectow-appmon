@@ -15,6 +15,7 @@
  */
 package com.aspectran.appmon.engine.service.polling;
 
+import com.aspectran.appmon.common.auth.AppMonTokenIssuer;
 import com.aspectran.appmon.engine.config.InstanceInfo;
 import com.aspectran.appmon.engine.config.PollingConfig;
 import com.aspectran.appmon.engine.service.ExportServiceManager;
@@ -120,7 +121,7 @@ public class PollingExportService implements ExportService {
         List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(serviceSession.getJoinedInstances());
         List<String> messages = appMonManager.getExportServiceManager().getLastMessages(serviceSession);
         return Map.of(
-                "token", AppMonManager.issueToken(),
+                "token", AppMonTokenIssuer.issueToken(),
                 "instances", instanceInfoList,
                 "pollingInterval", serviceSession.getPollingInterval(),
                 "messages", messages
@@ -137,9 +138,9 @@ public class PollingExportService implements ExportService {
      */
     @RequestToGet("/${token}/polling/pull")
     @Transform(FormatType.JSON)
-    public Map<String, Object> pull(@NonNull Translet translet,
-                                    String token,
-                                    @Qualifier("commands[]") String[] commands) throws IOException {
+    public Map<String, Object> pull(
+            @NonNull Translet translet, String token,
+            @Qualifier("commands[]") String[] commands) throws IOException {
         if (checkServiceAvailable(token)) {
             return null;
         }
@@ -162,7 +163,7 @@ public class PollingExportService implements ExportService {
             }
         }
 
-        String newToken = AppMonManager.issueToken(1800); // 30 min.
+        String newToken = AppMonTokenIssuer.issueToken(1800); // 30 min.
         String[] messages = sessionManager.pull(serviceSession);
         return Map.of(
                 "token", newToken,
@@ -218,7 +219,7 @@ public class PollingExportService implements ExportService {
 
     private boolean checkServiceAvailable(String token) {
         try {
-            AppMonManager.validateToken(token);
+            AppMonTokenIssuer.validateToken(token);
             return false;
         } catch (InvalidPBTokenException e) {
             logger.error("Invalid token: {}", token);

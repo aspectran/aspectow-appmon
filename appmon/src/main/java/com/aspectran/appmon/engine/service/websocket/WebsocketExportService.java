@@ -15,6 +15,7 @@
  */
 package com.aspectran.appmon.engine.service.websocket;
 
+import com.aspectran.appmon.common.auth.AppMonTokenIssuer;
 import com.aspectran.appmon.engine.service.ExportServiceManager;
 import com.aspectran.appmon.engine.manager.AppMonManager;
 import com.aspectran.appmon.engine.service.CommandOptions;
@@ -86,7 +87,7 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
     protected boolean checkAuthorized(@NonNull Session session) {
         String token = session.getPathParameters().get("token");
         try {
-            AppMonManager.validateToken(token);
+            AppMonTokenIssuer.validateToken(token);
         } catch (InvalidPBTokenException e) {
             logger.error("Invalid token: {}", token);
             return false;
@@ -131,7 +132,7 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
     }
 
     private void pong(Session session) {
-        String newToken = AppMonManager.issueToken(1800); // 30 min.
+        String newToken = AppMonTokenIssuer.issueToken(1800); // 30 min.
         sendText(session, MESSAGE_PONG + newToken);
     }
 

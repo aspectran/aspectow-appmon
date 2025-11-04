@@ -27,8 +27,6 @@ import com.aspectran.core.activity.InstantActivitySupport;
 import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.security.InvalidPBTokenException;
-import com.aspectran.utils.security.TimeLimitedPBTokenIssuer;
 
 import java.util.List;
 
@@ -201,32 +199,6 @@ public class AppMonManager extends InstantActivitySupport {
      */
     public boolean containsBean(Class<?> type) {
         return getActivityContext().getBeanRegistry().containsBean(type);
-    }
-
-    /**
-     * Issues a time-limited token with a default expiration of 60 seconds.
-     * @return the generated token
-     */
-    public static String issueToken() {
-        return issueToken(60); // default 60 secs.
-    }
-
-    /**
-     * Issues a time-limited token with a specified expiration time.
-     * @param expirationTimeInSeconds the expiration time in seconds
-     * @return the generated token
-     */
-    public static String issueToken(int expirationTimeInSeconds) {
-        return TimeLimitedPBTokenIssuer.getToken(1000L * expirationTimeInSeconds);
-    }
-
-    /**
-     * Validates the given time-limited token.
-     * @param token the token to validate
-     * @throws InvalidPBTokenException if the token is invalid or expired
-     */
-    public static void validateToken(String token) throws InvalidPBTokenException {
-        TimeLimitedPBTokenIssuer.validate(token);
     }
 
 }

@@ -90,6 +90,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="<aspectran:url value="/../monitoring/"/>" title="AppMon">AppMon</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<aspectran:url value="/anatomy/"/>" title="Anatomy">Anatomy</a>
+                    </li>
                 </ul>
             </div>
             <div class="top-bar-right d-lg-flex align-items-center gap-3">

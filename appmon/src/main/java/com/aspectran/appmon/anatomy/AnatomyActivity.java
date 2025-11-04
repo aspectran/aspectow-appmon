@@ -15,8 +15,7 @@
  */
 package com.aspectran.appmon.anatomy;
 
-import com.aspectran.appmon.engine.manager.AppMonManager;
-import com.aspectran.core.activity.Translet;
+import com.aspectran.appmon.AboutMe;
 import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Bean;
@@ -24,16 +23,23 @@ import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.Transform;
+import com.aspectran.core.context.ActivityContext;
 import com.aspectran.core.context.rule.type.FormatType;
+import com.aspectran.core.service.CoreService;
+import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.utils.StringUtils;
-import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.security.InvalidPBTokenException;
 import com.aspectran.web.activity.response.DefaultRestResponse;
 import com.aspectran.web.activity.response.RestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A controller that provides framework anatomy data for the viewer.
@@ -54,36 +60,23 @@ public class AnatomyActivity {
     /**
      * Dispatches to the anatomy viewer page within the default template.
      */
-    @Request("/anatomy/viewer/${token}/${contextName}")
+    @Request("/anatomy/${contextName}")
     @Dispatch("templates/default")
     @Action("page")
-    public Map<String, String> viewer(@NonNull Translet translet, String token, String contextName) {
-        if (token == null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Required token");
+    public Map<String, Object> viewer(String contextName) {
+        Contexts contexts = prepareContexts();
+        if (contextName == null || !contexts.names.contains(contextName)) {
+            if (!contexts.names.isEmpty()) {
+                contextName = contexts.names.get(0);
             }
-            translet.redirect("/");
-            return null;
-        }
-        try {
-            AppMonManager.validateToken(token);
-        } catch (Exception e) {
-            if (e instanceof InvalidPBTokenException) {
-                logger.error("Invalid token: {}", token);
-            } else {
-                logger.error(e.getMessage(), e);
-            }
-            if (StringUtils.hasLength(translet.getContextPath())) {
-                translet.redirect("/../");
-            } else {
-                translet.redirect("/");
-            }
-            return null;
         }
         return Map.of(
+                "headinclude", "anatomy/_contexts",
                 "include", "anatomy/viewer",
-                "style", "plate compact",
-                "headline", "Framework Anatomy"
+                "style", "fluid compact",
+                "version", AboutMe.getVersion(),
+                "allContextNames", contexts.names,
+                "contextName", contextName
         );
     }
 
@@ -91,21 +84,50 @@ public class AnatomyActivity {
      * Provides framework anatomy data as JSON.
      * @return a map containing the anatomy data, identified by "anatomyData"
      */
-    @Request("/anatomy/data")
-    @Action("anatomyData")
+    @Request("/anatomy/${contextName}/data")
     @Transform(format = FormatType.JSON)
-    public RestResponse data(@NonNull Translet translet) {
-        try {
-            String token = translet.getRequestAdapter().getHeader("token");
-            AppMonManager.validateToken(token);
-        } catch (InvalidPBTokenException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(e.getMessage(), e);
-            }
-            return new DefaultRestResponse().forbidden();
+    public RestResponse data(String contextName) {
+        Contexts contexts = prepareContexts();
+        ActivityContext context = contexts.map.get(contextName);
+        if (context == null) {
+            return new DefaultRestResponse().notFound();
         }
-        Map<String, Object> data = anatomyService.getAnatomyData();
-        return new DefaultRestResponse(data).nullWritable(false).ok();
+        Map<String, Object> data = anatomyService.getAnatomyData(context);
+        return new DefaultRestResponse("anatomyData", data).nullWritable(false).ok();
+    }
+
+    private static class Contexts {
+
+        final List<String> names;
+        final Map<String, ActivityContext> map;
+
+        Contexts(List<String> names, Map<String, ActivityContext> map) {
+            this.names = names;
+            this.map = map;
+        }
+
+    }
+
+    private Contexts prepareContexts() {
+        List<CoreService> services = new ArrayList<>(CoreServiceHolder.getAllServices());
+        Collections.reverse(services);
+
+        Map<String, ActivityContext> contextMap = new LinkedHashMap<>();
+        Set<ActivityContext> seenContexts = new LinkedHashSet<>();
+        int index = 0;
+        for (CoreService service : services) {
+            ActivityContext currentContext = service.getActivityContext();
+            if (seenContexts.add(currentContext)) {
+                String name = service.getContextName();
+                if (StringUtils.isEmpty(name)) {
+                    name = Integer.toString(index);
+                }
+                contextMap.putIfAbsent(name, currentContext);
+            }
+            index++;
+        }
+        List<String> allContextNames = new ArrayList<>(contextMap.keySet());
+        return new Contexts(allContextNames, contextMap);
     }
 
 }

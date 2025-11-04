@@ -9,7 +9,8 @@
         overflow-y: auto;
     }
 </style>
-<div class="row g-3 py-3">
+<h2 class="pt-3">Framework Anatomy</h2>
+<div class="row g-3 pb-3">
     <div class="col-md-4 left-panel">
         <div class="card h-100">
             <div class="card-header">
@@ -42,7 +43,7 @@
 
         $detailsContent.text("Select a rule from the left panel to see details.");
 
-        $.getJSON('<%= request.getContextPath() %>/anatomy/data', function(data) {
+        $.getJSON('<%= request.getContextPath() %>/anatomy/${page.contextName}/data', function(data) {
             const anatomyData = data.anatomyData;
             if (!anatomyData) {
                 $detailsContent.text('Failed to load anatomy data.');

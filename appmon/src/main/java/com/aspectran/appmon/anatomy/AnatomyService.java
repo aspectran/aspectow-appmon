@@ -19,7 +19,6 @@ import com.aspectran.core.component.bean.BeanRuleRegistry;
 import com.aspectran.core.component.bean.DefaultBeanRegistry;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
-import com.aspectran.core.component.bean.aware.ActivityContextAware;
 import com.aspectran.core.component.bean.event.EventListenerRegistry;
 import com.aspectran.core.component.bean.event.ListenerMethod;
 import com.aspectran.core.component.converter.TypeConverter;
@@ -31,6 +30,7 @@ import com.aspectran.core.context.rule.ScheduleRule;
 import com.aspectran.core.context.rule.TemplateRule;
 import com.aspectran.core.context.rule.TransletRule;
 import com.aspectran.core.context.rule.converter.RulesToParameters;
+import com.aspectran.utils.Assert;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.apon.AponLines;
 import com.aspectran.utils.apon.Parameters;
@@ -48,16 +48,11 @@ import java.util.stream.Collectors;
  */
 @Component
 @Bean("anatomyService")
-public class AnatomyService implements ActivityContextAware {
+public class AnatomyService {
 
-    private ActivityContext context;
+    public Map<String, Object> getAnatomyData(ActivityContext context) {
+        Assert.notNull(context, "context must not be null");
 
-    @Override
-    public void setActivityContext(ActivityContext context) {
-        this.context = context;
-    }
-
-    public Map<String, Object> getAnatomyData() {
         Map<String, Object> anatomyData = new LinkedHashMap<>();
 
         // 1. Translet Rules

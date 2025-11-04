@@ -16,6 +16,7 @@
 package com.aspectran.appmon.dashboard;
 
 import com.aspectran.appmon.AboutMe;
+import com.aspectran.appmon.common.auth.AppMonTokenIssuer;
 import com.aspectran.appmon.engine.config.DomainInfo;
 import com.aspectran.appmon.engine.config.InstanceInfo;
 import com.aspectran.appmon.engine.manager.AppMonManager;
@@ -71,7 +72,7 @@ public class DashboardActivity {
      * @param instances a comma-separated list of instance names to get configuration for
      * @return a {@link RestResponse} containing the configuration data
      */
-    @RequestToGet("/config")
+    @RequestToGet("/config/data")
     public RestResponse getConfigData(String instances) {
         Map<String, Object> settings = Map.of(
                 "counterPersistInterval", appMonManager.getCounterPersistInterval()
@@ -84,7 +85,7 @@ public class DashboardActivity {
         List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(instanceNames);
 
         Map<String, Object> data = Map.of(
-                "token", AppMonManager.issueToken(),
+                "token", AppMonTokenIssuer.issueToken(),
                 "settings", settings,
                 "domains", domainInfoList,
                 "instances", instanceInfoList

@@ -9,7 +9,7 @@ function FrontBuilder() {
     this.build = function (basePath, instancesToJoin) {
         clearView();
         $.ajax({
-            url: basePath + "/dashboard/config",
+            url: basePath + "/dashboard/config/data",
             type: "get",
             dataType: "json",
             data: instancesToJoin ? {
