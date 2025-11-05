@@ -3,7 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
 <!DOCTYPE html>
-<html class="no-js">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <script>
@@ -193,14 +193,14 @@
     <div id="footer">
         <div class="container">
             <div class="row">
-                <div class="col-md-2 col-lg-1 mt-1">
-                    <h5><a class="logo" href="https://aspectran.com/aspectran/" title="Aspectran"><img src="https://assets.aspectran.com/img/aspectran-logo-grey-x100.png" width="100" height="100" alt="Aspectran" title="Aspectran"/></a></h5>
+                <div class="col-sm-8 col-md-7 col-lg-6 col-xl-5 d-flex flex-row">
+                    <div class="d-none d-sm-block mt-1"><a class="logo float-start me-3 me-lg-4" href="https://aspectran.com/aspectran/" title="Aspectran"></a></div>
+                    <div>
+                        <a href="https://aspectran.com/aspectran/"><h5>About Aspectran</h5></a>
+                        <p><a href="https://aspectran.com/aspectran/">Aspectran is a lightweight, high‑performance framework for building both simple shell applications and large enterprise web services on the JVM.</a></p>
+                    </div>
                 </div>
-                <div class="col-md-6 col-lg-4">
-                    <a href="https://aspectran.com/aspectran/"><h5>About Aspectran</h5></a>
-                    <p><a href="https://aspectran.com/aspectran/">Aspectran is a lightweight, high‑performance framework for building both simple shell applications and large enterprise web services on the JVM.</a></p>
-                </div>
-                <div class="col-md-4 col-lg-3 offset-lg-1">
+                <div class="col-sm-4 col-md-5 col-lg-3 offset-lg-1">
                     <h5>Get Involved</h5>
                     <ul class="list-unstyled">
                         <li class="bi bi-github"> <a href="https://github.com/aspectran" target="_blank" title="" class="external">GitHub</a></li>

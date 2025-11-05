@@ -67,7 +67,7 @@
                             <div class="row row-cols-1 row-cols-sm-2 mt-3">
                                 <c:forEach items="${page.domainInfoList}" var="domainInfo">
                                     <div class="col">
-                                        <a href="#" class="domain-link">
+                                        <a href="#" class="domain-link bg-primary">
                                             <i class="bi bi-server"></i> ${domainInfo.title}
                                         </a>
                                     </div>
@@ -95,7 +95,7 @@
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mt-3">
                                 <c:forEach items="${page.instanceInfoList}" var="instanceInfo">
                                     <div class="col">
-                                        <a href="<aspectran:url value="/dashboard/#${instanceInfo.name}"/>" class="instance-link">
+                                        <a href="<aspectran:url value="/dashboard/#${instanceInfo.name}"/>" class="instance-link bg-primary">
                                             <i class="bi bi-box"></i> ${instanceInfo.title}
                                         </a>
                                     </div>
@@ -123,7 +123,7 @@
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-lg-6 mt-3">
                                 <c:forEach items="${page.allContextNames}" var="contextName">
                                     <div class="col">
-                                        <a href="<aspectran:url value="/anatomy/${contextName}"/>">
+                                        <a href="<aspectran:url value="/anatomy/${contextName}"/>" class="bg-secondary">
                                             <i class="bi bi-pc-display-horizontal"></i> ${contextName}
                                         </a>
                                     </div>
