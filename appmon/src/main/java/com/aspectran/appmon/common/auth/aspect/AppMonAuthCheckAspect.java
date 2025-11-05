@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.appmon.common.auth;
+package com.aspectran.appmon.common.auth.aspect;
 
+import com.aspectran.appmon.common.auth.AppMonTokenIssuer;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Aspect;
 import com.aspectran.core.component.bean.annotation.Bean;

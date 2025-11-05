@@ -88,17 +88,17 @@
             <div class="top-bar-left me-auto">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="<aspectran:url value="/../monitoring/"/>" title="AppMon">AppMon</a>
+                        <a class="nav-link" href="<aspectran:url value="/dashboard/"/>" title="AppMon Dashboard">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<aspectran:url value="/anatomy/"/>" title="Anatomy">Anatomy</a>
+                        <a class="nav-link" href="<aspectran:url value="/anatomy/"/>" title="Framework Anatomy">Anatomy</a>
                     </li>
                 </ul>
             </div>
             <div class="top-bar-right d-lg-flex align-items-center gap-3">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="https://github.com/aspectran/aspectow-appmon" title="Get Involved">v${page.version}</a>
+                        <a class="nav-link" href="https://github.com/aspectran/aspectow-appmon" title="Get Involved">v<aspectran:token  type="bean" expression="class:com.aspectran.appmon.AboutMe^version"/></a>
                     </li>
                 </ul>
                 <div class="settings d-flex align-items-center justify-content-end gap-2 m-2 mx-md-3 m-lg-0">
@@ -251,6 +251,7 @@
     $(function () {
         let links = $("#navbarSupportedContent .navbar-nav a[href='" + decodeURI(location.pathname) + "']").last();
         if (links.length > 0) {
+            links.closest(".nav-item").addClass("active");
             let arr = [];
             arr.push({'name': links.text(), 'href': location.pathname});
             links.parentsUntil(".navbar-nav").each(function () {

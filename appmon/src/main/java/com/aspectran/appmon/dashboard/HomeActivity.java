@@ -15,7 +15,6 @@
  */
 package com.aspectran.appmon.dashboard;
 
-import com.aspectran.appmon.AboutMe;
 import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
@@ -42,8 +41,7 @@ public class HomeActivity {
     public Map<String, String> home() {
         return Map.of(
                 "include", "home/main",
-                "style", "fluid compact",
-                "version", AboutMe.getVersion()
+                "style", "fluid compact"
         );
     }
 

@@ -15,7 +15,6 @@
  */
 package com.aspectran.appmon.dashboard;
 
-import com.aspectran.appmon.AboutMe;
 import com.aspectran.appmon.common.auth.AppMonTokenIssuer;
 import com.aspectran.appmon.engine.config.DomainInfo;
 import com.aspectran.appmon.engine.config.InstanceInfo;
@@ -62,7 +61,6 @@ public class DashboardActivity {
                 "headinclude", "appmon/_domains",
                 "include", "appmon/appmon",
                 "style", "fluid compact",
-                "version", AboutMe.getVersion(),
                 "instances", StringUtils.nullToEmpty(instances)
         );
     }

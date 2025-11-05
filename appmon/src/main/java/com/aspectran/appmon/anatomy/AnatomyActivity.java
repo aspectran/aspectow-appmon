@@ -15,7 +15,6 @@
  */
 package com.aspectran.appmon.anatomy;
 
-import com.aspectran.appmon.AboutMe;
 import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Bean;
@@ -64,18 +63,21 @@ public class AnatomyActivity {
     @Dispatch("templates/default")
     @Action("page")
     public Map<String, Object> viewer(String contextName) {
-        Contexts contexts = prepareContexts();
-        if (contextName == null || !contexts.names.contains(contextName)) {
-            if (!contexts.names.isEmpty()) {
-                contextName = contexts.names.get(0);
+        Map<String, ActivityContext> contexts = prepareContexts();
+        List<String> allContextNames = new ArrayList<>(contexts.keySet());
+        if (contextName == null || !allContextNames.contains(contextName)) {
+            if (!allContextNames.isEmpty()) {
+                contextName = allContextNames.getFirst();
             }
+        }
+        if (contextName == null) {
+            contextName = "0";
         }
         return Map.of(
                 "headinclude", "anatomy/_contexts",
                 "include", "anatomy/viewer",
                 "style", "fluid compact",
-                "version", AboutMe.getVersion(),
-                "allContextNames", contexts.names,
+                "allContextNames", allContextNames,
                 "contextName", contextName
         );
     }
@@ -87,8 +89,8 @@ public class AnatomyActivity {
     @Request("/anatomy/${contextName}/data")
     @Transform(format = FormatType.JSON)
     public RestResponse data(String contextName) {
-        Contexts contexts = prepareContexts();
-        ActivityContext context = contexts.map.get(contextName);
+        Map<String, ActivityContext> contexts = prepareContexts();
+        ActivityContext context = contexts.get(contextName);
         if (context == null) {
             return new DefaultRestResponse().notFound();
         }
@@ -96,19 +98,7 @@ public class AnatomyActivity {
         return new DefaultRestResponse("anatomyData", data).nullWritable(false).ok();
     }
 
-    private static class Contexts {
-
-        final List<String> names;
-        final Map<String, ActivityContext> map;
-
-        Contexts(List<String> names, Map<String, ActivityContext> map) {
-            this.names = names;
-            this.map = map;
-        }
-
-    }
-
-    private Contexts prepareContexts() {
+    private Map<String, ActivityContext> prepareContexts() {
         List<CoreService> services = new ArrayList<>(CoreServiceHolder.getAllServices());
         Collections.reverse(services);
 
@@ -126,8 +116,7 @@ public class AnatomyActivity {
             }
             index++;
         }
-        List<String> allContextNames = new ArrayList<>(contextMap.keySet());
-        return new Contexts(allContextNames, contextMap);
+        return contextMap;
     }
 
 }
