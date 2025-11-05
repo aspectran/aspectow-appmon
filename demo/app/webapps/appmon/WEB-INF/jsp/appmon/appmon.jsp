@@ -33,10 +33,10 @@
     </div>
     <ul class="instance tabs nav nav-tabs mt-3">
         <li class="tabs-title nav-item">
-            <a class="nav-link"><i class="bi bi-modem"></i> <span class="title">JPetStore</span> <i class="indicator bi bi-lightning-charge-fill"></i></a>
+            <a class="nav-link"><i class="bi bi-box"></i> <span class="title">JPetStore</span> <i class="indicator bi bi-lightning-charge-fill"></i></a>
         </li>
         <li class="tabs-title nav-item available active">
-            <a class="nav-link"><i class="bi bi-modem"></i> <span class="title">PetClinic</span> <i class="indicator bi bi-lightning-charge-fill"></i></a>
+            <a class="nav-link"><i class="bi bi-box"></i> <span class="title">PetClinic</span> <i class="indicator bi bi-lightning-charge-fill"></i></a>
         </li>
     </ul>
     <div class="control-bar">

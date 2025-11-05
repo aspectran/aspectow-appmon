@@ -91,7 +91,7 @@
                         <a class="nav-link" href="<aspectran:url value="/dashboard/"/>" title="AppMon Dashboard">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<aspectran:url value="/anatomy/"/>" title="Framework Anatomy">Anatomy</a>
+                        <a class="nav-link" href="<aspectran:url value="/anatomy/"/>" title="Framework Anatomy"><i class="bi bi-diagram-3"></i> Anatomy</a>
                     </li>
                 </ul>
             </div>

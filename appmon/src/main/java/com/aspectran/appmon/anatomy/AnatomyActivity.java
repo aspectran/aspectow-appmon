@@ -27,6 +27,7 @@ import com.aspectran.core.context.rule.type.FormatType;
 import com.aspectran.core.service.CoreService;
 import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.utils.StringUtils;
+import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.web.activity.response.DefaultRestResponse;
 import com.aspectran.web.activity.response.RestResponse;
 import org.slf4j.Logger;
@@ -63,7 +64,7 @@ public class AnatomyActivity {
     @Dispatch("templates/default")
     @Action("page")
     public Map<String, Object> viewer(String contextName) {
-        Map<String, ActivityContext> contexts = prepareContexts();
+        Map<String, ActivityContext> contexts = prepareContextMap();
         List<String> allContextNames = new ArrayList<>(contexts.keySet());
         if (contextName == null || !allContextNames.contains(contextName)) {
             if (!allContextNames.isEmpty()) {
@@ -89,7 +90,7 @@ public class AnatomyActivity {
     @Request("/anatomy/${contextName}/data")
     @Transform(format = FormatType.JSON)
     public RestResponse data(String contextName) {
-        Map<String, ActivityContext> contexts = prepareContexts();
+        Map<String, ActivityContext> contexts = prepareContextMap();
         ActivityContext context = contexts.get(contextName);
         if (context == null) {
             return new DefaultRestResponse().notFound();
@@ -98,7 +99,8 @@ public class AnatomyActivity {
         return new DefaultRestResponse("anatomyData", data).nullWritable(false).ok();
     }
 
-    private Map<String, ActivityContext> prepareContexts() {
+    @NonNull
+    public static Map<String, ActivityContext> prepareContextMap() {
         List<CoreService> services = new ArrayList<>(CoreServiceHolder.getAllServices());
         Collections.reverse(services);
 

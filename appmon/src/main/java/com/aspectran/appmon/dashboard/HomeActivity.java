@@ -15,11 +15,19 @@
  */
 package com.aspectran.appmon.dashboard;
 
+import com.aspectran.appmon.anatomy.AnatomyActivity;
+import com.aspectran.appmon.engine.config.DomainInfo;
+import com.aspectran.appmon.engine.config.InstanceInfo;
+import com.aspectran.appmon.engine.manager.AppMonManager;
 import com.aspectran.core.component.bean.annotation.Action;
+import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
 import com.aspectran.core.component.bean.annotation.Request;
+import com.aspectran.core.context.ActivityContext;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,6 +39,13 @@ import java.util.Map;
 @Component
 public class HomeActivity {
 
+    private final AppMonManager appMonManager;
+
+    @Autowired
+    public HomeActivity(AppMonManager appMonManager) {
+        this.appMonManager = appMonManager;
+    }
+
     /**
      * Handles the root request and displays the main home page.
      * @return a map of attributes for rendering the view
@@ -38,10 +53,17 @@ public class HomeActivity {
     @Request("/")
     @Dispatch("templates/default")
     @Action("page")
-    public Map<String, String> home() {
+    public Map<String, Object> home() {
+        List<DomainInfo> domainInfoList = appMonManager.getDomainInfoList();
+        List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList();
+        Map<String, ActivityContext> contexts = AnatomyActivity.prepareContextMap();
+        List<String> allContextNames = new ArrayList<>(contexts.keySet());
         return Map.of(
                 "include", "home/main",
-                "style", "fluid compact"
+                "style", "fluid compact",
+                "domainInfoList", domainInfoList,
+                "instanceInfoList", instanceInfoList,
+                "allContextNames", allContextNames
         );
     }
 
@@ -52,7 +74,7 @@ public class HomeActivity {
     @Request("/${ignore}")
     @Dispatch("templates/default")
     @Action("page")
-    public Map<String, String> home2() {
+    public Map<String, Object> home2() {
         return home();
     }
 
