@@ -15,13 +15,9 @@
         border: 1px solid #dee2e6;
         border-radius: 0.25rem;
         text-decoration: none;
-        color: #212529;
-        background-color: #f8f9fa;
         transition: all 0.2s ease-in-out;
     }
     .card-body a:hover {
-        background-color: #e9ecef;
-        border-color: #ced4da;
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.05);
     }
