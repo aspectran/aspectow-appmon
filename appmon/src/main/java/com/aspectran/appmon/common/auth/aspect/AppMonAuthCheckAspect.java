@@ -15,9 +15,11 @@
  */
 package com.aspectran.appmon.common.auth.aspect;
 
+import com.aspectran.appmon.common.auth.AppMonCookieIssuer;
 import com.aspectran.appmon.common.auth.AppMonTokenIssuer;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Aspect;
+import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Before;
 import com.aspectran.core.component.bean.annotation.Component;
@@ -30,9 +32,11 @@ import jakarta.servlet.http.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 /**
+ * An aspect that checks for an authentication token before processing a request.
+ * If the token is missing or invalid, it redirects the user to the main page.
+ * If the token is valid, it refreshes the token's expiration time.
+ *
  * <p>Created: 2024-07-27</p>
  */
 @Component
@@ -47,8 +51,21 @@ public class AppMonAuthCheckAspect {
 
     private static final String AUTH_TOKEN_NAME = "appmon-auth-token";
 
+    private final AppMonCookieIssuer appMonCookieIssuer;
+
+    @Autowired
+    public AppMonAuthCheckAspect(AppMonCookieIssuer appMonCookieIssuer) {
+        this.appMonCookieIssuer = appMonCookieIssuer;
+    }
+
+    /**
+     * Checks for a valid authentication token in the cookies.
+     * If the token is not found or is invalid, redirects to the main page.
+     * If the token is valid, the cookie is refreshed with a new expiration time.
+     * @param translet the current translet
+     */
     @Before
-    public void before(@NonNull Translet translet) throws IOException {
+    public void before(@NonNull Translet translet) {
         Cookie cookie = WebUtils.getCookie(translet, AUTH_TOKEN_NAME);
         if (cookie == null) {
             goToMain(translet);
@@ -57,7 +74,7 @@ public class AppMonAuthCheckAspect {
 
         String token = cookie.getValue();
         try {
-            AppMonTokenIssuer.validateToken(token);
+            appMonCookieIssuer.refreshCookie(translet, token);
         } catch (Exception e) {
             if (e instanceof InvalidPBTokenException) {
                 if (logger.isDebugEnabled()) {
@@ -70,6 +87,10 @@ public class AppMonAuthCheckAspect {
         }
     }
 
+    /**
+     * Redirects the user to the main page.
+     * @param translet the current translet
+     */
     private void goToMain(@NonNull Translet translet) {
         if (StringUtils.hasLength(translet.getContextPath())) {
             translet.redirect("/../");

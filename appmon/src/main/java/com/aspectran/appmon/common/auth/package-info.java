@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 /**
- * Provides classes for the Application Monitor dashboard.
+ * Provides common authentication related classes for the Application Monitor.
  */
-package com.aspectran.appmon.dashboard;
+package com.aspectran.appmon.common.auth;

@@ -27,7 +27,7 @@ function WebsocketClient(domain, viewer, onJoined, onEstablished, onClosed, onFa
 
     const openSocket = function (instancesToJoin) {
         closeSocket(false);
-        let url = new URL(domain.endpoint.url + "/" + domain.endpoint.token + "/websocket", location.href);
+        let url = new URL(domain.endpoint.url + "/websocket/" + domain.endpoint.token, location.href);
         url.protocol = url.protocol.replace("https:", "wss:");
         url.protocol = url.protocol.replace("http:", "ws:");
         socket = new WebSocket(url.href);

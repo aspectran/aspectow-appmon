@@ -45,7 +45,7 @@ import java.util.List;
  */
 @Component
 @ServerEndpoint(
-        value = "/backend/{token}/websocket",
+        value = "/backend/websocket/{token}",
         configurator = AspectranConfigurator.class
 )
 public class WebsocketExportService extends SimplifiedEndpoint implements ExportService {

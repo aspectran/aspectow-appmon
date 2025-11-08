@@ -15,7 +15,6 @@
  */
 package com.aspectran.appmon.engine.service.polling;
 
-import com.aspectran.appmon.common.auth.AppMonTokenIssuer;
 import com.aspectran.appmon.engine.config.InstanceInfo;
 import com.aspectran.appmon.engine.config.PollingConfig;
 import com.aspectran.appmon.engine.manager.AppMonManager;
@@ -35,9 +34,6 @@ import com.aspectran.core.component.bean.annotation.Transform;
 import com.aspectran.core.context.rule.type.FormatType;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.security.InvalidPBTokenException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -51,8 +47,6 @@ import java.util.Map;
  */
 @Component("/backend")
 public class PollingExportService implements ExportService {
-
-    private static final Logger logger = LoggerFactory.getLogger(PollingExportService.class);
 
     private static final String COMMAND_REFRESH = "refresh";
 
@@ -87,17 +81,12 @@ public class PollingExportService implements ExportService {
     /**
      * Allows a client to join and start a polling session.
      * @param translet the current translet
-     * @param token the security token
-     * @return a map containing the new token, instance info, and initial messages
+     * @return a map containing the instance info, and initial messages
      * @throws IOException if an I/O error occurs
      */
-    @RequestToPost("/${token}/polling/join")
+    @RequestToPost("/polling/join")
     @Transform(FormatType.JSON)
-    public Map<String, Object> join(@NonNull Translet translet, String token) throws IOException {
-        if (checkServiceAvailable(token)) {
-            return null;
-        }
-
+    public Map<String, Object> join(@NonNull Translet translet) throws IOException {
         PollingConfig pollingConfig = appMonManager.getPollingConfig();
 
         String instancesToJoin = translet.getParameter("instances");
@@ -106,7 +95,6 @@ public class PollingExportService implements ExportService {
         if (StringUtils.hasText(instancesToJoin) && instanceNames.length == 0) {
             return null;
         }
-
 
         PollingServiceSession serviceSession = sessionManager.createSession(translet, pollingConfig, instanceNames);
         String timeZone = translet.getParameter("timeZone");
@@ -121,7 +109,6 @@ public class PollingExportService implements ExportService {
         List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(serviceSession.getJoinedInstances());
         List<String> messages = appMonManager.getExportServiceManager().getLastMessages(serviceSession);
         return Map.of(
-                "token", AppMonTokenIssuer.issueToken(),
                 "instances", instanceInfoList,
                 "pollingInterval", serviceSession.getPollingInterval(),
                 "messages", messages
@@ -131,20 +118,14 @@ public class PollingExportService implements ExportService {
     /**
      * Allows a client to pull new messages from the server.
      * @param translet the current translet
-     * @param token the security token
      * @param commands an array of commands from the client
      * @return a map containing the new token and any new messages
      * @throws IOException if an I/O error occurs
      */
-    @RequestToGet("/${token}/polling/pull")
+    @RequestToGet("/polling/pull")
     @Transform(FormatType.JSON)
     public Map<String, Object> pull(
-            @NonNull Translet translet, String token,
-            @Qualifier("commands[]") String[] commands) throws IOException {
-        if (checkServiceAvailable(token)) {
-            return null;
-        }
-
+            @NonNull Translet translet, @Qualifier("commands[]") String[] commands) throws IOException {
         PollingServiceSession serviceSession = sessionManager.getSession(translet);
         if (serviceSession == null || !serviceSession.isValid()) {
             return null;
@@ -163,10 +144,8 @@ public class PollingExportService implements ExportService {
             }
         }
 
-        String newToken = AppMonTokenIssuer.issueToken(1800); // 30 min.
         String[] messages = sessionManager.pull(serviceSession);
         return Map.of(
-                "token", newToken,
                 "messages", (messages != null ? messages : new String[0])
         );
     }
@@ -174,17 +153,12 @@ public class PollingExportService implements ExportService {
     /**
      * Adjusts the polling interval for a client session.
      * @param translet the current translet
-     * @param token the security token
      * @param speed the desired speed multiplier (1 for fast)
      * @return a map containing the new polling interval
      */
-    @RequestToPost("/${token}/polling/interval")
+    @RequestToPost("/polling/interval")
     @Transform(FormatType.JSON)
-    public Map<String, Object> pollingInterval(@NonNull Translet translet, String token, int speed) {
-        if (checkServiceAvailable(token)) {
-            return null;
-        }
-
+    public Map<String, Object> pollingInterval(@NonNull Translet translet, int speed) {
         PollingServiceSession serviceSession = sessionManager.getSession(translet);
         if (serviceSession == null) {
             return null;
@@ -215,16 +189,6 @@ public class PollingExportService implements ExportService {
     @Override
     public boolean isUsingInstance(String instanceName) {
         return sessionManager.isUsingInstance(instanceName);
-    }
-
-    private boolean checkServiceAvailable(String token) {
-        try {
-            AppMonTokenIssuer.validateToken(token);
-            return false;
-        } catch (InvalidPBTokenException e) {
-            logger.error("Invalid token: {}", token);
-            return true;
-        }
     }
 
 }

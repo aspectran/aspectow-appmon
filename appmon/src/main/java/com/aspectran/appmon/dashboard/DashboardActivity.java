@@ -33,8 +33,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Handles requests from backend agents (monitored applications).
- * This class provides configuration data to the agents.
+ * Handles requests for the Application Monitor dashboard.
+ * This includes serving the main monitoring page and providing configuration
+ * data to backend agents.
  *
  * <p>Created: 2020/02/23</p>
  */
@@ -43,15 +44,19 @@ public class DashboardActivity {
 
     private final AppMonManager appMonManager;
 
+    /**
+     * Instantiates a new DashboardActivity.
+     * @param appMonManager the application monitor manager
+     */
     @Autowired
     public DashboardActivity(AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
     }
 
     /**
-     * Displays the main monitoring page after validating the token.
+     * Displays the main monitoring page.
      * @param instances the comma-separated list of instances to monitor
-     * @return a map of attributes for rendering the view, or {@code null} if redirected
+     * @return a map of attributes for rendering the view
      */
     @Request("/${instances}")
     @Dispatch("templates/default")
@@ -66,7 +71,7 @@ public class DashboardActivity {
     }
 
     /**
-     * Provides configuration data to a backend agent after validating the token.
+     * Provides configuration data to a backend agent.
      * @param instances a comma-separated list of instance names to get configuration for
      * @return a {@link RestResponse} containing the configuration data
      */
@@ -83,7 +88,7 @@ public class DashboardActivity {
         List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(instanceNames);
 
         Map<String, Object> data = Map.of(
-                "token", AppMonTokenIssuer.issueToken(),
+                "token", AppMonTokenIssuer.issueToken(30),
                 "settings", settings,
                 "domains", domainInfoList,
                 "instances", instanceInfoList

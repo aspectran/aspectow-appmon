@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 /**
- * Provides classes for the Application Monitor dashboard.
+ * Provides classes for displaying the internal anatomy of the Application Monitor.
  */
-package com.aspectran.appmon.dashboard;
+package com.aspectran.appmon.anatomy;

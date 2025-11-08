@@ -30,8 +30,6 @@ import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.web.activity.response.DefaultRestResponse;
 import com.aspectran.web.activity.response.RestResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,8 +45,6 @@ import java.util.Set;
 @Component
 @Bean("anatomyActivity")
 public class AnatomyActivity {
-
-    private static final Logger logger = LoggerFactory.getLogger(AnatomyActivity.class);
 
     private final AnatomyService anatomyService;
 

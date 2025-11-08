@@ -32,7 +32,7 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
 
     const join = function (instancesToJoin) {
         $.ajax({
-            url: domain.endpoint.url + "/" + domain.endpoint.token + "/polling/join",
+            url: domain.endpoint.url + "/polling/join",
             type: "post",
             dataType: "json",
             data: {
@@ -43,7 +43,6 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
                 if (data) {
                     retryCount = 0;
                     domain.endpoint['mode'] = ENDPOINT_MODE;
-                    domain.endpoint['token'] = data.token;
                     domain.endpoint['pollingInterval'] = data.pollingInterval;
                     if (onJoined) {
                         onJoined(domain, data);
@@ -91,14 +90,13 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
             commands.length = 0;
         }
         $.ajax({
-            url: domain.endpoint.url + "/" + domain.endpoint.token + "/polling/pull",
+            url: domain.endpoint.url + "/polling/pull",
             type: "get",
             data: withCommands ? {
                 commands: withCommands
             } : null,
             success: function (data) {
-                if (data && data.token && data.messages) {
-                    domain.endpoint['token'] = data.token;
+                if (data && data.messages) {
                     for (let key in data.messages) {
                         viewer.processMessage(data.messages[key]);
                     }
@@ -127,7 +125,7 @@ function PollingClient(domain, viewer, onJoined, onEstablished, onClosed, onFail
 
     const changePollingInterval = function (speed) {
         $.ajax({
-            url: domain.endpoint.url + "/" + domain.endpoint.token + "/polling/interval",
+            url: domain.endpoint.url + "/polling/interval",
             type: "post",
             dataType: "json",
             data: {
