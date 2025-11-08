@@ -128,8 +128,8 @@ public class PollingServiceSessionManager extends AbstractComponent {
     }
 
     private String getSessionId(@NonNull Translet translet, boolean create) {
-        HttpServletRequest request = translet.getRequestAdapter().getAdaptee();
-        HttpServletResponse response = translet.getResponseAdapter().getAdaptee();
+        HttpServletRequest request = translet.getRequestAdaptee();
+        HttpServletResponse response = translet.getResponseAdaptee();
         String cookieName = sessionIdCookieGenerator.getCookieName();
         Cookie cookie = WebUtils.getCookie(request, cookieName);
         String sessionId = null;
