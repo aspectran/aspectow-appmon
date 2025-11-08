@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
  * <p>Created: 2024-07-27</p>
  */
 @Component
-@Bean("appMonAuthCheckAspect")
 @Aspect("appMonAuthCheckAspect")
 @Joinpoint(pointcut = {
         "+: /**"
