@@ -15,7 +15,7 @@
  */
 package com.aspectran.appmon.engine.config;
 
-import com.aspectran.utils.apon.AbstractParameters;
+import com.aspectran.utils.apon.DefaultParameters;
 import com.aspectran.utils.apon.ParameterKey;
 import com.aspectran.utils.apon.ValueType;
 
@@ -27,7 +27,7 @@ import java.util.List;
  *
  * <p>Created: 2020/02/12</p>
  */
-public class InstanceInfo extends AbstractParameters {
+public class InstanceInfo extends DefaultParameters {
 
     private static final ParameterKey name;
     private static final ParameterKey title;

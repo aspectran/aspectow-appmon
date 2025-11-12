@@ -15,7 +15,7 @@
  */
 package com.aspectran.appmon.engine.config;
 
-import com.aspectran.utils.apon.AbstractParameters;
+import com.aspectran.utils.apon.DefaultParameters;
 import com.aspectran.utils.apon.ParameterKey;
 import com.aspectran.utils.apon.ValueType;
 
@@ -25,7 +25,7 @@ import com.aspectran.utils.apon.ValueType;
  *
  * <p>Created: 2025-02-13</p>
  */
-public class EndpointInfo extends AbstractParameters {
+public class EndpointInfo extends DefaultParameters {
 
     private static final ParameterKey mode;
     private static final ParameterKey url;

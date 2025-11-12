@@ -16,7 +16,7 @@
 package com.aspectran.appmon.engine.config;
 
 import com.aspectran.utils.Assert;
-import com.aspectran.utils.apon.AbstractParameters;
+import com.aspectran.utils.apon.DefaultParameters;
 import com.aspectran.utils.apon.ParameterKey;
 import com.aspectran.utils.apon.Parameters;
 import com.aspectran.utils.apon.ValueType;
@@ -27,7 +27,7 @@ import com.aspectran.utils.apon.ValueType;
  *
  * <p>Created: 2020/02/12</p>
  */
-public class EventInfo extends AbstractParameters {
+public class EventInfo extends DefaultParameters {
 
     private static final ParameterKey name;
     private static final ParameterKey title;

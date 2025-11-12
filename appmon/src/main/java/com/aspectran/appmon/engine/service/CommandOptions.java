@@ -16,7 +16,7 @@
 package com.aspectran.appmon.engine.service;
 
 import com.aspectran.utils.StringUtils;
-import com.aspectran.utils.apon.AbstractParameters;
+import com.aspectran.utils.apon.DefaultParameters;
 import com.aspectran.utils.apon.AponFormat;
 import com.aspectran.utils.apon.AponParseException;
 import com.aspectran.utils.apon.ParameterKey;
@@ -28,7 +28,7 @@ import com.aspectran.utils.apon.ValueType;
  *
  * <p>Created: 2020. 12. 24.</p>
  */
-public class CommandOptions extends AbstractParameters {
+public class CommandOptions extends DefaultParameters {
 
     private static final ParameterKey command;
     private static final ParameterKey instancesToJoin;
