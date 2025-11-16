@@ -39,7 +39,7 @@ import java.util.Map;
  *
  * <p>Created: 2020/02/23</p>
  */
-@Component("/dashboard")
+@Component
 public class DashboardActivity {
 
     private final AppMonManager appMonManager;
@@ -58,7 +58,7 @@ public class DashboardActivity {
      * @param instances the comma-separated list of instances to monitor
      * @return a map of attributes for rendering the view
      */
-    @Request("/${instances}")
+    @Request("/dashboard/${instances}")
     @Dispatch("templates/default")
     @Action("page")
     public Map<String, String> front(String instances) {
@@ -75,7 +75,7 @@ public class DashboardActivity {
      * @param instances a comma-separated list of instance names to get configuration for
      * @return a {@link RestResponse} containing the configuration data
      */
-    @RequestToGet("/config/data")
+    @RequestToGet("/backend/config/data")
     public RestResponse getConfigData(String instances) {
         Map<String, Object> settings = Map.of(
                 "counterPersistInterval", appMonManager.getCounterPersistInterval()
