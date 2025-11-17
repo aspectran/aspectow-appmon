@@ -5,9 +5,6 @@
     .metrics-bar {
         background-color: #52595e;
     }
-    .metrics-bar .metric:hover dl dt {
-        border-left: 3px solid #353b3e;
-    }
     .domain.metrics-bar {
         border-bottom: 1px solid #353b3e;
         background-color: #24282b;
