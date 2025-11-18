@@ -16,17 +16,17 @@
 package com.aspectran.appmon.common.auth.aspect;
 
 import com.aspectran.appmon.common.auth.AppMonCookieIssuer;
-import com.aspectran.appmon.common.auth.AppMonTokenIssuer;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Aspect;
 import com.aspectran.core.component.bean.annotation.Autowired;
-import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Before;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Joinpoint;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.security.InvalidPBTokenException;
+import com.aspectran.web.activity.response.DefaultRestResponse;
+import com.aspectran.web.support.http.MediaType;
 import com.aspectran.web.support.util.WebUtils;
 import jakarta.servlet.http.Cookie;
 import org.slf4j.Logger;
@@ -67,7 +67,7 @@ public class AppMonAuthCheckAspect {
     public void before(@NonNull Translet translet) {
         Cookie cookie = WebUtils.getCookie(translet, AUTH_TOKEN_NAME);
         if (cookie == null) {
-            goToMain(translet);
+            reject(translet);
             return;
         }
 
@@ -82,7 +82,7 @@ public class AppMonAuthCheckAspect {
             } else {
                 logger.error(e.getMessage(), e);
             }
-            goToMain(translet);
+            reject(translet);
         }
     }
 
@@ -90,12 +90,17 @@ public class AppMonAuthCheckAspect {
      * Redirects the user to the main page.
      * @param translet the current translet
      */
-    private void goToMain(@NonNull Translet translet) {
-        if (StringUtils.hasLength(translet.getContextPath())) {
-            translet.redirect("/../");
-        } else {
-            translet.redirect("/");
+    private void reject(@NonNull Translet translet) {
+        if (WebUtils.isAcceptContentTypes(translet, MediaType.TEXT_HTML)) {
+            if (StringUtils.hasLength(translet.getContextPath())) {
+                translet.redirect("/../");
+                return;
+            } else if (!"/".equals(translet.getRequestName())) {
+                translet.redirect("/");
+                return;
+            }
         }
+        translet.transform(new DefaultRestResponse().forbidden());
     }
 
 }
