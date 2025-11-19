@@ -56,7 +56,8 @@ function FrontBuilder() {
             },
             error: function (xhr) {
                 if (xhr.status === 403) {
-                    location.href = "/";
+                    alert("Authentication has expired. You will be redirected to the main page.");
+                    location.href = (typeof contextPath !== 'undefined' && contextPath ? contextPath : "/");
                 }
             }
         });

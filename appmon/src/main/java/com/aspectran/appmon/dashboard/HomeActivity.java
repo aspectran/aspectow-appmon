@@ -78,4 +78,14 @@ public class HomeActivity {
         return home();
     }
 
+    @Request("/auth-expired")
+    @Dispatch("templates/default")
+    @Action("page")
+    public Map<String, Object> handleAuthExpired() {
+        return Map.of(
+                "include", "home/auth-expired",
+                "style", "fluid compact"
+        );
+    }
+
 }

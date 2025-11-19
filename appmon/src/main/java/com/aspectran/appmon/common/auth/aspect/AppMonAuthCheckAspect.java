@@ -22,7 +22,6 @@ import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Before;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Joinpoint;
-import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.security.InvalidPBTokenException;
 import com.aspectran.web.activity.response.DefaultRestResponse;
@@ -42,7 +41,8 @@ import org.slf4j.LoggerFactory;
 @Component
 @Aspect("appMonAuthCheckAspect")
 @Joinpoint(pointcut = {
-        "+: /**"
+        "+: /**",
+        "-: /auth-expired"
 })
 public class AppMonAuthCheckAspect {
 
@@ -87,18 +87,15 @@ public class AppMonAuthCheckAspect {
     }
 
     /**
-     * Redirects the user to the main page.
+     * Rejects the request due to an authentication failure.
+     * For HTML requests, redirects to an authentication expired page.
+     * For other requests (like AJAX), returns a 403 Forbidden status.
      * @param translet the current translet
      */
     private void reject(@NonNull Translet translet) {
         if (WebUtils.isAcceptContentTypes(translet, MediaType.TEXT_HTML)) {
-            if (StringUtils.hasLength(translet.getContextPath())) {
-                translet.redirect("/../");
-                return;
-            } else if (!"/".equals(translet.getRequestName())) {
-                translet.redirect("/");
-                return;
-            }
+            translet.redirect("/auth-expired");
+            return;
         }
         translet.transform(new DefaultRestResponse().forbidden());
     }
