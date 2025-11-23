@@ -682,15 +682,6 @@ function FrontViewer(sampleInterval) {
                                 mode: "x",
                                 modifierKey: "ctrl"
                             }
-                        },
-                        crosshair: {
-                            line: {
-                                color: "#ccc",
-                                width: 1
-                            },
-                            zoom: {
-                                enabled: false
-                            }
                         }
                     },
                     scales: {
