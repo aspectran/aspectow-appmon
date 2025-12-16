@@ -25,9 +25,9 @@ import com.aspectran.appmon.engine.persist.counter.EventCountVO;
 import com.aspectran.appmon.engine.persist.db.mapper.EventCountMapper;
 import com.aspectran.appmon.engine.service.CommandOptions;
 import com.aspectran.utils.ToStringBuilder;
-import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.annotation.jsr305.Nullable;
 import com.aspectran.utils.json.JsonBuilder;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.ZoneId;
 import java.time.ZoneOffset;

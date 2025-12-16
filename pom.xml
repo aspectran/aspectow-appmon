@@ -119,7 +119,7 @@
         <javadoc.title>${project.name} API Reference (${project.version})</javadoc.title>
         <javadoc.locale>en_US</javadoc.locale>
 
-        <aspectran.version>9.4.0</aspectran.version>
+        <aspectran.version>9.4.1-SNAPSHOT</aspectran.version>
         <jakarta.websocket.api.version>2.2.0</jakarta.websocket.api.version>
     </properties>
 

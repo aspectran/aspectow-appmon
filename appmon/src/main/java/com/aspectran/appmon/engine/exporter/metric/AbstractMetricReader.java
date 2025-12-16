@@ -17,7 +17,7 @@ package com.aspectran.appmon.engine.exporter.metric;
 
 import com.aspectran.appmon.engine.config.MetricInfo;
 import com.aspectran.appmon.engine.exporter.ExporterManager;
-import com.aspectran.utils.annotation.jsr305.NonNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Abstract base class for {@link MetricReader} implementations.

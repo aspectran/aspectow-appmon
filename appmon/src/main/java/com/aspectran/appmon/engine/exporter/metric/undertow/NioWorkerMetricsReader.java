@@ -6,8 +6,8 @@ import com.aspectran.appmon.engine.exporter.metric.AbstractMetricReader;
 import com.aspectran.appmon.engine.exporter.metric.MetricData;
 import com.aspectran.appmon.engine.exporter.metric.MetricReader;
 import com.aspectran.undertow.server.TowServer;
-import com.aspectran.utils.annotation.jsr305.NonNull;
 import io.undertow.Undertow;
+import org.jspecify.annotations.NonNull;
 import org.xnio.management.XnioWorkerMXBean;
 
 /**

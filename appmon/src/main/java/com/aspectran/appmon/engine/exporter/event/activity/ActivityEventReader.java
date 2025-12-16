@@ -27,8 +27,8 @@ import com.aspectran.core.context.rule.JoinpointRule;
 import com.aspectran.core.context.rule.params.PointcutParameters;
 import com.aspectran.core.context.rule.type.JoinpointTargetType;
 import com.aspectran.core.service.CoreServiceHolder;
-import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.json.JsonBuilder;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

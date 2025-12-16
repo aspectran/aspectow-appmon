@@ -21,9 +21,9 @@ import com.aspectran.appmon.engine.exporter.ExporterManager;
 import com.aspectran.appmon.engine.exporter.ExporterType;
 import com.aspectran.appmon.engine.service.CommandOptions;
 import com.aspectran.utils.ToStringBuilder;
-import com.aspectran.utils.annotation.jsr305.NonNull;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.io.input.Tailer;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

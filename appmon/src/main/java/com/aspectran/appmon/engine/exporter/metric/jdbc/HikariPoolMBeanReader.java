@@ -20,8 +20,8 @@ import com.aspectran.appmon.engine.exporter.ExporterManager;
 import com.aspectran.appmon.engine.exporter.metric.AbstractMetricReader;
 import com.aspectran.appmon.engine.exporter.metric.MetricData;
 import com.aspectran.appmon.engine.exporter.metric.MetricReader;
-import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.zaxxer.hikari.HikariPoolMXBean;
+import org.jspecify.annotations.NonNull;
 
 import javax.management.JMX;
 import javax.management.MBeanServer;

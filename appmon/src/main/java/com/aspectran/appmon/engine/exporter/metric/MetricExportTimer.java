@@ -1,8 +1,8 @@
 package com.aspectran.appmon.engine.exporter.metric;
 
-import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.scheduling.Scheduler;
 import com.aspectran.utils.timer.CyclicTimeout;
+import org.jspecify.annotations.NonNull;
 
 import java.util.concurrent.TimeUnit;
 

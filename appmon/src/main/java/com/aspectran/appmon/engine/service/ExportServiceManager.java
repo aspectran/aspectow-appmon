@@ -17,8 +17,8 @@ package com.aspectran.appmon.engine.service;
 
 import com.aspectran.appmon.engine.config.InstanceInfoHolder;
 import com.aspectran.appmon.engine.exporter.ExporterManager;
-import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.annotation.jsr305.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;

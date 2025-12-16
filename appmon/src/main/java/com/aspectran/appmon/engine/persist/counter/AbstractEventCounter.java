@@ -16,7 +16,7 @@
 package com.aspectran.appmon.engine.persist.counter;
 
 import com.aspectran.appmon.engine.config.EventInfo;
-import com.aspectran.utils.annotation.jsr305.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;

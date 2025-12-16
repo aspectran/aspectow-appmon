@@ -28,7 +28,7 @@ import com.aspectran.core.context.rule.type.JoinpointTargetType;
 import com.aspectran.core.service.CoreService;
 import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.core.service.ServiceHoldingListener;
-import com.aspectran.utils.annotation.jsr305.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

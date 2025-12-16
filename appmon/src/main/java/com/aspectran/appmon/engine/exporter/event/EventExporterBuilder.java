@@ -22,8 +22,8 @@ import com.aspectran.appmon.engine.exporter.event.session.SessionEventReader;
 import com.aspectran.appmon.engine.persist.counter.EventCount;
 import com.aspectran.utils.ClassUtils;
 import com.aspectran.utils.ToStringBuilder;
-import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.annotation.jsr305.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

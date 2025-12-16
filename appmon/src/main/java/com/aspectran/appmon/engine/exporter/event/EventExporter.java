@@ -20,7 +20,7 @@ import com.aspectran.appmon.engine.exporter.AbstractExporter;
 import com.aspectran.appmon.engine.exporter.ExporterManager;
 import com.aspectran.appmon.engine.service.CommandOptions;
 import com.aspectran.utils.ToStringBuilder;
-import com.aspectran.utils.annotation.jsr305.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 

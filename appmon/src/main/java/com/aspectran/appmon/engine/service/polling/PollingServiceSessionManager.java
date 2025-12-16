@@ -22,7 +22,6 @@ import com.aspectran.core.component.AbstractComponent;
 import com.aspectran.core.component.session.SessionIdGenerator;
 import com.aspectran.utils.CopyOnWriteMap;
 import com.aspectran.utils.StringUtils;
-import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.scheduling.ScheduledExecutorScheduler;
 import com.aspectran.utils.scheduling.Scheduler;
 import com.aspectran.web.support.util.CookieGenerator;
@@ -30,6 +29,7 @@ import com.aspectran.web.support.util.WebUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;

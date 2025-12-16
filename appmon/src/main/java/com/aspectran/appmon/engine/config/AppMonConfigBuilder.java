@@ -17,7 +17,7 @@ package com.aspectran.appmon.engine.config;
 
 import com.aspectran.utils.Assert;
 import com.aspectran.utils.ResourceUtils;
-import com.aspectran.utils.annotation.jsr305.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.io.IOException;

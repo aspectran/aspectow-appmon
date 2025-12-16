@@ -15,7 +15,7 @@
  */
 package com.aspectran.appmon.engine.config;
 
-import com.aspectran.utils.annotation.jsr305.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

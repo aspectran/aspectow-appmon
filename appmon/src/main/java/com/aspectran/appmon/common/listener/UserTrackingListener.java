@@ -26,9 +26,9 @@ import com.aspectran.core.component.session.SessionListenerRegistration;
 import com.aspectran.undertow.server.TowServer;
 import com.aspectran.undertow.support.SessionListenerRegistrationBean;
 import com.aspectran.utils.StringUtils;
-import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.web.support.http.HttpHeaders;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.NonNull;
 
 import static com.aspectran.appmon.engine.exporter.event.session.SessionEventReader.USER_IP_ADDRESS;
 

@@ -28,7 +28,7 @@ import com.aspectran.core.service.ServiceHoldingListener;
 import com.aspectran.undertow.server.TowServer;
 import com.aspectran.undertow.support.SessionListenerRegistrationBean;
 import com.aspectran.utils.StringUtils;
-import com.aspectran.utils.annotation.jsr305.NonNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * An {@link EventCounter} for counting session creation events.

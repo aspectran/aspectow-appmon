@@ -17,8 +17,8 @@ package com.aspectran.appmon.engine.exporter.event.activity;
 
 import com.aspectran.core.activity.Activity;
 import com.aspectran.core.adapter.SessionAdapter;
-import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.json.JsonBuilder;
+import org.jspecify.annotations.NonNull;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

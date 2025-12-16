@@ -15,7 +15,7 @@
  */
 package com.aspectran.appmon.engine.exporter;
 
-import com.aspectran.utils.annotation.jsr305.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An enumeration for the types of exporters.

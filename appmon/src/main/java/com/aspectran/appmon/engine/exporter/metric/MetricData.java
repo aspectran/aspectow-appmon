@@ -1,8 +1,8 @@
 package com.aspectran.appmon.engine.exporter.metric;
 
 import com.aspectran.appmon.engine.config.MetricInfo;
-import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.json.JsonBuilder;
+import org.jspecify.annotations.NonNull;
 
 import java.util.LinkedHashMap;
 

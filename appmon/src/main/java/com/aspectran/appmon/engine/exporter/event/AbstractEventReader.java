@@ -18,8 +18,8 @@ package com.aspectran.appmon.engine.exporter.event;
 import com.aspectran.appmon.engine.config.EventInfo;
 import com.aspectran.appmon.engine.exporter.ExporterManager;
 import com.aspectran.appmon.engine.persist.counter.EventCount;
-import com.aspectran.utils.annotation.jsr305.NonNull;
-import com.aspectran.utils.annotation.jsr305.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Abstract base class for {@link EventReader} implementations.

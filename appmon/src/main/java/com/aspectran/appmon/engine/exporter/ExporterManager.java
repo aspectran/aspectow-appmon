@@ -18,9 +18,9 @@ package com.aspectran.appmon.engine.exporter;
 import com.aspectran.appmon.engine.manager.AppMonManager;
 import com.aspectran.appmon.engine.service.CommandOptions;
 import com.aspectran.core.activity.InstantAction;
-import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.scheduling.ScheduledExecutorScheduler;
 import com.aspectran.utils.scheduling.Scheduler;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -19,7 +19,7 @@ import com.aspectran.appmon.engine.config.LogInfo;
 import com.aspectran.appmon.engine.exporter.ExporterManager;
 import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.utils.ToStringBuilder;
-import com.aspectran.utils.annotation.jsr305.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -17,7 +17,7 @@ package com.aspectran.appmon.engine.exporter.event.session;
 
 import com.aspectran.core.component.session.Session;
 import com.aspectran.core.component.session.SessionListener;
-import com.aspectran.utils.annotation.jsr305.NonNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * A listener for session lifecycle events.

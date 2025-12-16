@@ -18,12 +18,12 @@ package com.aspectran.appmon.common.auth;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
-import com.aspectran.utils.annotation.jsr305.NonNull;
 import com.aspectran.utils.security.InvalidPBTokenException;
 import com.aspectran.web.support.util.WebUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Manages the authentication token cookie for the Application Monitor.
