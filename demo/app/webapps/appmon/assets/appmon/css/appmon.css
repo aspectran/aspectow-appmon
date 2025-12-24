@@ -573,7 +573,7 @@
 .console-box .console p {
     font-size: 12px;
     line-height: 16px;
-    white-space: nowrap;
+    white-space: pre;
     color: #e1e1e1;
     margin: 0;
     padding: 0;
