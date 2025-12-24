@@ -20,7 +20,7 @@ import com.aspectran.appmon.engine.exporter.ExporterManager;
 import com.aspectran.appmon.engine.exporter.metric.AbstractMetricReader;
 import com.aspectran.appmon.engine.exporter.metric.MetricData;
 import com.aspectran.appmon.engine.exporter.metric.MetricReader;
-import com.aspectran.utils.StringUtils;
+import com.aspectran.utils.DataSizeUtils;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -81,8 +81,8 @@ public class HeapMemoryUsageReader extends AbstractMetricReader {
 
         oldUsed = usedToCompare;
 
-        String usedKB = StringUtils.toHumanFriendlyByteSize(memoryUsage.getUsed());
-        String maxKB = StringUtils.toHumanFriendlyByteSize(memoryUsage.getMax());
+        String usedKB = DataSizeUtils.toHumanFriendlyByteSize(memoryUsage.getUsed());
+        String maxKB = DataSizeUtils.toHumanFriendlyByteSize(memoryUsage.getMax());
 
         return new MetricData(getMetricInfo())
                 .setFormat("{usedKB}/{maxKB}")
