@@ -26,7 +26,7 @@ import java.util.Map;
  * <p>This class retrieves the version of AppMon from the manifest file
  * of the JAR in which it is packaged.</p>
  */
-public abstract class AboutMe {
+public class AboutMe {
 
     /** The version of AppMon. */
     public static final String VERSION;
@@ -54,6 +54,12 @@ public abstract class AboutMe {
 
         // Show warning when RC# or M# or -SNAPSHOT is in version string
         STABLE = !VERSION.matches("^.*[.-](RC|M|SNAPSHOT|x)[0-9]?$");
+    }
+
+    /**
+     * This class cannot be instantiated.
+     */
+    private AboutMe() {
     }
 
     /**
