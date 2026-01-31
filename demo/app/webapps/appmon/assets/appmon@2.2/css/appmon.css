@@ -555,10 +555,12 @@
     color: #e1e1e1;
     margin: 0;
     padding: 0;
+    width: fit-content;
+    min-width: 100%;
 }
 .console-box .console p:hover {
     color: #fafafa;
-    background-color: #333;
+    background-color: #323d48;
 }
 .console-box .console p.event {
     border-radius: 20px;

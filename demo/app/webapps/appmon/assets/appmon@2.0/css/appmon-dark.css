@@ -179,7 +179,7 @@
     }
     .console-box .console p:hover {
         color: #fafafa;
-        background-color: #333;
+        background-color: #323d48;
     }
     .console-box .console p.event {
         border: 1px solid rgba(92, 218, 173, 0.53);
