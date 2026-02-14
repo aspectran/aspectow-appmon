@@ -40,6 +40,8 @@ public class SessionEventData {
 
     private String startTime;
 
+    private boolean fullSync;
+
     private JsonString[] createdSessions;
 
     private String[] destroyedSessions;
@@ -102,6 +104,14 @@ public class SessionEventData {
 
     public void setStartTime(String startTime) {
         this.startTime = startTime;
+    }
+
+    public boolean isFullSync() {
+        return fullSync;
+    }
+
+    public void setFullSync(boolean fullSync) {
+        this.fullSync = fullSync;
     }
 
     public JsonString[] getCreatedSessions() {

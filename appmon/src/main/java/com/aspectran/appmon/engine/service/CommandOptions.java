@@ -30,6 +30,8 @@ import com.aspectran.utils.apon.ValueType;
  */
 public class CommandOptions extends DefaultParameters {
 
+    public static final String COMMAND_REFRESH = "refresh";
+
     private static final ParameterKey command;
     private static final ParameterKey instancesToJoin;
     private static final ParameterKey instance;

@@ -37,6 +37,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static com.aspectran.appmon.engine.service.CommandOptions.COMMAND_REFRESH;
+
 /**
  * An {@link ExportService} implementation based on the WebSocket protocol (JSR-356).
  * It provides real-time, bidirectional communication with clients.
@@ -55,7 +57,6 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
     private static final String COMMAND_PING = "ping";
     private static final String COMMAND_JOIN = "join";
     private static final String COMMAND_ESTABLISHED = "established";
-    private static final String COMMAND_REFRESH = "refresh";
 
     private static final String MESSAGE_PONG = "pong:";
     private static final String MESSAGE_JOINED = "joined:";

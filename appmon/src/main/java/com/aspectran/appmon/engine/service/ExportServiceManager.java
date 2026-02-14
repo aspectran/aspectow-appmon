@@ -210,8 +210,7 @@ public class ExportServiceManager {
         }
     }
 
-    @Nullable
-    private String[] getUnusedInstances(ServiceSession session) {
+    private String @Nullable [] getUnusedInstances(ServiceSession session) {
         String[] instanceNames = getJoinedInstances(session);
         if (instanceNames == null || instanceNames.length == 0) {
             return null;
@@ -236,8 +235,7 @@ public class ExportServiceManager {
         }
     }
 
-    @Nullable
-    private String[] getJoinedInstances(@NonNull ServiceSession session) {
+    private String @Nullable [] getJoinedInstances(@NonNull ServiceSession session) {
         String[] instanceNames = session.getJoinedInstances();
         if (instanceNames == null) {
             return null;

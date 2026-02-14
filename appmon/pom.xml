@@ -24,7 +24,6 @@
     </parent>
 
     <artifactId>aspectow-appmon</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Aspectow AppMon</name>

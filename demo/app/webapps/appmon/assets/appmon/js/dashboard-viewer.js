@@ -20,7 +20,8 @@ class DashboardViewer {
         this.currentActivityCounts = {};
         this.cachedCanvasWidth = 0;
         this.activeBulletCount = 0;
-        this.maxBullets = 100;
+        this.maxBullets = 500;
+        this.painters = {};
     }
 
     setClient(client) {
@@ -42,7 +43,14 @@ class DashboardViewer {
     }
 
     putDisplay$(instanceName, eventName, $display) {
-        this.displays[instanceName + ":event:" + eventName] = $display;
+        const key = instanceName + ":event:" + eventName;
+        this.displays[key] = $display;
+        if ($display.hasClass("track-box")) {
+            const canvas = $display.find(".traffic-canvas")[0];
+            if (canvas) {
+                this.painters[key] = new TrafficPainter(canvas);
+            }
+        }
     }
 
     putMetric$(instanceName, metricName, $metric) {
@@ -83,6 +91,29 @@ class DashboardViewer {
 
     updateCanvasWidth() {
         this.cachedCanvasWidth = 0;
+    }
+
+    resetCurrentActivityCounts() {
+        this.currentActivityCounts = {};
+        for (let key in this.indicators) {
+            if (key.includes(":event:activity")) {
+                this.printCurrentActivityCount(key, 0);
+            }
+        }
+        this.clearBullets();
+    }
+
+    clearAllSessions() {
+        for (let key in this.displays) {
+            if (key.includes(":event:session")) {
+                const $sessions = this.displays[key].find("ul.sessions");
+                $sessions.find("li").each(function () {
+                    const timer = $(this).data("timer");
+                    if (timer) clearTimeout(timer);
+                });
+                $sessions.empty();
+            }
+        }
     }
 
     setLoading(instanceName, isLoading) {
@@ -259,6 +290,7 @@ class DashboardViewer {
     processEventData(instanceName, exporterType, eventName, messagePrefix, eventData) {
         switch (eventName) {
             case "activity":
+                console.log(eventData);
                 this.indicate(instanceName, exporterType, eventName);
                 if (eventData.activities) {
                     this.printActivityStatus(messagePrefix, eventData.activities);
@@ -309,49 +341,41 @@ class DashboardViewer {
     }
 
     launchBullet($track, eventData, onLeaving, onArriving) {
-        if (!eventData.elapsedTime) return;
+        if (eventData.elapsedTime === undefined || eventData.elapsedTime === null) return;
+
+        // Skip visualization and counting if tab is hidden
+        if (document.hidden) return;
 
         if (onLeaving) onLeaving();
 
-        if (this.activeBulletCount >= this.maxBullets) {
-            // Cap visual animation but still update counts via timer
-            setTimeout(() => {
-                if (onArriving) onArriving();
-            }, eventData.elapsedTime + 1750); // 900 (delay) + 350 + 500
-            return;
+        // Find the painter associated with this track-box
+        let painter = null;
+        for (let key in this.displays) {
+            if (this.displays[key][0] === $track[0]) {
+                painter = this.painters[key];
+                break;
+            }
         }
 
-        let position = this.generateRandom(3, 103);
-        if (this.prevPosition && Math.abs(position - this.prevPosition) <= 20) {
-            position = this.generateRandom(3, 103);
-        }
-        this.prevPosition = position;
-
-        this.activeBulletCount++;
-        const $bullet = $("<div class='bullet'/>")
-            .attr("sessionId", eventData.sessionId)
-            .css("top", position + "px")
-            .appendTo($track).show();
-        if (eventData.error) $bullet.addClass("error");
-
-        setTimeout(() => {
-            $bullet.addClass("arrive");
-            setTimeout(() => {
-                $bullet.fadeOut(1000);
-                setTimeout(() => {
-                    $bullet.remove();
+        if (painter) {
+            if (this.activeBulletCount < this.maxBullets) {
+                this.activeBulletCount++;
+                painter.addBullet(eventData, () => {
                     this.activeBulletCount--;
                     if (onArriving) onArriving();
-                }, 500);
-            }, eventData.elapsedTime + 350);
-        }, 900);
+                });
+            } else {
+                // Still update counts via timer even if capped
+                setTimeout(() => {
+                    if (onArriving) onArriving();
+                }, eventData.elapsedTime + 900);
+            }
+        }
     }
 
     clearBullets() {
-        for (let key in this.displays) {
-            if (this.displays[key].hasClass("track-box")) {
-                this.displays[key].find(".bullet").remove();
-            }
+        for (let key in this.painters) {
+            this.painters[key].clear();
         }
         this.activeBulletCount = 0;
     }
@@ -464,8 +488,24 @@ class DashboardViewer {
                 $display.find(".startTime").text(dayjs.utc(eventData.startTime).local().format("LLL"));
             }
             const $sessions = $display.find("ul.sessions");
+
+            if (eventData.fullSync && eventData.createdSessions) {
+                const newSids = eventData.createdSessions.map(s => {
+                    const session = (typeof s === "string" ? JSON.parse(s) : s);
+                    return session.sessionId;
+                });
+                $sessions.find("li").each(function () {
+                    const sid = $(this).data("sid");
+                    if (sid && !newSids.includes(sid)) {
+                        const timer = $(this).data("timer");
+                        if (timer) clearTimeout(timer);
+                        $(this).remove();
+                    }
+                });
+            }
+
             if (eventData.createdSessions) {
-                eventData.createdSessions.forEach(session => this.addSession($sessions, session));
+                eventData.createdSessions.forEach(session => this.addSession($sessions, typeof session === "string" ? JSON.parse(session) : session));
             }
             if (eventData.destroyedSessions) {
                 eventData.destroyedSessions.forEach(sessionId => $sessions.find("li[data-sid='" + sessionId + "']").remove());
@@ -481,7 +521,7 @@ class DashboardViewer {
                 });
             }
             if (eventData.residedSessions) {
-                eventData.residedSessions.forEach(session => this.addSession($sessions, session));
+                eventData.residedSessions.forEach(session => this.addSession($sessions, typeof session === "string" ? JSON.parse(session) : session));
             }
         }
     }

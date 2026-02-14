@@ -39,6 +39,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import static com.aspectran.appmon.engine.service.CommandOptions.COMMAND_REFRESH;
+
 /**
  * An {@link ExportService} implementation based on HTTP long-polling.
  * Clients connect to join, then periodically pull for new messages.
@@ -47,8 +49,6 @@ import java.util.Map;
  */
 @Component("/backend")
 public class PollingExportService implements ExportService {
-
-    private static final String COMMAND_REFRESH = "refresh";
 
     private final AppMonManager appMonManager;
 

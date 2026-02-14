@@ -1,5 +1,5 @@
 [data-bs-theme=dark] {
-    canvas {
+    canvas:not(.traffic-canvas) {
         filter: invert(1) hue-rotate(180deg);
     }
     .metrics-bar {
@@ -48,20 +48,6 @@
     }
     .track-box .track-stack {
         background-color: #1d0c17;
-    }
-    .track-box .bullet {
-        background: linear-gradient(to right, rgba(9, 17, 39, 0) 25%, rgba(13, 168, 44, 0.66) 100%);
-    }
-    .track-box .bullet.arrive {
-        background-color: #0d7aaa;
-        border: 1px solid #086893;
-    }
-    .track-box .bullet.error {
-        background: linear-gradient(to right, rgba(9, 17, 39, 0) 27%, rgb(255, 0, 0) 100%);
-    }
-    .track-box .bullet.error.arrive {
-        background-color: #a51e1e;
-        border: 1px solid #f34d4d;
     }
     .track-stack .activity-status-plate .bottom-plate-left {
         background-color: #3c201f;

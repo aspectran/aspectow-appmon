@@ -64,7 +64,7 @@ public class SessionEventReader extends AbstractEventReader {
 
     private SessionEventReadingListener sessionListener;
 
-    private volatile SessionEventData oldData;
+    private volatile boolean changed;
 
     /**
      * Instantiates a new SessionEventReader.
@@ -97,13 +97,14 @@ public class SessionEventReader extends AbstractEventReader {
         if (sessionManager != null) {
             sessionListener = new SessionEventReadingListener(this);
             getSessionListenerRegistration().register(sessionListener, deploymentName);
+            changed = true;
         }
     }
 
     @Override
     public void stop() {
         if (sessionManager != null) {
-            oldData = null;
+            changed = false;
             if (sessionListener != null) {
                 try {
                     getSessionListenerRegistration().remove(sessionListener, deploymentName);
@@ -136,35 +137,40 @@ public class SessionEventReader extends AbstractEventReader {
             return null;
         }
         try {
-            if (oldData != null) {
-                return oldData.toJson();
-            } else {
-                SessionEventData data = loadWithActiveSessions();
-                oldData = data;
-                return data.toJson();
-            }
+            SessionEventData data = loadWithActiveSessions();
+            changed = false;
+            return data.toJson();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return null;
         }
     }
 
+    @Override
+    public boolean hasChanges() {
+        return (sessionListener != null && changed);
+    }
+
     void sessionCreated(@NonNull Session session) {
+        changed = true;
         String json = readWithCreatedSession(session);
         getEventExporter().broadcast(json);
     }
 
     void sessionDestroyed(@NonNull Session session) {
+        changed = true;
         String json = readWithDestroyedSession(session.getId());
         getEventExporter().broadcast(json);
     }
 
     void sessionEvicted(@NonNull Session session) {
+        changed = true;
         String json = readWithEvictedSession(session.getId());
         getEventExporter().broadcast(json);
     }
 
     void sessionResided(@NonNull Session session) {
+        changed = true;
         String json = readWithResidedSession(session);
         getEventExporter().broadcast(json);
     }
@@ -183,28 +189,24 @@ public class SessionEventReader extends AbstractEventReader {
 
     private String readWithCreatedSession(Session session) {
         SessionEventData data = load();
-        oldData = data;
         data.setCreatedSessions(new JsonString[] { serialize(session) });
         return data.toJson();
     }
 
     private String readWithDestroyedSession(String sessionId) {
         SessionEventData data = load();
-        oldData = data;
         data.setDestroyedSessions(new String[] { sessionId });
         return data.toJson();
     }
 
     private String readWithEvictedSession(String sessionId) {
         SessionEventData data = load();
-        oldData = data;
         data.setEvictedSessions(new String[] { sessionId });
         return data.toJson();
     }
 
     private String readWithResidedSession(Session session) {
         SessionEventData data = load();
-        oldData = data;
         data.setResidedSessions(new JsonString[] { serialize(session) });
         return data.toJson();
     }
@@ -212,6 +214,7 @@ public class SessionEventReader extends AbstractEventReader {
     @NonNull
     private SessionEventData loadWithActiveSessions() {
         SessionEventData data = load();
+        data.setFullSync(true);
         data.setCreatedSessions(getAllActiveSessions());
         return data;
     }
@@ -230,8 +233,7 @@ public class SessionEventReader extends AbstractEventReader {
         return data;
     }
 
-    @NonNull
-    private JsonString[] getAllActiveSessions() {
+    private JsonString @NonNull [] getAllActiveSessions() {
         Set<String> sessionIds = sessionManager.getActiveSessions();
         List<JsonString> list = new ArrayList<>(sessionIds.size());
         for (String sessionId : sessionIds) {

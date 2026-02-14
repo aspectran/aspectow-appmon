@@ -6,6 +6,7 @@
 <script>const contextPath = "<aspectran:url value="/"/>";</script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/dashboard-builder.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/dashboard-viewer.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
+<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/traffic-painter.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/base-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/websocket-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/polling-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
@@ -15,6 +16,7 @@
         document.write('<link rel="stylesheet" href="https://appmon-assets.aspectran.com/appmon/css/appmon-dark.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">');
         document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/dashboard-builder.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
         document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/dashboard-viewer.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/traffic-painter.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
         document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/base-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
         document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/websocket-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
         document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/polling-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
@@ -64,6 +66,7 @@
                 <h4 class="ellipses"></h4>
             </div>
             <div class="track-box">
+                <canvas class="traffic-canvas"></canvas>
                 <div class="track-stack">
                     <div class="activity-status-plate">
                         <div class="bottom-plate-left"></div>

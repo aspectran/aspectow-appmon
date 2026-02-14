@@ -24,6 +24,8 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
+import static com.aspectran.appmon.engine.service.CommandOptions.COMMAND_REFRESH;
+
 /**
  * An exporter for collecting and broadcasting event data.
  * It uses an {@link EventReader} to read data and can periodically broadcast changes.
@@ -76,7 +78,7 @@ public class EventExporter extends AbstractExporter {
 
     @Override
     public void readIfChanged(@NonNull List<String> messages, CommandOptions commandOptions) {
-        if (eventReader.hasChanges()) {
+        if ((commandOptions != null && commandOptions.hasCommand(COMMAND_REFRESH)) || eventReader.hasChanges()) {
             read(messages, commandOptions);
         }
     }
