@@ -1,147 +1,143 @@
-function WebsocketClient(domain, viewer, onJoined, onEstablished, onClosed, onFailed) {
+/**
+ * WebSocket implementation of the AppMon client.
+ */
+class WebsocketClient extends BaseClient {
+    constructor(domain, viewer, onJoined, onEstablished, onClosed, onFailed) {
+        super(domain, viewer, onJoined, onEstablished, onClosed, onFailed);
+        this.endpointMode = "websocket";
+        this.heartbeatInterval = 5000;
+        this.socket = null;
+        this.heartbeatTimer = null;
+        this.pendingMessages = [];
+        this.established = false;
+    }
 
-    const ENDPOINT_MODE = "websocket";
-    const MAX_RETRIES = 10;
-    const RETRY_INTERVAL = 5000;
-    const HEARTBEAT_INTERVAL = 5000;
+    start(instancesToJoin) {
+        this.openSocket(instancesToJoin);
+    }
 
-    let socket = null;
-    let retryCount = 0;
-    let heartbeatTimer = null;
-    let pendingMessages = [];
-    let established = false;
+    stop() {
+        this.closeSocket();
+    }
 
-    this.start = function (instancesToJoin) {
-        openSocket(instancesToJoin);
-    };
-
-    this.stop = function () {
-        closeSocket();
-    };
-
-    this.refresh = function (options) {
-        if (socket) {
-            socket.send("command:refresh;" + (options ? options.join(";") : ""));
+    refresh(options) {
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send("command:refresh;" + (options ? options.join(";") : ""));
         }
-    };
+    }
 
-    const openSocket = function (instancesToJoin) {
-        closeSocket(false);
-        let url = new URL(domain.endpoint.url + "/websocket/" + domain.endpoint.token, location.href);
-        url.protocol = url.protocol.replace("https:", "wss:");
-        url.protocol = url.protocol.replace("http:", "ws:");
-        socket = new WebSocket(url.href);
-        socket.onopen = function () {
-            console.log(domain.name, "socket connected:", domain.endpoint.url);
-            pendingMessages.push("Socket connection successful");
-            let options = [];
-            options.push("command:join");
-            options.push("timeZone:" + Intl.DateTimeFormat().resolvedOptions().timeZone);
+    openSocket(instancesToJoin) {
+        this.closeSocket(false);
+        const url = new URL(this.domain.endpoint.url + "/websocket/" + this.domain.endpoint.token, location.href);
+        url.protocol = url.protocol.replace("https:", "wss:").replace("http:", "ws:");
+
+        this.socket = new WebSocket(url.href);
+
+        this.socket.onopen = () => {
+            console.log(this.domain.name, "socket connected:", this.domain.endpoint.url);
+            this.pendingMessages.push("Socket connection successful");
+            const options = [
+                "command:join",
+                "timeZone:" + Intl.DateTimeFormat().resolvedOptions().timeZone
+            ];
             if (instancesToJoin) {
                 options.push("instancesToJoin:" + instancesToJoin);
             }
-            socket.send(options.join(";"));
-            heartbeatPing();
-            retryCount = 0;
+            this.socket.send(options.join(";"));
+            this.heartbeatPing();
+            this.retryCount = 0;
         };
-        socket.onmessage = function (event) {
+
+        this.socket.onmessage = (event) => {
             if (typeof event.data === "string") {
-                let msg = event.data;
-                if (established) {
+                const msg = event.data;
+                if (this.established) {
                     if (msg.startsWith("pong:")) {
-                        domain.endpoint.token = msg.substring(5);
-                        heartbeatPing();
+                        this.domain.endpoint.token = msg.substring(5);
+                        this.heartbeatPing();
                     } else {
-                        viewer.processMessage(msg);
+                        this.viewer.processMessage(msg);
                     }
                 } else if (msg.startsWith("joined:")) {
-                    console.log(domain.name, msg, domain.endpoint.token);
-                    let payload = (msg.length > 7 ? JSON.parse(msg.substring(7)) : null);
-                    establish(payload);
+                    console.log(this.domain.name, msg, this.domain.endpoint.token);
+                    const payload = (msg.length > 7 ? JSON.parse(msg.substring(7)) : null);
+                    this.establish(payload);
                 }
             }
         };
-        socket.onclose = function (event) {
-            closeSocket(true);
-            if (domain.endpoint.mode === ENDPOINT_MODE) {
-                if (onClosed) {
-                    onClosed(domain);
+
+        this.socket.onclose = (event) => {
+            this.closeSocket(true);
+            if (this.domain.endpoint.mode === this.endpointMode) {
+                if (this.onClosed) {
+                    this.onClosed(this.domain);
                 }
                 if (event.code === 1003) {
-                    console.log(domain.name, "socket connection refused: ", event.code);
-                    viewer.printErrorMessage("Socket connection refused by server.");
+                    console.log(this.domain.name, "socket connection refused: ", event.code);
+                    this.viewer.printErrorMessage("Socket connection refused by server.");
                     return;
                 }
-                if (event.code === 1000 || retryCount === 0) {
-                    console.log(domain.name, "socket connection closed: ", event.code);
-                    viewer.printMessage("Socket connection closed.");
+                if (event.code === 1000 || this.retryCount === 0) {
+                    console.log(this.domain.name, "socket connection closed: ", event.code);
+                    this.viewer.printMessage("Socket connection closed.");
                 }
                 if (event.code !== 1000) {
-                    if (retryCount++ < MAX_RETRIES) {
-                        let retryInterval = (RETRY_INTERVAL * retryCount) + (domain.index * 200) + domain.random1000;
-                        let status = "(" + retryCount + "/" + MAX_RETRIES + ", interval=" + retryInterval + ")";
-                        console.log(domain.name, "trying to reconnect", status);
-                        viewer.printMessage("Trying to reconnect... " + status);
-                        setTimeout(function () {
-                            openSocket(instancesToJoin);
-                        }, retryInterval);
-                    } else {
-                        console.log(domain.name, "abort reconnect attempt");
-                        viewer.printMessage("Max connection attempts exceeded.");
-                        if (onFailed) {
-                            onFailed(domain);
-                        }
-                    }
+                    this.rejoin(instancesToJoin);
                 }
             }
         };
-        socket.onerror = function (event) {
-            if (domain.endpoint.mode === ENDPOINT_MODE) {
-                console.log(domain.name, "websocket error:", event);
-                viewer.printErrorMessage("Could not connect to the WebSocket server.");
+
+        this.socket.onerror = (event) => {
+            if (this.domain.endpoint.mode === this.endpointMode) {
+                console.log(this.domain.name, "websocket error:", event);
+                this.viewer.printErrorMessage("Could not connect to the WebSocket server.");
             }
-            if (onFailed) {
-                onFailed(domain);
+            if (this.onFailed) {
+                this.onFailed(this.domain);
             }
         };
-    };
+    }
 
-    const closeSocket = function (afterClosing) {
-        if (socket) {
-            established = false;
+    closeSocket(afterClosing) {
+        if (this.socket) {
+            this.established = false;
             if (!afterClosing) {
-                socket.close();
+                this.socket.close();
             }
-            socket = null;
+            this.socket = null;
         }
-    };
+        if (this.heartbeatTimer) {
+            clearTimeout(this.heartbeatTimer);
+            this.heartbeatTimer = null;
+        }
+    }
 
-    const establish = function (payload) {
-        domain.endpoint['mode'] = ENDPOINT_MODE;
-        if (onJoined) {
-            onJoined(domain, payload);
+    establish(payload) {
+        this.domain.endpoint['mode'] = this.endpointMode;
+        if (this.onJoined) {
+            this.onJoined(this.domain, payload);
         }
-        while (pendingMessages.length) {
-            viewer.printMessage(pendingMessages.shift());
+        while (this.pendingMessages.length) {
+            this.viewer.printMessage(this.pendingMessages.shift());
         }
-        if (onEstablished) {
-            onEstablished(domain);
+        if (this.onEstablished) {
+            this.onEstablished(this.domain);
         }
-        while (pendingMessages.length) {
-            viewer.printMessage(pendingMessages.shift());
+        while (this.pendingMessages.length) {
+            this.viewer.printMessage(this.pendingMessages.shift());
         }
-        established = true;
-        socket.send("command:established");
-    };
+        this.established = true;
+        this.socket.send("command:established");
+    }
 
-    const heartbeatPing = function () {
-        if (heartbeatTimer) {
-            clearTimeout(heartbeatTimer);
+    heartbeatPing() {
+        if (this.heartbeatTimer) {
+            clearTimeout(this.heartbeatTimer);
         }
-        heartbeatTimer = setTimeout(function () {
-            if (socket) {
-                socket.send("command:ping");
+        this.heartbeatTimer = setTimeout(() => {
+            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                this.socket.send("command:ping");
             }
-        }, HEARTBEAT_INTERVAL);
-    };
+        }, this.heartbeatInterval);
+    }
 }

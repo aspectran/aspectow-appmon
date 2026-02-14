@@ -4,16 +4,18 @@
 <link rel="stylesheet" href="<aspectran:token type='bean' expression='appmonAssets^url'/>/css/appmon.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">
 <link rel="stylesheet" href="<aspectran:token type='bean' expression='appmonAssets^url'/>/css/appmon-dark.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">
 <script>const contextPath = "<aspectran:url value="/"/>";</script>
-<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/front-builder.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
-<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/front-viewer.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
+<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/dashboard-builder.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
+<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/dashboard-viewer.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
+<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/base-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/websocket-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/polling-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
 <script>
-    if (typeof FrontBuilder === "undefined") {
+    if (typeof DashboardBuilder === "undefined") {
         document.write('<link rel="stylesheet" href="https://appmon-assets.aspectran.com/appmon/css/appmon.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">');
         document.write('<link rel="stylesheet" href="https://appmon-assets.aspectran.com/appmon/css/appmon-dark.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">');
-        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/front-builder.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
-        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/front-viewer.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/dashboard-builder.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/dashboard-viewer.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/base-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
         document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/websocket-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
         document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/polling-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
     }
@@ -39,24 +41,24 @@
     </ul>
     <div class="control-bar">
         <div class="options">
-            <i class="bi bi-layout-wtf d-none d-lg-inline-block"></i>
+            <i class="bi bi-columns-gap d-none d-lg-inline-block"></i>
             <div class="layout-options btn-group d-none d-lg-inline-block" title="Layout options">
-                <a class="btn compact on"> Compact</a>
+                <a class="btn compact on">Compact</a>
             </div>
             <i class="bi bi-bar-chart-line"></i>
             <div class="date-unit-options btn-group" title="Date unit options">
                 <a class="btn default on">Default</a><a class="btn hour" data-unit="hour">Hour</a><a class="btn day" data-unit="day">Day</a><a class="btn month" data-unit="month">Month</a><a class="btn year" data-unit="year">Year</a>
             </div>
             <div class="date-offset-options btn-group" title="Date offset options">
-                <a class="btn previous on" data-offset="previous" title="Previous"><i class="bi bi-rewind-fill"></i></a><a class="btn current" data-offset="current" title="Next"><i class="bi bi-skip-forward-fill"></i></a>
+                <a class="btn previous on" data-offset="previous" title="Previous"><i class="bi bi-rewind-fill"></i></a><a class="btn current" data-offset="current" title="Latest"><i class="bi bi-skip-forward-fill"></i></a>
             </div>
             <div class="speed-options btn-group d-none" title="Speed options">
-                <a class="btn bi bi-fast-forward faster" title="Set to poll every second. Turn this option on only when absolutely necessary."> Faster polling interval</a>
+                <a class="btn bi bi-fast-forward faster" title="Set to poll every second. Turn this option on only when absolutely necessary.">Faster polling interval</a>
             </div>
         </div>
     </div>
     <div class="row g-0">
-        <div class="col-lg-6 event-box">
+        <div class="col-12 col-lg-6 event-box">
             <div class="title-bar">
                 <i class="bi bi-pc-display-horizontal"></i><span class="number"></span>
                 <h4 class="ellipses"></h4>
@@ -89,17 +91,17 @@
                     <div class="col-sm-12 col-md-4">
                         <div class="panel status">
                             <dl class="session-stats">
-                                <dt title="The number of active sessions">Current Active Sessions</dt>
+                                <dt title="The number of active sessions">Active Sessions</dt>
                                 <dd><span class="number numberOfActives">0</span></dd>
-                                <dt title="The highest number of sessions that have been active at a single time">Highest Active Sessions</dt>
+                                <dt title="The highest number of sessions that have been active at a single time">Peak Active Sessions</dt>
                                 <dd><span class="number highestNumberOfActives">0</span></dd>
                                 <dt title="The number of sessions created since system bootup">Created Sessions</dt>
                                 <dd><span class="number numberOfCreated">0</span></dd>
                                 <dt title="The number of expired sessions">Expired Sessions</dt>
                                 <dd><span class="number numberOfExpired">0</span></dd>
-                                <dt title="This number of sessions includes sessions that are inactive or have been transferred to a session manager on another clustered server">Unmanaged Sessions</dt>
+                                <dt title="The number of sessions that are inactive or managed by another server in a cluster">Unmanaged Sessions</dt>
                                 <dd><span class="number numberOfUnmanaged">0</span></dd>
-                                <dt title="The number of rejected sessions">Rejected Sessions</dt>
+                                <dt title="The number of rejected sessions due to reaching the maximum session limit">Rejected Sessions</dt>
                                 <dd><span class="number numberOfRejected">0</span></dd>
                             </dl>
                             <p class="since"><i>Since <span class="startTime"></span></i></p>
@@ -114,10 +116,13 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-6 visual-box">
+        <div class="col-12 col-lg-6 visual-box">
             <div class="chart-box" style="display: none;">
                 <div class="chart">
                     <button class="bi bi-fullscreen-exit reset-zoom" type="button"></button>
+                </div>
+                <div class="loading-overlay">
+                    <div class="spinner-border" role="status"></div>
                 </div>
             </div>
             <div class="chart-box available">
@@ -129,17 +134,20 @@
                 </div>
             </div>
         </div>
-        <div class="col console-box">
+        <div class="col-12 console-box">
             <div class="status-bar">
                 <h4 class="ellipses"></h4>
-                <a class="tailing-switch" title="Scroll to End of Log">
-                    <i class="tailing-status"></i>
-                </a>
-                <a class="pause-switch" title="Pause log output">
-                    <i class="icon bi bi-pause"></i>
-                </a>
                 <a class="clear-screen" title="Clear screen">
                     <i class="icon bi bi-trash"></i>
+                </a>
+                <a class="pause-switch" title="Pause log output" data-title-pause="Pause log output" data-title-resume="Resume log output">
+                    <i class="icon bi bi-pause" data-icon-pause="bi-pause" data-icon-resume="bi-play-fill"></i>
+                </a>
+                <a class="expand-switch" title="Expand" data-title-expand="Expand" data-title-compress="Compress">
+                    <i class="icon bi bi-arrows-fullscreen" data-icon-expand="bi-arrows-fullscreen" data-icon-compress="bi-fullscreen-exit"></i>
+                </a>
+                <a class="tailing-switch" title="Disable Auto Scroll" data-title-on="Disable Auto Scroll" data-title-off="Enable Auto Scroll">
+                    <i class="tailing-status"></i>
                 </a>
             </div>
             <pre class="console"></pre>
@@ -150,6 +158,6 @@
     $(function () {
         const BASE_PATH = "${pageContext.request.contextPath}";
         const INSTANCES = "${page.instances}";
-        new FrontBuilder().build(BASE_PATH, INSTANCES);
+        new DashboardBuilder().build(BASE_PATH, INSTANCES);
     });
 </script>

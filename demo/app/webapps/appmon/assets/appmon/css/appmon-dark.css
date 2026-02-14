@@ -91,13 +91,26 @@
         box-shadow: 0 8px 10px -10px rgba(50, 50, 50, 0.33);
     }
     .visual-box .chart-box {
+        background-color: #000;
+        border-top: 1px solid #333;
         box-shadow: 0 6px 10px -10px rgba(50, 50, 50, 0.45);
+    }
+    @media screen and (min-width: 992px) {
+        .visual-box .chart-box {
+            border-right: 1px solid #333;
+        }
     }
     .visual-box .chart-box .chart .reset-zoom {
         background-color: #744065;
         color: #fff;
         border-radius: 3px 0 0 3px;
         z-index: 1;
+    }
+    .visual-box .chart-box .loading-overlay {
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+    .visual-box .chart-box .loading-overlay .spinner-border {
+        color: #709185;
     }
     .session-box .panel {
         background-color: #212c28;
@@ -160,6 +173,9 @@
     }
     .console-box .status-bar .tailing-switch .tailing-status.on {
         background-color: #39aa56;
+    }
+    .console-box.maximized {
+        background-color: #222;
     }
     .console-box .console {
         color: #f1f1f1;
