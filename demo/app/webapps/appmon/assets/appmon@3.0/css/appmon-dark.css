@@ -78,13 +78,8 @@
     }
     .visual-box .chart-box {
         background-color: #000;
-        border-top: 1px solid #333;
+        border-top: 1px solid #212426;
         box-shadow: 0 6px 10px -10px rgba(50, 50, 50, 0.45);
-    }
-    @media screen and (min-width: 992px) {
-        .visual-box .chart-box {
-            border-right: 1px solid #333;
-        }
     }
     .visual-box .chart-box .chart .reset-zoom {
         background-color: #744065;
