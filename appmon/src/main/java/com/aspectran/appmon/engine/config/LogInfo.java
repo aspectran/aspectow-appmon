@@ -31,6 +31,7 @@ public class LogInfo extends DefaultParameters {
     private static final ParameterKey name;
     private static final ParameterKey title;
     private static final ParameterKey file;
+    private static final ParameterKey archivedDir;
     private static final ParameterKey charset;
     private static final ParameterKey sampleInterval;
     private static final ParameterKey lastLines;
@@ -44,11 +45,13 @@ public class LogInfo extends DefaultParameters {
         charset = new ParameterKey("charset", ValueType.STRING);
         sampleInterval = new ParameterKey("sampleInterval", ValueType.INT);
         lastLines = new ParameterKey("lastLines", ValueType.INT);
+        archivedDir = new ParameterKey("archivedDir", ValueType.STRING);
 
         parameterKeys = new ParameterKey[] {
                 name,
                 title,
                 file,
+                archivedDir,
                 charset,
                 sampleInterval,
                 lastLines
@@ -144,6 +147,22 @@ public class LogInfo extends DefaultParameters {
      */
     public void setFile(String file) {
         putValue(LogInfo.file, file);
+    }
+
+    /**
+     * Gets the path to the directory where archived log files are stored.
+     * @return the archived log directory path
+     */
+    public String getArchivedDir() {
+        return getString(archivedDir);
+    }
+
+    /**
+     * Sets the path to the directory where archived log files are stored.
+     * @param archivedDir the archived log directory path
+     */
+    public void setArchivedDir(String archivedDir) {
+        putValue(LogInfo.archivedDir, archivedDir);
     }
 
     /**

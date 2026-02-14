@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -98,11 +99,45 @@ public class LogExporter extends AbstractExporter {
     public void read(@NonNull List<String> messages, CommandOptions commandOptions) {
         if (lastLines > 0) {
             try {
+                List<String> lines = new ArrayList<>();
                 if (logFile.exists()) {
-                    List<String> lines = readLastLines(logFile, lastLines);
-                    if (!lines.isEmpty()) {
-                        messages.addAll(lines);
+                    lines.addAll(readLastLines(logFile, lastLines));
+                }
+                if (lines.size() < lastLines) {
+                    String archivedDirPath = logInfo.getArchivedDir();
+                    File archivedDir;
+                    if (archivedDirPath != null) {
+                        archivedDir = new File(archivedDirPath);
+                        if (!archivedDir.isAbsolute()) {
+                            archivedDir = new File(logFile.getParentFile(), archivedDirPath);
+                        }
+                    } else {
+                        archivedDir = new File(logFile.getParentFile(), "archived");
                     }
+
+                    if (archivedDir.exists() && archivedDir.isDirectory()) {
+                        String baseName = logFile.getName();
+                        int dotIdx = baseName.lastIndexOf('.');
+                        if (dotIdx != -1) {
+                            baseName = baseName.substring(0, dotIdx);
+                        }
+                        final String fileNamePrefix = baseName + ".";
+                        File[] archivedFiles = archivedDir.listFiles((dir, name) -> name.startsWith(fileNamePrefix));
+                        if (archivedFiles != null && archivedFiles.length > 0) {
+                            Arrays.sort(archivedFiles, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+                            for (File archivedFile : archivedFiles) {
+                                int remaining = lastLines - lines.size();
+                                List<String> archivedLines = readLastLines(archivedFile, remaining);
+                                lines.addAll(0, archivedLines);
+                                if (lines.size() >= lastLines) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!lines.isEmpty()) {
+                    messages.addAll(lines);
                 }
             } catch (IOException e) {
                 logger.error("Failed to read log file {}", logFile, e);
