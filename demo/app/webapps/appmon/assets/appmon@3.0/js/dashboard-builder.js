@@ -383,6 +383,18 @@ class DashboardBuilder {
         $(window).off("resize").on("resize", () => {
             this.viewers.forEach(v => v.updateCanvasWidth());
         });
+        $(document).off("visibilitychange").on("visibilitychange", () => {
+            if (!document.hidden) {
+                this.viewers.forEach(v => {
+                    v.resetCurrentActivityCounts();
+                });
+                this.instances.forEach(instance => {
+                    if (!instance.hidden) {
+                        this.refreshData(instance.name);
+                    }
+                });
+            }
+        });
     }
 
     refreshData(instanceName, dateOffset) {

@@ -164,6 +164,13 @@
     overflow: hidden;
     display: none;
 }
+.track-box .traffic-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
 .track-box .track-stack {
     position: absolute;
     top: 0;
@@ -171,45 +178,7 @@
     width: 180px;
     height: 120px;
     background-color: #3e132d;
-}
-@keyframes bulletAnimation {
-    from {
-        left: 0;
-    }
-    to {
-        left: calc(100% - 184px);
-    }
-}
-.track-box .bullet {
-    position: absolute;
-    top: 40%;
-    right: 10px;
-    width: 160px;
-    height: 12px;
-    border-radius: 50%;
-    background: linear-gradient(to right, rgba(9, 17, 39, 0) 25%, rgba(17, 213, 57, 0.66) 100%);
-    animation-name: bulletAnimation;
-    animation-timing-function: linear;
-    animation-iteration-count: 1;
-    animation-duration: .9s;
-    z-index: 10;
-    display: none;
-}
-.track-box .bullet.arrive {
-    background-color: #0d7aaa;
-    border: 1px solid #086893;
-    border-radius: 3px;
-    width: 160px;
-    height: 10px;
-    margin: 2px 0;
-    opacity: .4;
-}
-.track-box .bullet.error {
-    background: linear-gradient(to right, rgba(9, 17, 39, 0) 27%, rgb(255, 0, 0) 100%);
-}
-.track-box .bullet.error.arrive {
-    background-color: #a51e1e;
-    border: 1px solid #f34d4d;
+    z-index: 5;
 }
 .track-stack .activity-status-plate {
     position: absolute;
