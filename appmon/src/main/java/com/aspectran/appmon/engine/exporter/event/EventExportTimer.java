@@ -37,7 +37,10 @@ class EventExportTimer {
 
     private CyclicTimeout samplingTimer;
 
-    EventExportTimer(@NonNull ExporterManager exporterManager, @NonNull EventExporter eventExporter, int sampleInterval) {
+    EventExportTimer(
+            @NonNull ExporterManager exporterManager,
+            @NonNull EventExporter eventExporter,
+            int sampleInterval) {
         this.scheduler = exporterManager.getScheduler();
         this.eventExporter = eventExporter;
         this.sampleInterval = sampleInterval;

@@ -38,8 +38,9 @@ public abstract class AbstractMetricReader implements MetricReader {
      * @param exporterManager the exporter manager
      * @param metricInfo the metric configuration
      */
-    public AbstractMetricReader(@NonNull ExporterManager exporterManager,
-                                @NonNull MetricInfo metricInfo) {
+    public AbstractMetricReader(
+            @NonNull ExporterManager exporterManager,
+            @NonNull MetricInfo metricInfo) {
         this.exporterManager = exporterManager;
         this.metricInfo = metricInfo;
     }

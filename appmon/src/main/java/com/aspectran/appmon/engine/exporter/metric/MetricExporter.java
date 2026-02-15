@@ -52,9 +52,10 @@ public class MetricExporter extends AbstractExporter {
      * @param metricInfo the metric configuration
      * @param metricReader the reader for the metric data
      */
-    public MetricExporter(@NonNull ExporterManager exporterManager,
-                          @NonNull MetricInfo metricInfo,
-                          @NonNull MetricReader metricReader) {
+    public MetricExporter(
+            @NonNull ExporterManager exporterManager,
+            @NonNull MetricInfo metricInfo,
+            @NonNull MetricReader metricReader) {
         super(metricReader.getType());
         this.exporterManager = exporterManager;
         this.metricInfo = metricInfo;

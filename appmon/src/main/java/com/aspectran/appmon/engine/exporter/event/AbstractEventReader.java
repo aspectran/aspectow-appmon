@@ -43,9 +43,10 @@ public abstract class AbstractEventReader implements EventReader {
      * @param eventInfo the event configuration
      * @param eventCount the event counter, can be {@code null}
      */
-    public AbstractEventReader(@NonNull ExporterManager exporterManager,
-                               @NonNull EventInfo eventInfo,
-                               @Nullable EventCount eventCount) {
+    public AbstractEventReader(
+            @NonNull ExporterManager exporterManager,
+            @NonNull EventInfo eventInfo,
+            @Nullable EventCount eventCount) {
         this.exporterManager = exporterManager;
         this.eventInfo = eventInfo;
         this.eventCount = eventCount;

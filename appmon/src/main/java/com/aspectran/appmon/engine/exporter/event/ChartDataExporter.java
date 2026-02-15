@@ -56,8 +56,9 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
      * @param exporterManager the exporter manager
      * @param eventInfo the event configuration
      */
-    public ChartDataExporter(@NonNull ExporterManager exporterManager,
-                             @NonNull EventInfo eventInfo) {
+    public ChartDataExporter(
+            @NonNull ExporterManager exporterManager,
+            @NonNull EventInfo eventInfo) {
         super(TYPE);
         this.exporterManager = exporterManager;
         this.eventInfo = eventInfo;
@@ -109,18 +110,22 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
         final String dateUnit = (commandOptions != null ? commandOptions.getDateUnit() : null);
         final String dateOffset = (commandOptions != null ? commandOptions.getDateOffset() : null);
         EventCountMapper.Dao dao = exporterManager.getBean(EventCountMapper.Dao.class);
-        List<EventCountVO> list = exporterManager.instantActivity(() -> {
-            if ("hour".equals(dateUnit)) {
-                return dao.getChartDataByHour(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), zoneOffsetInSeconds, dateOffset);
-            } else if ("day".equals(dateUnit)) {
-                return dao.getChartDataByDay(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), zoneOffsetInSeconds, dateOffset);
-            } else if ("month".equals(dateUnit)) {
-                return dao.getChartDataByMonth(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), zoneOffsetInSeconds, dateOffset);
-            } else if ("year".equals(dateUnit)) {
-                return dao.getChartDataByYear(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), zoneOffsetInSeconds, dateOffset);
-            } else {
-                return dao.getChartData(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(), dateOffset);
-            }
+        List<EventCountVO> list = exporterManager.instantActivity(() -> switch (dateUnit) {
+            case "hour" ->
+                    dao.getChartDataByHour(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(),
+                            zoneOffsetInSeconds, dateOffset);
+            case "day" ->
+                    dao.getChartDataByDay(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(),
+                            zoneOffsetInSeconds, dateOffset);
+            case "month" ->
+                    dao.getChartDataByMonth(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(),
+                            zoneOffsetInSeconds, dateOffset);
+            case "year" ->
+                    dao.getChartDataByYear(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(),
+                            zoneOffsetInSeconds, dateOffset);
+            case null, default ->
+                    dao.getChartData(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(),
+                            dateOffset);
         });
 
         String[] labels = new String[list.size()];

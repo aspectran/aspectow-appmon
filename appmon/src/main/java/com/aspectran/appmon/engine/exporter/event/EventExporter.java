@@ -52,9 +52,10 @@ public class EventExporter extends AbstractExporter {
      * @param eventInfo the event configuration
      * @param eventReader the reader for the event data
      */
-    public EventExporter(@NonNull ExporterManager exporterManager,
-                         @NonNull EventInfo eventInfo,
-                         @NonNull EventReader eventReader) {
+    public EventExporter(
+            @NonNull ExporterManager exporterManager,
+            @NonNull EventInfo eventInfo,
+            @NonNull EventReader eventReader) {
         super(eventReader.getType());
         this.exporterManager = exporterManager;
         this.eventInfo = eventInfo;

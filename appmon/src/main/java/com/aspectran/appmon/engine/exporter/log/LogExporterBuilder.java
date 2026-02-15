@@ -43,8 +43,9 @@ public abstract class LogExporterBuilder {
      * @throws Exception if the exporter cannot be built
      */
     @NonNull
-    public static LogExporter build(@NonNull ExporterManager logExporterManager,
-                                    @NonNull LogInfo logInfo) throws Exception {
+    public static LogExporter build(
+            @NonNull ExporterManager logExporterManager,
+            @NonNull LogInfo logInfo) throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug(ToStringBuilder.toString("Create LogExporter", logInfo));
         }

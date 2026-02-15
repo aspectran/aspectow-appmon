@@ -77,9 +77,10 @@ public class LogExporter extends AbstractExporter {
      * @param logInfo the log configuration
      * @param logFile the log file to tail
      */
-    public LogExporter(@NonNull ExporterManager exporterManager,
-                       @NonNull LogInfo logInfo,
-                       @NonNull File logFile) {
+    public LogExporter(
+            @NonNull ExporterManager exporterManager,
+            @NonNull LogInfo logInfo,
+            @NonNull File logFile) {
         super(TYPE);
         this.exporterManager = exporterManager;
         this.logInfo = logInfo;

@@ -62,11 +62,12 @@ public class AppMonManager extends InstantActivitySupport {
      * @param domainInfoHolder the holder for domain information
      * @param instanceInfoHolder the holder for instance information
      */
-    public AppMonManager(String currentDomain,
-                         PollingConfig pollingConfig,
-                         int counterPersistInterval,
-                         DomainInfoHolder domainInfoHolder,
-                         InstanceInfoHolder instanceInfoHolder) {
+    public AppMonManager(
+            String currentDomain,
+            PollingConfig pollingConfig,
+            int counterPersistInterval,
+            DomainInfoHolder domainInfoHolder,
+            InstanceInfoHolder instanceInfoHolder) {
         this.currentDomain = currentDomain;
         this.pollingConfig = pollingConfig;
         this.counterPersistInterval = counterPersistInterval;

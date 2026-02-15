@@ -115,8 +115,7 @@ public class InstanceInfoHolder {
      * @param instanceInfoList the list of instance information
      * @return an array of instance names
      */
-    @NonNull
-    public static String[] extractInstanceNames(@NonNull List<InstanceInfo> instanceInfoList) {
+    public static String @NonNull [] extractInstanceNames(@NonNull List<InstanceInfo> instanceInfoList) {
         List<String> instanceNames = new ArrayList<>(instanceInfoList.size());
         for (InstanceInfo instanceInfo : instanceInfoList) {
             instanceNames.add(instanceInfo.getName());
