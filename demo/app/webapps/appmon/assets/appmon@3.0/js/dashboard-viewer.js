@@ -16,7 +16,6 @@ class DashboardViewer {
         this.charts = {};
         this.consoles = {};
         this.indicators = {};
-        this.prevPosition = 0;
         this.currentActivityCounts = {};
         this.cachedCanvasWidth = 0;
         this.activeBulletCount = 0;
@@ -290,7 +289,6 @@ class DashboardViewer {
     processEventData(instanceName, exporterType, eventName, messagePrefix, eventData) {
         switch (eventName) {
             case "activity":
-                console.log(eventData);
                 this.indicate(instanceName, exporterType, eventName);
                 if (eventData.activities) {
                     this.printActivityStatus(messagePrefix, eventData.activities);
