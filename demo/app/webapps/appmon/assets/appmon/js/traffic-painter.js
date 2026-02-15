@@ -37,12 +37,12 @@ class TrafficPainter {
             ? Math.min(Math.log10(activityCount + 1) / Math.log10(targetMax + 1), 1)
             : 0;
         
-        const size = 2.2 + (timeIntensity * 4);
+        const size = 3.0 + (timeIntensity * 6);
         const baseSpeed = (this.canvas.width - this.finishLineOffset) / (900 / 16.6);
         const speed = baseSpeed * (1 - (timeIntensity * 0.6));
 
         const bullet = {
-            x: 0,
+            x: -(Math.random() * 150),
             y: Math.random() * (this.canvas.height - 20) + 10,
             speed: speed,
             size: size,
@@ -67,7 +67,6 @@ class TrafficPainter {
         this.isRunning = true;
         const loop = () => {
             if (document.hidden) {
-                // If we somehow entered the loop while hidden, pause it
                 this.isRunning = false;
                 return;
             }
@@ -77,9 +76,7 @@ class TrafficPainter {
                 this.animationId = requestAnimationFrame(loop);
             } else {
                 this.isRunning = false;
-                setTimeout(() => {
-                    if (!this.isRunning) this.clear();
-                }, 500);
+                this.clear();
             }
         };
         this.animationId = requestAnimationFrame(loop);
@@ -118,17 +115,7 @@ class TrafficPainter {
     }
 
     draw() {
-        const style = window.getComputedStyle(this.canvas.parentElement);
-        const bgColor = style.backgroundColor;
-        const rgb = bgColor.match(/\d+/g);
-        
-        if (rgb && rgb.length >= 3) {
-            this.ctx.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.3)`;
-        } else {
-            this.ctx.fillStyle = 'rgba(13, 25, 57, 0.3)';
-        }
-        
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.bullets.forEach(b => {
             this.ctx.globalAlpha = b.alpha;
