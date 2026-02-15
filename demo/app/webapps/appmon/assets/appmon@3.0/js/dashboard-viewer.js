@@ -324,7 +324,7 @@ class DashboardViewer {
     printLogMessage(instanceName, exporterType, logName, exporterKey, messageContent, subType) {
         this.indicate(instanceName, exporterType, logName);
         const $console = this.getConsole$(exporterKey);
-        if ($console && !$console.data("pause")) {
+        if ($console) {
             if (subType === "p") {
                 if (messageContent) {
                     let prevBuffer = $console.data("log-prev-buffer");
@@ -344,7 +344,7 @@ class DashboardViewer {
                     this.prependToConsole($console, true);
                     $console.closest(".console-box").find(".load-previous").hide();
                 }
-            } else {
+            } else if (!$console.data("pause")) {
                 let buffer = $console.data("log-buffer");
                 if (!buffer) {
                     buffer = [];
