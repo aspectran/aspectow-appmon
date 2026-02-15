@@ -37,7 +37,7 @@ class TrafficPainter {
             ? Math.min(Math.log10(activityCount + 1) / Math.log10(targetMax + 1), 1)
             : 0;
         
-        const size = 3.0 + (timeIntensity * 6);
+        const size = 3.0 + (timeIntensity * 4) + (activityIntensity * 4);
         const baseSpeed = (this.canvas.width - this.finishLineOffset) / (900 / 16.6);
         const speed = baseSpeed * (1 - (timeIntensity * 0.6));
 
@@ -65,13 +65,19 @@ class TrafficPainter {
 
     start() {
         this.isRunning = true;
-        const loop = () => {
+        this.lastTime = performance.now();
+        const loop = (currentTime) => {
             if (document.hidden) {
                 this.isRunning = false;
                 return;
             }
-            this.update();
+            
+            const deltaTime = Math.min((currentTime - this.lastTime) / 16.66, 3.0);
+            this.lastTime = currentTime;
+
+            this.update(deltaTime);
             this.draw();
+
             if (this.bullets.length > 0) {
                 this.animationId = requestAnimationFrame(loop);
             } else {
@@ -82,7 +88,7 @@ class TrafficPainter {
         this.animationId = requestAnimationFrame(loop);
     }
 
-    update() {
+    update(deltaTime) {
         const finishLine = this.canvas.width - this.finishLineOffset;
         const now = Date.now();
 
@@ -90,7 +96,7 @@ class TrafficPainter {
             const b = this.bullets[i];
 
             if (!b.arrived) {
-                b.x += b.speed;
+                b.x += b.speed * deltaTime;
                 if (b.x >= finishLine) {
                     b.x = finishLine;
                     b.arrived = true;
@@ -99,12 +105,12 @@ class TrafficPainter {
                 }
             } else {
                 if (b.impactPulse > 0) {
-                    b.impactPulse -= 0.05;
+                    b.impactPulse -= 0.05 * deltaTime;
                 }
 
                 const stayElapsed = now - b.arrivedTime;
                 if (stayElapsed > b.elapsedTime + 200) {
-                    b.alpha -= 0.04;
+                    b.alpha -= 0.04 * deltaTime;
                     if (b.alpha <= 0) {
                         if (b.onArriving) b.onArriving();
                         this.bullets.splice(i, 1);
@@ -117,34 +123,36 @@ class TrafficPainter {
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.bullets.forEach(b => {
+        for (let i = 0; i < this.bullets.length; i++) {
+            const b = this.bullets[i];
             this.ctx.globalAlpha = b.alpha;
-            this.ctx.beginPath();
-            
-            let glowSize = b.size * (1 + b.timeIntensity);
-            if (b.arrived) {
-                glowSize = b.size * (2.0 + (b.impactPulse * 3));
-            }
-            glowSize *= (1 + b.activityIntensity);
-
-            this.ctx.shadowBlur = glowSize;
-            this.ctx.shadowColor = b.color;
-            this.ctx.fillStyle = b.color;
             
             const drawSize = b.arrived ? b.size * (1 + b.impactPulse * 0.3) : b.size;
+
+            // 1. Aura (Glow) - high performance alternative to shadowBlur
+            this.ctx.fillStyle = b.color;
+            this.ctx.beginPath();
+            let auraSize = drawSize * (1.2 + b.timeIntensity + (b.arrived ? b.impactPulse : 0));
+            this.ctx.globalAlpha = b.alpha * 0.3;
+            this.ctx.arc(b.x, b.y, auraSize, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            // 2. Main Bullet Body
+            this.ctx.globalAlpha = b.alpha;
+            this.ctx.beginPath();
             this.ctx.arc(b.x, b.y, drawSize, 0, Math.PI * 2);
             this.ctx.fill();
-            
-            if (b.activityIntensity > 0.8) {
+
+            // 3. Activity Glow (Hot Core) - high performance alternative to radial gradient
+            if (b.activityIntensity > 0.3) {
+                const coreSize = drawSize * (0.3 + b.activityIntensity * 0.4);
                 this.ctx.fillStyle = '#fff';
                 this.ctx.beginPath();
-                this.ctx.arc(b.x, b.y, drawSize * 0.4, 0, Math.PI * 2);
+                this.ctx.arc(b.x, b.y, coreSize, 0, Math.PI * 2);
                 this.ctx.fill();
             }
-            
-            this.ctx.shadowBlur = 0;
-            this.ctx.globalAlpha = 1.0;
-        });
+        }
+        this.ctx.globalAlpha = 1.0;
     }
 
     clear() {
