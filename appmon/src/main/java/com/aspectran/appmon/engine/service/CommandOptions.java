@@ -31,10 +31,13 @@ import com.aspectran.utils.apon.ValueType;
 public class CommandOptions extends DefaultParameters {
 
     public static final String COMMAND_REFRESH = "refresh";
+    public static final String COMMAND_LOAD_PREVIOUS = "loadPrevious";
 
     private static final ParameterKey command;
     private static final ParameterKey instancesToJoin;
     private static final ParameterKey instance;
+    private static final ParameterKey logName;
+    private static final ParameterKey loadedLines;
     private static final ParameterKey timeZone;
     private static final ParameterKey dateUnit;
     private static final ParameterKey dateOffset;
@@ -48,6 +51,8 @@ public class CommandOptions extends DefaultParameters {
         timeZone = new ParameterKey("timeZone", ValueType.STRING);
         dateUnit = new ParameterKey("dateUnit", ValueType.STRING);
         dateOffset = new ParameterKey("dateOffset", ValueType.STRING);
+        logName = new ParameterKey("logName", ValueType.STRING);
+        loadedLines = new ParameterKey("loadedLines", ValueType.INT);
 
         parameterKeys = new ParameterKey[] {
                 command,
@@ -55,7 +60,9 @@ public class CommandOptions extends DefaultParameters {
                 instance,
                 timeZone,
                 dateUnit,
-                dateOffset
+                dateOffset,
+                logName,
+                loadedLines
         };
     }
 
@@ -141,6 +148,22 @@ public class CommandOptions extends DefaultParameters {
 
     public void setDateOffset(String dateOffset) {
         putValue(CommandOptions.dateOffset, dateOffset);
+    }
+
+    public String getLogName() {
+        return getString(logName);
+    }
+
+    public void setLogName(String logName) {
+        putValue(CommandOptions.logName, logName);
+    }
+
+    public int getLoadedLines() {
+        return getInt(loadedLines);
+    }
+
+    public void setLoadedLines(int loadedLines) {
+        putValue(CommandOptions.loadedLines, loadedLines);
     }
 
 }

@@ -525,6 +525,9 @@
 .console-box .status-bar a.on {
     color: #ffeb00;
 }
+.console-box .status-bar a.load-previous i {
+    font-size: 1.1em;
+}
 .console-box .status-bar .tailing-switch {
     display: flex;
     align-items: center;

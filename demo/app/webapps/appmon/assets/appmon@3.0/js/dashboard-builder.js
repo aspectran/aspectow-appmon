@@ -380,6 +380,39 @@ class DashboardBuilder {
             const $consoleBox = $(e.currentTarget).closest(".console-box");
             this.viewers[$consoleBox.data("domain-index")].clearConsole($consoleBox.find(".console"));
         });
+        $(".console-box .console").off("scroll").on("scroll", (e) => {
+            const $console = $(e.currentTarget);
+            const $consoleBox = $console.closest(".console-box");
+            if ($console.scrollTop() === 0) {
+                $consoleBox.find(".load-previous").fadeIn();
+            } else {
+                $consoleBox.find(".load-previous").fadeOut();
+            }
+        });
+        $(".console-box .load-previous").off("click").on("click", (e) => {
+            const $btn = $(e.currentTarget);
+            const $consoleBox = $btn.closest(".console-box");
+            const $console = $consoleBox.find(".console");
+            const domainIndex = $consoleBox.data("domain-index");
+            const instanceName = $consoleBox.data("instance-name");
+            const logName = $consoleBox.data("log-name");
+            const loadedLines = $console.find("p").length;
+
+            if ($console.data("tailing")) {
+                $console.data("tailing", false);
+                const $tailingSwitch = $consoleBox.find(".tailing-switch");
+                $consoleBox.find(".tailing-status").removeClass("on");
+                $tailingSwitch.attr("title", $tailingSwitch.data("title-off"));
+            }
+
+            const options = [
+                "command:loadPrevious",
+                "instance:" + instanceName,
+                "logName:" + logName,
+                "loadedLines:" + loadedLines
+            ];
+            this.clients[domainIndex].sendCommand(options);
+        });
         $(window).off("resize").on("resize", () => {
             this.viewers.forEach(v => v.updateCanvasWidth());
         });

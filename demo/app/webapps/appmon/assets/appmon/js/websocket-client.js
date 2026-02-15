@@ -21,8 +21,16 @@ class WebsocketClient extends BaseClient {
     }
 
     refresh(options) {
+        let cmdOptions = ["command:refresh"];
+        if (options) {
+            cmdOptions.push(...options);
+        }
+        this.sendCommand(cmdOptions);
+    }
+
+    sendCommand(options) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            this.socket.send("command:refresh;" + (options ? options.join(";") : ""));
+            this.socket.send(options ? options.join(";") : "");
         }
     }
 

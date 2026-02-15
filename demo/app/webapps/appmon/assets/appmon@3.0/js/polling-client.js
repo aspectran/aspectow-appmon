@@ -17,7 +17,14 @@ class PollingClient extends BaseClient {
     }
 
     refresh(options) {
-        this.withCommand("command:refresh");
+        let cmdOptions = ["command:refresh"];
+        if (options) {
+            cmdOptions.push(...options);
+        }
+        this.sendCommand(cmdOptions);
+    }
+
+    sendCommand(options) {
         if (options) {
             options.forEach(option => this.withCommand(option));
         }

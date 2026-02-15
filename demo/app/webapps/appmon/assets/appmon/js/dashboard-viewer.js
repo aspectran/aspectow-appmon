@@ -193,6 +193,47 @@ class DashboardViewer {
         $console.data("timer", timer);
     }
 
+    prependToConsole($console, noAnchoring) {
+        if (!$console) return;
+        let timer = $console.data("prev-timer");
+        if (timer) {
+            clearTimeout(timer);
+        }
+        timer = setTimeout(() => {
+            const el = $console[0];
+            if (!el) return;
+
+            const buffer = $console.data("log-prev-buffer");
+            if (buffer && buffer.length > 0) {
+                const oldScrollHeight = el.scrollHeight;
+                const oldScrollTop = el.scrollTop;
+
+                const fragment = document.createDocumentFragment();
+                while (buffer.length > 0) {
+                    const item = buffer.shift();
+                    const p = document.createElement("p");
+                    if (typeof item === "string") {
+                        p.textContent = item;
+                    } else {
+                        if (item.html) p.innerHTML = item.html;
+                        else p.textContent = item.text;
+                        if (item.className) p.className = item.className;
+                    }
+                    fragment.appendChild(p);
+                }
+                el.prepend(fragment);
+
+                // Maintain scroll position (anchoring)
+                if (noAnchoring) {
+                    el.scrollTop = 0;
+                } else {
+                    el.scrollTop = oldScrollTop + (el.scrollHeight - oldScrollHeight);
+                }
+            }
+        }, 100);
+        $console.data("prev-timer", timer);
+    }
+
     printMessage(message, consoleName) {
         if (consoleName) {
             const $console = this.getConsole$(consoleName);
@@ -240,79 +281,108 @@ class DashboardViewer {
         }
 
         const instanceName = message.substring(0, idx1);
-        const exporterType = message.substring(idx1 + 1, idx2);
+        let exporterType = message.substring(idx1 + 1, idx2);
         const exporterName = message.substring(idx2 + 1, idx3);
-        const messagePrefix = message.substring(0, idx3);
-        const messageText = message.substring(idx3 + 1);
+
+        let subType = "";
+        if (exporterType.includes("/")) {
+            const parts = exporterType.split("/");
+            exporterType = parts[0];
+            subType = parts[1];
+        }
+
+        const exporterKey = instanceName + ":" + exporterType + ":" + exporterName;
+        const messageContent = message.substring(idx3 + 1);
 
         switch (exporterType) {
             case "event":
-                if (messageText.length) {
-                    const eventData = JSON.parse(messageText);
-                    this.processEventData(instanceName, exporterType, exporterName, messagePrefix, eventData);
+                if (messageContent.length) {
+                    const eventData = JSON.parse(messageContent);
+                    this.processEventData(instanceName, exporterType, exporterName, exporterKey, eventData);
                 }
                 break;
             case "data":
-                if (messageText.length) {
-                    const eventData = JSON.parse(messageText);
-                    if (eventData.chartData) {
-                        this.processChartData(instanceName, exporterType, exporterName, messagePrefix, eventData.chartData);
+                if (messageContent.length) {
+                    if (subType === "chart") {
+                        const chartData = JSON.parse(messageContent);
+                        this.processChartData(instanceName, exporterType, exporterName, exporterKey, chartData);
                     }
                 }
                 break;
             case "metric":
-                if (messageText.length) {
-                    const metricData = JSON.parse(messageText);
-                    this.processMetricData(instanceName, exporterType, exporterName, messagePrefix, metricData);
+                if (messageContent.length) {
+                    const metricData = JSON.parse(messageContent);
+                    this.processMetricData(instanceName, exporterType, exporterName, exporterKey, metricData);
                 }
                 break;
             case "log":
-                this.printLogMessage(instanceName, exporterType, exporterName, messagePrefix, messageText);
+                this.printLogMessage(instanceName, exporterType, exporterName, exporterKey, messageContent, subType);
                 break;
         }
     }
 
-    printLogMessage(instanceName, exporterType, logName, messagePrefix, messageText) {
+    printLogMessage(instanceName, exporterType, logName, exporterKey, messageContent, subType) {
         this.indicate(instanceName, exporterType, logName);
-        const $console = this.getConsole$(messagePrefix);
+        const $console = this.getConsole$(exporterKey);
         if ($console && !$console.data("pause")) {
-            let buffer = $console.data("log-buffer");
-            if (!buffer) {
-                buffer = [];
-                $console.data("log-buffer", buffer);
+            if (subType === "p") {
+                if (messageContent) {
+                    let prevBuffer = $console.data("log-prev-buffer");
+                    if (!prevBuffer) {
+                        prevBuffer = [];
+                        $console.data("log-prev-buffer", prevBuffer);
+                    }
+                    prevBuffer.push(messageContent);
+                    this.prependToConsole($console);
+                } else {
+                    let prevBuffer = $console.data("log-prev-buffer");
+                    if (!prevBuffer) {
+                        prevBuffer = [];
+                        $console.data("log-prev-buffer", prevBuffer);
+                    }
+                    prevBuffer.push({ html: "No more logs to load.", className: "event ellipses" });
+                    this.prependToConsole($console, true);
+                    $console.closest(".console-box").find(".load-previous").hide();
+                }
+            } else {
+                let buffer = $console.data("log-buffer");
+                if (!buffer) {
+                    buffer = [];
+                    $console.data("log-buffer", buffer);
+                }
+                buffer.push(messageContent);
+                this.scrollToBottom($console);
             }
-            buffer.push(messageText);
-            this.scrollToBottom($console);
         }
     }
 
-    processEventData(instanceName, exporterType, eventName, messagePrefix, eventData) {
+    processEventData(instanceName, exporterType, eventName, exporterKey, eventData) {
         switch (eventName) {
             case "activity":
                 this.indicate(instanceName, exporterType, eventName);
                 if (eventData.activities) {
-                    this.printActivityStatus(messagePrefix, eventData.activities);
+                    this.printActivityStatus(exporterKey, eventData.activities);
                 }
                 if (this.visible) {
-                    const $track = this.getDisplay$(messagePrefix);
+                    const $track = this.getDisplay$(exporterKey);
                     if ($track) {
-                        const varName = messagePrefix.replace(':', '_');
+                        const varName = exporterKey.replace(/:/g, '_');
                         if (!this.currentActivityCounts[varName]) {
                             this.currentActivityCounts[varName] = 0;
-                            this.printCurrentActivityCount(messagePrefix, 0);
+                            this.printCurrentActivityCount(exporterKey, 0);
                         }
                         this.launchBullet($track, eventData, () => {
                             this.currentActivityCounts[varName]++;
-                            this.printCurrentActivityCount(messagePrefix, this.currentActivityCounts[varName]);
+                            this.printCurrentActivityCount(exporterKey, this.currentActivityCounts[varName]);
                         }, () => {
                             if (this.currentActivityCounts[varName] > 0) {
                                 this.currentActivityCounts[varName]--;
                             }
-                            this.printCurrentActivityCount(messagePrefix, this.currentActivityCounts[varName]);
+                            this.printCurrentActivityCount(exporterKey, this.currentActivityCounts[varName]);
                         });
                     }
                 } else {
-                    this.printCurrentActivityCount(messagePrefix, 0);
+                    this.printCurrentActivityCount(exporterKey, 0);
                 }
                 this.updateActivityCount(
                     instanceName + ":" + exporterType + ":session",
@@ -320,13 +390,13 @@ class DashboardViewer {
                     eventData.activityCount || 0);
                 break;
             case "session":
-                this.printSessionEventData(messagePrefix, eventData);
+                this.printSessionEventData(exporterKey, eventData);
                 break;
         }
     }
 
-    processMetricData(instanceName, exporterType, metricName, messagePrefix, metricData) {
-        const $metric = this.getMetric$(messagePrefix);
+    processMetricData(instanceName, exporterType, metricName, exporterKey, metricData) {
+        const $metric = this.getMetric$(exporterKey);
         if ($metric) {
             let formatted = metricData.format;
             for (let key in metricData.data) {
@@ -401,8 +471,8 @@ class DashboardViewer {
         }
     }
 
-    printActivityStatus(messagePrefix, activities) {
-        const $activityStatus = this.getIndicator$(messagePrefix);
+    printActivityStatus(exporterKey, activities) {
+        const $activityStatus = this.getIndicator$(exporterKey);
         if ($activityStatus) {
             const separator = (activities.errors > 0 ? " / " : (activities.interim > 0 ? "+" : "-"));
             $activityStatus.find(".interim .separator").text(separator);
@@ -412,8 +482,8 @@ class DashboardViewer {
         }
     }
 
-    resetInterimActivityStatus(messagePrefix) {
-        const $activityStatus = this.getIndicator$(messagePrefix);
+    resetInterimActivityStatus(exporterKey) {
+        const $activityStatus = this.getIndicator$(exporterKey);
         if ($activityStatus) {
             $activityStatus.find(".interim .separator").text("");
             $activityStatus.find(".interim .total").text(0);
@@ -421,9 +491,9 @@ class DashboardViewer {
         }
     }
 
-    resetInterimTimer(messagePrefix) {
+    resetInterimTimer(exporterKey) {
         if (this.sampleInterval) {
-            const $activityStatus = this.getIndicator$(messagePrefix);
+            const $activityStatus = this.getIndicator$(exporterKey);
             if ($activityStatus) {
                 const $samplingTimerBar = $activityStatus.find(".sampling-timer-bar");
                 const $samplingTimerStatus = $activityStatus.find(".sampling-timer-status");
@@ -466,15 +536,15 @@ class DashboardViewer {
         }
     }
 
-    printCurrentActivityCount(messagePrefix, count) {
-        const $activityStatus = this.getIndicator$(messagePrefix);
+    printCurrentActivityCount(exporterKey, count) {
+        const $activityStatus = this.getIndicator$(exporterKey);
         if ($activityStatus) {
             $activityStatus.find(".current .total").text(count);
         }
     }
 
-    printSessionEventData(messagePrefix, eventData) {
-        const $display = this.getDisplay$(messagePrefix);
+    printSessionEventData(exporterKey, eventData) {
+        const $display = this.getDisplay$(exporterKey);
         if ($display) {
             $display.find(".numberOfCreated").text(eventData.numberOfCreated);
             $display.find(".numberOfExpired").text(eventData.numberOfExpired);
@@ -567,8 +637,8 @@ class DashboardViewer {
         else $li.prependTo($sessions);
     }
 
-    updateActivityCount(messagePrefix, sessionId, activityCount) {
-        const $display = this.getDisplay$(messagePrefix);
+    updateActivityCount(exporterKey, sessionId, activityCount) {
+        const $display = this.getDisplay$(exporterKey);
         if ($display) {
             const $li = $display.find("ul.sessions li[data-sid='" + sessionId + "']");
             const $count = $li.find(".count").text(activityCount);
@@ -577,8 +647,8 @@ class DashboardViewer {
         }
     }
 
-    processChartData(instanceName, exporterType, eventName, messagePrefix, chartData) {
-        const $chart = this.getChart$(messagePrefix);
+    processChartData(instanceName, exporterType, eventName, exporterKey, chartData) {
+        const $chart = this.getChart$(exporterKey);
         if (!$chart) return;
         this.setLoading(instanceName, false);
 

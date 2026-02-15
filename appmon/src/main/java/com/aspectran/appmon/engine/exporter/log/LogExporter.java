@@ -58,6 +58,8 @@ public class LogExporter extends AbstractExporter {
 
     private final String prefix;
 
+    private final String plogPrefix;
+
     /** the Charset to be used for reading the file */
     private final Charset charset;
 
@@ -85,6 +87,7 @@ public class LogExporter extends AbstractExporter {
         this.exporterManager = exporterManager;
         this.logInfo = logInfo;
         this.prefix = logInfo.getInstanceName() + ":" + TYPE + ":" + logInfo.getName() + ":";
+        this.plogPrefix = logInfo.getInstanceName() + ":" + TYPE + "/p:" + logInfo.getName() + ":";
         this.charset = (logInfo.getCharset() != null ? Charset.forName(logInfo.getCharset()): DEFAULT_CHARSET);
         this.sampleInterval = (logInfo.getSampleInterval() > 0 ? logInfo.getSampleInterval() : DEFAULT_SAMPLE_INTERVAL);
         this.lastLines = logInfo.getLastLines();
@@ -105,27 +108,10 @@ public class LogExporter extends AbstractExporter {
                     lines.addAll(readLastLines(logFile, lastLines));
                 }
                 if (lines.size() < lastLines) {
-                    String archivedDirPath = logInfo.getArchivedDir();
-                    File archivedDir;
-                    if (archivedDirPath != null) {
-                        archivedDir = new File(archivedDirPath);
-                        if (!archivedDir.isAbsolute()) {
-                            archivedDir = new File(logFile.getParentFile(), archivedDirPath);
-                        }
-                    } else {
-                        archivedDir = new File(logFile.getParentFile(), "archived");
-                    }
-
+                    File archivedDir = getArchivedDir();
                     if (archivedDir.exists() && archivedDir.isDirectory()) {
-                        String baseName = logFile.getName();
-                        int dotIdx = baseName.lastIndexOf('.');
-                        if (dotIdx != -1) {
-                            baseName = baseName.substring(0, dotIdx);
-                        }
-                        final String fileNamePrefix = baseName + ".";
-                        File[] archivedFiles = archivedDir.listFiles((dir, name) -> name.startsWith(fileNamePrefix));
-                        if (archivedFiles != null && archivedFiles.length > 0) {
-                            Arrays.sort(archivedFiles, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+                        File[] archivedFiles = getArchivedFiles(archivedDir);
+                        if (archivedFiles != null) {
                             for (File archivedFile : archivedFiles) {
                                 int remaining = lastLines - lines.size();
                                 List<String> archivedLines = readLastLines(archivedFile, remaining);
@@ -144,6 +130,127 @@ public class LogExporter extends AbstractExporter {
                 logger.error("Failed to read log file {}", logFile, e);
             }
         }
+    }
+
+    @Override
+    public void readIfChanged(@NonNull List<String> messages, @NonNull CommandOptions commandOptions) {
+        if (commandOptions.hasCommand(CommandOptions.COMMAND_LOAD_PREVIOUS)) {
+            if (getName().equals(commandOptions.getLogName())) {
+                try {
+                    int loadedLines = commandOptions.getLoadedLines();
+                    List<String> lines = readPreviousLines(loadedLines, lastLines);
+                    if (!lines.isEmpty()) {
+                        for (String line : lines) {
+                            messages.add(plogPrefix + line);
+                        }
+                    } else {
+                        messages.add(plogPrefix);
+                    }
+                } catch (IOException e) {
+                    logger.error("Failed to read previous log lines", e);
+                }
+            }
+        }
+    }
+
+    @NonNull
+    private List<String> readPreviousLines(int loadedLines, int countToRead) throws IOException {
+        int totalSkipped = 0;
+        List<String> lines = new ArrayList<>();
+
+        // Main log file
+        if (logFile.exists()) {
+            try (ReversedLinesFileReader reader = ReversedLinesFileReader.builder()
+                    .setFile(logFile)
+                    .setCharset(charset)
+                    .get()) {
+                while (totalSkipped < loadedLines) {
+                    if (reader.readLine() == null) {
+                        break;
+                    }
+                    totalSkipped++;
+                }
+                if (totalSkipped == loadedLines) {
+                    String line;
+                    while (lines.size() < countToRead && (line = reader.readLine()) != null) {
+                        lines.add(line);
+                    }
+                    if (!lines.isEmpty()) {
+                        Collections.reverse(lines);
+                    }
+                }
+            }
+        }
+
+        if (lines.size() >= countToRead) {
+            return lines;
+        }
+
+        // Archived files
+        File archivedDir = getArchivedDir();
+        if (archivedDir.exists() && archivedDir.isDirectory()) {
+            File[] archivedFiles = getArchivedFiles(archivedDir);
+            if (archivedFiles != null) {
+                for (File archivedFile : archivedFiles) {
+                    try (ReversedLinesFileReader reader = ReversedLinesFileReader.builder()
+                            .setFile(archivedFile)
+                            .setCharset(charset)
+                            .get()) {
+                        while (totalSkipped < loadedLines) {
+                            if (reader.readLine() == null) {
+                                break;
+                            }
+                            totalSkipped++;
+                        }
+                        if (totalSkipped == loadedLines) {
+                            List<String> moreLines = new ArrayList<>();
+                            int remaining = countToRead - lines.size();
+                            String line;
+                            while (moreLines.size() < remaining && (line = reader.readLine()) != null) {
+                                moreLines.add(line);
+                            }
+                            if (!moreLines.isEmpty()) {
+                                Collections.reverse(moreLines);
+                                lines.addAll(0, moreLines);
+                            }
+                        }
+                    }
+                    if (lines.size() >= countToRead) {
+                        break;
+                    }
+                }
+            }
+        }
+        return lines;
+    }
+
+    @NonNull
+    private File getArchivedDir() {
+        String archivedDirPath = logInfo.getArchivedDir();
+        File archivedDir;
+        if (archivedDirPath != null) {
+            archivedDir = new File(archivedDirPath);
+            if (!archivedDir.isAbsolute()) {
+                archivedDir = new File(logFile.getParentFile(), archivedDirPath);
+            }
+        } else {
+            archivedDir = new File(logFile.getParentFile(), "archived");
+        }
+        return archivedDir;
+    }
+
+    private File[] getArchivedFiles(File archivedDir) {
+        String baseName = logFile.getName();
+        int dotIdx = baseName.lastIndexOf('.');
+        if (dotIdx != -1) {
+            baseName = baseName.substring(0, dotIdx);
+        }
+        final String fileNamePrefix = baseName + ".";
+        File[] archivedFiles = archivedDir.listFiles((dir, name) -> name.startsWith(fileNamePrefix));
+        if (archivedFiles != null && archivedFiles.length > 0) {
+            Arrays.sort(archivedFiles, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+        }
+        return archivedFiles;
     }
 
     @NonNull

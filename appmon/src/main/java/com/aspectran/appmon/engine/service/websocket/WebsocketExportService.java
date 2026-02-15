@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static com.aspectran.appmon.engine.service.CommandOptions.COMMAND_LOAD_PREVIOUS;
 import static com.aspectran.appmon.engine.service.CommandOptions.COMMAND_REFRESH;
 
 /**
@@ -122,6 +123,7 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
                 joinComplete(session);
                 break;
             case COMMAND_REFRESH:
+            case COMMAND_LOAD_PREVIOUS:
                 refreshData(session, commandOptions);
         }
     }

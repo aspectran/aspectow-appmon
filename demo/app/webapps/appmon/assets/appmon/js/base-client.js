@@ -39,6 +39,14 @@ class BaseClient {
     }
 
     /**
+     * Sends a command with the specified options.
+     * @param {string[]} [options] - Command options.
+     */
+    sendCommand(options) {
+        throw new Error("Method 'sendCommand()' must be implemented.");
+    }
+
+    /**
      * Handles reconnection logic when a connection is lost or fails.
      * @param {string} [instancesToJoin] - Names of instances to join.
      */

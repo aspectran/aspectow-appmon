@@ -136,7 +136,8 @@ public class PollingExportService implements ExportService {
             if (!commandOptions.hasTimeZone()) {
                 commandOptions.setTimeZone(serviceSession.getTimeZone());
             }
-            if (commandOptions.hasCommand(COMMAND_REFRESH)) {
+            if (commandOptions.hasCommand(COMMAND_REFRESH) ||
+                    commandOptions.hasCommand(CommandOptions.COMMAND_LOAD_PREVIOUS)) {
                 List<String> newMessages = appMonManager.getExportServiceManager().getNewMessages(serviceSession, commandOptions);
                 for (String msg : newMessages) {
                     sessionManager.push(msg);

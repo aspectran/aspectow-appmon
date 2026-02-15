@@ -62,7 +62,7 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
         super(TYPE);
         this.exporterManager = exporterManager;
         this.eventInfo = eventInfo;
-        this.prefix = eventInfo.getInstanceName() + ":" + TYPE + ":" + eventInfo.getName() + ":";
+        this.prefix = eventInfo.getInstanceName() + ":" + TYPE + "/chart:" + eventInfo.getName() + ":";
     }
 
     @Override
@@ -147,14 +147,12 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
                 .prettyPrint(false)
                 .nullWritable(false)
                 .object()
-                    .object("chartData")
-                        .put("dateUnit", dateUnit)
-                        .put("dateOffset", dateOffset)
-                        .put("labels", labels)
-                        .put("data1", data1)
-                        .put("data2", data2)
-                        .put("rolledUp", rolledUp)
-                    .endObject()
+                    .put("dateUnit", dateUnit)
+                    .put("dateOffset", dateOffset)
+                    .put("labels", labels)
+                    .put("data1", data1)
+                    .put("data2", data2)
+                    .put("rolledUp", rolledUp)
                 .endObject()
                 .toString();
     }

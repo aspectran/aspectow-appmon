@@ -140,6 +140,9 @@
         <div class="col-12 console-box">
             <div class="status-bar">
                 <h4 class="ellipses"></h4>
+                <a class="load-previous" title="Load previous logs" style="display: none;">
+                    <i class="icon bi bi-arrow-up-circle"></i>
+                </a>
                 <a class="clear-screen" title="Clear screen">
                     <i class="icon bi bi-trash"></i>
                 </a>
