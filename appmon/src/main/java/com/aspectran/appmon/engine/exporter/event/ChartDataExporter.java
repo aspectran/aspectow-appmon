@@ -29,9 +29,13 @@ import com.aspectran.utils.json.JsonBuilder;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
@@ -133,7 +137,7 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
         long[] data2 = new long[list.size()];
         for (int i = 0; i < list.size(); i++) {
             EventCountVO vo = list.get(i);
-            labels[i] = vo.getDatetime();
+            labels[i] = normalizeDatetime(vo.getDatetime(), dateUnit, zoneOffsetInSeconds);
             data1[i] = vo.getDelta();
             data2[i] = vo.getError();
         }
@@ -141,8 +145,35 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
         return toJson(dateUnit, dateOffset, labels, data1, data2, false);
     }
 
-    private String toJson(String dateUnit, String dateOffset, String[] labels,
-                          long[] data1, long[] data2, boolean rolledUp) {
+    private String normalizeDatetime(String datetime, String dateUnit, int zoneOffsetInSeconds) {
+        if (dateUnit == null || datetime == null || datetime.length() != 12) {
+            return datetime;
+        }
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+            LocalDateTime utcTime = LocalDateTime.parse(datetime, formatter);
+            Instant utcInstant = utcTime.toInstant(ZoneOffset.UTC);
+
+            ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds(zoneOffsetInSeconds);
+            ZonedDateTime localTime = ZonedDateTime.ofInstant(utcInstant, zoneOffset);
+
+            ZonedDateTime normalizedLocal = switch (dateUnit) {
+                case "hour" -> localTime.truncatedTo(ChronoUnit.HOURS);
+                case "day" -> localTime.truncatedTo(ChronoUnit.DAYS);
+                case "month" -> localTime.withDayOfMonth(1).truncatedTo(ChronoUnit.DAYS);
+                case "year" -> localTime.withDayOfYear(1).truncatedTo(ChronoUnit.DAYS);
+                default -> localTime;
+            };
+
+            return normalizedLocal.withZoneSameInstant(ZoneOffset.UTC).format(formatter);
+        } catch (Exception e) {
+            return datetime;
+        }
+    }
+
+    private String toJson(
+            String dateUnit, String dateOffset, String[] labels,
+            long[] data1, long[] data2, boolean rolledUp) {
         return new JsonBuilder()
                 .prettyPrint(false)
                 .nullWritable(false)
