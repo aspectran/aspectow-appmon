@@ -7,7 +7,7 @@
 
 Aspectow AppMon is a powerful monitoring tool that provides an integrated, real-time view of logs, events, and metrics for your Aspectran-based application servers. It helps you observe and analyze the behavior of your applications, making it easier to debug issues, optimize performance, and ensure stability.
 
-<img width="1042" alt="petclinic-screenshot" src="https://aspectran.com/images/projects/appmon.png">
+<img width="1042" alt="AppMon v3.0 Dashboard Screenshot" src="https://appmon-assets.aspectran.com/screenshots/appmon-v3-dashboard-dark.jpg">
 
 ## Features
 
