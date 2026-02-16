@@ -132,11 +132,16 @@
                 select datetime, delta, error
                 from (
                     select min(datetime) as datetime, sum(delta) delta, sum(error) error
-                    from appmon_event_count
-                    where domain = #{domain} and instance = #{instance} and event = #{event}
-                <if test="dateOffset != null">
-                    and datetime &lt; #{dateOffset}
-                </if>
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                        order by datetime desc
+                    )
+                    where rownum &lt;= 2000
                     group by to_char(to_date(datetime, 'YYYYMMDDHH24MI') + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYYMMDDHH24')
                     order by 1 desc
                 )
@@ -147,11 +152,16 @@
                 select datetime, delta, error
                 from (
                     select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
-                    from appmon_event_count
-                    where domain = #{domain} and instance = #{instance} and event = #{event}
-                <if test="dateOffset != null">
-                    and datetime &lt; #{dateOffset}
-                </if>
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                        order by datetime desc
+                        limit 2000
+                    ) as raw
                     group by date_format(date_add(str_to_date(datetime, '%Y%m%d%H%i'), interval #{zoneOffset} second), '%Y%m%d%H')
                     order by 1 desc
                     limit 72
@@ -162,11 +172,16 @@
                 select datetime, delta, error
                 from (
                     select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
-                    from appmon_event_count
-                    where domain = #{domain} and instance = #{instance} and event = #{event}
-                <if test="dateOffset != null">
-                    and datetime &lt; #{dateOffset}
-                </if>
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                        order by datetime desc
+                        limit 2000
+                    ) as raw
                     group by formatdatetime(dateadd(second, #{zoneOffset}, parsedatetime(datetime, 'yyyyMMddHHmm')), 'yyyyMMddHH')
                     order by 1 desc
                     limit 72
@@ -182,11 +197,16 @@
                 select datetime, delta, error
                 from (
                     select min(datetime) as datetime, sum(delta) delta, sum(error) error
-                    from appmon_event_count
-                    where domain = #{domain} and instance = #{instance} and event = #{event}
-                <if test="dateOffset != null">
-                    and datetime &lt; #{dateOffset}
-                </if>
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                        order by datetime desc
+                    )
+                    where rownum &lt;= 5000
                     group by to_char(to_date(datetime, 'YYYYMMDDHH24MI') + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYYMMDD')
                     order by 1 desc
                 )
@@ -197,11 +217,16 @@
                 select datetime, delta, error
                 from (
                     select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
-                    from appmon_event_count
-                    where domain = #{domain} and instance = #{instance} and event = #{event}
-                <if test="dateOffset != null">
-                    and datetime &lt; #{dateOffset}
-                </if>
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                        order by datetime desc
+                        limit 5000
+                    ) as raw
                     group by date_format(date_add(str_to_date(datetime, '%Y%m%d%H%i'), interval #{zoneOffset} second), '%Y%m%d')
                     order by 1 desc
                     limit 72
@@ -212,11 +237,16 @@
                 select datetime, delta, error
                 from (
                     select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
-                    from appmon_event_count
-                    where domain = #{domain} and instance = #{instance} and event = #{event}
-                <if test="dateOffset != null">
-                    and datetime &lt; #{dateOffset}
-                </if>
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                        order by datetime desc
+                        limit 5000
+                    ) as raw
                     group by formatdatetime(dateadd(second, #{zoneOffset}, parsedatetime(datetime, 'yyyyMMddHHmm')), 'yyyyMMdd')
                     order by 1 desc
                     limit 72
@@ -232,11 +262,16 @@
                 select datetime, delta, error
                 from (
                     select min(datetime) as datetime, sum(delta) delta, sum(error) error
-                    from appmon_event_count
-                    where domain = #{domain} and instance = #{instance} and event = #{event}
-                <if test="dateOffset != null">
-                    and datetime &lt; #{dateOffset}
-                </if>
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                        order by datetime desc
+                    )
+                    where rownum &lt;= 15000
                     group by to_char(to_date(datetime, 'YYYYMMDDHH24MI') + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYYMM')
                     order by 1 desc
                 )
@@ -247,11 +282,16 @@
                 select datetime, delta, error
                 from (
                     select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
-                    from appmon_event_count
-                    where domain = #{domain} and instance = #{instance} and event = #{event}
-                <if test="dateOffset != null">
-                    and datetime &lt; #{dateOffset}
-                </if>
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                        order by datetime desc
+                        limit 15000
+                    ) as raw
                     group by date_format(date_add(str_to_date(datetime, '%Y%m%d%H%i'), interval #{zoneOffset} second), '%Y%m')
                     order by 1 desc
                     limit 72
@@ -262,11 +302,16 @@
                 select datetime, delta, error
                 from (
                     select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
-                    from appmon_event_count
-                    where domain = #{domain} and instance = #{instance} and event = #{event}
-                <if test="dateOffset != null">
-                    and datetime &lt; #{dateOffset}
-                </if>
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                        order by datetime desc
+                        limit 15000
+                    ) as raw
                     group by formatdatetime(dateadd(second, #{zoneOffset}, parsedatetime(datetime, 'yyyyMMddHHmm')), 'yyyyMM')
                     order by 1 desc
                     limit 72
@@ -282,11 +327,16 @@
                 select datetime, delta, error
                 from (
                     select min(datetime) as datetime, sum(delta) delta, sum(error) error
-                    from appmon_event_count
-                    where domain = #{domain} and instance = #{instance} and event = #{event}
-                <if test="dateOffset != null">
-                    and datetime &lt; #{dateOffset}
-                </if>
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                        order by datetime desc
+                    )
+                    where rownum &lt;= 50000
                     group by to_char(to_date(datetime, 'YYYYMMDDHH24MI') + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYY')
                     order by 1 desc
                 )
@@ -297,11 +347,16 @@
                 select datetime, delta, error
                 from (
                     select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
-                    from appmon_event_count
-                    where domain = #{domain} and instance = #{instance} and event = #{event}
-                <if test="dateOffset != null">
-                    and datetime &lt; #{dateOffset}
-                </if>
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                        order by datetime desc
+                        limit 50000
+                    ) as raw
                     group by date_format(date_add(str_to_date(datetime, '%Y%m%d%H%i'), interval #{zoneOffset} second), '%Y')
                     order by 1 desc
                     limit 72
@@ -312,11 +367,16 @@
                 select datetime, delta, error
                 from (
                     select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
-                    from appmon_event_count
-                    where domain = #{domain} and instance = #{instance} and event = #{event}
-                <if test="dateOffset != null">
-                    and datetime &lt; #{dateOffset}
-                </if>
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                        order by datetime desc
+                        limit 50000
+                    ) as raw
                     group by formatdatetime(dateadd(second, #{zoneOffset}, parsedatetime(datetime, 'yyyyMMddHHmm')), 'yyyy')
                     order by 1 desc
                     limit 72
