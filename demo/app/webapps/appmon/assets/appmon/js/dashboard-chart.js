@@ -108,7 +108,7 @@ class DashboardChart {
                     x: {
                         display: true,
                         ticks: {
-                            autoSkip: true,
+                            autoSkip: false,
                             includeBounds: false,
                             callback: (value, index) => {
                                 const datetime = dayjs(labels[value]);
