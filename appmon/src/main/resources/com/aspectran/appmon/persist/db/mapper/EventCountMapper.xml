@@ -362,7 +362,7 @@
                     limit 100
                 ) as x
                 order by 1
-            </otherwise>
+            </when>
             <otherwise>
                 select datetime, delta, error
                 from (
