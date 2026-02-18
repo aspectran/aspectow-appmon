@@ -28,8 +28,9 @@ import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.json.JsonBuilder;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -46,6 +47,8 @@ import java.util.List;
  * <p>Created: 2024-12-18</p>
  */
 public class ChartDataExporter extends AbstractExporter implements EventCountRollupListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(ChartDataExporter.class);
 
     private static final ExporterType TYPE = ExporterType.DATA;
 
@@ -95,7 +98,13 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
      */
     @Override
     public void onRolledUp(@NonNull EventCount eventCount) {
-        String[] labels = new String[] { eventCount.getTallied().getDatetime() };
+        LocalDateTime dt = eventCount.getTallied().getDatetime();
+        if (dt == null) {
+            return;
+        }
+        String datetime = dt.truncatedTo(ChronoUnit.MINUTES)
+                .atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        String[] labels = new String[] { datetime };
         long[] data1 = new long[] { eventCount.getTallied().getDelta() };
         long[] data2 = new long[] { eventCount.getTallied().getError() };
         String message = toJson(null, null, labels, data1, data2, true);
@@ -104,70 +113,92 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
 
     private String readChartData(@Nullable CommandOptions commandOptions) {
         String timeZone = (commandOptions != null ? commandOptions.getTimeZone() : null);
-        final int zoneOffsetInSeconds;
+        String dateUnit = (commandOptions != null ? commandOptions.getDateUnit() : null);
+        String dateOffsetStr = (commandOptions != null ? commandOptions.getDateOffset() : null);
+
+        int zoneOffsetInSeconds = 0;
         if (timeZone != null) {
-            ZoneOffset zoneOffset = ZonedDateTime.now(ZoneId.of(timeZone)).getOffset();
-            zoneOffsetInSeconds = zoneOffset.getTotalSeconds();
-        } else {
-            zoneOffsetInSeconds = 0;
+            try {
+                zoneOffsetInSeconds = ZonedDateTime.now(ZoneId.of(timeZone)).getOffset().getTotalSeconds();
+            } catch (Exception e) {
+                // Ignore invalid timeZone
+            }
         }
-        final String dateUnit = (commandOptions != null ? commandOptions.getDateUnit() : null);
-        final String dateOffset = (commandOptions != null ? commandOptions.getDateOffset() : null);
+
+        LocalDateTime dateOffset = null;
+        if (dateOffsetStr != null) {
+            try {
+                ZonedDateTime utcOffset = ZonedDateTime.parse(dateOffsetStr);
+                ZonedDateTime truncated = truncateToUnit(utcOffset.toLocalDateTime(), dateUnit, zoneOffsetInSeconds);
+                dateOffset = truncated.toLocalDateTime();
+            } catch (Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to parse dateOffset: {}", dateOffsetStr);
+                }
+            }
+        }
+
+        final int finalZoneOffsetInSeconds = zoneOffsetInSeconds;
+        final LocalDateTime finalDateOffset = dateOffset;
         EventCountMapper.Dao dao = exporterManager.getBean(EventCountMapper.Dao.class);
-        List<EventCountVO> list = exporterManager.instantActivity(() -> switch (dateUnit) {
-            case "hour" ->
-                    dao.getChartDataByHour(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(),
-                            zoneOffsetInSeconds, dateOffset);
-            case "day" ->
-                    dao.getChartDataByDay(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(),
-                            zoneOffsetInSeconds, dateOffset);
-            case "month" ->
-                    dao.getChartDataByMonth(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(),
-                            zoneOffsetInSeconds, dateOffset);
-            case "year" ->
-                    dao.getChartDataByYear(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(),
-                            zoneOffsetInSeconds, dateOffset);
-            case null, default ->
-                    dao.getChartData(eventInfo.getDomainName(), eventInfo.getInstanceName(), eventInfo.getName(),
-                            dateOffset);
+        List<EventCountVO> list = exporterManager.instantActivity(() -> {
+            String domain = eventInfo.getDomainName();
+            String instance = eventInfo.getInstanceName();
+            String name = eventInfo.getName();
+            return switch (dateUnit) {
+                case "hour" -> dao.getChartDataByHour(domain, instance, name, finalZoneOffsetInSeconds, finalDateOffset);
+                case "day" -> dao.getChartDataByDay(domain, instance, name, finalZoneOffsetInSeconds, finalDateOffset);
+                case "month" -> dao.getChartDataByMonth(domain, instance, name, finalZoneOffsetInSeconds, finalDateOffset);
+                case "year" -> dao.getChartDataByYear(domain, instance, name, finalZoneOffsetInSeconds, finalDateOffset);
+                case null, default -> dao.getChartData(domain, instance, name, finalDateOffset);
+            };
         });
 
-        String[] labels = new String[list.size()];
-        long[] data1 = new long[list.size()];
-        long[] data2 = new long[list.size()];
-        for (int i = 0; i < list.size(); i++) {
+        int size = list.size();
+        String[] labels = new String[size];
+        long[] data1 = new long[size];
+        long[] data2 = new long[size];
+        for (int i = 0; i < size; i++) {
             EventCountVO vo = list.get(i);
             labels[i] = normalizeDatetime(vo.getDatetime(), dateUnit, zoneOffsetInSeconds);
             data1[i] = vo.getDelta();
             data2[i] = vo.getError();
         }
 
-        return toJson(dateUnit, dateOffset, labels, data1, data2, false);
+        String effectiveDateOffset = (dateOffset != null ?
+                dateOffset.atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) : null);
+        return toJson(dateUnit, effectiveDateOffset, labels, data1, data2, false);
     }
 
-    private String normalizeDatetime(String datetime, String dateUnit, int zoneOffsetInSeconds) {
-        if (dateUnit == null || datetime == null || datetime.length() != 12) {
-            return datetime;
+    @Nullable
+    private String normalizeDatetime(LocalDateTime datetime, String dateUnit, int zoneOffsetInSeconds) {
+        ZonedDateTime truncated = truncateToUnit(datetime, dateUnit, zoneOffsetInSeconds);
+        return (truncated != null ? truncated.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) : null);
+    }
+
+    private ZonedDateTime truncateToUnit(LocalDateTime datetime, String dateUnit, int zoneOffsetInSeconds) {
+        if (datetime == null) {
+            return null;
+        }
+        ZonedDateTime utcTime = datetime.atZone(ZoneOffset.UTC);
+        if (dateUnit == null) {
+            return utcTime.truncatedTo(ChronoUnit.MINUTES);
         }
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-            LocalDateTime utcTime = LocalDateTime.parse(datetime, formatter);
-            Instant utcInstant = utcTime.toInstant(ZoneOffset.UTC);
-
             ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds(zoneOffsetInSeconds);
-            ZonedDateTime localTime = ZonedDateTime.ofInstant(utcInstant, zoneOffset);
+            ZonedDateTime localTime = utcTime.withZoneSameInstant(zoneOffset);
 
             ZonedDateTime normalizedLocal = switch (dateUnit) {
                 case "hour" -> localTime.truncatedTo(ChronoUnit.HOURS);
                 case "day" -> localTime.truncatedTo(ChronoUnit.DAYS);
                 case "month" -> localTime.withDayOfMonth(1).truncatedTo(ChronoUnit.DAYS);
                 case "year" -> localTime.withDayOfYear(1).truncatedTo(ChronoUnit.DAYS);
-                default -> localTime;
+                default -> localTime.truncatedTo(ChronoUnit.MINUTES);
             };
 
-            return normalizedLocal.withZoneSameInstant(ZoneOffset.UTC).format(formatter);
+            return normalizedLocal.withZoneSameInstant(ZoneOffset.UTC);
         } catch (Exception e) {
-            return datetime;
+            return utcTime.truncatedTo(ChronoUnit.MINUTES);
         }
     }
 

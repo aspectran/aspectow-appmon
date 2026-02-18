@@ -22,6 +22,7 @@ import com.aspectran.mybatis.SqlMapperAccess;
 import com.aspectran.mybatis.SqlMapperProvider;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -39,15 +40,15 @@ public interface EventCountMapper {
 
     int insertEventCount(EventCountVO eventCountVO);
 
-    List<EventCountVO> getChartData(String domain, String instance, String event, String dateOffset);
+    List<EventCountVO> getChartData(String domain, String instance, String event, LocalDateTime dateOffset);
 
-    List<EventCountVO> getChartDataByHour(String domain, String instance, String event, int zoneOffset, String dateOffset);
+    List<EventCountVO> getChartDataByHour(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset);
 
-    List<EventCountVO> getChartDataByDay(String domain, String instance, String event, int zoneOffset, String dateOffset);
+    List<EventCountVO> getChartDataByDay(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset);
 
-    List<EventCountVO> getChartDataByMonth(String domain, String instance, String event, int zoneOffset, String dateOffset);
+    List<EventCountVO> getChartDataByMonth(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset);
 
-    List<EventCountVO> getChartDataByYear(String domain, String instance, String event, int zoneOffset, String dateOffset);
+    List<EventCountVO> getChartDataByYear(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset);
 
     /**
      * Data Access Object (DAO) for {@link EventCountMapper}.
@@ -77,27 +78,27 @@ public interface EventCountMapper {
         }
 
         @Override
-        public List<EventCountVO> getChartData(String domain, String instance, String event, String dateOffset) {
+        public List<EventCountVO> getChartData(String domain, String instance, String event, LocalDateTime dateOffset) {
             return simple().getChartData(domain, instance, event, dateOffset);
         }
 
         @Override
-        public List<EventCountVO> getChartDataByHour(String domain, String instance, String event, int zoneOffset, String dateOffset) {
+        public List<EventCountVO> getChartDataByHour(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset) {
             return simple().getChartDataByHour(domain, instance, event, zoneOffset, dateOffset);
         }
 
         @Override
-        public List<EventCountVO> getChartDataByDay(String domain, String instance, String event, int zoneOffset, String dateOffset) {
+        public List<EventCountVO> getChartDataByDay(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset) {
             return simple().getChartDataByDay(domain, instance, event, zoneOffset, dateOffset);
         }
 
         @Override
-        public List<EventCountVO> getChartDataByMonth(String domain, String instance, String event, int zoneOffset, String dateOffset) {
+        public List<EventCountVO> getChartDataByMonth(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset) {
             return simple().getChartDataByMonth(domain, instance, event, zoneOffset, dateOffset);
         }
 
         @Override
-        public List<EventCountVO> getChartDataByYear(String domain, String instance, String event, int zoneOffset, String dateOffset) {
+        public List<EventCountVO> getChartDataByYear(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset) {
             return simple().getChartDataByYear(domain, instance, event, zoneOffset, dateOffset);
         }
 

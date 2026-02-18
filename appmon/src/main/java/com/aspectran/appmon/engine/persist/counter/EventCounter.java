@@ -15,6 +15,8 @@
  */
 package com.aspectran.appmon.engine.persist.counter;
 
+import java.time.LocalDateTime;
+
 /**
  * An interface for counting events.
  * Implementations of this interface are responsible for tracking and rolling up event counts.
@@ -55,17 +57,17 @@ public interface EventCounter {
 
     /**
      * Rolls up the current tallying counts into the tallied counts for the specified datetime.
-     * @param datetime the datetime for the rollup (format: yyyyMMddHHmm)
+     * @param datetime the datetime for the rollup
      */
-    void rollup(String datetime);
+    void rollup(LocalDateTime datetime);
 
     /**
      * Resets the counter with the given values.
-     * @param datetime the datetime for the reset (format: yyyyMMddHHmm)
+     * @param datetime the datetime for the reset
      * @param total the total count
      * @param delta the delta count since the last reset
      * @param error the error count
      */
-    void reset(String datetime, long total, long delta, long error);
+    void reset(LocalDateTime datetime, long total, long delta, long error);
 
 }

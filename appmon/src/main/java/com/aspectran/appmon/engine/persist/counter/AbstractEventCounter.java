@@ -18,6 +18,7 @@ package com.aspectran.appmon.engine.persist.counter;
 import com.aspectran.appmon.engine.config.EventInfo;
 import org.jspecify.annotations.NonNull;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,7 +76,7 @@ public abstract class AbstractEventCounter implements EventCounter {
     }
 
     @Override
-    public void rollup(String datetime) {
+    public void rollup(LocalDateTime datetime) {
         eventCount.rollup(datetime);
         for (EventCountRollupListener eventRollupListener : eventCountRollupListeners) {
             eventRollupListener.onRolledUp(eventCount);
@@ -83,7 +84,7 @@ public abstract class AbstractEventCounter implements EventCounter {
     }
 
     @Override
-    public void reset(String datetime, long total, long delta, long error) {
+    public void reset(LocalDateTime datetime, long total, long delta, long error) {
         eventCount.reset(datetime, total, delta, error);
         for (EventCountRollupListener eventRollupListener : eventCountRollupListeners) {
             eventRollupListener.onRolledUp(eventCount);

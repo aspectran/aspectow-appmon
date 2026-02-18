@@ -6,6 +6,7 @@
 <script>const contextPath = "<aspectran:url value="/"/>";</script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/dashboard-builder.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/dashboard-viewer.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
+<script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/dashboard-chart.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/traffic-painter.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/base-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/websocket-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>

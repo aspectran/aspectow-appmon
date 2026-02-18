@@ -1,0 +1,186 @@
+[data-bs-theme=dark] {
+    canvas:not(.traffic-canvas) {
+        filter: invert(1) hue-rotate(180deg);
+    }
+    .metrics-bar {
+        background-color: #52595e;
+    }
+    .domain.metrics-bar {
+        border-bottom: 1px solid #353b3e;
+        background-color: #24282b;
+        box-shadow: none;
+    }
+    .domain.metrics-bar .title {
+        color: #677278;
+    }
+    .domain.metrics-bar .metric {
+        border-left: 1px solid #52595e;
+    }
+    .instance.metrics-bar {
+        background-color: #2a2f33;
+    }
+    .control-bar {
+        background-color: #3b3f42;
+        color: #eee;
+        box-shadow: 0 6px 10px -10px rgba(50, 50, 50, 0.45);
+    }
+    .control-bar .options > .bi {
+        color: #d6e5e4;
+    }
+    .control-bar .options .btn-group .btn {
+        background-color: #313639;
+        color: #e1e1e1;
+    }
+    .control-bar .options .btn-group .btn.on {
+        background-color: #1a272e;
+        color: #fff;
+    }
+    .event-box .title-bar {
+        background-color: #24272e;
+        color: #eee;
+        box-shadow: none;
+    }
+    .event-box .title-bar.on {
+        background-color: #709185;
+    }
+    .track-box {
+        background-color: #0d1324;
+    }
+    .track-box .track-stack {
+        background-color: #1d0c17;
+    }
+    .track-stack .activity-status-plate .bottom-plate-left {
+        background-color: #3c201f;
+        color: #eee;
+    }
+    .track-stack .activity-status-plate .bottom-plate-right {
+        background-color: #3c201f;
+        color: #eee;
+    }
+    .track-stack .activity-status {
+        color: #6471a1;
+    }
+    .track-stack .activity-status p.interim {
+        color: #1f8c45;
+    }
+    .track-stack .activity-status p.interim .errors {
+        color: #fc2184;
+    }
+    .track-stack .activity-status p.interim .separator {
+        color: #936e86;
+    }
+    .track-stack .activity-status .sampling-timer-bar {
+        background-color: #9b6485;
+    }
+    .visual-box {
+        background-color: #000;
+        box-shadow: 0 8px 10px -10px rgba(50, 50, 50, 0.33);
+    }
+    .visual-box .chart-box {
+        background-color: #000;
+        border-top: 1px solid #212426;
+        box-shadow: 0 6px 10px -10px rgba(50, 50, 50, 0.45);
+    }
+    .visual-box .chart-box .chart .reset-zoom {
+        background-color: #744065;
+        color: #fff;
+        border-radius: 3px 0 0 3px;
+        z-index: 1;
+    }
+    .visual-box .chart-box .loading-overlay {
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+    .visual-box .chart-box .loading-overlay .spinner-border {
+        color: #709185;
+    }
+    .session-box .panel {
+        background-color: #212c28;
+    }
+    .session-box .panel.status .knob {
+        background-color: #567181;
+    }
+    .session-box .panel.ground {
+        background-color: #191c1d;
+    }
+    .session-box ul.sessions li {
+        background-color: #fff;
+    }
+    .session-box ul.sessions li .count {
+        background-color: #6d8898;
+        border-left: 3px solid #008100;
+    }
+    .session-box ul.sessions li .count.active {
+        background-color: #02b502;
+    }
+    .session-box ul.sessions li .count.counting {
+        color: #fff;
+    }
+    .session-box ul.sessions li.inactive .count.counting {
+        border-left-color: #959494;
+    }
+    .session-box ul.sessions li .username {
+        background-color: #525552;
+    }
+    .session-box ul.sessions li .detail {
+        border-top: 1px solid #336382;
+    }
+    .session-box ul.sessions li.designated {
+        background-color: #1a252d;
+        border: 1px solid #48585e;
+    }
+    .session-box ul.sessions li .detail p:first-child {
+        background-color: #18486b;
+        color: #b1aeae;
+    }
+    .console-box .status-bar {
+        background-color: #2f3437;
+        color: #eee;
+        box-shadow: -20px 20px 20px -20px #1c2225 inset;
+    }
+    .console-box .status-bar.on {
+        background-color: #394a54;
+    }
+    .console-box .status-bar a {
+        color: #fff;
+    }
+    .console-box .status-bar a:hover {
+        color: #d1b605;
+    }
+    .console-box .status-bar a.on {
+        color: #ffeb00;
+    }
+    .console-box .status-bar .tailing-switch .tailing-status::after {
+        background: #f1f1f1;
+    }
+    .console-box .status-bar .tailing-switch .tailing-status.on {
+        background-color: #39aa56;
+    }
+    .console-box.maximized {
+        background-color: #222;
+    }
+    .console-box .console {
+        color: #f1f1f1;
+        background-color: #222;
+        box-shadow: inset -20px 20px 30px -20px #262f44;
+    }
+    .console-box .console:hover {
+        box-shadow: inset 0 0 6px 3px #3a4c57;
+    }
+    .console-box .console p {
+        color: #e1e1e1;
+    }
+    .console-box .console p:hover {
+        color: #fafafa;
+        background-color: #323d48;
+    }
+    .console-box .console p.event {
+        border: 1px solid rgba(92, 218, 173, 0.53);
+        color: #fff;
+        background-color: #333;
+    }
+    .console-box .console p.event.error {
+        background-color: #3e132d;
+        border: 1px solid #db7093;
+        color: #fff;
+    }
+}

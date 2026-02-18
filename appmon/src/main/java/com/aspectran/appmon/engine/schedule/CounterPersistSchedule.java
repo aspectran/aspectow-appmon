@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 /**
@@ -95,7 +94,7 @@ public class CounterPersistSchedule {
                 if (vo != null) {
                     eventCounter.reset(vo.getDatetime(), vo.getTotal(), vo.getDelta(), vo.getError());
                 } else {
-                    String datetime = getDatetime(false);
+                    LocalDateTime datetime = getDatetime(false);
                     eventCounter.reset(datetime, 0L, 0L, 0L);
                 }
                 eventCounter.initialize();
@@ -139,7 +138,7 @@ public class CounterPersistSchedule {
     }
 
     private void rollupAndSave(boolean scheduled) {
-        String datetime = getDatetime(scheduled);
+        LocalDateTime datetime = getDatetime(scheduled);
         EventCountVO eventCountVO = null;
         for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
             eventCounter.rollup(datetime);
@@ -160,7 +159,7 @@ public class CounterPersistSchedule {
     }
 
     @NonNull
-    private String getDatetime(boolean scheduled) {
+    private LocalDateTime getDatetime(boolean scheduled) {
         Instant instant = Instant.now();
         int interval = appMonManager.getCounterPersistInterval();
         if (!scheduled && interval > 0) {
@@ -168,13 +167,11 @@ public class CounterPersistSchedule {
             int offset = interval - next % interval;
             instant = instant.plus(offset, ChronoUnit.MINUTES);
         }
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-        return formatter.format(localDateTime);
+        return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
     }
 
     @NonNull
-    private EventCountVO createEventCountVO(@NonNull String datetime) {
+    private EventCountVO createEventCountVO(@NonNull LocalDateTime datetime) {
         EventCountVO eventCountVO = new EventCountVO();
         eventCountVO.setDomain(currentDomain);
         eventCountVO.setDatetime(datetime);

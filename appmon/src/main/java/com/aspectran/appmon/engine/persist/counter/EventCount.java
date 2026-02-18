@@ -18,6 +18,7 @@ package com.aspectran.appmon.engine.persist.counter;
 import com.aspectran.utils.Assert;
 import org.jspecify.annotations.NonNull;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
@@ -75,23 +76,22 @@ public class EventCount {
 
     /**
      * Rolls up the current tallying counts into the tallied counts.
-     * @param datetime the datetime for the rollup (format: yyyyMMddHHmm)
+     * @param datetime the datetime for the rollup
      */
-    synchronized void rollup(String datetime) {
+    synchronized void rollup(LocalDateTime datetime) {
         Assert.notNull(datetime, "datetime must not be null");
-        Assert.isTrue(datetime.length() == 12, "datetime length must be 12");
         updated = tallied.update(datetime, tallying);
         tallying.reset();
     }
 
     /**
      * Resets the counter with the given values.
-     * @param datetime the datetime for the reset (format: yyyyMMddHHmm)
+     * @param datetime the datetime for the reset
      * @param total the total count
      * @param delta the delta count
      * @param error the error count
      */
-    synchronized void reset(String datetime, long total, long delta, long error) {
+    synchronized void reset(LocalDateTime datetime, long total, long delta, long error) {
         Assert.isTrue(total >= 0, "total must be positive");
         Assert.isTrue(delta >= 0, "delta must be positive");
         Assert.isTrue(error >= 0, "error must be positive");
@@ -154,7 +154,7 @@ public class EventCount {
      */
     public static class Tallied {
 
-        private String datetime;
+        private LocalDateTime datetime;
 
         private long total;
 
@@ -164,9 +164,9 @@ public class EventCount {
 
         /**
          * Gets the datetime of the last rollup.
-         * @return the datetime string
+         * @return the datetime object
          */
-        public String getDatetime() {
+        public LocalDateTime getDatetime() {
             return datetime;
         }
 
@@ -194,7 +194,7 @@ public class EventCount {
             return error;
         }
 
-        private boolean update(@NonNull String datetime, @NonNull Tallying tallying) {
+        private boolean update(@NonNull LocalDateTime datetime, @NonNull Tallying tallying) {
             long total = tallying.getTotal();
             long error = tallying.getError();
             if (datetime.equals(this.datetime)) {
@@ -210,7 +210,7 @@ public class EventCount {
             return (total > 0);
         }
 
-        private void update(String datetime, long total, long delta, long error) {
+        private void update(LocalDateTime datetime, long total, long delta, long error) {
             this.datetime = datetime;
             this.total = total;
             this.delta = delta;

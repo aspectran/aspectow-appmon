@@ -17,6 +17,7 @@ package com.aspectran.appmon.engine.persist.counter;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * A Value Object (VO) representing event count data for database persistence.
@@ -34,7 +35,7 @@ public class EventCountVO implements Serializable {
 
     private String event;
 
-    private String datetime;
+    private LocalDateTime datetime;
 
     private long total;
 
@@ -66,11 +67,11 @@ public class EventCountVO implements Serializable {
         this.event = event;
     }
 
-    public String getDatetime() {
+    public LocalDateTime getDatetime() {
         return datetime;
     }
 
-    public void setDatetime(String datetime) {
+    public void setDatetime(LocalDateTime datetime) {
         this.datetime = datetime;
     }
 
