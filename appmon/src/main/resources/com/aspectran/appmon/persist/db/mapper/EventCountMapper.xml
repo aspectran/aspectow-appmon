@@ -101,12 +101,12 @@
                     select datetime, delta, error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
-                <if test="dateOffset != null">
-                    and datetime &lt; #{dateOffset}
-                </if>
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
                     order by 1 desc
                 )
-                where rownum &lt;= 72
+                where rownum &lt;= 100
                 order by 1
             </when>
             <otherwise>
@@ -115,11 +115,11 @@
                     select datetime, delta, error
                     from appmon_event_count
                     where domain = #{domain} and instance = #{instance} and event = #{event}
-                <if test="dateOffset != null">
-                    and datetime &lt; #{dateOffset}
-                </if>
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
                     order by 1 desc
-                    limit 72
+                    limit 100
                 ) as x
                 order by 1
             </otherwise>
@@ -136,16 +136,16 @@
                         select datetime, delta, error
                         from appmon_event_count
                         where domain = #{domain} and instance = #{instance} and event = #{event}
-                    <if test="dateOffset != null">
-                        and datetime &lt; #{dateOffset}
-                    </if>
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
                         order by datetime desc
                     )
                     where rownum &lt;= 2000
                     group by to_char(datetime + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYYMMDDHH24')
                     order by 1 desc
                 )
-                where rownum &lt;= 72
+                where rownum &lt;= 100
                 order by 1
             </when>
             <when test="_databaseId == 'mysql'">
@@ -156,15 +156,15 @@
                         select datetime, delta, error
                         from appmon_event_count
                         where domain = #{domain} and instance = #{instance} and event = #{event}
-                    <if test="dateOffset != null">
-                        and datetime &lt; #{dateOffset}
-                    </if>
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
                         order by datetime desc
                         limit 2000
                     ) as raw
                     group by date_format(date_add(datetime, interval #{zoneOffset} second), '%Y%m%d%H')
                     order by 1 desc
-                    limit 72
+                    limit 100
                 ) as x
                 order by 1
             </when>
@@ -176,15 +176,15 @@
                         select datetime, delta, error
                         from appmon_event_count
                         where domain = #{domain} and instance = #{instance} and event = #{event}
-                    <if test="dateOffset != null">
-                        and datetime &lt; #{dateOffset}
-                    </if>
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
                         order by datetime desc
                         limit 2000
                     ) as raw
                     group by formatdatetime(dateadd(second, #{zoneOffset}, datetime), 'yyyyMMddHH')
                     order by 1 desc
-                    limit 72
+                    limit 100
                 ) as x
                 order by 1
             </otherwise>
@@ -201,16 +201,16 @@
                         select datetime, delta, error
                         from appmon_event_count
                         where domain = #{domain} and instance = #{instance} and event = #{event}
-                    <if test="dateOffset != null">
-                        and datetime &lt; #{dateOffset}
-                    </if>
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
                         order by datetime desc
                     )
-                    where rownum &lt;= 5000
+                    where rownum &lt;= 30000
                     group by to_char(datetime + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYYMMDD')
                     order by 1 desc
                 )
-                where rownum &lt;= 72
+                where rownum &lt;= 100
                 order by 1
             </when>
             <when test="_databaseId == 'mysql'">
@@ -221,15 +221,15 @@
                         select datetime, delta, error
                         from appmon_event_count
                         where domain = #{domain} and instance = #{instance} and event = #{event}
-                    <if test="dateOffset != null">
-                        and datetime &lt; #{dateOffset}
-                    </if>
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
                         order by datetime desc
-                        limit 5000
+                        limit 30000
                     ) as raw
                     group by date_format(date_add(datetime, interval #{zoneOffset} second), '%Y%m%d')
                     order by 1 desc
-                    limit 72
+                    limit 100
                 ) as x
                 order by 1
             </when>
@@ -241,15 +241,15 @@
                         select datetime, delta, error
                         from appmon_event_count
                         where domain = #{domain} and instance = #{instance} and event = #{event}
-                    <if test="dateOffset != null">
-                        and datetime &lt; #{dateOffset}
-                    </if>
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
                         order by datetime desc
-                        limit 5000
+                        limit 30000
                     ) as raw
                     group by formatdatetime(dateadd(second, #{zoneOffset}, datetime), 'yyyyMMdd')
                     order by 1 desc
-                    limit 72
+                    limit 100
                 ) as x
                 order by 1
             </otherwise>
@@ -266,16 +266,16 @@
                         select datetime, delta, error
                         from appmon_event_count
                         where domain = #{domain} and instance = #{instance} and event = #{event}
-                    <if test="dateOffset != null">
-                        and datetime &lt; #{dateOffset}
-                    </if>
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
                         order by datetime desc
                     )
-                    where rownum &lt;= 15000
+                    where rownum &lt;= 1000000
                     group by to_char(datetime + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYYMM')
                     order by 1 desc
                 )
-                where rownum &lt;= 72
+                where rownum &lt;= 100
                 order by 1
             </when>
             <when test="_databaseId == 'mysql'">
@@ -286,15 +286,15 @@
                         select datetime, delta, error
                         from appmon_event_count
                         where domain = #{domain} and instance = #{instance} and event = #{event}
-                    <if test="dateOffset != null">
-                        and datetime &lt; #{dateOffset}
-                    </if>
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
                         order by datetime desc
-                        limit 15000
+                        limit 1000000
                     ) as raw
                     group by date_format(date_add(datetime, interval #{zoneOffset} second), '%Y%m')
                     order by 1 desc
-                    limit 72
+                    limit 100
                 ) as x
                 order by 1
             </when>
@@ -306,15 +306,15 @@
                         select datetime, delta, error
                         from appmon_event_count
                         where domain = #{domain} and instance = #{instance} and event = #{event}
-                    <if test="dateOffset != null">
-                        and datetime &lt; #{dateOffset}
-                    </if>
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
                         order by datetime desc
-                        limit 15000
+                        limit 1000000
                     ) as raw
                     group by formatdatetime(dateadd(second, #{zoneOffset}, datetime), 'yyyyMM')
                     order by 1 desc
-                    limit 72
+                    limit 100
                 ) as x
                 order by 1
             </otherwise>
@@ -331,16 +331,16 @@
                         select datetime, delta, error
                         from appmon_event_count
                         where domain = #{domain} and instance = #{instance} and event = #{event}
-                    <if test="dateOffset != null">
-                        and datetime &lt; #{dateOffset}
-                    </if>
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
                         order by datetime desc
                     )
-                    where rownum &lt;= 50000
+                    where rownum &lt;= 10000000
                     group by to_char(datetime + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYY')
                     order by 1 desc
                 )
-                where rownum &lt;= 72
+                where rownum &lt;= 100
                 order by 1
             </when>
             <when test="_databaseId == 'mysql'">
@@ -351,18 +351,18 @@
                         select datetime, delta, error
                         from appmon_event_count
                         where domain = #{domain} and instance = #{instance} and event = #{event}
-                    <if test="dateOffset != null">
-                        and datetime &lt; #{dateOffset}
-                    </if>
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
                         order by datetime desc
-                        limit 50000
+                        limit 10000000
                     ) as raw
                     group by date_format(date_add(datetime, interval #{zoneOffset} second), '%Y')
                     order by 1 desc
-                    limit 72
+                    limit 100
                 ) as x
                 order by 1
-            </when>
+            </otherwise>
             <otherwise>
                 select datetime, delta, error
                 from (
@@ -371,15 +371,15 @@
                         select datetime, delta, error
                         from appmon_event_count
                         where domain = #{domain} and instance = #{instance} and event = #{event}
-                    <if test="dateOffset != null">
-                        and datetime &lt; #{dateOffset}
-                    </if>
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
                         order by datetime desc
-                        limit 50000
+                        limit 10000000
                     ) as raw
                     group by formatdatetime(dateadd(second, #{zoneOffset}, datetime), 'yyyy')
                     order by 1 desc
-                    limit 72
+                    limit 100
                 ) as x
                 order by 1
             </otherwise>
