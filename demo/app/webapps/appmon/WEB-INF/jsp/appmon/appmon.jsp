@@ -17,6 +17,7 @@
         document.write('<link rel="stylesheet" href="https://appmon-assets.aspectran.com/appmon/css/appmon-dark.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">');
         document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/dashboard-builder.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
         document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/dashboard-viewer.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/dashboard-chart.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
         document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/traffic-painter.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
         document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/base-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
         document.write('<script src="https://appmon-assets.aspectran.com/appmon/js/websocket-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
