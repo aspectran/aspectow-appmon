@@ -46,7 +46,7 @@ public class AboutMe {
                 pkg.getImplementationVersion() != null) {
             VERSION = pkg.getImplementationVersion();
         } else {
-            VERSION = System.getProperty("appmon.version", "3.0.x");
+            VERSION = System.getProperty("appmon.version", "3.1.x");
         }
 
         POWERED_BY = "Powered by Aspectran " + VERSION;
