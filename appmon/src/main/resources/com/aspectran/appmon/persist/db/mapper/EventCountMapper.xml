@@ -93,6 +93,78 @@
         </choose>
     </insert>
 
+    <insert id="insertEventCountHourly" parameterType="com.aspectran.appmon.engine.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'mysql'">
+                insert into appmon_event_count_hourly (domain, instance, event, datetime, total, delta, error)
+                values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                on duplicate key update total = #{total}, delta = delta + #{delta}, error = error + #{error}
+            </when>
+            <when test="_databaseId == 'oracle'">
+                merge into appmon_event_count_hourly a
+                using (
+                    select
+                        #{domain} domain, #{instance} instance, #{event} event,
+                        #{datetime} datetime, #{total} total, #{delta} delta, #{error} error
+                    from dual
+                ) b
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.datetime = b.datetime)
+                when matched then
+                    update set total = b.total, delta = a.delta + b.delta, error = a.error + b.error
+                when not matched then
+                    insert (domain, instance, event, datetime, total, delta, error)
+                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
+            </when>
+            <otherwise>
+                merge into appmon_event_count_hourly as a
+                using values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                    as b (domain, instance, event, datetime, total, delta, error)
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.datetime = b.datetime)
+                when matched then
+                    update set total = b.total, delta = a.delta + b.delta, error = a.error + b.error
+                when not matched then
+                    insert (domain, instance, event, datetime, total, delta, error)
+                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
+            </otherwise>
+        </choose>
+    </insert>
+
+    <insert id="insertEventCountDaily" parameterType="com.aspectran.appmon.engine.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'mysql'">
+                insert into appmon_event_count_daily (domain, instance, event, datetime, total, delta, error)
+                values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                on duplicate key update total = #{total}, delta = delta + #{delta}, error = error + #{error}
+            </when>
+            <when test="_databaseId == 'oracle'">
+                merge into appmon_event_count_daily a
+                using (
+                    select
+                        #{domain} domain, #{instance} instance, #{event} event,
+                        #{datetime} datetime, #{total} total, #{delta} delta, #{error} error
+                    from dual
+                ) b
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.datetime = b.datetime)
+                when matched then
+                    update set total = b.total, delta = a.delta + b.delta, error = a.error + b.error
+                when not matched then
+                    insert (domain, instance, event, datetime, total, delta, error)
+                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
+            </when>
+            <otherwise>
+                merge into appmon_event_count_daily as a
+                using values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                    as b (domain, instance, event, datetime, total, delta, error)
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.datetime = b.datetime)
+                when matched then
+                    update set total = b.total, delta = a.delta + b.delta, error = a.error + b.error
+                when not matched then
+                    insert (domain, instance, event, datetime, total, delta, error)
+                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
+            </otherwise>
+        </choose>
+    </insert>
+
     <select id="getChartData" resultType="com.aspectran.appmon.engine.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
@@ -131,19 +203,13 @@
             <when test="_databaseId == 'oracle'">
                 select datetime, delta, error
                 from (
-                    select min(datetime) as datetime, sum(delta) delta, sum(error) error
-                    from (
-                        select datetime, delta, error
-                        from appmon_event_count
-                        where domain = #{domain} and instance = #{instance} and event = #{event}
-                        <if test="dateOffset != null">
-                            and datetime &lt; #{dateOffset}
-                        </if>
-                        order by datetime desc
-                    )
-                    where rownum &lt;= 2000
-                    group by to_char(datetime + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYYMMDDHH24')
-                    order by 1 desc
+                    select datetime, delta, error
+                    from appmon_event_count_hourly
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                    order by datetime desc
                 )
                 where rownum &lt;= 100
                 order by 1
@@ -151,19 +217,13 @@
             <when test="_databaseId == 'mysql'">
                 select datetime, delta, error
                 from (
-                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
-                    from (
-                        select datetime, delta, error
-                        from appmon_event_count
-                        where domain = #{domain} and instance = #{instance} and event = #{event}
-                        <if test="dateOffset != null">
-                            and datetime &lt; #{dateOffset}
-                        </if>
-                        order by datetime desc
-                        limit 2000
-                    ) as raw
-                    group by date_format(date_add(datetime, interval #{zoneOffset} second), '%Y%m%d%H')
-                    order by 1 desc
+                    select datetime, delta, error
+                    from appmon_event_count_hourly
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                    order by datetime desc
                     limit 100
                 ) as x
                 order by 1
@@ -171,19 +231,13 @@
             <otherwise>
                 select datetime, delta, error
                 from (
-                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
-                    from (
-                        select datetime, delta, error
-                        from appmon_event_count
-                        where domain = #{domain} and instance = #{instance} and event = #{event}
-                            <if test="dateOffset != null">
-                                and datetime &lt; #{dateOffset}
-                            </if>
-                        order by datetime desc
-                        limit 2000
-                    ) as raw
-                    group by formatdatetime(dateadd(second, #{zoneOffset}, datetime), 'yyyyMMddHH')
-                    order by 1 desc
+                    select datetime, delta, error
+                    from appmon_event_count_hourly
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                    order by datetime desc
                     limit 100
                 ) as x
                 order by 1
@@ -196,19 +250,13 @@
                 <when test="_databaseId == 'oracle'">
                     select datetime, delta, error
                     from (
-                        select min(datetime) as datetime, sum(delta) delta, sum(error) error
-                        from (
-                            select datetime, delta, error
-                            from appmon_event_count
-                            where domain = #{domain} and instance = #{instance} and event = #{event}
-                            <if test="dateOffset != null">
-                                and datetime &lt; #{dateOffset}
-                            </if>
-                            order by datetime desc
-                        )
-                        where rownum &lt;= 20000
-                        group by to_char(datetime + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYYMMDD')
-                        order by 1 desc
+                        select datetime, delta, error
+                        from appmon_event_count_daily
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
                     )
                     where rownum &lt;= 100
                     order by 1
@@ -216,19 +264,13 @@
                 <when test="_databaseId == 'mysql'">
                     select datetime, delta, error
                     from (
-                        select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
-                        from (
-                            select datetime, delta, error
-                            from appmon_event_count
-                            where domain = #{domain} and instance = #{instance} and event = #{event}
-                            <if test="dateOffset != null">
-                                and datetime &lt; #{dateOffset}
-                            </if>
-                            order by datetime desc
-                            limit 20000
-                        ) as raw
-                        group by date_format(date_add(datetime, interval #{zoneOffset} second), '%Y%m%d')
-                        order by 1 desc
+                        select datetime, delta, error
+                        from appmon_event_count_daily
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
                         limit 100
                     ) as x
                     order by 1
@@ -236,19 +278,13 @@
                 <otherwise>
                     select datetime, delta, error
                     from (
-                        select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
-                        from (
-                            select datetime, delta, error
-                            from appmon_event_count
-                            where domain = #{domain} and instance = #{instance} and event = #{event}
-                            <if test="dateOffset != null">
-                                and datetime &lt; #{dateOffset}
-                            </if>
-                            order by datetime desc
-                            limit 20000
-                        ) as raw
-                        group by formatdatetime(dateadd(second, #{zoneOffset}, datetime), 'yyyyMMdd')
-                        order by 1 desc
+                        select datetime, delta, error
+                        from appmon_event_count_daily
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
                         limit 100
                     ) as x
                     order by 1
@@ -264,14 +300,14 @@
                         select min(datetime) as datetime, sum(delta) delta, sum(error) error
                         from (
                             select datetime, delta, error
-                            from appmon_event_count
+                            from appmon_event_count_daily
                             where domain = #{domain} and instance = #{instance} and event = #{event}
                             <if test="dateOffset != null">
                                 and datetime &lt; #{dateOffset}
                             </if>
                             order by datetime desc
                         )
-                        where rownum &lt;= 100000
+                        where rownum &lt;= 5000
                         group by to_char(datetime + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYYMM')
                         order by 1 desc
                     )
@@ -284,13 +320,13 @@
                         select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
                         from (
                             select datetime, delta, error
-                            from appmon_event_count
+                            from appmon_event_count_daily
                             where domain = #{domain} and instance = #{instance} and event = #{event}
                             <if test="dateOffset != null">
                                 and datetime &lt; #{dateOffset}
                             </if>
                             order by datetime desc
-                            limit 100000
+                            limit 5000
                         ) as raw
                         group by date_format(date_add(datetime, interval #{zoneOffset} second), '%Y%m')
                         order by 1 desc
@@ -304,13 +340,13 @@
                         select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
                         from (
                             select datetime, delta, error
-                            from appmon_event_count
+                            from appmon_event_count_daily
                             where domain = #{domain} and instance = #{instance} and event = #{event}
                             <if test="dateOffset != null">
                                 and datetime &lt; #{dateOffset}
                             </if>
                             order by datetime desc
-                            limit 100000
+                            limit 5000
                         ) as raw
                         group by formatdatetime(dateadd(second, #{zoneOffset}, datetime), 'yyyyMM')
                         order by 1 desc
@@ -329,14 +365,14 @@
                         select min(datetime) as datetime, sum(delta) delta, sum(error) error
                         from (
                             select datetime, delta, error
-                            from appmon_event_count
+                            from appmon_event_count_daily
                             where domain = #{domain} and instance = #{instance} and event = #{event}
                             <if test="dateOffset != null">
                                 and datetime &lt; #{dateOffset}
                             </if>
                             order by datetime desc
                         )
-                        where rownum &lt;= 500000
+                        where rownum &lt;= 10000
                         group by to_char(datetime + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYY')
                         order by 1 desc
                     )
@@ -349,13 +385,13 @@
                         select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
                         from (
                             select datetime, delta, error
-                            from appmon_event_count
+                            from appmon_event_count_daily
                             where domain = #{domain} and instance = #{instance} and event = #{event}
                             <if test="dateOffset != null">
                                 and datetime &lt; #{dateOffset}
                             </if>
                             order by datetime desc
-                            limit 500000
+                            limit 10000
                         ) as raw
                         group by date_format(date_add(datetime, interval #{zoneOffset} second), '%Y')
                         order by 1 desc
@@ -369,13 +405,13 @@
                         select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
                         from (
                             select datetime, delta, error
-                            from appmon_event_count
+                            from appmon_event_count_daily
                             where domain = #{domain} and instance = #{instance} and event = #{event}
                             <if test="dateOffset != null">
                                 and datetime &lt; #{dateOffset}
                             </if>
                             order by datetime desc
-                            limit 500000
+                            limit 10000
                         ) as raw
                         group by formatdatetime(dateadd(second, #{zoneOffset}, datetime), 'yyyy')
                         order by 1 desc

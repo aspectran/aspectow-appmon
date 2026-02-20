@@ -139,6 +139,8 @@ public class CounterPersistSchedule {
 
     private void rollupAndSave(boolean scheduled) {
         LocalDateTime datetime = getDatetime(scheduled);
+        LocalDateTime hourlyDt = datetime.truncatedTo(ChronoUnit.HOURS);
+        LocalDateTime dailyDt = datetime.truncatedTo(ChronoUnit.DAYS);
         EventCountVO eventCountVO = null;
         for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
             eventCounter.rollup(datetime);
@@ -152,8 +154,16 @@ public class CounterPersistSchedule {
                 eventCountVO.setTotal(eventCount.getTallied().getTotal());
                 eventCountVO.setDelta(eventCount.getTallied().getDelta());
                 eventCountVO.setError(eventCount.getTallied().getError());
+
+                eventCountVO.setDatetime(datetime);
                 dao.updateLastEventCount(eventCountVO);
                 dao.insertEventCount(eventCountVO);
+
+                eventCountVO.setDatetime(hourlyDt);
+                dao.insertEventCountHourly(eventCountVO);
+
+                eventCountVO.setDatetime(dailyDt);
+                dao.insertEventCountDaily(eventCountVO);
             }
         }
     }

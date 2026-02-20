@@ -28,8 +28,6 @@ import java.util.List;
 /**
  * The MyBatis mapper interface for event count data.
  * Defines methods for CRUD operations on event count records in the database.
- *
- * @author Juho Jeong
  */
 @Mapper
 public interface EventCountMapper {
@@ -38,7 +36,11 @@ public interface EventCountMapper {
 
     void updateLastEventCount(EventCountVO eventCountVO);
 
-    int insertEventCount(EventCountVO eventCountVO);
+    void insertEventCount(EventCountVO eventCountVO);
+
+    void insertEventCountHourly(EventCountVO eventCountVO);
+
+    void insertEventCountDaily(EventCountVO eventCountVO);
 
     List<EventCountVO> getChartData(String domain, String instance, String event, LocalDateTime dateOffset);
 
@@ -73,8 +75,18 @@ public interface EventCountMapper {
         }
 
         @Override
-        public int insertEventCount(EventCountVO eventCountVO) {
-            return simple().insertEventCount(eventCountVO);
+        public void insertEventCount(EventCountVO eventCountVO) {
+            simple().insertEventCount(eventCountVO);
+        }
+
+        @Override
+        public void insertEventCountHourly(EventCountVO eventCountVO) {
+            simple().insertEventCountHourly(eventCountVO);
+        }
+
+        @Override
+        public void insertEventCountDaily(EventCountVO eventCountVO) {
+            simple().insertEventCountDaily(eventCountVO);
         }
 
         @Override

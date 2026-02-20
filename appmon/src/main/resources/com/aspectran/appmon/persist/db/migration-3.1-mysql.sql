@@ -55,3 +55,52 @@ FROM appmon_event_count_last_old;
 -- 데이터 건수가 백업 테이블과 일치하는지 확인하세요.
 SELECT COUNT(*) AS new_count FROM appmon_event_count;
 SELECT COUNT(*) AS old_count FROM appmon_event_count_old;
+
+-- 집계 테이블 생성
+CREATE TABLE appmon_event_count_hourly (
+   domain varchar(30) not null,
+   instance varchar(30) not null,
+   event varchar(30) not null,
+   datetime datetime not null,
+   total int not null,
+   delta int not null,
+   error int not null,
+   CONSTRAINT appmon_event_count_hourly_pk PRIMARY KEY (domain, instance, event, datetime)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE appmon_event_count_daily (
+   domain varchar(30) not null,
+   instance varchar(30) not null,
+   event varchar(30) not null,
+   datetime datetime not null,
+   total int not null,
+   delta int not null,
+   error int not null,
+   CONSTRAINT appmon_event_count_daily_pk PRIMARY KEY (domain, instance, event, datetime)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 시간 단위 집계 데이터 생성
+INSERT INTO appmon_event_count_hourly (domain, instance, event, datetime, total, delta, error)
+SELECT
+   domain,
+   instance,
+   event,
+   STR_TO_DATE(DATE_FORMAT(datetime, '%Y-%m-%d %H:00:00'), '%Y-%m-%d %H:%i:%s'),
+   MAX(total),
+   SUM(delta),
+   SUM(error)
+FROM appmon_event_count
+GROUP BY domain, instance, event, STR_TO_DATE(DATE_FORMAT(datetime, '%Y-%m-%d %H:00:00'), '%Y-%m-%d %H:%i:%s');
+
+-- 일 단위 집계 데이터 생성
+INSERT INTO appmon_event_count_daily (domain, instance, event, datetime, total, delta, error)
+SELECT
+   domain,
+   instance,
+   event,
+   CAST(datetime AS DATE),
+   MAX(total),
+   SUM(delta),
+   SUM(error)
+FROM appmon_event_count
+GROUP BY domain, instance, event, CAST(datetime AS DATE);
