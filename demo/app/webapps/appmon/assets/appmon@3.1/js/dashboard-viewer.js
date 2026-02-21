@@ -8,8 +8,8 @@
  * Responsible for rendering monitoring data, including logs, metrics, and charts.
  */
 class DashboardViewer {
-    constructor(sampleInterval) {
-        this.flagsUrl = "https://cdn.jsdelivr.net/gh/aspectran/aspectran-assets/app/webroot/assets/countries/flags/";
+    constructor(sampleInterval, options = {}) {
+        this.flagsUrl = options.flagsUrl || "https://cdn.jsdelivr.net/gh/aspectran/aspectran-assets/app/webroot/assets/countries/flags/";
         this.tempResidentInactiveSecs = 30;
         this.sampleInterval = sampleInterval;
 
@@ -620,10 +620,14 @@ class DashboardViewer {
         }
 
         if (session.countryCode) {
+            const code = session.countryCode.toLowerCase();
+            const countryInfo = (typeof countries !== "undefined" && countries[session.countryCode])
+                ? countries[session.countryCode]
+                : null;
             $("<img class='flag' alt=''/>")
-                .attr("src", this.flagsUrl + session.countryCode.toLowerCase() + ".png")
+                .attr("src", this.flagsUrl + code + ".png")
                 .attr("alt", session.countryCode)
-                .attr("title", countries[session.countryCode].name)
+                .attr("title", countryInfo ? countryInfo.name : session.countryCode)
                 .appendTo($li);
         }
         if (session.username) {

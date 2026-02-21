@@ -8,7 +8,8 @@
  * Responsible for assembling the dashboard UI based on configuration data.
  */
 class DashboardBuilder {
-    constructor() {
+    constructor(options = {}) {
+        this.options = options;
         this.settings = {};
         this.domains = [];
         this.instances = [];
@@ -44,7 +45,7 @@ class DashboardBuilder {
                         };
                         domain.endpoint.token = data.token;
                         this.domains.push(domain);
-                        this.viewers[domain.index] = new DashboardViewer(this.settings.counterPersistInterval * 60);
+                        this.viewers[domain.index] = new DashboardViewer(this.settings.counterPersistInterval * 60, this.options);
                         console.log("domain", domain);
                     });
 
