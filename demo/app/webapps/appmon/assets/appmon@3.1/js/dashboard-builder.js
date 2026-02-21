@@ -1,3 +1,8 @@
+/*
+ * Aspectow AppMon 3.1
+ * Last modified: 2026-02-21
+ */
+
 /**
  * The builder component for the AppMon dashboard.
  * Responsible for assembling the dashboard UI based on configuration data.

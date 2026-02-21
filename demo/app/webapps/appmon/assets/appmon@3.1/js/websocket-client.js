@@ -1,3 +1,8 @@
+/*
+ * Aspectow AppMon 3.1
+ * Last modified: 2026-02-21
+ */
+
 /**
  * WebSocket implementation of the AppMon client.
  */

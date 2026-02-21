@@ -1,3 +1,8 @@
+/*
+ * Aspectow AppMon 3.1
+ * Last modified: 2026-02-21
+ */
+
 /**
  * The base class for AppMon communication clients.
  * Provides common functionality for connection management and retries.

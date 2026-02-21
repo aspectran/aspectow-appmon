@@ -1,3 +1,8 @@
+/*
+ * Aspectow AppMon 3.1
+ * Last modified: 2026-02-21
+ */
+
 /**
  * The viewer component for the AppMon dashboard.
  * Responsible for rendering monitoring data, including logs, metrics, and charts.

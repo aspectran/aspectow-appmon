@@ -1,3 +1,8 @@
+/*
+ * Aspectow AppMon 3.1
+ * Last modified: 2026-02-21
+ */
+
 /**
  * Advanced Canvas-based particle engine for AppMon traffic visualization.
  * Handles tab visibility to prevent "bullet bursts" when returning to the tab.

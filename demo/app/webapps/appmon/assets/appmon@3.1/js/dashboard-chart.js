@@ -1,3 +1,8 @@
+/*
+ * Aspectow AppMon 3.1
+ * Last modified: 2026-02-21
+ */
+
 /**
  * The chart component for the AppMon dashboard.
  * Responsible for rendering and updating individual charts using Chart.js.
