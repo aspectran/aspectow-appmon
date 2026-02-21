@@ -32,33 +32,104 @@ import java.util.List;
 @Mapper
 public interface EventCountMapper {
 
+    /**
+     * Retrieves the last recorded event count for the specified domain, instance, and event.
+     * @param domain the domain name
+     * @param instance the instance name
+     * @param event the event name
+     * @return the last event count VO, or null if not found
+     */
     EventCountVO getLastEventCount(String domain, String instance, String event);
 
+    /**
+     * Updates the last recorded event count.
+     * @param eventCountVO the event count data to update
+     */
     void updateLastEventCount(EventCountVO eventCountVO);
 
+    /**
+     * Inserts a new raw event count record.
+     * @param eventCountVO the event count data to insert
+     */
     void insertEventCount(EventCountVO eventCountVO);
 
+    /**
+     * Inserts an hourly aggregated event count record.
+     * @param eventCountVO the event count data to insert
+     */
     void insertEventCountHourly(EventCountVO eventCountVO);
 
+    /**
+     * Inserts a daily aggregated event count record.
+     * @param eventCountVO the event count data to insert
+     */
     void insertEventCountDaily(EventCountVO eventCountVO);
 
+    /**
+     * Retrieves raw chart data for the specified criteria.
+     * @param domain the domain name
+     * @param instance the instance name
+     * @param event the event name
+     * @param dateOffset the start date/time for fetching data
+     * @return a list of event count records
+     */
     List<EventCountVO> getChartData(String domain, String instance, String event, LocalDateTime dateOffset);
 
+    /**
+     * Retrieves chart data aggregated by hour for the specified criteria.
+     * @param domain the domain name
+     * @param instance the instance name
+     * @param event the event name
+     * @param zoneOffset the time zone offset in minutes
+     * @param dateOffset the start date/time for fetching data
+     * @return a list of event count records aggregated by hour
+     */
     List<EventCountVO> getChartDataByHour(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset);
 
+    /**
+     * Retrieves chart data aggregated by day for the specified criteria.
+     * @param domain the domain name
+     * @param instance the instance name
+     * @param event the event name
+     * @param zoneOffset the time zone offset in minutes
+     * @param dateOffset the start date/time for fetching data
+     * @return a list of event count records aggregated by day
+     */
     List<EventCountVO> getChartDataByDay(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset);
 
+    /**
+     * Retrieves chart data aggregated by month for the specified criteria.
+     * @param domain the domain name
+     * @param instance the instance name
+     * @param event the event name
+     * @param zoneOffset the time zone offset in minutes
+     * @param dateOffset the start date/time for fetching data
+     * @return a list of event count records aggregated by month
+     */
     List<EventCountVO> getChartDataByMonth(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset);
 
+    /**
+     * Retrieves chart data aggregated by year for the specified criteria.
+     * @param domain the domain name
+     * @param instance the instance name
+     * @param event the event name
+     * @param zoneOffset the time zone offset in minutes
+     * @param dateOffset the start date/time for fetching data
+     * @return a list of event count records aggregated by year
+     */
     List<EventCountVO> getChartDataByYear(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset);
 
     /**
      * Data Access Object (DAO) for {@link EventCountMapper}.
-     * Provides a convenient way to access the mapper methods.
+     * Provides a convenient way to access the mapper methods using Aspectran's bean container.
      */
     @Component
     class Dao extends SqlMapperAccess<EventCountMapper> implements EventCountMapper {
 
+        /**
+         * Constructs a new Dao.
+         * @param sqlMapperProvider the SQL mapper provider
+         */
         @Autowired
         public Dao(SqlMapperProvider sqlMapperProvider) {
             super(sqlMapperProvider, EventCountMapper.class);

@@ -30,7 +30,10 @@ import com.aspectran.utils.apon.ValueType;
  */
 public class CommandOptions extends DefaultParameters {
 
+    /** Command to refresh the current view or data */
     public static final String COMMAND_REFRESH = "refresh";
+
+    /** Command to load previous data records */
     public static final String COMMAND_LOAD_PREVIOUS = "loadPrevious";
 
     private static final ParameterKey command;
@@ -67,23 +70,24 @@ public class CommandOptions extends DefaultParameters {
     }
 
     /**
-     * Instantiates a new CommandOptions.
+     * Constructs a new empty CommandOptions.
      */
     public CommandOptions() {
         super(parameterKeys);
     }
 
     /**
-     * Instantiates a new CommandOptions from a semicolon-delimited string.
-     * @param text the command string
+     * Constructs a new CommandOptions from a semicolon-delimited string.
+     * @param text the semicolon-delimited command string
      */
     public CommandOptions(String text) {
         this(StringUtils.split(text, ";"));
     }
 
     /**
-     * Instantiates a new CommandOptions from an array of command lines.
-     * @param lines the command lines
+     * Constructs a new CommandOptions from an array of command lines.
+     * @param lines the array of command lines
+     * @throws RuntimeException if the command lines cannot be parsed
      */
     public CommandOptions(String[] lines) {
         super(parameterKeys);
@@ -94,74 +98,147 @@ public class CommandOptions extends DefaultParameters {
         }
     }
 
+    /**
+     * Returns the name of the command.
+     * @return the command name
+     */
     public String getCommand() {
         return getString(command);
     }
 
+    /**
+     * Sets the name of the command.
+     * @param command the command name
+     */
     public void setCommand(String command) {
         putValue(CommandOptions.command, command);
     }
 
+    /**
+     * Checks if the specified command is equal to the current command.
+     * @param command the command name to compare
+     * @return true if the commands match, false otherwise
+     */
     public boolean hasCommand(String command) {
         return (command != null && command.equals(getCommand()));
     }
 
+    /**
+     * Returns the list of instances to join, usually as a comma-separated string.
+     * @return the instances to join
+     */
     public String getInstancesToJoin() {
         return getString(instancesToJoin);
     }
 
+    /**
+     * Sets the list of instances to join.
+     * @param instancesToJoin the instances to join
+     */
     public void setInstancesToJoin(String instancesToJoin) {
         putValue(CommandOptions.instancesToJoin, instancesToJoin);
     }
 
+    /**
+     * Returns the specific instance name.
+     * @return the instance name
+     */
     public String getInstance() {
         return getString(instance);
     }
 
+    /**
+     * Sets the specific instance name.
+     * @param instance the instance name
+     */
     public void setInstance(String instance) {
         putValue(CommandOptions.instance, instance);
     }
 
+    /**
+     * Returns whether a time zone has been specified.
+     * @return true if a time zone exists, false otherwise
+     */
     public boolean hasTimeZone() {
         return hasValue(timeZone);
     }
 
+    /**
+     * Returns the time zone ID.
+     * @return the time zone ID
+     */
     public String getTimeZone() {
         return getString(timeZone);
     }
 
+    /**
+     * Sets the time zone ID.
+     * @param timeZone the time zone ID
+     */
     public void setTimeZone(String timeZone) {
         putValue(CommandOptions.timeZone, timeZone);
     }
 
+    /**
+     * Returns the date unit (e.g., "hour", "day") for time-series data.
+     * @return the date unit
+     */
     public String getDateUnit() {
         return getString(dateUnit);
     }
 
+    /**
+     * Sets the date unit for time-series data.
+     * @param dateUnit the date unit
+     */
     public void setDateUnit(String dateUnit) {
         putValue(CommandOptions.dateUnit, dateUnit);
     }
 
+    /**
+     * Returns the date offset for filtering historical data.
+     * @return the date offset string
+     */
     public String getDateOffset() {
         return getString(dateOffset);
     }
 
+    /**
+     * Sets the date offset for filtering historical data.
+     * @param dateOffset the date offset string
+     */
     public void setDateOffset(String dateOffset) {
         putValue(CommandOptions.dateOffset, dateOffset);
     }
 
+    /**
+     * Returns the log file name.
+     * @return the log name
+     */
     public String getLogName() {
         return getString(logName);
     }
 
+    /**
+     * Sets the log file name.
+     * @param logName the log name
+     */
     public void setLogName(String logName) {
         putValue(CommandOptions.logName, logName);
     }
 
+    /**
+     * Returns the number of lines already loaded from the log.
+     * @return the number of loaded lines
+     */
     public int getLoadedLines() {
         return getInt(loadedLines);
     }
 
+    /**
+     * Sets the number of lines already loaded from the log.
+     * @param loadedLines the number of loaded lines
+     */
     public void setLoadedLines(int loadedLines) {
         putValue(CommandOptions.loadedLines, loadedLines);
     }
