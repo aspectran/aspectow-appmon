@@ -160,9 +160,6 @@
     .console-box .status-bar .tailing-switch .tailing-status.on {
         background-color: #39aa56;
     }
-    .console-box.maximized {
-        background-color: #222;
-    }
     .console-box .console {
         color: #f1f1f1;
         background-color: #222;
@@ -175,8 +172,7 @@
         color: #e1e1e1;
     }
     .console-box .console p:hover {
-        color: #fafafa;
-        background-color: #323d48;
+        color: #fbf1a2;
     }
     .console-box .console p.event {
         border: 1px solid rgba(92, 218, 173, 0.53);
@@ -187,5 +183,14 @@
         background-color: #3e132d;
         border: 1px solid #db7093;
         color: #fff;
+    }
+    .console-box.maximized {
+        background-color: #222;
+    }
+    .console-box.maximized .console {
+        box-shadow: none;
+    }
+    .console-box.maximized .console:hover {
+        box-shadow: none;
     }
 }

@@ -561,25 +561,6 @@
 .console-box .status-bar .tailing-switch .tailing-status.on {
     background-color: #39aa56;
 }
-.console-box.maximized {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9999;
-    background-color: #fff;
-}
-.console-box.maximized .status-bar {
-    border-radius: 0;
-}
-.console-box.maximized .console {
-    height: calc(100vh - 29px) !important;
-    box-shadow: none;
-}
-.console-box.maximized .console:hover {
-    box-shadow: none;
-}
 .console-box .console {
     clear: both;
     margin: 0;
@@ -606,8 +587,7 @@
     min-width: 100%;
 }
 .console-box .console p:hover {
-    color: #fafafa;
-    background-color: #323d48;
+    color: #fbf1a2;
 }
 .console-box .console p.event {
     border-radius: 20px;
@@ -623,3 +603,20 @@
     border: 1px solid #db7093;
     color: #fff;
 }
+.console-box.maximized {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background-color: #fff;
+}
+.console-box.maximized .console {
+    height: calc(100vh - 29px) !important;
+    box-shadow: none;
+}
+.console-box.maximized .console:hover {
+    box-shadow: none;
+}
+
