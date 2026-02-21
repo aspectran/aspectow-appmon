@@ -86,6 +86,7 @@ class PollingClient extends BaseClient {
         $.ajax({
             url: this.domain.endpoint.url + "/polling/pull",
             type: "get",
+            cache: false,
             data: withCommands ? {
                 commands: withCommands
             } : null,

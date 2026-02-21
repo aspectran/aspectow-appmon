@@ -1,6 +1,6 @@
 /*
  * Aspectow AppMon 3.0
- * Last modified: 2026-02-15
+ * Last modified: 2026-02-21
  */
 
 /**
@@ -86,6 +86,7 @@ class PollingClient extends BaseClient {
         $.ajax({
             url: this.domain.endpoint.url + "/polling/pull",
             type: "get",
+            cache: false,
             data: withCommands ? {
                 commands: withCommands
             } : null,

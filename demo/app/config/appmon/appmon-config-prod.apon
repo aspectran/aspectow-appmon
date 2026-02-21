@@ -1,6 +1,10 @@
+# Polling configuration used only when WebSocket is not supported
 pollingConfig: {
+    # The interval in milliseconds at which the client polls the server for new messages
     pollingInterval: 3000
-    sessionTimeout: 10000
+    # The duration in milliseconds after which an inactive polling session expires
+    sessionTimeout: 60000
+    # The initial capacity of the shared message buffer
     initialBufferSize: 9999
 }
 domain: {

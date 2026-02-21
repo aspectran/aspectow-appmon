@@ -51,7 +51,7 @@ public class PollingConfig extends DefaultParameters {
     }
 
     /**
-     * Gets the polling interval in seconds.
+     * Gets the polling interval in milliseconds.
      * @return the polling interval
      */
     public int getPollingInterval() {
@@ -59,7 +59,7 @@ public class PollingConfig extends DefaultParameters {
     }
 
     /**
-     * Sets the polling interval in seconds.
+     * Sets the polling interval in milliseconds.
      * @param pollingInterval the polling interval
      */
     public void setPollingInterval(int pollingInterval) {
@@ -67,7 +67,7 @@ public class PollingConfig extends DefaultParameters {
     }
 
     /**
-     * Gets the session timeout in seconds.
+     * Gets the session timeout in milliseconds.
      * @return the session timeout
      */
     public int getSessionTimeout() {
@@ -75,7 +75,7 @@ public class PollingConfig extends DefaultParameters {
     }
 
     /**
-     * Sets the session timeout in seconds.
+     * Sets the session timeout in milliseconds.
      * @param sessionTimeout the session timeout
      */
     public void setSessionTimeout(int sessionTimeout) {
