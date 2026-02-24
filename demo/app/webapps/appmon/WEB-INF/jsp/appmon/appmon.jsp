@@ -3,7 +3,6 @@
 <%@ taglib uri="http://aspectran.com/tags" prefix="aspectran" %>
 <link rel="stylesheet" href="<aspectran:token type='bean' expression='appmonAssets^url'/>/css/appmon.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">
 <link rel="stylesheet" href="<aspectran:token type='bean' expression='appmonAssets^url'/>/css/appmon-dark.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">
-<script>const contextPath = "<aspectran:url value="/"/>";</script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/dashboard-builder.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/dashboard-viewer.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
 <script src="<aspectran:token type='bean' expression='appmonAssets^url'/>/js/dashboard-chart.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>"></script>
