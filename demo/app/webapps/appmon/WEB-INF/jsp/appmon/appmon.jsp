@@ -168,7 +168,7 @@
         const BASE_PATH = "${pageContext.request.contextPath}";
         const INSTANCES = "${page.instances}";
         const options = {
-            // flagsUrl: "https://cdn.jsdelivr.net/gh/aspectran/aspectran-assets/app/webroot/assets/countries/flags/"
+            // flagsUrl: "https://cdn.jsdelivr.net/gh/aspectran/aspectran-assets@main/app/webroot/assets/countries/flags/"
         };
         new DashboardBuilder(options).build(BASE_PATH, INSTANCES);
     });

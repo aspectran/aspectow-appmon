@@ -9,7 +9,7 @@
  */
 class DashboardViewer {
     constructor(sampleInterval) {
-        this.flagsUrl = "https://cdn.jsdelivr.net/gh/aspectran/aspectran-assets/app/webroot/assets/countries/flags/";
+        this.flagsUrl = "https://cdn.jsdelivr.net/gh/aspectran/aspectran-assets@main/app/webroot/assets/countries/flags/";
         this.tempResidentInactiveSecs = 30;
         this.sampleInterval = sampleInterval;
 
