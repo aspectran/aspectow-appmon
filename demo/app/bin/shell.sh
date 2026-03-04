@@ -81,9 +81,13 @@ while [ ".$1" != . ]; do
   case "$1" in
   --debug)
     LOGGING_CONFIG="$BASE_DIR/config/logging/logback-debug.xml"
+    echo "Using JAVA_HOME: $JAVA_HOME"
+    if [ ! -z "$JAVA_OPTS" ]; then
+      echo "Using JAVA_OPTS: $JAVA_OPTS"
+    fi
     shift
     continue
-    ;;  
+    ;;
   *)
     break
     ;;
@@ -98,6 +102,7 @@ fi
   $JVM_MS_OPT \
   $JVM_MX_OPT \
   $JVM_SS_OPT \
+  --enable-native-access=ALL-UNNAMED \
   -server \
   -classpath "$CLASSPATH" \
   -Djava.io.tmpdir="$TMP_DIR" \

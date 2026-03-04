@@ -46,17 +46,17 @@ set ASPECTRAN_CONFIG=%BASE_DIR%\config\aspectran-config.apon
 
 if "%1" == "debug" (
     set LOGGING_CONFIG=%BASE_DIR%\config\logging\logback-debug.xml
+    echo Using JAVA_HOME: %JAVA_HOME%
+    if not "%JAVA_OPTS%" == "" echo Using JAVA_OPTS: %JAVA_OPTS%
 ) else (
     set LOGGING_CONFIG=%BASE_DIR%\config\logging\logback.xml
 )
-
-echo Using JAVA_HOME: %JAVA_HOME%
-if not "%JAVA_OPTS%" == "" echo Using JAVA_OPTS: %JAVA_OPTS%
 
 "%JAVA_EXE%"^
  %JVM_MS_OPT%^
  %JVM_MX_OPT%^
  %JVM_SS_OPT%^
+ --enable-native-access=ALL-UNNAMED^
  -server^
  -classpath "%BASE_DIR%\lib\*"^
  -Djava.io.tmpdir="%TMP_DIR%"^
