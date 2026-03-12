@@ -454,7 +454,7 @@
     border: 1px solid #748fa0;
 }
 .session-box ul.sessions li.designated .count {
-    border-top-left-radius: 3px;
+    border-top-left-radius: 2px;
 }
 .session-box ul.sessions li.designated .detail {
     display: block;
