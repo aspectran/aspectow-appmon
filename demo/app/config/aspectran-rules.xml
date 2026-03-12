@@ -30,6 +30,6 @@
 
     <append file="/config/server/server.xml"/>
     <append file="/config/appmon/appmon-assets.xml"/>
-    <append file="/config/root-web-config.xml"/>
+    <append file="/config/root-web-rules.xml"/>
 
 </aspectran>
