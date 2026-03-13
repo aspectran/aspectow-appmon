@@ -80,7 +80,7 @@ public interface EventCountMapper {
      * @param domain the domain name
      * @param instance the instance name
      * @param event the event name
-     * @param zoneOffset the time zone offset in minutes
+     * @param zoneOffset the time zone offset in seconds
      * @param dateOffset the start date/time for fetching data
      * @return a list of event count records aggregated by hour
      */
@@ -91,7 +91,7 @@ public interface EventCountMapper {
      * @param domain the domain name
      * @param instance the instance name
      * @param event the event name
-     * @param zoneOffset the time zone offset in minutes
+     * @param zoneOffset the time zone offset in seconds
      * @param dateOffset the start date/time for fetching data
      * @return a list of event count records aggregated by day
      */
@@ -102,7 +102,7 @@ public interface EventCountMapper {
      * @param domain the domain name
      * @param instance the instance name
      * @param event the event name
-     * @param zoneOffset the time zone offset in minutes
+     * @param zoneOffset the time zone offset in seconds
      * @param dateOffset the start date/time for fetching data
      * @return a list of event count records aggregated by month
      */
@@ -113,7 +113,7 @@ public interface EventCountMapper {
      * @param domain the domain name
      * @param instance the instance name
      * @param event the event name
-     * @param zoneOffset the time zone offset in minutes
+     * @param zoneOffset the time zone offset in seconds
      * @param dateOffset the start date/time for fetching data
      * @return a list of event count records aggregated by year
      */
