@@ -60,12 +60,6 @@ public interface EventCountMapper {
     void insertEventCountHourly(EventCountVO eventCountVO);
 
     /**
-     * Inserts a daily aggregated event count record.
-     * @param eventCountVO the event count data to insert
-     */
-    void insertEventCountDaily(EventCountVO eventCountVO);
-
-    /**
      * Retrieves raw chart data for the specified criteria.
      * @param domain the domain name
      * @param instance the instance name
@@ -153,11 +147,6 @@ public interface EventCountMapper {
         @Override
         public void insertEventCountHourly(EventCountVO eventCountVO) {
             simple().insertEventCountHourly(eventCountVO);
-        }
-
-        @Override
-        public void insertEventCountDaily(EventCountVO eventCountVO) {
-            simple().insertEventCountDaily(eventCountVO);
         }
 
         @Override

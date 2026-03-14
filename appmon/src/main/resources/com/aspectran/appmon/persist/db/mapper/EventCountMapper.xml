@@ -129,42 +129,6 @@
         </choose>
     </insert>
 
-    <insert id="insertEventCountDaily" parameterType="com.aspectran.appmon.engine.persist.counter.EventCountVO">
-        <choose>
-            <when test="_databaseId == 'mysql'">
-                insert into appmon_event_count_daily (domain, instance, event, datetime, total, delta, error)
-                values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
-                on duplicate key update total = #{total}, delta = delta + #{delta}, error = error + #{error}
-            </when>
-            <when test="_databaseId == 'oracle'">
-                merge into appmon_event_count_daily a
-                using (
-                    select
-                        #{domain} domain, #{instance} instance, #{event} event,
-                        #{datetime} datetime, #{total} total, #{delta} delta, #{error} error
-                    from dual
-                ) b
-                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.datetime = b.datetime)
-                when matched then
-                    update set total = b.total, delta = a.delta + b.delta, error = a.error + b.error
-                when not matched then
-                    insert (domain, instance, event, datetime, total, delta, error)
-                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
-            </when>
-            <otherwise>
-                merge into appmon_event_count_daily as a
-                using values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
-                    as b (domain, instance, event, datetime, total, delta, error)
-                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.datetime = b.datetime)
-                when matched then
-                    update set total = b.total, delta = a.delta + b.delta, error = a.error + b.error
-                when not matched then
-                    insert (domain, instance, event, datetime, total, delta, error)
-                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
-            </otherwise>
-        </choose>
-    </insert>
-
     <select id="getChartData" resultType="com.aspectran.appmon.engine.persist.counter.EventCountVO">
         <choose>
             <when test="_databaseId == 'oracle'">
@@ -250,7 +214,7 @@
             <when test="_databaseId == 'oracle'">
                 select datetime, delta, error
                 from (
-                    select min(datetime) as datetime, sum(delta) delta, sum(error) error
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
                     from (
                         select datetime, delta, error
                         from appmon_event_count_hourly
@@ -261,7 +225,7 @@
                         order by datetime desc
                     )
                     where rownum &lt;= 3000
-                    group by to_char(datetime + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYYMMDD')
+                    group by to_char(datetime + #{zoneOffset} / 86400.0, 'YYYYMMDD')
                     order by 1 desc
                 )
                 where rownum &lt;= 100
@@ -315,7 +279,7 @@
             <when test="_databaseId == 'oracle'">
                 select datetime, delta, error
                 from (
-                    select min(datetime) as datetime, sum(delta) delta, sum(error) error
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
                     from (
                         select datetime, delta, error
                         from appmon_event_count_hourly
@@ -326,7 +290,7 @@
                         order by datetime desc
                     )
                     where rownum &lt;= 80000
-                    group by to_char(datetime + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYYMM')
+                    group by to_char(datetime + #{zoneOffset} / 86400.0, 'YYYYMM')
                     order by 1 desc
                 )
                 where rownum &lt;= 100
@@ -380,7 +344,7 @@
             <when test="_databaseId == 'oracle'">
                 select datetime, delta, error
                 from (
-                    select min(datetime) as datetime, sum(delta) delta, sum(error) error
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
                     from (
                         select datetime, delta, error
                         from appmon_event_count_hourly
@@ -391,7 +355,7 @@
                         order by datetime desc
                     )
                     where rownum &lt;= 100000
-                    group by to_char(datetime + 1 / 24 / 60 / 60 * #{zoneOffset}, 'YYYY')
+                    group by to_char(datetime + #{zoneOffset} / 86400.0, 'YYYY')
                     order by 1 desc
                 )
                 where rownum &lt;= 100

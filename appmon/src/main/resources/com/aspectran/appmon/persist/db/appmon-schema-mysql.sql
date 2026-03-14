@@ -30,22 +30,6 @@ create table if not exists appmon_event_count_hourly (
     COLLATE = utf8mb4_unicode_ci
     comment = 'Hourly aggregated event count data';
 
--- Daily aggregated event count data
-create table if not exists appmon_event_count_daily (
-    domain varchar(30) not null comment 'Monitoring domain name',
-    instance varchar(30) not null comment 'Application instance name',
-    event varchar(30) not null comment 'Event name',
-    datetime datetime not null comment 'Daily truncated timestamp',
-    total int not null comment 'Cumulative total count at the end of the day',
-    delta int not null comment 'Total incremental count for the day',
-    error int not null comment 'Total incremental error count for the day',
-    constraint appmon_event_count_daily_pk primary key (domain, instance, event, datetime)
-)
-    engine = MyISAM
-    charset = utf8mb4
-    COLLATE = utf8mb4_unicode_ci
-    comment = 'Daily aggregated event count data';
-
 -- Most recent event count state for incremental updates
 create table if not exists appmon_event_count_last (
     domain varchar(30) not null comment 'Monitoring domain name',
