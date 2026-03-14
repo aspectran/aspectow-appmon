@@ -32,7 +32,7 @@ import java.net.URI;
  */
 public abstract class AppMonConfigBuilder {
 
-    private static final String DEFAULT_BACKEND_CONFIG_RESOURCE = "com/aspectran/appmon/context/appmon-config.apon";
+    private static final String DEFAULT_BACKEND_CONFIG_RESOURCE = "com/aspectran/appmon/config/appmon-config.apon";
 
     /**
      * Builds the default {@link AppMonConfig} from the classpath resource.

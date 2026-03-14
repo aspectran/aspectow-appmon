@@ -13,29 +13,29 @@
         </properties>
         <properties profile="h2">
             <item name="locations" type="array">
-                <value>classpath:com/aspectran/appmon/persist/db/appmon.db-h2.properties</value>
-                <value>classpath:com/aspectran/appmon/persist/db/appmon.db-h2.system.properties</value>
+                <value>classpath:com/aspectran/appmon/config/db/appmon.db-h2.properties</value>
+                <value>classpath:com/aspectran/appmon/config/db/appmon.db-h2.system.properties</value>
                 <value>/config/appmon/appmon.db-h2.properties</value>
             </item>
         </properties>
         <properties profile="mariadb">
             <item name="locations" type="array">
-                <value>classpath:com/aspectran/appmon/persist/db/appmon.db-mariadb.properties</value>
-                <value>classpath:com/aspectran/appmon/persist/db/appmon.db-mariadb.system.properties</value>
+                <value>classpath:com/aspectran/appmon/config/db/appmon.db-mariadb.properties</value>
+                <value>classpath:com/aspectran/appmon/config/db/appmon.db-mariadb.system.properties</value>
                 <value>/config/appmon/appmon.db-mariadb.properties</value>
             </item>
         </properties>
         <properties profile="mysql">
             <item name="locations" type="array">
-                <value>classpath:com/aspectran/appmon/persist/db/appmon.db-mysql.properties</value>
-                <value>classpath:com/aspectran/appmon/persist/db/appmon.db-mysql.system.properties</value>
+                <value>classpath:com/aspectran/appmon/config/db/appmon.db-mysql.properties</value>
+                <value>classpath:com/aspectran/appmon/config/db/appmon.db-mysql.system.properties</value>
                 <value>/config/appmon/appmon.db-mysql.properties</value>
             </item>
         </properties>
         <properties profile="oracle">
             <item name="locations" type="array">
-                <value>classpath:com/aspectran/appmon/persist/db/appmon.db-oracle.properties</value>
-                <value>classpath:com/aspectran/appmon/persist/db/appmon.db-oracle.system.properties</value>
+                <value>classpath:com/aspectran/appmon/config/db/appmon.db-oracle.properties</value>
+                <value>classpath:com/aspectran/appmon/config/db/appmon.db-oracle.system.properties</value>
                 <value>/config/appmon/appmon.db-oracle.properties</value>
             </item>
         </properties>
@@ -46,7 +46,7 @@
             FactoryBean that creates an MyBatis SqlSessionFactory using default MyBatis Configuration.
         </description>
         <properties>
-            <item name="configLocation" value="classpath:com/aspectran/appmon/persist/db/mybatis-config.xml"/>
+            <item name="configLocation" value="classpath:com/aspectran/appmon/config/db/mybatis-config.xml"/>
             <item name="environmentId" value="default"/>
             <item name="variables" type="properties">
                 <entry name="driver">#{appmonDBProperties^driver}</entry>

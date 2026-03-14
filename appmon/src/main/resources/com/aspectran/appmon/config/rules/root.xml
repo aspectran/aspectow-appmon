@@ -17,8 +17,8 @@
         </settings>
     </aspect>
 
-    <append resource="com/aspectran/appmon/context/scheduler-context.xml"/>
-    <append resource="com/aspectran/appmon/context/db-context.xml" profile="!appmon.ext-persistence"/>
-    <append resource="com/aspectran/appmon/context/web-context.xml"/>
+    <append resource="com/aspectran/appmon/config/rules/scheduler.xml"/>
+    <append resource="com/aspectran/appmon/config/rules/db.xml" profile="!appmon.ext-persistence"/>
+    <append resource="com/aspectran/appmon/config/rules/web.xml"/>
 
 </aspectran>
