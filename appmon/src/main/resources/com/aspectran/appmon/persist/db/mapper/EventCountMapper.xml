@@ -225,7 +225,7 @@
                         order by datetime desc
                     )
                     where rownum &lt;= 3000
-                    group by to_char(datetime + #{zoneOffset} / 86400.0, 'YYYYMMDD')
+                    group by trunc(datetime + #{zoneOffset} / 86400.0)
                     order by 1 desc
                 )
                 where rownum &lt;= 100
@@ -245,7 +245,7 @@
                         order by datetime desc
                         limit 3000
                     ) as raw
-                    group by date_format(date_add(datetime, interval #{zoneOffset} second), '%Y%m%d')
+                    group by date(date_add(datetime, interval #{zoneOffset} second))
                     order by 1 desc
                     limit 100
                 ) as x
@@ -265,7 +265,7 @@
                         order by datetime desc
                         limit 3000
                     ) as raw
-                    group by formatdatetime(dateadd(second, #{zoneOffset}, datetime), 'yyyyMMdd')
+                    group by cast(dateadd(second, #{zoneOffset}, datetime) as date)
                     order by 1 desc
                     limit 100
                 ) as x
@@ -290,7 +290,7 @@
                         order by datetime desc
                     )
                     where rownum &lt;= 80000
-                    group by to_char(datetime + #{zoneOffset} / 86400.0, 'YYYYMM')
+                    group by trunc(datetime + #{zoneOffset} / 86400.0, 'MM')
                     order by 1 desc
                 )
                 where rownum &lt;= 100
@@ -355,7 +355,7 @@
                         order by datetime desc
                     )
                     where rownum &lt;= 100000
-                    group by to_char(datetime + #{zoneOffset} / 86400.0, 'YYYY')
+                    group by trunc(datetime + #{zoneOffset} / 86400.0, 'YYYY')
                     order by 1 desc
                 )
                 where rownum &lt;= 100
