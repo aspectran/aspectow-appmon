@@ -23,6 +23,7 @@ import com.aspectran.core.component.bean.annotation.Before;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Finally;
 import com.aspectran.core.component.bean.annotation.Joinpoint;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Scope;
 import com.aspectran.core.context.rule.type.ScopeType;
 import com.aspectran.mybatis.SqlSessionAdvice;
@@ -43,6 +44,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
  */
 @Component
 @Bean(lazyDestroy = true)
+@Profile("!appmon.ext-persistence")
 @Scope(ScopeType.PROTOTYPE)
 @Aspect(
         id = "simpleTxAspect",

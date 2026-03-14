@@ -70,11 +70,10 @@ public class CounterPersistSchedule {
 
     private final CounterPersist counterPersist;
 
-    private final EventCountMapper.Dao dao;
+    private final EventCountMapper dao;
 
     @Autowired
-    public CounterPersistSchedule(@NonNull AppMonManager appMonManager,
-                                  EventCountMapper.Dao dao) {
+    public CounterPersistSchedule(@NonNull AppMonManager appMonManager, EventCountMapper dao) {
         this.appMonManager = appMonManager;
         this.currentDomain = appMonManager.getCurrentDomain();
         this.counterPersist = appMonManager.getPersistManager().getCounterPersist();

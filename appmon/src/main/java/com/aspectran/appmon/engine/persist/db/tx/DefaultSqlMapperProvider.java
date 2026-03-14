@@ -18,6 +18,7 @@ package com.aspectran.appmon.engine.persist.db.tx;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.mybatis.SqlMapperProvider;
 import org.apache.ibatis.session.SqlSession;
 
@@ -29,6 +30,7 @@ import org.apache.ibatis.session.SqlSession;
  */
 @Component
 @Bean(lazyDestroy = true)
+@Profile("!appmon.ext-persistence")
 public class DefaultSqlMapperProvider implements SqlMapperProvider {
 
     private final SqlSession simpleSqlSession;

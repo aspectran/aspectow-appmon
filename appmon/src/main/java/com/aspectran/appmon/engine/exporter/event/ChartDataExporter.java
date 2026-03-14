@@ -140,7 +140,7 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
 
         final int finalZoneOffsetInSeconds = zoneOffsetInSeconds;
         final LocalDateTime finalDateOffset = dateOffset;
-        EventCountMapper.Dao dao = exporterManager.getBean(EventCountMapper.Dao.class);
+        EventCountMapper dao = exporterManager.getBean("appmon.eventCountDao");
         List<EventCountVO> list = exporterManager.instantActivity(() -> {
             String domain = eventInfo.getDomainName();
             String instance = eventInfo.getInstanceName();

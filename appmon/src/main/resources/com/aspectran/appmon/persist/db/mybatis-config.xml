@@ -32,6 +32,7 @@
         <property name="MariaDB" value="mysql"/>
         <property name="MySQL" value="mysql"/>
         <property name="Oracle" value="oracle"/>
+        <property name="PostgreSQL" value="postgresql"/>
     </databaseIdProvider>
 
     <mappers>

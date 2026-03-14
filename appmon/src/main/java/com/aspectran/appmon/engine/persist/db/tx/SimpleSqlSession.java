@@ -17,6 +17,7 @@ package com.aspectran.appmon.engine.persist.db.tx;
 
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.mybatis.SqlSessionAgent;
 
 /**
@@ -27,6 +28,7 @@ import com.aspectran.mybatis.SqlSessionAgent;
  */
 @Component
 @Bean(id = "simpleSqlSession", lazyDestroy = true)
+@Profile("!appmon.ext-persistence")
 public class SimpleSqlSession extends SqlSessionAgent {
 
     /**

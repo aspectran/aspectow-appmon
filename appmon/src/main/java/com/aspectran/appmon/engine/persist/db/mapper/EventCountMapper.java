@@ -17,7 +17,9 @@ package com.aspectran.appmon.engine.persist.db.mapper;
 
 import com.aspectran.appmon.engine.persist.counter.EventCountVO;
 import com.aspectran.core.component.bean.annotation.Autowired;
+import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.mybatis.SqlMapperAccess;
 import com.aspectran.mybatis.SqlMapperProvider;
 import org.apache.ibatis.annotations.Mapper;
@@ -118,6 +120,8 @@ public interface EventCountMapper {
      * Provides a convenient way to access the mapper methods using Aspectran's bean container.
      */
     @Component
+    @Bean("appmon.eventCountDao")
+    @Profile("!appmon.ext-persistence")
     class Dao extends SqlMapperAccess<EventCountMapper> implements EventCountMapper {
 
         /**
