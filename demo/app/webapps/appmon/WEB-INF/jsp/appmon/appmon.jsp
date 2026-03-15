@@ -13,15 +13,15 @@
 <aspectran:profile expression="dev">
 <script>
     if (typeof DashboardBuilder === "undefined") {
-        document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.1/css/appmon.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">');
-        document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.1/css/appmon-dark.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">');
-        document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.1/js/dashboard-builder.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
-        document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.1/js/dashboard-viewer.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
-        document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.1/js/dashboard-chart.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
-        document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.1/js/traffic-painter.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
-        document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.1/js/base-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
-        document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.1/js/websocket-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
-        document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.1/js/polling-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/css/appmon.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">');
+        document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/css/appmon-dark.css?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">');
+        document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/dashboard-builder.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/dashboard-viewer.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/dashboard-chart.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/traffic-painter.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/base-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/websocket-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
+        document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/polling-client.js?v=<aspectran:token type='bean' expression='appmonAssets^cacheBustingVersion'/>">\x3C/script>');
     }
 </script>
 </aspectran:profile>
