@@ -31,8 +31,8 @@
         <property name="H2" value="h2"/>
         <property name="MariaDB" value="mysql"/>
         <property name="MySQL" value="mysql"/>
-        <property name="Oracle" value="oracle"/>
         <property name="PostgreSQL" value="postgresql"/>
+        <property name="Oracle" value="oracle"/>
     </databaseIdProvider>
 
     <mappers>

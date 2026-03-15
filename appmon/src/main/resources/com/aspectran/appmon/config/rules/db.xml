@@ -32,6 +32,13 @@
                 <value>/config/appmon/appmon.db-mysql.properties</value>
             </item>
         </properties>
+        <properties profile="postgresql">
+            <item name="locations" type="array">
+                <value>classpath:com/aspectran/appmon/config/db/appmon.db-postgresql.properties</value>
+                <value>classpath:com/aspectran/appmon/config/db/appmon.db-postgresql.system.properties</value>
+                <value>/config/appmon/appmon.db-postgresql.properties</value>
+            </item>
+        </properties>
         <properties profile="oracle">
             <item name="locations" type="array">
                 <value>classpath:com/aspectran/appmon/config/db/appmon.db-oracle.properties</value>
