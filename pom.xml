@@ -78,11 +78,6 @@
             <name>Central Portal Snapshots</name>
             <url>https://central.sonatype.com/repository/maven-snapshots/</url>
         </snapshotRepository>
-        <repository>
-            <id>central-portal-staging</id>
-            <name>Central Portal Staging Repository</name>
-            <url>https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/</url>
-        </repository>
     </distributionManagement>
 
     <repositories>
@@ -236,6 +231,11 @@
                                     <version>[3.9.4,)</version>
                                     <message>[ERROR] OLD MAVEN in use, Aspectran ${project.version} requires Maven 3.9.4 or newer</message>
                                 </requireMavenVersion>
+                                <requireProperty>
+                                    <property>project.build.sourceEncoding</property>
+                                    <regex>UTF-8</regex>
+                                    <message>[ERROR] The project encoding must be UTF-8.</message>
+                                </requireProperty>
                             </rules>
                         </configuration>
                     </execution>
@@ -245,7 +245,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <compilerArgs>
-                        <arg>-Xlint:-try,-path,-options</arg>
+                        <arg>-Xlint:-try,-path</arg>
                     </compilerArgs>
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
