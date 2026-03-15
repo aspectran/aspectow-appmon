@@ -5,10 +5,8 @@
 
     <bean id="sessionListenerRegistration"
           class="com.aspectran.undertow.support.SessionListenerRegistrationBean" lazyInit="true">
-        <arguments>
-            <item>tow.server</item>
-            <item>root</item>
-        </arguments>
+        <argument>tow.server</argument>
+        <argument>root</argument>
     </bean>
 
 </aspectran>
