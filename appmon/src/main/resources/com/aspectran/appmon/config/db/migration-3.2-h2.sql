@@ -58,4 +58,4 @@ SELECT
    SUM(delta),
    SUM(error)
 FROM appmon_event_count
-GROUP BY domain, instance, event, DATE_TRUNC('DAY', datetime);
+GROUP BY domain, instance, event, DATE_TRUNC('HOUR', datetime);
