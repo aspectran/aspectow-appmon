@@ -193,8 +193,8 @@
                 <div class="col-sm-8 col-md-7 col-lg-6 col-xl-5 d-flex">
                     <div class="d-none d-sm-block mt-1"><a class="logo float-start me-3 me-lg-4" href="https://aspectran.com/aspectran/" title="Aspectran"></a></div>
                     <div>
-                        <a href="https://aspectran.com/aspectran/"><h5>About Aspectran</h5></a>
-                        <p><a href="https://aspectran.com/aspectran/">Aspectran is a lightweight, high‑performance framework for building both simple shell applications and large enterprise web services on the JVM.</a></p>
+                        <a href="https://aspectran.com/ko/aspectow/"><h5>About AppMon</h5></a>
+                        <p><a href="https://aspectran.com/ko/aspectow/">Aspectow AppMon is a lightweight, real-time monitoring solution for applications based on the Aspectran framework.</a></p>
                     </div>
                 </div>
                 <div class="col-sm-4 col-md-5 col-lg-3 offset-lg-1">
