@@ -50,18 +50,18 @@ shell: {
     }
     greetings: (
         |
-        |{{GREEN  }}      _
-        |{{GREEN  }}     /_\  _ __  _ __   /\/\   ___  _ __
+        |{{WHITE  }}      _
+        |{{CYAN   }}     /_\  _ __  _ __   /\/\   ___  _ __
         |{{GREEN  }}    //_\\| '_ \| '_ \ /    \ / _ \| '_ \
-        |{{GREEN  }}   /  _  \ |_) | |_) / /\/\ \ (_) | | | |
-        |{{CYAN   }}   \_/ \_/ .__/| .__/\/    \/\___/|_| |_|   for Aspectow
-        |{{CYAN   }}=========|_|===|_|=========================================
-        |{{MAGENTA}}:: Built with Aspectran :: #{class:com.aspectran.core.AboutMe^version}
-        |{{reset  }}
-        |If you want a list of all supported built-in commands, type '{{GREEN}}help{{reset}}'.
-        |To get help on a specific command, type '{{GREEN}}command_name -h{{reset}}'.
-        |If you want a list of all available translets, type '{{GREEN}}translet -l{{reset}}'.
-        |To run a translet, type '{{GREEN}}translet <translet_name>{{reset}}' or '{{GREEN}}translet_name{{reset}}'.
+        |{{YELLOW }}   /  _  \ |_) | |_) / /\/\ \ (_) | | | |
+        |{{RED    }}   \_/ \_/ .__/| .__/\/    \/\___/|_| |_|    {{WHITE}}Application Monitor
+        |{{gray   }}=========|_|===|_|==========================================================
+        |{{MAGENTA}}:: Built with Aspectran :: {{RED}}#{class:com.aspectran.core.AboutMe^version}{{reset}}
+        |
+        |{{gray   }}To see a list of all built-in commands, type {{GREEN}}help{{reset}}.
+        |{{gray   }}To get help for a specific command, type {{GREEN}}command_name -h{{reset}}.
+        |{{gray   }}To list all available translets, type {{CYAN}}translet -l{{reset}}.
+        |{{gray   }}To run a translet, type {{CYAN}}translet <translet_name>{{gray}} or just {{CYAN}}translet_name{{reset}}.
     )
     prompt: "{{green}}app-mon>{{reset}} "
     commands: [
