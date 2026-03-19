@@ -60,7 +60,7 @@
     <script>dayjs.extend(window.dayjs_plugin_localizedFormat)</script>
     <script src="https://assets.aspectran.com/js/navigation.js?v=20250923"></script>
     <script src="https://assets.aspectran.com/js/theme-toggler.js?v=20251005"></script>
-    <script src="https://assets.aspectran.com/countries/countries.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/aspectran/aspectran-assets@main/assets/countries/countries.js"></script>
 </head>
 <body id="top-of-page" class="${page.style}" itemscope itemtype="https://schema.org/WebPage">
 <nav id="navigation" class="navbar navbar-expand-lg" data-bs-theme="dark">
