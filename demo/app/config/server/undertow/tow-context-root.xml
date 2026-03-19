@@ -63,25 +63,23 @@
     <bean id="tow.context.root.sessionManager"
           class="com.aspectran.undertow.server.session.TowSessionManager"
           scope="prototype">
-        <properties>
-            <item name="sessionManagerConfig">
-                <bean class="com.aspectran.core.context.config.SessionManagerConfig">
-                    <argument>
-                        workerName: rn0
-                        maxActiveSessions: 9999
-                        maxIdleSeconds: 489
-                        evictionIdleSeconds: 258
-                        scavengingIntervalSeconds: 180
-                        clusterEnabled: false
-                    </argument>
-                </bean>
-            </item>
-            <item name="sessionStore">
-                <bean class="com.aspectran.core.component.session.FileSessionStoreFactoryBean">
-                    <property name="storeDir">/work/_sessions/%{tow.context.root.name}</property>
-                </bean>
-            </item>
-        </properties>
+        <property name="sessionManagerConfig">
+            <bean class="com.aspectran.core.context.config.SessionManagerConfig">
+                <argument>
+                    workerName: rn0
+                    maxActiveSessions: 9999
+                    maxIdleSeconds: 489
+                    evictionIdleSeconds: 258
+                    scavengingIntervalSeconds: 180
+                    clusterEnabled: false
+                </argument>
+            </bean>
+        </property>
+        <property name="sessionStore">
+            <bean class="com.aspectran.core.component.session.FileSessionStoreFactoryBean">
+                <property name="storeDir">/work/_sessions/%{tow.context.root.name}</property>
+            </bean>
+        </property>
     </bean>
 
 </aspectran>
