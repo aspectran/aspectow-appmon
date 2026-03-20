@@ -53,7 +53,7 @@ public class HomeActivity {
      * @return a map of attributes for rendering the view
      */
     @Request("/")
-    @Dispatch("templates/default")
+    @Dispatch("home/home")
     @Action("page")
     public Map<String, Object> home() {
         List<DomainInfo> domainInfoList = appMonManager.getDomainInfoList();
@@ -61,7 +61,6 @@ public class HomeActivity {
         Map<String, ActivityContext> contexts = AnatomyActivity.prepareContextMap();
         List<String> allContextNames = new ArrayList<>(contexts.keySet());
         return Map.of(
-                "include", "home/main",
                 "style", "fluid compact",
                 "domainInfoList", domainInfoList,
                 "instanceInfoList", instanceInfoList,
@@ -74,18 +73,17 @@ public class HomeActivity {
      * @return a map of attributes for rendering the view
      */
     @Request("/${ignore}")
-    @Dispatch("templates/default")
+    @Dispatch("home/main")
     @Action("page")
     public Map<String, Object> home2() {
         return home();
     }
 
     @Request("/auth-expired")
-    @Dispatch("templates/default")
+    @Dispatch("home/auth-expired")
     @Action("page")
     public Map<String, Object> handleAuthExpired() {
         return Map.of(
-                "include", "home/auth-expired",
                 "style", "fluid compact"
         );
     }

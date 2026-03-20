@@ -48,14 +48,6 @@
                 <property name="loadOnStartup" valueType="int">1</property>
             </bean>
         </property>
-        <property name="servletContainerInitializers" type="array">
-            <bean class="com.aspectran.undertow.server.servlet.TowJasperInitializer">
-                <property name="tldResources" type="array">
-                    <value>classpath:com/aspectran/web/support/tags/aspectran.tld</value>
-                    <value>/webapps/%{tow.context.appmon.name}/WEB-INF/taglibs/</value>
-                </property>
-            </bean>
-        </property>
         <property name="webSocketServerContainerInitializer">
             <bean class="com.aspectran.undertow.server.servlet.TowWebSocketServerContainerInitializer">
                 <property name="directBuffers" valueType="boolean">false</property>

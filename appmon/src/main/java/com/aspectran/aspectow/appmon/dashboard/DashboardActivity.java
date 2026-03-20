@@ -61,12 +61,11 @@ public class DashboardActivity {
      * @return a map of attributes for rendering the view
      */
     @Request("/dashboard/${instances}")
-    @Dispatch("templates/default")
+    @Dispatch("appmon/dashboard")
     @Action("page")
     public Map<String, String> dashboard(String instances) {
         return Map.of(
                 "headinclude", "appmon/_domains",
-                "include", "appmon/appmon",
                 "style", "fluid compact",
                 "instances", StringUtils.nullToEmpty(instances)
         );

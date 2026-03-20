@@ -47,12 +47,13 @@
 
     <script layout:fragment="script" th:inline="javascript">
         $(function() {
+            const dataUrl = [[@{/anatomy/{name}/data(name=${page.contextName})}]];
             const $componentTree = $('#component-tree');
             const $detailsContent = $('#details-content');
 
             $detailsContent.text("Select a rule from the left panel to see details.");
 
-            $.getJSON([[${#request.contextPath}]] + '/anatomy/' + [[${page.contextName}]] + '/data', function(data) {
+            $.getJSON(dataUrl, function(data) {
                 const anatomyData = data.anatomyData;
                 if (!anatomyData) {
                     $detailsContent.text('Failed to load anatomy data.');

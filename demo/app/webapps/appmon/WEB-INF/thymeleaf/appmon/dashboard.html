@@ -4,30 +4,32 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{templates/default}">
 <head>
-    <link rel="stylesheet" th:href="|${appmonAssets.url}/css/appmon.css?v=${appmonAssets.cacheBustingVersion}|"/>
-    <link rel="stylesheet" th:href="|${appmonAssets.url}/css/appmon-dark.css?v=${appmonAssets.cacheBustingVersion}|"/>
-    <script th:src="|${appmonAssets.url}/js/dashboard-builder.js?v=${appmonAssets.cacheBustingVersion}|"></script>
-    <script th:src="|${appmonAssets.url}/js/dashboard-viewer.js?v=${appmonAssets.cacheBustingVersion}|"></script>
-    <script th:src="|${appmonAssets.url}/js/dashboard-chart.js?v=${appmonAssets.cacheBustingVersion}|"></script>
-    <script th:src="|${appmonAssets.url}/js/traffic-painter.js?v=${appmonAssets.cacheBustingVersion}|"></script>
-    <script th:src="|${appmonAssets.url}/js/base-client.js?v=${appmonAssets.cacheBustingVersion}|"></script>
-    <script th:src="|${appmonAssets.url}/js/websocket-client.js?v=${appmonAssets.cacheBustingVersion}|"></script>
-    <script th:src="|${appmonAssets.url}/js/polling-client.js?v=${appmonAssets.cacheBustingVersion}|"></script>
-    <th:block th:if="${#arrays.contains(currentEnvironment.activeProfiles, 'dev')}">
-        <script th:inline="javascript">
-            if (typeof DashboardBuilder === "undefined") {
-                const version = [[${appmonAssets.cacheBustingVersion}]];
-                document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/css/appmon.css?v=' + version + '">');
-                document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/css/appmon-dark.css?v=' + version + '">');
-                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/dashboard-builder.js?v=' + version + '">\x3C/script>');
-                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/dashboard-viewer.js?v=' + version + '">\x3C/script>');
-                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/dashboard-chart.js?v=' + version + '">\x3C/script>');
-                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/traffic-painter.js?v=' + version + '">\x3C/script>');
-                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/base-client.js?v=' + version + '">\x3C/script>');
-                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/websocket-client.js?v=' + version + '">\x3C/script>');
-                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/polling-client.js?v=' + version + '">\x3C/script>');
-            }
-        </script>
+    <th:block th:fragment="style">
+        <link rel="stylesheet" th:href="|${#{appmonAssets}.url}/css/appmon.css?v=${#{appmonAssets}.cacheBustingVersion}|"/>
+        <link rel="stylesheet" th:href="|${#{appmonAssets}.url}/css/appmon-dark.css?v=${#{appmonAssets}.cacheBustingVersion}|"/>
+        <script th:src="|${#{appmonAssets}.url}/js/dashboard-builder.js?v=${#{appmonAssets}.cacheBustingVersion}|"></script>
+        <script th:src="|${#{appmonAssets}.url}/js/dashboard-viewer.js?v=${#{appmonAssets}.cacheBustingVersion}|"></script>
+        <script th:src="|${#{appmonAssets}.url}/js/dashboard-chart.js?v=${#{appmonAssets}.cacheBustingVersion}|"></script>
+        <script th:src="|${#{appmonAssets}.url}/js/traffic-painter.js?v=${#{appmonAssets}.cacheBustingVersion}|"></script>
+        <script th:src="|${#{appmonAssets}.url}/js/base-client.js?v=${#{appmonAssets}.cacheBustingVersion}|"></script>
+        <script th:src="|${#{appmonAssets}.url}/js/websocket-client.js?v=${#{appmonAssets}.cacheBustingVersion}|"></script>
+        <script th:src="|${#{appmonAssets}.url}/js/polling-client.js?v=${#{appmonAssets}.cacheBustingVersion}|"></script>
+        <th:block th:if="${#arrays.contains(#{currentEnvironment}.activeProfiles, 'dev')}">
+            <script th:inline="javascript">
+                if (typeof DashboardBuilder === "undefined") {
+                    const version = [[${#{appmonAssets}.cacheBustingVersion}]];
+                    document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/css/appmon.css?v=' + version + '">');
+                    document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/css/appmon-dark.css?v=' + version + '">');
+                    document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/dashboard-builder.js?v=' + version + '">\x3C/script>');
+                    document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/dashboard-viewer.js?v=' + version + '">\x3C/script>');
+                    document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/dashboard-chart.js?v=' + version + '">\x3C/script>');
+                    document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/traffic-painter.js?v=' + version + '">\x3C/script>');
+                    document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/base-client.js?v=' + version + '">\x3C/script>');
+                    document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/websocket-client.js?v=' + version + '">\x3C/script>');
+                    document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.2/js/polling-client.js?v=' + version + '">\x3C/script>');
+                }
+            </script>
+        </th:block>
     </th:block>
 </head>
 <body>
@@ -172,7 +174,7 @@
 
     <script layout:fragment="script" th:inline="javascript">
     $(function () {
-        const BASE_PATH = [[${#request.contextPath}]];
+        const BASE_PATH = [[@{/}]].replace(/\/$/, '');
         const INSTANCES = [[${page.instances}]];
         const options = {
             // flagsUrl: "https://cdn.jsdelivr.net/gh/aspectran/aspectran-assets@main/assets/countries/flags/"

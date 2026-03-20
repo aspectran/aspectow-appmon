@@ -32,9 +32,6 @@
             </bean>
         </property>
         <property name="servlets" type="array">
-            <bean class="com.aspectran.undertow.server.servlet.DefaultJspServlet">
-                <property name="loadOnStartup" valueType="int">0</property>
-            </bean>
             <bean class="com.aspectran.undertow.server.servlet.TowServlet">
                 <argument>webActivityServlet</argument>
                 <argument>com.aspectran.web.servlet.WebActivityServlet</argument>
@@ -42,14 +39,6 @@
                     <value>/</value>
                 </property>
                 <property name="loadOnStartup" valueType="int">1</property>
-            </bean>
-        </property>
-        <property name="servletContainerInitializers" type="array">
-            <bean class="com.aspectran.undertow.server.servlet.TowJasperInitializer">
-                <property name="tldResources" type="array">
-                    <value>classpath:com/aspectran/web/support/tags/aspectran.tld</value>
-                    <value>/webapps/%{tow.context.root.name}/WEB-INF/taglibs/</value>
-                </property>
             </bean>
         </property>
         <property name="webSocketServerContainerInitializer">

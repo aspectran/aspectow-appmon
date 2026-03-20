@@ -23,8 +23,8 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
     <meta name="google" content="notranslate"/>
-    <title th:text="${page.title ?: 'AppMon'}">AppMon</title>
-    <meta name="description" th:content="${page.description ?: 'Welcome to AppMon'}"/>
+    <title th:text="${page.title != null ? page.title : 'AppMon'}">AppMon</title>
+    <meta name="description" th:content="${page.description != null ? page.description : 'Welcome to AppMon'}"/>
     <link rel="mask-icon" href="https://assets.aspectran.com/img/aspectran-logo.svg" color="#4B555A"/>
     <link rel="apple-touch-icon" sizes="57x57" href="https://assets.aspectran.com/img/apple-icon-57x57.png"/>
     <link rel="apple-touch-icon" sizes="60x60" href="https://assets.aspectran.com/img/apple-icon-60x60.png"/>
@@ -93,7 +93,7 @@
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="https://github.com/aspectran/aspectow-appmon" title="Get Involved"
-                           th:text="|v${@com.aspectran.aspectow.appmon.AboutMe@VERSION}|">v1.0.0</a>
+                           th:text="|v${@com.aspectran.aspectow.appmon.AboutMe@getVersion()}|">v1.0.0</a>
                     </li>
                 </ul>
                 <div class="settings d-flex align-items-center justify-content-end gap-2 m-2 mx-md-3 m-lg-0">
@@ -131,14 +131,14 @@
     </div>
 </nav>
 <section itemscope="itemscope" itemtype="https://schema.org/Article">
-    <div id="masthead" th:classappend="|${#strings.contains(page.style ?: '', 'compact') ? 'masthead-compact' : ''} ${page.headimageinclude != null ? 'masthead-with-image' : ''}|">
+    <div id="masthead" th:classappend="|${#strings.contains(page.style != null ? page.style : '', 'compact') ? 'masthead-compact' : ''} ${page.headimageinclude != null ? 'masthead-with-image' : ''}|">
         <div class="container">
             <header th:if="${page.headline != null}">
                 <p th:if="${page.subheadline != null}" class="subheadline" itemprop="alternativeHeadline" th:text="${page.subheadline}"></p>
                 <h1 th:if="${page.headline != null}" itemprop="headline" th:text="${page.headline}"></h1>
                 <p th:if="${page.teaser != null}" class="teaser" itemprop="description" th:text="${page.teaser}"></p>
             </header>
-            <div th:if="${!#strings.contains(page.style ?: '', 'compact') and page.headline != null}" class="hexagons">
+            <div th:if="${!#strings.contains(page.style != null ? page.style : '', 'compact') and page.headline != null}" class="hexagons">
                 <div class="hexagon hex1"></div>
                 <div class="hexagon hex2"></div>
                 <div class="hexagon hex3"></div>
@@ -199,9 +199,10 @@
                     <p>Copyright © 2008-present The Aspectran Project</p>
                 </section>
                 <section id="subfooter-right" class="col-md-6 social-icons text-end"
-                         th:utext="${@com.aspectran.core.AboutMe@POWERED_BY_LINK}">
+                         th:with="poweredByLink=${@com.aspectran.core.AboutMe@getPoweredByLink()}"
+                         th:utext="${poweredByLink}">
                 </section>
-            </nav>
+                </nav>
         </div>
     </div>
 </footer>
@@ -263,5 +264,6 @@
         }
     });
 </script>
+<th:block layout:fragment="script"></th:block>
 </body>
 </html>

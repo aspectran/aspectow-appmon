@@ -59,7 +59,7 @@ public class AnatomyActivity {
      * Dispatches to the anatomy viewer page within the default template.
      */
     @Request("/anatomy/${contextName}")
-    @Dispatch("templates/default")
+    @Dispatch("anatomy/viewer")
     @Action("page")
     public Map<String, Object> viewer(String contextName) {
         Map<String, ActivityContext> contexts = prepareContextMap();
@@ -74,7 +74,6 @@ public class AnatomyActivity {
         }
         return Map.of(
                 "headinclude", "anatomy/_contexts",
-                "include", "anatomy/viewer",
                 "style", "fluid compact",
                 "allContextNames", allContextNames,
                 "contextName", contextName
