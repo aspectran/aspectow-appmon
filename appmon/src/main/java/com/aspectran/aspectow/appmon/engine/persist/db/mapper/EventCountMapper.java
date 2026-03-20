@@ -16,12 +16,12 @@
 package com.aspectran.aspectow.appmon.engine.persist.db.mapper;
 
 import com.aspectran.aspectow.appmon.engine.persist.counter.EventCountVO;
+import com.aspectran.aspectow.appmon.engine.persist.db.tx.AppMonSqlMapperProvider;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.mybatis.SqlMapperAccess;
-import com.aspectran.mybatis.SqlMapperProvider;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.time.LocalDateTime;
@@ -129,7 +129,7 @@ public interface EventCountMapper {
          * @param sqlMapperProvider the SQL mapper provider
          */
         @Autowired
-        public Dao(SqlMapperProvider sqlMapperProvider) {
+        public Dao(AppMonSqlMapperProvider sqlMapperProvider) {
             super(sqlMapperProvider, EventCountMapper.class);
         }
 

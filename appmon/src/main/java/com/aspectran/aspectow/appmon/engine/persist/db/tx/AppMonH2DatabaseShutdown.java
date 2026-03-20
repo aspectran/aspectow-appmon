@@ -38,9 +38,9 @@ import java.sql.SQLException;
 @Component
 @Bean(lazyDestroy = true)
 @Profile("!appmon.ext-persistence")
-public final class H2DatabaseShutdown {
+public final class AppMonH2DatabaseShutdown {
 
-    private static final Logger logger = LoggerFactory.getLogger(H2DatabaseShutdown.class);
+    private static final Logger logger = LoggerFactory.getLogger(AppMonH2DatabaseShutdown.class);
 
     private final SqlSessionFactory sqlSessionFactory;
 
@@ -49,7 +49,7 @@ public final class H2DatabaseShutdown {
      * @param sqlSessionFactory the MyBatis SqlSessionFactory
      */
     @Autowired(required = false)
-    public H2DatabaseShutdown(SqlSessionFactory sqlSessionFactory) {
+    public AppMonH2DatabaseShutdown(SqlSessionFactory sqlSessionFactory) {
         this.sqlSessionFactory = sqlSessionFactory;
     }
 

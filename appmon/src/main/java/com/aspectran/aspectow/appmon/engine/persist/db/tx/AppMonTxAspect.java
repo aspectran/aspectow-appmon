@@ -24,6 +24,7 @@ import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Finally;
 import com.aspectran.core.component.bean.annotation.Joinpoint;
 import com.aspectran.core.component.bean.annotation.Profile;
+import com.aspectran.core.component.bean.annotation.Qualifier;
 import com.aspectran.core.component.bean.annotation.Scope;
 import com.aspectran.core.context.rule.type.ScopeType;
 import com.aspectran.mybatis.SqlSessionAdvice;
@@ -47,18 +48,18 @@ import org.apache.ibatis.session.SqlSessionFactory;
 @Profile("!appmon.ext-persistence")
 @Scope(ScopeType.PROTOTYPE)
 @Aspect(
-        id = "simpleTxAspect",
+        id = "appmonTxAspect",
         order = 0
 )
 @Joinpoint(
         pointcut = {
-                "+: **@simpleSqlSession"
+                "+: **@appmonSqlSession"
         }
 )
-public class SimpleTxAspect extends SqlSessionAdvice {
+public class AppMonTxAspect extends SqlSessionAdvice {
 
     @Autowired
-    public SimpleTxAspect(SqlSessionFactory sqlSessionFactory) {
+    public AppMonTxAspect(@Qualifier("appmonSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
         super(sqlSessionFactory);
         setAutoCommit(true);
     }

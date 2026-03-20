@@ -31,12 +31,12 @@ import org.apache.ibatis.session.SqlSession;
 @Component
 @Bean(lazyDestroy = true)
 @Profile("!appmon.ext-persistence")
-public class DefaultSqlMapperProvider implements SqlMapperProvider {
+public class AppMonSqlMapperProvider implements SqlMapperProvider {
 
     private final SqlSession simpleSqlSession;
 
     @Autowired
-    public DefaultSqlMapperProvider(SimpleSqlSession simpleSqlSession) {
+    public AppMonSqlMapperProvider(AppMonSqlSession simpleSqlSession) {
         this.simpleSqlSession = simpleSqlSession;
     }
 

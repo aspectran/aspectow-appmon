@@ -22,20 +22,20 @@ import com.aspectran.mybatis.SqlSessionAgent;
 
 /**
  * A {@link SqlSessionAgent} for handling simple, auto-committing database sessions.
- * This agent is advised by {@link SimpleTxAspect} to manage transactions.
+ * This agent is advised by {@link AppMonTxAspect} to manage transactions.
  *
  * <p>Created: 2025. 2. 15.</p>
  */
 @Component
-@Bean(id = "simpleSqlSession", lazyDestroy = true)
+@Bean(id = "appmonSqlSession", lazyDestroy = true)
 @Profile("!appmon.ext-persistence")
-public class SimpleSqlSession extends SqlSessionAgent {
+public class AppMonSqlSession extends SqlSessionAgent {
 
     /**
-     * Instantiates a new SimpleSqlSession, targeting the "simpleTxAspect".
+     * Instantiates a new AppMonSqlSession, targeting the "appmonTxAspect".
      */
-    public SimpleSqlSession() {
-        super("simpleTxAspect");
+    public AppMonSqlSession() {
+        super("appmonTxAspect");
     }
 
 }
