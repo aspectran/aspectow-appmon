@@ -9,7 +9,7 @@
 
     <environment>
         <property name="tow.context.appmon.name">appmon</property>
-        <property name="tow.context.appmon.config">classpath:com/aspectran/appmon/config/aspectran-config.apon</property>
+        <property name="tow.context.appmon.config">classpath:com/aspectran/aspectow/appmon/config/aspectran-config.apon</property>
     </environment>
 
     <bean id="tow.context.appmon.servletContext"

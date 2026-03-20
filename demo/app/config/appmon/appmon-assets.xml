@@ -4,9 +4,7 @@
 <aspectran>
 
     <bean id="appmonAssets" class="com.aspectran.core.support.PropertiesFactoryBean">
-        <properties>
-            <item name="ignoreInvalidResource" valueType="boolean">false</item>
-        </properties>
+        <property name="ignoreInvalidResource" valueType="boolean">false</property>
         <properties profile="prod">
             <item name="locations" type="array">
                 <value>/config/appmon/appmon-assets-prod.properties</value>

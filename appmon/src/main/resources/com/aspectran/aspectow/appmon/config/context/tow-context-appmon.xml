@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 9.0//EN"
+        "https://aspectran.com/dtd/aspectran-9.dtd">
+<aspectran>
+
+    <description>
+        Aspectran configuration for setting up the servlet context.
+    </description>
+
+    <environment>
+        <property name="tow.context.appmon.name">appmon</property>
+        <property name="tow.context.appmon.config">classpath:com/aspectran/aspectow/appmon/config/aspectran-config.apon</property>
+    </environment>
+
+    <bean id="tow.context.appmon.servletContext"
+          class="com.aspectran.undertow.server.servlet.TowServletContext"
+          scope="prototype">
+        <property name="deploymentName">%{tow.context.appmon.name}</property>
+        <property name="contextPath">/%{tow.context.appmon.name}</property>
+        <property name="resourceManager">
+            <bean class="com.aspectran.undertow.server.handler.resource.TowResourceManager">
+                <property name="base">/webapps/%{tow.context.appmon.name}</property>
+            </bean>
+        </property>
+        <property name="scratchDir">/work/_webapps/%{tow.context.appmon.name}</property>
+        <property name="initParams" type="map">
+            <entry name="aspectran:config">%{tow.context.appmon.config}</entry>
+        </property>
+        <property name="filters" type="array">
+            <bean class="com.aspectran.undertow.server.servlet.TowFilter">
+                <argument>urlSessionTrackingFilter</argument>
+                <argument>com.aspectran.web.servlet.filter.URLSessionTrackingFilter</argument>
+                <property name="mappingUrls" type="array">
+                    <value>/*</value>
+                </property>
+            </bean>
+        </property>
+        <property name="servlets" type="array">
+            <bean class="com.aspectran.undertow.server.servlet.DefaultJspServlet">
+                <property name="loadOnStartup" valueType="int">0</property>
+            </bean>
+            <bean class="com.aspectran.undertow.server.servlet.TowServlet">
+                <argument>webActivityServlet</argument>
+                <argument>com.aspectran.web.servlet.WebActivityServlet</argument>
+                <property name="mappings" type="array">
+                    <value>/</value>
+                </property>
+                <property name="loadOnStartup" valueType="int">1</property>
+            </bean>
+        </property>
+        <property name="servletContainerInitializers" type="array">
+            <bean class="com.aspectran.undertow.server.servlet.TowJasperInitializer">
+                <property name="tldResources" type="array">
+                    <value>classpath:com/aspectran/web/support/tags/aspectran.tld</value>
+                    <value>/webapps/%{tow.context.appmon.name}/WEB-INF/taglibs/</value>
+                </property>
+            </bean>
+        </property>
+        <property name="webSocketServerContainerInitializer">
+            <bean class="com.aspectran.undertow.server.servlet.TowWebSocketServerContainerInitializer">
+                <property name="directBuffers" valueType="boolean">false</property>
+                <property name="bufferSize" valueType="int">1024</property>
+            </bean>
+        </property>
+    </bean>
+
+</aspectran>

@@ -32,7 +32,7 @@
         </settings>
     </aspect>
 
-    <bean class="com.aspectran.appmon.engine.config.AppMonConfigResolver">
+    <bean class="com.aspectran.aspectow.appmon.engine.config.AppMonConfigResolver">
         <properties profile="!prod">
             <item name="configLocation">/config/appmon/appmon-config.apon</item>
         </properties>
@@ -45,7 +45,7 @@
         <redirect path="/monitoring/"/>
     </translet>
 
-    <bean id="appMonCookieIssuer" class="com.aspectran.appmon.common.auth.AppMonCookieIssuer"/>
+    <bean id="appMonCookieIssuer" class="com.aspectran.aspectow.appmon.common.auth.AppMonCookieIssuer"/>
 
     <translet name="/monitoring/${instances}">
         <action bean="appMonCookieIssuer" method="issueCookie">

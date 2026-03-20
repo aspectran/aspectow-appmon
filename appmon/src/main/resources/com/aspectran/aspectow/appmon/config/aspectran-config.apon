@@ -1,0 +1,20 @@
+context: {
+    name: appmon
+    rules: classpath:com/aspectran/aspectow/appmon/config/rules/root.xml
+    scan: [
+        com.aspectran.aspectow.appmon
+    ]
+    profiles: {
+        base: [
+            h2
+        ]
+        default: [
+            dev
+        ]
+    }
+}
+scheduler: {
+    startDelaySeconds: 2
+    waitOnShutdown: true
+    enabled: true
+}

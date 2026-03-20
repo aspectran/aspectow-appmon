@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aspectran.aspectow.appmon.engine.persist.db.mapper.EventCountMapper">
+
+    <cache />
+
+    <select id="getLastEventCount" resultType="com.aspectran.aspectow.appmon.engine.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'mysql'">
+                select domain, instance, event, datetime, total, delta, error
+                from appmon_event_count_last
+                where domain = #{domain} and instance = #{instance} and event = #{event}
+                </when>
+            <otherwise>
+                select domain, instance, event, datetime, total, delta, error
+                from appmon_event_count_last
+                where domain = #{domain} and instance = #{instance} and event = #{event}
+            </otherwise>
+        </choose>
+    </select>
+
+    <update id="updateLastEventCount" parameterType="com.aspectran.aspectow.appmon.engine.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'mysql'">
+                insert into appmon_event_count_last (domain, instance, event, datetime, total, delta, error)
+                values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                on duplicate key update datetime = #{datetime}, total = #{total}, delta = #{delta}, error = #{error}
+            </when>
+            <when test="_databaseId == 'oracle'">
+                merge into appmon_event_count_last a
+                using (
+                    select
+                        #{domain} domain, #{instance} instance, #{event} event,
+                        #{datetime} datetime, #{total} total, #{delta} delta, #{error} error
+                    from dual
+                ) b
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event)
+                when matched then
+                    update set datetime = b.datetime, total = b.total, delta = b.delta, error = b.error
+                when not matched then
+                    insert (domain, instance, event, datetime, total, delta, error)
+                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
+            </when>
+            <when test="_databaseId == 'postgresql'">
+                insert into appmon_event_count_last (domain, instance, event, datetime, total, delta, error)
+                values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                on conflict (domain, instance, event)
+                do update set datetime = excluded.datetime, total = excluded.total, delta = excluded.delta, error = excluded.error
+            </when>
+            <otherwise>
+                merge into appmon_event_count_last as a
+                using values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                    as b (domain, instance, event, datetime, total, delta, error)
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event)
+                when matched then
+                    update set datetime = b.datetime, total = b.total, delta = b.delta, error = b.error
+                when not matched then
+                    insert (domain, instance, event, datetime, total, delta, error)
+                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
+            </otherwise>
+        </choose>
+    </update>
+
+    <insert id="insertEventCount" parameterType="com.aspectran.aspectow.appmon.engine.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'mysql'">
+                insert into appmon_event_count (domain, instance, event, datetime, total, delta, error)
+                values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                on duplicate key update total = #{total}, delta = #{delta}, error = #{error}
+            </when>
+            <when test="_databaseId == 'oracle'">
+                merge into appmon_event_count a
+                using (
+                    select
+                        #{domain} domain, #{instance} instance, #{event} event,
+                        #{datetime} datetime, #{total} total, #{delta} delta, #{error} error
+                    from dual
+                ) b
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.datetime = b.datetime)
+                when matched then
+                    update set total = b.total, delta = b.delta, error = b.error
+                when not matched then
+                    insert (domain, instance, event, datetime, total, delta, error)
+                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
+            </when>
+            <when test="_databaseId == 'postgresql'">
+                insert into appmon_event_count (domain, instance, event, datetime, total, delta, error)
+                values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                on conflict (domain, instance, event, datetime)
+                do update set total = excluded.total, delta = excluded.delta, error = excluded.error
+            </when>
+            <otherwise>
+                merge into appmon_event_count as a
+                using values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                    as b (domain, instance, event, datetime, total, delta, error)
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.datetime = b.datetime)
+                when matched then
+                    update set total = b.total, delta = b.delta, error = b.error
+                when not matched then
+                    insert (domain, instance, event, datetime, total, delta, error)
+                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
+            </otherwise>
+        </choose>
+    </insert>
+
+    <insert id="insertEventCountHourly" parameterType="com.aspectran.aspectow.appmon.engine.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'mysql'">
+                insert into appmon_event_count_hourly (domain, instance, event, datetime, total, delta, error)
+                values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                on duplicate key update total = #{total}, delta = delta + #{delta}, error = error + #{error}
+            </when>
+            <when test="_databaseId == 'oracle'">
+                merge into appmon_event_count_hourly a
+                using (
+                    select
+                        #{domain} domain, #{instance} instance, #{event} event,
+                        #{datetime} datetime, #{total} total, #{delta} delta, #{error} error
+                    from dual
+                ) b
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.datetime = b.datetime)
+                when matched then
+                    update set total = b.total, delta = a.delta + b.delta, error = a.error + b.error
+                when not matched then
+                    insert (domain, instance, event, datetime, total, delta, error)
+                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
+            </when>
+            <when test="_databaseId == 'postgresql'">
+                insert into appmon_event_count_hourly (domain, instance, event, datetime, total, delta, error)
+                values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                on conflict (domain, instance, event, datetime)
+                do update set total = excluded.total, delta = appmon_event_count_hourly.delta + excluded.delta, error = appmon_event_count_hourly.error + excluded.error
+            </when>
+            <otherwise>
+                merge into appmon_event_count_hourly as a
+                using values (#{domain}, #{instance}, #{event}, #{datetime}, #{total}, #{delta}, #{error})
+                    as b (domain, instance, event, datetime, total, delta, error)
+                on (a.domain = b.domain and a.instance = b.instance and a.event = b.event and a.datetime = b.datetime)
+                when matched then
+                    update set total = b.total, delta = a.delta + b.delta, error = a.error + b.error
+                when not matched then
+                    insert (domain, instance, event, datetime, total, delta, error)
+                    values (b.domain, b.instance, b.event, b.datetime, b.total, b.delta, b.error)
+            </otherwise>
+        </choose>
+    </insert>
+
+    <select id="getChartData" resultType="com.aspectran.aspectow.appmon.engine.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'oracle'">
+                select datetime, delta, error
+                from (
+                    select datetime, delta, error
+                    from appmon_event_count
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                    order by 1 desc
+                )
+                where rownum &lt;= 100
+                order by 1
+            </when>
+            <when test="_databaseId == 'postgresql'">
+                select datetime, delta, error
+                from (
+                    select datetime, delta, error
+                    from appmon_event_count
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                    order by 1 desc
+                    limit 100
+                ) as x
+                order by 1
+            </when>
+            <otherwise>
+                select datetime, delta, error
+                from (
+                    select datetime, delta, error
+                    from appmon_event_count
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                    order by 1 desc
+                    limit 100
+                ) as x
+                order by 1
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getChartDataByHour" resultType="com.aspectran.aspectow.appmon.engine.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'oracle'">
+                select datetime, delta, error
+                from (
+                    select datetime, delta, error
+                    from appmon_event_count_hourly
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                    order by datetime desc
+                )
+                where rownum &lt;= 100
+                order by 1
+            </when>
+            <when test="_databaseId == 'mysql'">
+                select datetime, delta, error
+                from (
+                    select datetime, delta, error
+                    from appmon_event_count_hourly
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                    order by datetime desc
+                    limit 100
+                ) as x
+                order by 1
+            </when>
+            <when test="_databaseId == 'postgresql'">
+                select datetime, delta, error
+                from (
+                    select datetime, delta, error
+                    from appmon_event_count_hourly
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                    order by datetime desc
+                    limit 100
+                ) as x
+                order by 1
+            </when>
+            <otherwise>
+                select datetime, delta, error
+                from (
+                    select datetime, delta, error
+                    from appmon_event_count_hourly
+                    where domain = #{domain} and instance = #{instance} and event = #{event}
+                    <if test="dateOffset != null">
+                        and datetime &lt; #{dateOffset}
+                    </if>
+                    order by datetime desc
+                    limit 100
+                ) as x
+                order by 1
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getChartDataByDay" resultType="com.aspectran.aspectow.appmon.engine.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'oracle'">
+                select datetime, delta, error
+                from (
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count_hourly
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
+                    )
+                    where rownum &lt;= 3000
+                    group by trunc(datetime + #{zoneOffset} / 86400.0)
+                    order by 1 desc
+                )
+                where rownum &lt;= 100
+                order by 1
+            </when>
+            <when test="_databaseId == 'mysql'">
+                select datetime, delta, error
+                from (
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count_hourly
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
+                        limit 3000
+                    ) as raw
+                    group by date(date_add(datetime, interval #{zoneOffset} second))
+                    order by 1 desc
+                    limit 100
+                ) as x
+                order by 1
+            </when>
+            <when test="_databaseId == 'postgresql'">
+                select datetime, delta, error
+                from (
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count_hourly
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
+                        limit 3000
+                    ) as raw
+                    group by date_trunc('day', datetime + (#{zoneOffset} || ' second')::interval)
+                    order by 1 desc
+                    limit 100
+                ) as x
+                order by 1
+            </when>
+            <otherwise>
+                select datetime, delta, error
+                from (
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count_hourly
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
+                        limit 3000
+                    ) as raw
+                    group by cast(dateadd(second, #{zoneOffset}, datetime) as date)
+                    order by 1 desc
+                    limit 100
+                ) as x
+                order by 1
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getChartDataByMonth" resultType="com.aspectran.aspectow.appmon.engine.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'oracle'">
+                select datetime, delta, error
+                from (
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count_hourly
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
+                    )
+                    where rownum &lt;= 80000
+                    group by trunc(datetime + #{zoneOffset} / 86400.0, 'MM')
+                    order by 1 desc
+                )
+                where rownum &lt;= 100
+                order by 1
+            </when>
+            <when test="_databaseId == 'mysql'">
+                select datetime, delta, error
+                from (
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count_hourly
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
+                        limit 80000
+                    ) as raw
+                    group by date_format(date_add(datetime, interval #{zoneOffset} second), '%Y%m')
+                    order by 1 desc
+                    limit 100
+                ) as x
+                order by 1
+            </when>
+            <when test="_databaseId == 'postgresql'">
+                select datetime, delta, error
+                from (
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count_hourly
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
+                        limit 80000
+                    ) as raw
+                    group by date_trunc('month', datetime + (#{zoneOffset} || ' second')::interval)
+                    order by 1 desc
+                    limit 100
+                ) as x
+                order by 1
+            </when>
+            <otherwise>
+                select datetime, delta, error
+                from (
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count_hourly
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
+                        limit 80000
+                    ) as raw
+                    group by formatdatetime(dateadd(second, #{zoneOffset}, datetime), 'yyyyMM')
+                    order by 1 desc
+                    limit 100
+                ) as x
+                order by 1
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getChartDataByYear" resultType="com.aspectran.aspectow.appmon.engine.persist.counter.EventCountVO">
+        <choose>
+            <when test="_databaseId == 'oracle'">
+                select datetime, delta, error
+                from (
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count_hourly
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
+                    )
+                    where rownum &lt;= 100000
+                    group by trunc(datetime + #{zoneOffset} / 86400.0, 'YYYY')
+                    order by 1 desc
+                )
+                where rownum &lt;= 100
+                order by 1
+            </when>
+            <when test="_databaseId == 'mysql'">
+                select datetime, delta, error
+                from (
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count_hourly
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
+                        limit 100000
+                    ) as raw
+                    group by date_format(date_add(datetime, interval #{zoneOffset} second), '%Y')
+                    order by 1 desc
+                    limit 100
+                ) as x
+                order by 1
+            </when>
+            <when test="_databaseId == 'postgresql'">
+                select datetime, delta, error
+                from (
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count_hourly
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
+                        limit 100000
+                    ) as raw
+                    group by date_trunc('year', datetime + (#{zoneOffset} || ' second')::interval)
+                    order by 1 desc
+                    limit 100
+                ) as x
+                order by 1
+            </when>
+            <otherwise>
+                select datetime, delta, error
+                from (
+                    select min(datetime) as datetime, sum(delta) as delta, sum(error) as error
+                    from (
+                        select datetime, delta, error
+                        from appmon_event_count_hourly
+                        where domain = #{domain} and instance = #{instance} and event = #{event}
+                        <if test="dateOffset != null">
+                            and datetime &lt; #{dateOffset}
+                        </if>
+                        order by datetime desc
+                        limit 100000
+                    ) as raw
+                    group by formatdatetime(dateadd(second, #{zoneOffset}, datetime), 'yyyy')
+                    order by 1 desc
+                    limit 100
+                ) as x
+                order by 1
+            </otherwise>
+        </choose>
+    </select>
+</mapper>

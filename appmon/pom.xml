@@ -31,7 +31,7 @@
 
     <properties>
         <main.basedir>${project.parent.basedir}</main.basedir>
-        <automatic.module.name>com.aspectran.appmon</automatic.module.name>
+        <automatic.module.name>com.aspectran.aspectow.appmon</automatic.module.name>
     </properties>
 
     <dependencies>
