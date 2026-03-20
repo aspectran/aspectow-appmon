@@ -1,6 +1,6 @@
 /*
- * Aspectow AppMon 3.2
- * Last modified: 2026-03-15
+ * Aspectow AppMon 3.3
+ * Last modified: 2026-03-20
  */
 
 .tabs > .tabs-title .indicator {
@@ -11,6 +11,16 @@
 }
 .domain.tabs .tabs-title .indicator.error {
     color: #a01f27;
+}
+
+.monitoring-page .domain.tabs {
+    box-shadow: none;
+}
+.monitoring-page .domain.tabs > .tabs-title > a, .monitoring-page .domain.tabs > .tabs-title button {
+    background-color: transparent;
+}
+.monitoring-page .domain.metrics-bar {
+    border-top: 1px solid #ccc;
 }
 
 .metrics-bar {

@@ -1,6 +1,6 @@
 /*
- * Aspectow AppMon 3.2
- * Last modified: 2026-03-15
+ * Aspectow AppMon 3.3
+ * Last modified: 2026-03-20
  */
 
 [data-bs-theme=dark] {
@@ -14,6 +14,9 @@
         border-bottom: 1px solid #353b3e;
         background-color: #24282b;
         box-shadow: none;
+    }
+    .monitoring-page .domain.metrics-bar {
+        border-top: 1px solid #353b3e;
     }
     .domain.metrics-bar .title {
         color: #677278;
