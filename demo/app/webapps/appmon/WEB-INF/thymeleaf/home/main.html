@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{templates/default}">
+<head>
+    <style layout:fragment="style">
+        .card-body .row .col {
+            margin-bottom: 0.75rem;
+        }
+        .card-body a {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            transition: all 0.2s ease-in-out;
+        }
+        .card-body a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .card-body a i {
+            margin-right: 0.5rem;
+            margin-bottom: 0;
+            font-size: 1rem;
+        }
+
+        /* For large screens and up */
+        @media (min-width: 992px) {
+            .card-body a {
+                flex-direction: column;
+                justify-content: center;
+                text-align: center;
+                padding-top: 1.5rem;
+                padding-bottom: 1.5rem;
+                font-size: 1.05rem;
+            }
+            .card-body a i {
+                margin-right: 0;
+                margin-bottom: 0.5rem;
+                font-size: 1.75rem;
+            }
+        }
+
+        /* Blink effect */
+        .highlight-blink {
+            background-color: #85898d !important;
+            color: #fff !important;
+            transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content" class="container-fluid pt-3">
+        <div class="row g-3">
+            <!-- Domains Panel -->
+            <div class="col-lg-5">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-hdd-stack"></i> Domains</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text text-muted">List of servers in the cluster. Click a domain to see related instances.</p>
+                        <th:block th:if="${not #lists.isEmpty(page.domainInfoList)}">
+                            <div class="row row-cols-1 row-cols-sm-2 mt-3">
+                                <div class="col" th:each="domainInfo : ${page.domainInfoList}">
+                                    <a href="#" class="domain-link">
+                                        <i class="bi bi-server"></i> [[${domainInfo.title}]]
+                                    </a>
+                                </div>
+                            </div>
+                        </th:block>
+                        <p th:unless="${not #lists.isEmpty(page.domainInfoList)}" class="text-muted mt-3">No domains found.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instance Configurations Panel -->
+            <div class="col-lg-7">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-display"></i> Instance Configurations</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text text-muted">Common instance configurations running on each domain.</p>
+                        <th:block th:if="${not #lists.isEmpty(page.instanceInfoList)}">
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mt-3">
+                                <div class="col" th:each="instanceInfo : ${page.instanceInfoList}">
+                                    <a th:href="@{/dashboard/#${instanceInfo.name}}" class="instance-link">
+                                        <i class="bi bi-box"></i> [[${instanceInfo.title}]]
+                                    </a>
+                                </div>
+                            </div>
+                        </th:block>
+                        <p th:unless="${not #lists.isEmpty(page.instanceInfoList)}" class="text-muted mt-3">No instance configurations found.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Framework Anatomy Panel -->
+            <div class="col-lg-12 mt-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-diagram-3"></i> Framework Anatomy</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text text-muted">Explore the internal structure and components of the loaded framework contexts.</p>
+                        <th:block th:if="${not #lists.isEmpty(page.allContextNames)}">
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-lg-6 mt-3">
+                                <div class="col" th:each="contextName : ${page.allContextNames}">
+                                    <a th:href="@{/anatomy/${contextName}}">
+                                        <i class="bi bi-pc-display-horizontal"></i> [[${contextName}]]
+                                    </a>
+                                </div>
+                            </div>
+                        </th:block>
+                        <p th:unless="${not #lists.isEmpty(page.allContextNames)}" class="text-muted mt-3">No framework contexts found.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script layout:fragment="script">
+    $(function() {
+        $('.domain-link').on('click', function(e) {
+            e.preventDefault();
+
+            const $instances = $('.instance-link');
+            if ($instances.length === 0) {
+                return;
+            }
+
+            let delay = 0;
+            const blinkDuration = 300; // The duration of the highlight
+            const blinkInterval = 150; // The time between the start of each blink
+
+            $instances.each(function() {
+                const $instance = $(this);
+                setTimeout(function() {
+                    $instance.addClass('highlight-blink');
+                    setTimeout(function() {
+                        $instance.removeClass('highlight-blink');
+                    }, blinkDuration);
+                }, delay);
+                delay += blinkInterval;
+            });
+        });
+    });
+    </script>
+</body>
+</html>

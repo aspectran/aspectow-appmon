@@ -1,0 +1,9 @@
+<div class="container py-2 pb-md-0 py-lg-0" xmlns:th="https://www.thymeleaf.org">
+    <ul class="anatomy tabs nav nav-tabs">
+        <li th:each="name : ${page.allContextNames}" class="tabs-title nav-item" th:classappend="${page.contextName eq name} ? 'active' : ''">
+            <a class="nav-link" th:href="@{/anatomy/${name}}">
+                <i class="bi bi-pc-display-horizontal"></i> <span class="title">[[${name}]]</span>
+            </a>
+        </li>
+    </ul>
+</div>

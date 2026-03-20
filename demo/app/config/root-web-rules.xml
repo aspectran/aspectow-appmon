@@ -8,26 +8,40 @@
         Note that names of translets that match the request URI always start with a forward slash (/).
     </description>
 
-    <bean id="jspViewDispatcher" class="com.aspectran.web.support.view.JspViewDispatcher">
-        <description>
-            Register a JSP View Dispatcher.
-        </description>
-        <property name="prefix">/WEB-INF/jsp/</property>
-        <property name="suffix">.jsp</property>
+    <bean id="thymeleaf" class="com.aspectran.thymeleaf.ThymeleafTemplateEngine">
+        <argument>
+            <bean class="com.aspectran.thymeleaf.TemplateEngineFactoryBean">
+                <property name="templateResolvers" type="set">
+                    <bean class="com.aspectran.thymeleaf.template.FileTemplateResolver">
+                        <property name="prefix">#{basePath}/webapps/appmon/WEB-INF/thymeleaf/</property>
+                        <property name="suffix">.html</property>
+                        <property name="templateMode">HTML</property>
+                        <property name="cacheable" valueType="boolean">false</property>
+                    </bean>
+                </property>
+                <property type="set" name="dialects">
+                    <bean class="nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect"/>
+                </property>
+            </bean>
+        </argument>
     </bean>
 
-    <aspect id="webTransletSettings">
+    <bean id="thymeleafViewDispatcher" class="com.aspectran.thymeleaf.view.ThymeleafViewDispatcher">
         <description>
-            This aspect is for injecting default settings into translets running in the web environment.
+            Register a Thymeleaf View Dispatcher.
         </description>
+        <argument>#{thymeleaf}</argument>
+    </bean>
+
+    <aspect id="thymeleafTransletSettings">
         <joinpoint>
             pointcut: {
-                +: /**
+            +: /**
             }
         </joinpoint>
         <settings>
             <setting name="characterEncoding" value="utf-8"/>
-            <setting name="viewDispatcher" value="jspViewDispatcher"/>
+            <setting name="viewDispatcher" value="thymeleafViewDispatcher"/>
             <setting name="proxyProtocolAware" value="true"/>
         </settings>
     </aspect>

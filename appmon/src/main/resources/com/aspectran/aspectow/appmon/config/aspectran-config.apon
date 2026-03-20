@@ -2,7 +2,10 @@ context: {
     name: appmon
     rules: classpath:com/aspectran/aspectow/appmon/config/rules/root.xml
     scan: [
-        com.aspectran.aspectow.appmon
+        com.aspectran.aspectow.appmon.anatomy
+        com.aspectran.aspectow.appmon.common
+        com.aspectran.aspectow.appmon.dashboard
+        com.aspectran.aspectow.appmon.engine
     ]
     profiles: {
         base: [
