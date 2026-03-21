@@ -53,7 +53,7 @@ After a successful build, you can run the included demo application to see Aspec
     ```
 
 2.  **Access the dashboard:**
-    Open your web browser and navigate to [http://localhost:8082](http://localhost:8082).
+    Open your web browser and navigate to [http://localhost:8083](http://localhost:8083).
 
 The demo will showcase the real-time monitoring dashboard with sample data.
 
