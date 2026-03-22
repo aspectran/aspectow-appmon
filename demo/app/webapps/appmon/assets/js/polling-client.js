@@ -11,10 +11,21 @@ class PollingClient extends BaseClient {
         super(domain, viewer, onJoined, onEstablished, onClosed, onFailed);
         this.endpointMode = "polling";
         this.commands = [];
+        this.pollingTimer = null;
+        this.stopped = false;
     }
 
     start(instancesToJoin) {
+        this.stopped = false;
         this.join(instancesToJoin);
+    }
+
+    stop() {
+        this.stopped = true;
+        if (this.pollingTimer) {
+            clearTimeout(this.pollingTimer);
+            this.pollingTimer = null;
+        }
     }
 
     speed(speed) {
@@ -78,6 +89,7 @@ class PollingClient extends BaseClient {
     }
 
     polling(instancesToJoin) {
+        if (this.stopped) return;
         let withCommands = null;
         if (this.commands.length) {
             withCommands = this.commands.slice();
@@ -91,9 +103,10 @@ class PollingClient extends BaseClient {
                 commands: withCommands
             } : null,
             success: (data) => {
+                if (this.stopped) return;
                 if (data && data.messages) {
                     data.messages.forEach(msg => this.viewer.processMessage(msg));
-                    setTimeout(() => {
+                    this.pollingTimer = setTimeout(() => {
                         this.polling(instancesToJoin);
                     }, this.domain.endpoint.pollingInterval);
                 } else {
@@ -106,6 +119,7 @@ class PollingClient extends BaseClient {
                 }
             },
             error: (xhr, status, error) => {
+                if (this.stopped) return;
                 console.log(this.domain.name, "connection lost", error);
                 this.viewer.printErrorMessage("Connection lost.");
                 if (this.onClosed) {

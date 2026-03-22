@@ -15,6 +15,9 @@
 
 .monitoring-page .domain.tabs {
     box-shadow: none;
+    @media screen and (max-width: 576px) {
+        height: auto;
+    }
 }
 .monitoring-page .domain.tabs > .tabs-title > a, .monitoring-page .domain.tabs > .tabs-title button {
     background-color: transparent;
@@ -141,7 +144,7 @@
     padding: 3px 8px;
     font-size: .9em;
     background-color: #545a5d;
-    color: #fff;
+    color: #e6e6e6;
     transition: all 0.2s ease-in-out;
 }
 .control-bar .options .btn-group .btn:hover {
@@ -149,7 +152,7 @@
     color: #fff;
 }
 .control-bar .options .btn-group .btn.on {
-    background-color: #2a4959;
+    background-color: #314959;
 }
 
 .event-box {
@@ -579,12 +582,8 @@
     height: 450px;
     color: #f1f1f1;
     background-color: #222;
-    border: none;
+    border: 1px solid #54656f;
     border-radius: 0;
-    box-shadow: inset -20px 20px 30px -20px #262f44;
-}
-.console-box .console:hover {
-    box-shadow: inset 0 0 6px 3px #3a4c57;
 }
 .console-box .console p {
     font-size: 12px;

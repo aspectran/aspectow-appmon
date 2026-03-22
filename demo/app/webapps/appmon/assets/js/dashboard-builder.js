@@ -18,6 +18,8 @@ class DashboardBuilder {
     }
 
     build(basePath, instancesToJoin) {
+        this.basePath = basePath;
+        this.instancesToJoin = instancesToJoin;
         this.clearView();
         $.ajax({
             url: basePath + "/backend/config/data",
@@ -320,6 +322,19 @@ class DashboardBuilder {
                 }
             });
         });
+        $(".open-popup").off("click").on("click", (e) => {
+            const url = this.basePath + "/dashboard/popup/" + (this.instancesToJoin || "");
+            const name = "appmon_dashboard_popup";
+            const features = "width=1200,height=800,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes";
+            const popup = window.open(url, name, features);
+            if (popup) {
+                this.suspendMonitoring();
+                this.showPopupModeMessage();
+                popup.focus();
+            } else {
+                alert("Please allow popups for this site.");
+            }
+        });
         $(document).off("click", ".session-box .panel.status .knob-bar")
             .on("click", ".session-box .panel.status .knob-bar", function() {
                 if ($("#navigation .title-bar").is(":visible")) $(this).parent().toggleClass("expanded");
@@ -460,7 +475,30 @@ class DashboardBuilder {
         }, 50);
     }
 
+    suspendMonitoring() {
+        this.clients.forEach(client => {
+            if (client) client.stop();
+        });
+        this.viewers.forEach(viewer => {
+            if (viewer) viewer.setEnable(false);
+        });
+    }
+
+    showPopupModeMessage() {
+        this.clearView();
+        const $container = $(".container-fluid.my-3");
+        $container.find(".row, .tabs, .control-bar, .console-box").hide();
+        const $messageBox = $("#appmon-popup-message");
+        if ($messageBox.length > 0) {
+            $messageBox.find(".resume-here").off("click").on("click", () => {
+                location.reload();
+            });
+            $messageBox.show();
+        }
+    }
+
     clearView() {
+        $("#appmon-popup-message").hide();
         $(".domain.tabs .tabs-title.available, .instance.tabs .tabs-title.available, " +
           ".domain.metrics-bar.available, .instance.metrics-bar.available, " +
           ".event-box.available, .visual-box.available, .chart-box.available, .console-box.available").remove();
