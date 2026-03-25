@@ -66,7 +66,7 @@ public class AppMonTxAspect extends SqlSessionAdvice {
 
     @Before
     public void open() {
-        super.open();
+        // Leave empty to support lazy opening
     }
 
     @After

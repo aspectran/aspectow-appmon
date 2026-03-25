@@ -36,6 +36,7 @@ public class AppMonSqlSession extends SqlSessionAgent {
      */
     public AppMonSqlSession() {
         super("appmonTxAspect");
+        setSqlSessionFactoryBeanId("appmonSqlSessionFactory");
     }
 
 }
