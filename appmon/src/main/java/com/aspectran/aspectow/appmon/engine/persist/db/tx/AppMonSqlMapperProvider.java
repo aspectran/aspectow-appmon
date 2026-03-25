@@ -45,14 +45,4 @@ public class AppMonSqlMapperProvider implements SqlMapperProvider {
         return simpleSqlSession;
     }
 
-    @Override
-    public SqlSession getBatchSqlSession() {
-        throw new UnsupportedOperationException("Batch operation is not supported");
-    }
-
-    @Override
-    public SqlSession getReuseSqlSession() {
-        throw new UnsupportedOperationException("Reuse operation is not supported");
-    }
-
 }

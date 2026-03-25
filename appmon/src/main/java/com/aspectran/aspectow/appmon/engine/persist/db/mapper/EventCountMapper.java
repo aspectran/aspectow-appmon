@@ -130,52 +130,52 @@ public interface EventCountMapper {
          */
         @Autowired
         public Dao(AppMonSqlMapperProvider sqlMapperProvider) {
-            super(sqlMapperProvider, EventCountMapper.class);
+            super(sqlMapperProvider);
         }
 
         @Override
         public EventCountVO getLastEventCount(String domain, String instance, String event) {
-            return simple().getLastEventCount(domain, instance, event);
+            return mapper().getLastEventCount(domain, instance, event);
         }
 
         @Override
         public void updateLastEventCount(EventCountVO eventCountVO) {
-            simple().updateLastEventCount(eventCountVO);
+            mapper().updateLastEventCount(eventCountVO);
         }
 
         @Override
         public void insertEventCount(EventCountVO eventCountVO) {
-            simple().insertEventCount(eventCountVO);
+            mapper().insertEventCount(eventCountVO);
         }
 
         @Override
         public void insertEventCountHourly(EventCountVO eventCountVO) {
-            simple().insertEventCountHourly(eventCountVO);
+            mapper().insertEventCountHourly(eventCountVO);
         }
 
         @Override
         public List<EventCountVO> getChartData(String domain, String instance, String event, LocalDateTime dateOffset) {
-            return simple().getChartData(domain, instance, event, dateOffset);
+            return mapper().getChartData(domain, instance, event, dateOffset);
         }
 
         @Override
         public List<EventCountVO> getChartDataByHour(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset) {
-            return simple().getChartDataByHour(domain, instance, event, zoneOffset, dateOffset);
+            return mapper().getChartDataByHour(domain, instance, event, zoneOffset, dateOffset);
         }
 
         @Override
         public List<EventCountVO> getChartDataByDay(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset) {
-            return simple().getChartDataByDay(domain, instance, event, zoneOffset, dateOffset);
+            return mapper().getChartDataByDay(domain, instance, event, zoneOffset, dateOffset);
         }
 
         @Override
         public List<EventCountVO> getChartDataByMonth(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset) {
-            return simple().getChartDataByMonth(domain, instance, event, zoneOffset, dateOffset);
+            return mapper().getChartDataByMonth(domain, instance, event, zoneOffset, dateOffset);
         }
 
         @Override
         public List<EventCountVO> getChartDataByYear(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset) {
-            return simple().getChartDataByYear(domain, instance, event, zoneOffset, dateOffset);
+            return mapper().getChartDataByYear(domain, instance, event, zoneOffset, dateOffset);
         }
 
     }
