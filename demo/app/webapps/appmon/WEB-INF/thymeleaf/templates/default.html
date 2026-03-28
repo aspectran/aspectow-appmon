@@ -131,14 +131,14 @@
     </div>
 </nav>
 <section itemscope="itemscope" itemtype="https://schema.org/Article">
-    <div id="masthead" th:classappend="|${#strings.contains(page.style != null ? page.style : '', 'compact') ? 'masthead-compact' : ''} ${page.headimageinclude != null ? 'masthead-with-image' : ''}|">
+    <div id="masthead" th:classappend="|${#strings.contains(page.style ?: '', 'compact') ? 'masthead-compact' : ''} ${page.headimageinclude != null ? 'masthead-with-image' : ''}|">
         <div class="container">
             <header th:if="${page.headline != null}">
                 <p th:if="${page.subheadline != null}" class="subheadline" itemprop="alternativeHeadline" th:text="${page.subheadline}"></p>
                 <h1 th:if="${page.headline != null}" itemprop="headline" th:text="${page.headline}"></h1>
                 <p th:if="${page.teaser != null}" class="teaser" itemprop="description" th:text="${page.teaser}"></p>
             </header>
-            <div th:if="${!#strings.contains(page.style != null ? page.style : '', 'compact') and page.headline != null}" class="hexagons">
+            <div th:if="${!#strings.contains(page.style ?: '', 'compact') and page.headline != null}" class="hexagons">
                 <div class="hexagon hex1"></div>
                 <div class="hexagon hex2"></div>
                 <div class="hexagon hex3"></div>
