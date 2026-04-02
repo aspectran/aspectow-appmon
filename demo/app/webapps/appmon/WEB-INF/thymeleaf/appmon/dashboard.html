@@ -14,7 +14,7 @@
         <script th:src="|${#{appmonAssets}.url}/js/base-client.js?v=${#{appmonAssets}.cacheBustingVersion}|"></script>
         <script th:src="|${#{appmonAssets}.url}/js/websocket-client.js?v=${#{appmonAssets}.cacheBustingVersion}|"></script>
         <script th:src="|${#{appmonAssets}.url}/js/polling-client.js?v=${#{appmonAssets}.cacheBustingVersion}|"></script>
-        <th:block th:if="${#arrays.contains(#{currentEnvironment}.activeProfiles, 'dev')}">
+        <th:block th:if="${#{currentEnvironment}.matchesProfiles('dev')}">
             <script th:inline="javascript">
                 if (typeof DashboardBuilder === "undefined") {
                     const version = [[${#{appmonAssets}.cacheBustingVersion}]];
