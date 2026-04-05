@@ -18,10 +18,10 @@ package com.aspectran.aspectow.appmon.engine.persist.db.tx;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Profile;
-import com.aspectran.mybatis.SqlSessionAgent;
+import com.aspectran.mybatis.DefaultSqlSessionAgent;
 
 /**
- * A {@link SqlSessionAgent} for handling simple, auto-committing database sessions.
+ * A {@link DefaultSqlSessionAgent} for handling simple, auto-committing database sessions.
  * This agent is advised by {@link AppMonTxAspect} to manage transactions.
  *
  * <p>Created: 2025. 2. 15.</p>
@@ -29,7 +29,7 @@ import com.aspectran.mybatis.SqlSessionAgent;
 @Component
 @Bean(id = "appmonSqlSession", lazyDestroy = true)
 @Profile("!appmon.ext-persistence")
-public class AppMonSqlSession extends SqlSessionAgent {
+public class AppMonSqlSession extends DefaultSqlSessionAgent {
 
     /**
      * Instantiates a new AppMonSqlSession, targeting the "appmonTxAspect".
