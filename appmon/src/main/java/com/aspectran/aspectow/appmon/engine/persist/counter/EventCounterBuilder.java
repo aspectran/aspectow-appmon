@@ -59,7 +59,8 @@ public abstract class EventCounterBuilder {
             } else if (eventInfo.getReader() != null) {
                 return null;
             } else {
-                throw new IllegalArgumentException("No event counter specified for " + eventInfo.getName() + " " + eventInfo);
+                String msg = ToStringBuilder.toString("No event counter specified for " + eventInfo.getName(), eventInfo);
+                throw new IllegalArgumentException(msg);
             }
         }
         try {
@@ -68,7 +69,8 @@ public abstract class EventCounterBuilder {
             Class<?>[] argTypes = { EventInfo.class };
             return ClassUtils.createInstance(counterType, args, argTypes);
         } catch (Exception e) {
-            throw new Exception(ToStringBuilder.toString("Failed to create event counter", eventInfo), e);
+            String msg = ToStringBuilder.toString("Failed to create event counter", eventInfo);
+            throw new Exception(msg);
         }
     }
 
