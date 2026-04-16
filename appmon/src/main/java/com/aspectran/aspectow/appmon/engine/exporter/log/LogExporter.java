@@ -19,7 +19,7 @@ import com.aspectran.aspectow.appmon.engine.config.LogInfo;
 import com.aspectran.aspectow.appmon.engine.exporter.AbstractExporter;
 import com.aspectran.aspectow.appmon.engine.exporter.ExporterManager;
 import com.aspectran.aspectow.appmon.engine.exporter.ExporterType;
-import com.aspectran.aspectow.appmon.engine.service.CommandOptions;
+import com.aspectran.aspectow.appmon.engine.relay.CommandOptions;
 import com.aspectran.utils.ToStringBuilder;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.io.input.Tailer;

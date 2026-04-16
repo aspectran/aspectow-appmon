@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.aspectow.appmon.engine.service.polling;
+package com.aspectran.aspectow.appmon.engine.relay.polling;
 
 import com.aspectran.aspectow.appmon.engine.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.engine.config.PollingConfig;
 import com.aspectran.aspectow.appmon.engine.manager.AppMonManager;
-import com.aspectran.aspectow.appmon.engine.service.CommandOptions;
-import com.aspectran.aspectow.appmon.engine.service.ExportService;
-import com.aspectran.aspectow.appmon.engine.service.ExportServiceManager;
-import com.aspectran.aspectow.appmon.engine.service.ServiceSession;
+import com.aspectran.aspectow.appmon.engine.relay.CommandOptions;
+import com.aspectran.aspectow.appmon.engine.relay.MessageRelayer;
+import com.aspectran.aspectow.appmon.engine.relay.MessageRelayManager;
+import com.aspectran.aspectow.appmon.engine.relay.RelaySession;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
@@ -39,34 +39,34 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static com.aspectran.aspectow.appmon.engine.service.CommandOptions.COMMAND_REFRESH;
+import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_REFRESH;
 
 /**
- * An {@link ExportService} implementation based on HTTP long-polling.
+ * An {@link MessageRelayer} implementation based on HTTP long-polling.
  * Clients connect to join, then periodically pull for new messages.
  *
  * <p>Created: 2020. 12. 24.</p>
  */
 @Component("/backend")
-public class PollingExportService implements ExportService {
+public class PollingMessageRelayer implements MessageRelayer {
 
     private final AppMonManager appMonManager;
 
-    private final PollingServiceSessionManager sessionManager;
+    private final PollingMessageRelayManager sessionManager;
 
     @Autowired
-    public PollingExportService(@NonNull AppMonManager appMonManager) {
+    public PollingMessageRelayer(@NonNull AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
-        this.sessionManager = new PollingServiceSessionManager(appMonManager);
+        this.sessionManager = new PollingMessageRelayManager(appMonManager);
     }
 
     /**
-     * Initializes the service by registering it with the {@link ExportServiceManager}.
+     * Initializes the service by registering it with the {@link MessageRelayManager}.
      */
     @Initialize
-    public void registerExportService() throws Exception {
+    public void registerRelayer() throws Exception {
         sessionManager.initialize();
-        appMonManager.getExportServiceManager().addExportService(this);
+        appMonManager.getMessageRelayManager().addRelayer(this);
     }
 
     /**
@@ -75,7 +75,7 @@ public class PollingExportService implements ExportService {
     @Destroy
     public void destroy() throws Exception {
         sessionManager.destroy();
-        appMonManager.getExportServiceManager().removeExportService(this);
+        appMonManager.getMessageRelayManager().removeRelayer(this);
     }
 
     /**
@@ -96,21 +96,21 @@ public class PollingExportService implements ExportService {
             return null;
         }
 
-        PollingServiceSession serviceSession = sessionManager.createSession(translet, pollingConfig, instanceNames);
+        PollingRelaySession relaySession = sessionManager.createSession(translet, pollingConfig, instanceNames);
         String timeZone = translet.getParameter("timeZone");
         if (StringUtils.hasText(timeZone)) {
-            serviceSession.setTimeZone(timeZone);
+            relaySession.setTimeZone(timeZone);
         }
 
-        if (!appMonManager.getExportServiceManager().join(serviceSession)) {
+        if (!appMonManager.getMessageRelayManager().join(relaySession)) {
             return null;
         }
 
-        List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(serviceSession.getJoinedInstances());
-        List<String> messages = appMonManager.getExportServiceManager().getLastMessages(serviceSession);
+        List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(relaySession.getJoinedInstances());
+        List<String> messages = appMonManager.getMessageRelayManager().getLastMessages(relaySession);
         return Map.of(
                 "instances", instanceInfoList,
-                "pollingInterval", serviceSession.getPollingInterval(),
+                "pollingInterval", relaySession.getPollingInterval(),
                 "messages", messages
         );
     }
@@ -126,26 +126,26 @@ public class PollingExportService implements ExportService {
     @Transform(FormatType.JSON)
     public Map<String, Object> pull(
             @NonNull Translet translet, @Qualifier("commands[]") String[] commands) throws IOException {
-        PollingServiceSession serviceSession = sessionManager.getSession(translet);
-        if (serviceSession == null || !serviceSession.isValid()) {
+        PollingRelaySession relaySession = sessionManager.getSession(translet);
+        if (relaySession == null || !relaySession.isValid()) {
             return null;
         }
 
         if (commands != null) {
             CommandOptions commandOptions = new CommandOptions(commands);
             if (!commandOptions.hasTimeZone()) {
-                commandOptions.setTimeZone(serviceSession.getTimeZone());
+                commandOptions.setTimeZone(relaySession.getTimeZone());
             }
             if (commandOptions.hasCommand(COMMAND_REFRESH) ||
                     commandOptions.hasCommand(CommandOptions.COMMAND_LOAD_PREVIOUS)) {
-                List<String> newMessages = appMonManager.getExportServiceManager().getNewMessages(serviceSession, commandOptions);
+                List<String> newMessages = appMonManager.getMessageRelayManager().getNewMessages(relaySession, commandOptions);
                 for (String msg : newMessages) {
                     sessionManager.push(msg);
                 }
             }
         }
 
-        String[] messages = sessionManager.pull(serviceSession);
+        String[] messages = sessionManager.pull(relaySession);
         return Map.of(
                 "messages", (messages != null ? messages : new String[0])
         );
@@ -160,31 +160,33 @@ public class PollingExportService implements ExportService {
     @RequestToPost("/polling/interval")
     @Transform(FormatType.JSON)
     public Map<String, Object> pollingInterval(@NonNull Translet translet, int speed) {
-        PollingServiceSession serviceSession = sessionManager.getSession(translet);
-        if (serviceSession == null) {
+        PollingRelaySession relaySession = sessionManager.getSession(translet);
+        if (relaySession == null) {
             return null;
         }
 
         if (speed == 1) {
-            serviceSession.setPollingInterval(1000);
+            relaySession.setPollingInterval(1000);
         } else {
             PollingConfig pollingConfig = appMonManager.getPollingConfig();
-            serviceSession.setPollingInterval(pollingConfig.getPollingInterval());
+            relaySession.setPollingInterval(pollingConfig.getPollingInterval());
         }
 
         return Map.of(
-            "pollingInterval", serviceSession.getPollingInterval()
+            "pollingInterval", relaySession.getPollingInterval()
         );
     }
 
     @Override
-    public void broadcast(String message) {
+    public void relay(String message) {
         sessionManager.push(message);
     }
 
     @Override
-    public void broadcast(ServiceSession serviceSession, String message) {
-        // Not applicable for polling service
+    public void relay(RelaySession relaySession, String message) {
+        if (relaySession instanceof PollingRelaySession session) {
+            sessionManager.push(session, message);
+        }
     }
 
     @Override

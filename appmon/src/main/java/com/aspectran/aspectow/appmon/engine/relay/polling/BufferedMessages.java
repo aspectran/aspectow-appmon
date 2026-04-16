@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.aspectow.appmon.engine.service.polling;
+package com.aspectran.aspectow.appmon.engine.relay.polling;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -64,7 +64,7 @@ public class BufferedMessages {
      * @return an array of new messages, or {@code null} if none are available
      */
     @Nullable
-    public String[] pop(@NonNull PollingServiceSession session) {
+    public String[] pop(@NonNull PollingRelaySession session) {
         synchronized (buffer) {
             int maxLineIndex = lineCounter.get() - 1;
             int lineIndex = session.getLastLineIndex();

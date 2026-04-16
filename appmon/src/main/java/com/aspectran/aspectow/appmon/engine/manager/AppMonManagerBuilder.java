@@ -40,6 +40,7 @@ import com.aspectran.aspectow.node.config.NodeConfigBuilder;
 import com.aspectran.aspectow.node.config.NodeConfigResolver;
 import com.aspectran.aspectow.node.manager.NodeReporter;
 import com.aspectran.aspectow.node.redis.RedisConnectionPool;
+import com.aspectran.aspectow.node.redis.RedisMessagePublisher;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.Assert;
 import com.aspectran.utils.SystemUtils;
@@ -77,8 +78,6 @@ public abstract class AppMonManagerBuilder {
         Assert.notNull(context, "context must not be null");
         Assert.notNull(appMonConfig, "appMonConfig must not be null");
 
-        AppMonManager appMonManager = createAppMonManager(context, appMonConfig);
-
         NodeConfig nodeConfig;
         if (context.getBeanRegistry().containsBean(NodeConfigResolver.class)) {
             NodeConfigResolver nodeConfigResolver = context.getBeanRegistry().getBean(NodeConfigResolver.class);
@@ -87,9 +86,17 @@ public abstract class AppMonManagerBuilder {
             nodeConfig = NodeConfigBuilder.build();
         }
 
+        String nodeId = nodeConfig.getNodeInfo().getName();
+        AppMonManager appMonManager = createAppMonManager(context, appMonConfig, nodeId);
+
         RedisConnectionPool connectionPool = context.getBeanRegistry().getBean(RedisConnectionPool.class);
         NodeReporter nodeReporter = new NodeReporter(nodeConfig, connectionPool);
         appMonManager.setNodeReporter(nodeReporter);
+
+        if (context.getBeanRegistry().containsBean(RedisMessagePublisher.class)) {
+            RedisMessagePublisher messagePublisher = context.getBeanRegistry().getBean(RedisMessagePublisher.class);
+            appMonManager.getMessageRelayManager().setMessagePublisher(messagePublisher);
+        }
 
         for (InstanceInfo instanceInfo : appMonConfig.getInstanceInfoList()) {
             String instanceName = instanceInfo.getName();
@@ -137,8 +144,8 @@ public abstract class AppMonManagerBuilder {
                 eventExporterManager.addExporter(eventExporter);
             }
         }
-        appMonManager.getExportServiceManager().addExporterManager(eventExporterManager);
-        appMonManager.getExportServiceManager().addExporterManager(dataExporterManager);
+        appMonManager.getMessageRelayManager().addExporterManager(eventExporterManager);
+        appMonManager.getMessageRelayManager().addExporterManager(dataExporterManager);
     }
 
     private static void buildMetricExporters(
@@ -152,7 +159,7 @@ public abstract class AppMonManagerBuilder {
             MetricExporter eventExporter = MetricExporterBuilder.build(metricExporterManager, metricInfo);
             metricExporterManager.addExporter(eventExporter);
         }
-        appMonManager.getExportServiceManager().addExporterManager(metricExporterManager);
+        appMonManager.getMessageRelayManager().addExporterManager(metricExporterManager);
     }
 
     private static void buildLogExporters(
@@ -166,13 +173,14 @@ public abstract class AppMonManagerBuilder {
             LogExporter logExporter = LogExporterBuilder.build(logExporterManager, logInfo);
             logExporterManager.addExporter(logExporter);
         }
-        appMonManager.getExportServiceManager().addExporterManager(logExporterManager);
+        appMonManager.getMessageRelayManager().addExporterManager(logExporterManager);
     }
 
     @NonNull
     private static AppMonManager createAppMonManager(
             ActivityContext context,
-            @NonNull AppMonConfig appMonConfig) throws Exception {
+            @NonNull AppMonConfig appMonConfig,
+            String nodeId) throws Exception {
         PollingConfig pollingConfig = appMonConfig.getPollingConfig();
         if (pollingConfig == null) {
             pollingConfig = new PollingConfig();
@@ -190,7 +198,7 @@ public abstract class AppMonManagerBuilder {
 
         InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(currentDomain, appMonConfig.getInstanceInfoList());
 
-        AppMonManager appMonManager = new AppMonManager(currentDomain, pollingConfig, counterPersistInterval,
+        AppMonManager appMonManager = new AppMonManager(nodeId, currentDomain, pollingConfig, counterPersistInterval,
                 domainInfoHolder, instanceInfoHolder);
         appMonManager.setActivityContext(context);
         return appMonManager;

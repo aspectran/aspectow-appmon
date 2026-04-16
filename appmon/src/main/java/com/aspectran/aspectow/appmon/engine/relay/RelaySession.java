@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.aspectow.appmon.engine.service;
+package com.aspectran.aspectow.appmon.engine.relay;
 
 /**
  * An interface representing a client session for an export service.
@@ -21,7 +21,7 @@ package com.aspectran.aspectow.appmon.engine.service;
  *
  * <p>Created: 2025. 2. 12.</p>
  */
-public interface ServiceSession {
+public interface RelaySession {
 
     /**
      * Gets the names of the instances that this session has joined.

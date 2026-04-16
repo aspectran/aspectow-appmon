@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.aspectow.appmon.engine.service.polling;
+package com.aspectran.aspectow.appmon.engine.relay.polling;
 
 import com.aspectran.aspectow.appmon.engine.config.PollingConfig;
 import com.aspectran.aspectow.appmon.engine.manager.AppMonManager;
@@ -36,14 +36,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Manages {@link PollingServiceSession} instances for the polling export service.
+ * Manages {@link PollingRelaySession} instances for the polling export service.
  * It handles session creation, retrieval, and expiration, as well as managing a central message buffer.
  *
  * <p>Created: 2020. 12. 24.</p>
  */
-public class PollingServiceSessionManager extends AbstractComponent {
+public class PollingMessageRelayManager extends AbstractComponent {
 
-    private static final String SESSION_ID_COOKIE_NAME = PollingServiceSessionManager.class.getName() + ".SESSION_ID";
+    private static final String SESSION_ID_COOKIE_NAME = PollingMessageRelayManager.class.getName() + ".SESSION_ID";
 
     private final CookieGenerator sessionIdCookieGenerator = new CookieGenerator(SESSION_ID_COOKIE_NAME);
 
@@ -51,7 +51,7 @@ public class PollingServiceSessionManager extends AbstractComponent {
 
     private final Scheduler scheduler = new ScheduledExecutorScheduler("PSSM-Scheduler", false);
 
-    private final Map<String, PollingServiceSession> sessions = new CopyOnWriteMap<>();
+    private final Map<String, PollingRelaySession> sessions = new CopyOnWriteMap<>();
 
     private final AppMonManager appMonManager;
 
@@ -61,7 +61,7 @@ public class PollingServiceSessionManager extends AbstractComponent {
      * Instantiates a new PollingServiceSessionManager.
      * @param appMonManager the main application manager
      */
-    public PollingServiceSessionManager(@NonNull AppMonManager appMonManager) {
+    public PollingMessageRelayManager(@NonNull AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
 
         PollingConfig pollingConfig = appMonManager.getPollingConfig();
@@ -73,9 +73,9 @@ public class PollingServiceSessionManager extends AbstractComponent {
      * @param translet the current translet
      * @param pollingConfig the polling configuration
      * @param instanceNames the names of the instances to join
-     * @return a new or existing {@link PollingServiceSession}
+     * @return a new or existing {@link PollingRelaySession}
      */
-    public PollingServiceSession createSession(
+    public PollingRelaySession createSession(
             @NonNull Translet translet, @NonNull PollingConfig pollingConfig, String[] instanceNames) {
         int pollingInterval = pollingConfig.getPollingInterval();
         int sessionTimeout = pollingConfig.getSessionTimeout();
@@ -84,14 +84,14 @@ public class PollingServiceSessionManager extends AbstractComponent {
         }
 
         String sessionId = getSessionId(translet, true);
-        PollingServiceSession existingSession = sessions.get(sessionId);
+        PollingRelaySession existingSession = sessions.get(sessionId);
         if (existingSession != null) {
             existingSession.access(false);
             existingSession.setSessionTimeout(sessionTimeout);
             existingSession.setPollingInterval(pollingInterval);
             return existingSession;
         } else {
-            PollingServiceSession newSession = new PollingServiceSession(this);
+            PollingRelaySession newSession = new PollingRelaySession(this);
             newSession.setSessionTimeout(sessionTimeout);
             newSession.setPollingInterval(pollingInterval);
             if (instanceNames != null) {
@@ -111,14 +111,14 @@ public class PollingServiceSessionManager extends AbstractComponent {
     /**
      * Gets the polling session associated with the current request.
      * @param translet the current translet
-     * @return the {@link PollingServiceSession}, or {@code null} if not found
+     * @return the {@link PollingRelaySession}, or {@code null} if not found
      */
-    public PollingServiceSession getSession(@NonNull Translet translet) {
+    public PollingRelaySession getSession(@NonNull Translet translet) {
         String sessionId = getSessionId(translet, false);
         if (sessionId == null) {
             return null;
         }
-        PollingServiceSession serviceSession = sessions.get(sessionId);
+        PollingRelaySession serviceSession = sessions.get(sessionId);
         if (serviceSession != null) {
             serviceSession.access(false);
             return serviceSession;
@@ -158,7 +158,7 @@ public class PollingServiceSessionManager extends AbstractComponent {
      * @param session the session pulling the messages
      * @return an array of new messages, or {@code null} if there are no new messages
      */
-    public String[] pull(PollingServiceSession session) {
+    public String[] pull(PollingRelaySession session) {
         String[] messages = bufferedMessages.pop(session);
         if (messages != null && messages.length > 0) {
             shrinkBuffer();
@@ -175,7 +175,7 @@ public class PollingServiceSessionManager extends AbstractComponent {
 
     private int getMinLineIndex() {
         int minLineIndex = -1;
-        for (PollingServiceSession serviceSession : sessions.values()) {
+        for (PollingRelaySession serviceSession : sessions.values()) {
             if (minLineIndex == -1) {
                 minLineIndex = serviceSession.getLastLineIndex();
             } else if (serviceSession.getLastLineIndex() < minLineIndex) {
@@ -188,7 +188,7 @@ public class PollingServiceSessionManager extends AbstractComponent {
     protected boolean isUsingInstance(String instanceName) {
         if (StringUtils.hasLength(instanceName)) {
             synchronized (sessions) {
-                for (PollingServiceSession serviceSession : sessions.values()) {
+                for (PollingRelaySession serviceSession : sessions.values()) {
                     if (serviceSession.isValid()) {
                         String[] instanceNames = serviceSession.getJoinedInstances();
                         if (instanceNames != null) {
@@ -210,11 +210,11 @@ public class PollingServiceSessionManager extends AbstractComponent {
      */
     protected void scavenge() {
         List<String> expiredSessions = new ArrayList<>();
-        for (Map.Entry<String, PollingServiceSession> entry : sessions.entrySet()) {
+        for (Map.Entry<String, PollingRelaySession> entry : sessions.entrySet()) {
             String id = entry.getKey();
-            PollingServiceSession session = entry.getValue();
+            PollingRelaySession session = entry.getValue();
             if (session.isExpired()) {
-                appMonManager.getExportServiceManager().release(session);
+                appMonManager.getMessageRelayManager().release(session);
                 session.destroy();
                 expiredSessions.add(id);
             }

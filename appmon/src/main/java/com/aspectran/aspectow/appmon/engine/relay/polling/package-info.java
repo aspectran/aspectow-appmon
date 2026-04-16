@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 /**
- * Contains service-related classes.
+ * Contains classes for polling service.
  */
-package com.aspectran.aspectow.appmon.engine.service;
+package com.aspectran.aspectow.appmon.engine.relay.polling;

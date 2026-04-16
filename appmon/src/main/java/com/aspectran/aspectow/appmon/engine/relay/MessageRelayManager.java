@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.aspectow.appmon.engine.service;
+package com.aspectran.aspectow.appmon.engine.relay;
 
 import com.aspectran.aspectow.appmon.engine.config.InstanceInfoHolder;
 import com.aspectran.aspectow.appmon.engine.exporter.ExporterManager;
+import com.aspectran.aspectow.node.redis.RedisMessagePublisher;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -28,42 +29,64 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * Manages all {@link ExportService} and {@link ExporterManager} instances.
+ * Manages all {@link MessageRelayer} and {@link ExporterManager} instances.
  * This class is a central hub for handling client sessions (join/release),
- * collecting messages from exporters, and broadcasting them to clients.
+ * collecting messages from exporters, and relaying them to clients.
  *
  * <p>Created: 2025-02-12</p>
  */
-public class ExportServiceManager {
+public class MessageRelayManager {
 
-    private final Set<ExportService> exportServices = new CopyOnWriteArraySet<>();
+    private final String nodeId;
+
+    private final Set<MessageRelayer> messageRelayers = new CopyOnWriteArraySet<>();
 
     private final List<ExporterManager> exporterManagers = new CopyOnWriteArrayList<>();
 
     private final InstanceInfoHolder instanceInfoHolder;
 
+    private RedisMessagePublisher messagePublisher;
+
     /**
-     * Instantiates a new ExportServiceManager.
+     * Instantiates a new MessageRelayManager.
+     * @param nodeId the node ID of the current instance
      * @param instanceInfoHolder the holder for instance information
      */
-    public ExportServiceManager(InstanceInfoHolder instanceInfoHolder) {
+    public MessageRelayManager(String nodeId, InstanceInfoHolder instanceInfoHolder) {
+        this.nodeId = nodeId;
         this.instanceInfoHolder = instanceInfoHolder;
     }
 
     /**
-     * Adds an export service to the manager.
-     * @param exportService the export service to add
+     * Gets the Redis message publisher.
+     * @return the Redis message publisher
      */
-    public void addExportService(ExportService exportService) {
-        exportServices.add(exportService);
+    public RedisMessagePublisher getMessagePublisher() {
+        return messagePublisher;
     }
 
     /**
-     * Removes an export service from the manager.
-     * @param exportService the export service to remove
+     * Sets the Redis message publisher.
+     * @param messagePublisher the Redis message publisher
      */
-    public void removeExportService(ExportService exportService) {
-        exportServices.remove(exportService);
+    public void setMessagePublisher(RedisMessagePublisher messagePublisher) {
+        this.messagePublisher = messagePublisher;
+    }
+
+    /**
+     * Adds a message relayer to the manager.
+     * @param messageRelayer the message relayer to add
+     */
+    public void addRelayer(MessageRelayer messageRelayer) {
+        messageRelayers.add(messageRelayer);
+    }
+
+    /**
+     * Removes a message relayer from the manager.
+     * @param messageRelayer the message relayer to remove
+     */
+    public void removeRelayer(MessageRelayer messageRelayer) {
+        messageRelayers.remove(messageRelayer);
     }
 
     /**
@@ -75,23 +98,23 @@ public class ExportServiceManager {
     }
 
     /**
-     * Broadcasts a message to all registered export services.
-     * @param message the message to broadcast
+     * Relays a local message from an exporter.
+     * @param message the message to relay
      */
-    public void broadcast(String message) {
-        for (ExportService exportService : exportServices) {
-            exportService.broadcast(message);
+    public void relay(String message) {
+        for (MessageRelayer relayer : messageRelayers) {
+            relayer.relay(message);
         }
     }
 
     /**
-     * Broadcasts a message to a specific session via all registered export services.
-     * @param session the target service session
-     * @param message the message to broadcast
+     * Relays a message to a specific session via all registered relayers.
+     * @param session the target relay session
+     * @param message the message to relay
      */
-    public void broadcast(ServiceSession session, String message) {
-        for (ExportService exportService : exportServices) {
-            exportService.broadcast(session, message);
+    public void relay(RelaySession session, String message) {
+        for (MessageRelayer relayer : messageRelayers) {
+            relayer.relay(session, message);
         }
     }
 
@@ -101,7 +124,7 @@ public class ExportServiceManager {
      * @param session the client session that is joining
      * @return {@code true} if the join was successful, {@code false} otherwise
      */
-    public synchronized boolean join(@NonNull ServiceSession session) {
+    public synchronized boolean join(@NonNull RelaySession session) {
         if (session.isValid()) {
             String[] instanceNames = session.getJoinedInstances();
             if (instanceNames != null && instanceNames.length > 0) {
@@ -130,7 +153,7 @@ public class ExportServiceManager {
      * Stops exporters that are no longer being monitored by any client.
      * @param session the client session that is being released
      */
-    public synchronized void release(ServiceSession session) {
+    public synchronized void release(RelaySession session) {
         String[] instanceNames = getUnusedInstances(session);
         if (instanceNames != null) {
             for (String name : instanceNames) {
@@ -153,7 +176,7 @@ public class ExportServiceManager {
      * @param session the client session
      * @return a list of messages
      */
-    public List<String> getLastMessages(@NonNull ServiceSession session) {
+    public List<String> getLastMessages(@NonNull RelaySession session) {
         CommandOptions commandOptions = new CommandOptions();
         commandOptions.setTimeZone(session.getTimeZone());
         List<String> messages = new ArrayList<>();
@@ -184,7 +207,7 @@ public class ExportServiceManager {
      * @param commandOptions the command options specifying what to refresh
      * @return a list of new messages
      */
-    public List<String> getNewMessages(@NonNull ServiceSession session, @NonNull CommandOptions commandOptions) {
+    public List<String> getNewMessages(@NonNull RelaySession session, @NonNull CommandOptions commandOptions) {
         String instanceName = commandOptions.getInstance();
         List<String> messages = new ArrayList<>();
         if (session.isValid()) {
@@ -210,7 +233,7 @@ public class ExportServiceManager {
         }
     }
 
-    private String @Nullable [] getUnusedInstances(ServiceSession session) {
+    private String @Nullable [] getUnusedInstances(RelaySession session) {
         String[] instanceNames = getJoinedInstances(session);
         if (instanceNames == null || instanceNames.length == 0) {
             return null;
@@ -218,8 +241,8 @@ public class ExportServiceManager {
         List<String> unusedInstances = new ArrayList<>(instanceNames.length);
         for (String name : instanceNames) {
             boolean using = false;
-            for (ExportService exportService : exportServices) {
-                if (exportService.isUsingInstance(name)) {
+            for (MessageRelayer messageRelayer : messageRelayers) {
+                if (messageRelayer.isUsingInstance(name)) {
                     using = true;
                     break;
                 }
@@ -235,7 +258,7 @@ public class ExportServiceManager {
         }
     }
 
-    private String @Nullable [] getJoinedInstances(@NonNull ServiceSession session) {
+    private String @Nullable [] getJoinedInstances(@NonNull RelaySession session) {
         String[] instanceNames = session.getJoinedInstances();
         if (instanceNames == null) {
             return null;

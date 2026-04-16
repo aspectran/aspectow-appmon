@@ -18,7 +18,7 @@ package com.aspectran.aspectow.appmon.engine.exporter.metric;
 import com.aspectran.aspectow.appmon.engine.config.MetricInfo;
 import com.aspectran.aspectow.appmon.engine.exporter.AbstractExporter;
 import com.aspectran.aspectow.appmon.engine.exporter.ExporterManager;
-import com.aspectran.aspectow.appmon.engine.service.CommandOptions;
+import com.aspectran.aspectow.appmon.engine.relay.CommandOptions;
 import com.aspectran.utils.ToStringBuilder;
 import org.jspecify.annotations.NonNull;
 

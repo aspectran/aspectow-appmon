@@ -13,34 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.aspectow.appmon.engine.service;
-
+package com.aspectran.aspectow.appmon.engine.relay;
 
 /**
- * A service for exporting and broadcasting messages to connected clients.
- * This service can be implemented using various communication protocols like WebSocket or polling.
+ * A relayer for broadcasting messages to connected clients.
+ * This can be implemented using various communication protocols like WebSocket or polling.
  *
  * <p>Created: 2020. 12. 24.</p>
  */
-public interface ExportService {
+public interface MessageRelayer {
 
     /**
-     * Broadcasts a message to all connected sessions.
-     * @param message the message to broadcast
+     * Relays a message to all connected sessions.
+     * @param message the message to relay
      */
-    void broadcast(String message);
+    void relay(String message);
 
     /**
-     * Broadcasts a message to a specific session.
-     * @param serviceSession the session to send the message to
-     * @param message the message to broadcast
+     * Relays a message to a specific session.
+     * @param relaySession the session to send the message to
+     * @param message the message to relay
      */
-    void broadcast(ServiceSession serviceSession, String message);
+    void relay(RelaySession relaySession, String message);
 
     /**
-     * Checks if the service is currently being used by a specific instance.
+     * Checks if the relayer is currently being used by a specific instance.
      * @param instanceName the name of the instance
-     * @return {@code true} if the instance is using this service, {@code false} otherwise
+     * @return {@code true} if the instance is using this relayer, {@code false} otherwise
      */
     boolean isUsingInstance(String instanceName);
 

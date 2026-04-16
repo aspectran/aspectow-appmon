@@ -16,4 +16,4 @@
 /**
  * Contains classes for websocket service.
  */
-package com.aspectran.aspectow.appmon.engine.service.websocket;
+package com.aspectran.aspectow.appmon.engine.relay.websocket;

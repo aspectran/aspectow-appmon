@@ -16,7 +16,7 @@
 package com.aspectran.aspectow.appmon.engine.exporter;
 
 import com.aspectran.aspectow.appmon.engine.manager.AppMonManager;
-import com.aspectran.aspectow.appmon.engine.service.CommandOptions;
+import com.aspectran.aspectow.appmon.engine.relay.CommandOptions;
 import com.aspectran.core.activity.InstantAction;
 import com.aspectran.utils.scheduling.ScheduledExecutorScheduler;
 import com.aspectran.utils.scheduling.Scheduler;

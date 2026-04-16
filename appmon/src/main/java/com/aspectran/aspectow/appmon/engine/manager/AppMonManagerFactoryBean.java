@@ -70,7 +70,7 @@ public class AppMonManagerFactoryBean implements ActivityContextAware, FactoryBe
     @Override
     public void destroy() throws Exception {
         if (appMonManager != null) {
-            appMonManager.getExportServiceManager().destroy();
+            appMonManager.getMessageRelayManager().destroy();
         }
     }
 

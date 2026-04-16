@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.aspectow.appmon.engine.service.websocket;
+package com.aspectran.aspectow.appmon.engine.relay.websocket;
 
 import com.aspectran.aspectow.appmon.common.auth.AppMonTokenIssuer;
 import com.aspectran.aspectow.appmon.engine.manager.AppMonManager;
-import com.aspectran.aspectow.appmon.engine.service.CommandOptions;
-import com.aspectran.aspectow.appmon.engine.service.ExportService;
-import com.aspectran.aspectow.appmon.engine.service.ExportServiceManager;
-import com.aspectran.aspectow.appmon.engine.service.ServiceSession;
+import com.aspectran.aspectow.appmon.engine.relay.CommandOptions;
+import com.aspectran.aspectow.appmon.engine.relay.MessageRelayer;
+import com.aspectran.aspectow.appmon.engine.relay.MessageRelayManager;
+import com.aspectran.aspectow.appmon.engine.relay.RelaySession;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Destroy;
@@ -37,11 +37,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static com.aspectran.aspectow.appmon.engine.service.CommandOptions.COMMAND_LOAD_PREVIOUS;
-import static com.aspectran.aspectow.appmon.engine.service.CommandOptions.COMMAND_REFRESH;
+import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_LOAD_PREVIOUS;
+import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_REFRESH;
 
 /**
- * An {@link ExportService} implementation based on the WebSocket protocol (JSR-356).
+ * An {@link MessageRelayer} implementation based on the WebSocket protocol (JSR-356).
  * It provides real-time, bidirectional communication with clients.
  *
  * <p>Created: 2020. 12. 24.</p>
@@ -51,9 +51,9 @@ import static com.aspectran.aspectow.appmon.engine.service.CommandOptions.COMMAN
         value = "/backend/websocket/{token}",
         configurator = AspectranConfigurator.class
 )
-public class WebsocketExportService extends SimplifiedEndpoint implements ExportService {
+public class WebsocketMessageRelayer extends SimplifiedEndpoint implements MessageRelayer {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebsocketExportService.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebsocketMessageRelayer.class);
 
     private static final String COMMAND_PING = "ping";
     private static final String COMMAND_JOIN = "join";
@@ -65,16 +65,16 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
     private final AppMonManager appMonManager;
 
     @Autowired
-    public WebsocketExportService(AppMonManager appMonManager) {
+    public WebsocketMessageRelayer(AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
     }
 
     /**
-     * Initializes the service by registering it with the {@link ExportServiceManager}.
+     * Initializes the service by registering it with the {@link MessageRelayManager}.
      */
     @Initialize
-    public void registerExportService() {
-        appMonManager.getExportServiceManager().addExportService(this);
+    public void registerRelayer() {
+        appMonManager.getMessageRelayManager().addRelayer(this);
     }
 
     /**
@@ -82,7 +82,7 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
      */
     @Destroy
     public void destroy() throws Exception {
-        appMonManager.getExportServiceManager().removeExportService(this);
+        appMonManager.getMessageRelayManager().removeRelayer(this);
     }
 
     @Override
@@ -130,8 +130,8 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
 
     @Override
     protected void onSessionRemoved(Session session) {
-        ServiceSession serviceSession = new WebsocketServiceSession(session);
-        appMonManager.getExportServiceManager().release(serviceSession);
+        RelaySession relaySession = new WebsocketRelaySession(session);
+        appMonManager.getMessageRelayManager().release(relaySession);
     }
 
     private void pong(Session session) {
@@ -140,45 +140,50 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
     }
 
     private void join(Session session, @NonNull CommandOptions commandOptions) {
-        WebsocketServiceSession serviceSession = new WebsocketServiceSession(session);
+        WebsocketRelaySession relaySession = new WebsocketRelaySession(session);
         String timeZone = commandOptions.getTimeZone();
         if (StringUtils.hasText(timeZone)) {
-            serviceSession.setTimeZone(timeZone);
+            relaySession.setTimeZone(timeZone);
         }
         String instancesToJoin = commandOptions.getInstancesToJoin();
         String[] instanceNames = StringUtils.splitWithComma(instancesToJoin);
         instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
         if (!StringUtils.hasText(instancesToJoin) || instanceNames.length > 0) {
-            serviceSession.setJoinedInstances(instanceNames);
+            relaySession.setJoinedInstances(instanceNames);
         }
         if (addSession(session)) {
-            broadcast(serviceSession, MESSAGE_JOINED);
+            relay(relaySession, MESSAGE_JOINED);
         }
     }
 
     private void joinComplete(@NonNull Session session) {
-        ServiceSession serviceSession = new WebsocketServiceSession(session);
-        appMonManager.getExportServiceManager().join(serviceSession);
-        List<String> messages = appMonManager.getExportServiceManager().getLastMessages(serviceSession);
+        RelaySession relaySession = new WebsocketRelaySession(session);
+        appMonManager.getMessageRelayManager().join(relaySession);
+        List<String> messages = appMonManager.getMessageRelayManager().getLastMessages(relaySession);
         for (String message : messages) {
             sendText(session, message);
         }
     }
 
     private void refreshData(@NonNull Session session, @NonNull CommandOptions commandOptions) {
-        ServiceSession serviceSession = new WebsocketServiceSession(session);
+        RelaySession relaySession = new WebsocketRelaySession(session);
         if (!commandOptions.hasTimeZone()) {
-            commandOptions.setTimeZone(serviceSession.getTimeZone());
+            commandOptions.setTimeZone(relaySession.getTimeZone());
         }
-        List<String> messages = appMonManager.getExportServiceManager().getNewMessages(serviceSession, commandOptions);
+        List<String> messages = appMonManager.getMessageRelayManager().getNewMessages(relaySession, commandOptions);
         for (String message : messages) {
             sendText(session, message);
         }
     }
 
     @Override
-    public void broadcast(@NonNull ServiceSession serviceSession, String message) {
-        if (serviceSession instanceof WebsocketServiceSession session) {
+    public void relay(String message) {
+        broadcast(message);
+    }
+
+    @Override
+    public void relay(@NonNull RelaySession serviceSession, String message) {
+        if (serviceSession instanceof WebsocketRelaySession session) {
             sendText(session.getSession(), message);
         }
     }
@@ -187,8 +192,8 @@ public class WebsocketExportService extends SimplifiedEndpoint implements Export
     public boolean isUsingInstance(String instanceName) {
         if (StringUtils.hasLength(instanceName)) {
             return containsSession(session -> {
-                ServiceSession serviceSession = new WebsocketServiceSession(session);
-                String[] instanceNames = serviceSession.getJoinedInstances();
+                RelaySession relaySession = new WebsocketRelaySession(session);
+                String[] instanceNames = relaySession.getJoinedInstances();
                 if (instanceNames != null) {
                     for (String name : instanceNames) {
                         if (instanceName.equals(name)) {

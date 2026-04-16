@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.appmon.engine.exporter;
 
-import com.aspectran.aspectow.appmon.engine.service.CommandOptions;
+import com.aspectran.aspectow.appmon.engine.relay.CommandOptions;
 import com.aspectran.utils.lifecycle.AbstractLifeCycle;
 
 import java.util.List;

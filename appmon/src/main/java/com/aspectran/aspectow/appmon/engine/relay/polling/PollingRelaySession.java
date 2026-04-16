@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.aspectow.appmon.engine.service.polling;
+package com.aspectran.aspectow.appmon.engine.relay.polling;
 
-import com.aspectran.aspectow.appmon.engine.service.ServiceSession;
+import com.aspectran.aspectow.appmon.engine.relay.RelaySession;
 import com.aspectran.utils.concurrent.AutoLock;
 import com.aspectran.utils.timer.CyclicTimeout;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Represents a client session for the {@link PollingExportService}.
+ * Represents a client session for the {@link PollingMessageRelayer}.
  * It manages session-specific state like timeouts, polling intervals, and joined instances.
  *
  * <p>Created: 2020. 12. 24.</p>
  */
-public class PollingServiceSession implements ServiceSession {
+public class PollingRelaySession implements RelaySession {
 
     private static final int MIN_POLLING_INTERVAL = 500;
 
@@ -35,9 +37,11 @@ public class PollingServiceSession implements ServiceSession {
 
     private final AutoLock autoLock = new AutoLock();
 
-    private final PollingServiceSessionManager sessionManager;
+    private final PollingMessageRelayManager sessionManager;
 
     private final SessionExpiryTimer expiryTimer;
+
+    private final List<String> messageQueue = new ArrayList<>();
 
     private volatile int sessionTimeout;
 
@@ -55,7 +59,7 @@ public class PollingServiceSession implements ServiceSession {
      * Instantiates a new PollingServiceSession.
      * @param sessionManager the session manager that created this session
      */
-    public PollingServiceSession(PollingServiceSessionManager sessionManager) {
+    public PollingRelaySession(PollingMessageRelayManager sessionManager) {
         this.sessionManager = sessionManager;
         this.expiryTimer = new SessionExpiryTimer();
     }
@@ -113,6 +117,33 @@ public class PollingServiceSession implements ServiceSession {
     }
 
     /**
+     * Pushes a message to the session's individual queue.
+     * @param message the message to push
+     */
+    public void push(String message) {
+        try (AutoLock ignored = autoLock.lock()) {
+            if (isValid()) {
+                messageQueue.add(message);
+            }
+        }
+    }
+
+    /**
+     * Pops all messages from the session's individual queue.
+     * @return a list of messages, or {@code null} if the queue is empty
+     */
+    public List<String> popMessages() {
+        try (AutoLock ignored = autoLock.lock()) {
+            if (messageQueue.isEmpty()) {
+                return null;
+            }
+            List<String> messages = new ArrayList<>(messageQueue);
+            messageQueue.clear();
+            return messages;
+        }
+    }
+
+    /**
      * Updates the session's last access time and schedules the next expiry check.
      * @param create {@code true} if the session is being created
      */
@@ -133,6 +164,7 @@ public class PollingServiceSession implements ServiceSession {
     protected void destroy() {
         try (AutoLock ignored = autoLock.lock()) {
             expiryTimer.destroy();
+            messageQueue.clear();
         }
     }
 

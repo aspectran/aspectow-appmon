@@ -23,7 +23,7 @@ import com.aspectran.aspectow.appmon.engine.persist.counter.EventCount;
 import com.aspectran.aspectow.appmon.engine.persist.counter.EventCountRollupListener;
 import com.aspectran.aspectow.appmon.engine.persist.counter.EventCountVO;
 import com.aspectran.aspectow.appmon.engine.persist.db.mapper.EventCountMapper;
-import com.aspectran.aspectow.appmon.engine.service.CommandOptions;
+import com.aspectran.aspectow.appmon.engine.relay.CommandOptions;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.json.JsonBuilder;
 import org.jspecify.annotations.NonNull;

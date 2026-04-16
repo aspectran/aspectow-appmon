@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.aspectow.appmon.engine.service;
+package com.aspectran.aspectow.appmon.engine.relay;
 
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.apon.AponFormat;

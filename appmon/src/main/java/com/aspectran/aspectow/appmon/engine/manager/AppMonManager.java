@@ -21,7 +21,7 @@ import com.aspectran.aspectow.appmon.engine.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.engine.config.InstanceInfoHolder;
 import com.aspectran.aspectow.appmon.engine.config.PollingConfig;
 import com.aspectran.aspectow.appmon.engine.persist.PersistManager;
-import com.aspectran.aspectow.appmon.engine.service.ExportServiceManager;
+import com.aspectran.aspectow.appmon.engine.relay.MessageRelayManager;
 import com.aspectran.aspectow.node.manager.NodeReporter;
 import com.aspectran.core.activity.InstantAction;
 import com.aspectran.core.activity.InstantActivitySupport;
@@ -51,7 +51,7 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final InstanceInfoHolder instanceInfoHolder;
 
-    private final ExportServiceManager exportServiceManager;
+    private final MessageRelayManager messageRelayManager;
 
     private final PersistManager persistManager;
 
@@ -59,6 +59,7 @@ public class AppMonManager extends InstantActivitySupport {
 
     /**
      * Instantiates a new AppMonManager.
+     * @param nodeId the node ID of the current instance
      * @param currentDomain the name of the current domain
      * @param pollingConfig the polling configuration
      * @param counterPersistInterval the counter persistence interval in minutes
@@ -66,6 +67,7 @@ public class AppMonManager extends InstantActivitySupport {
      * @param instanceInfoHolder the holder for instance information
      */
     public AppMonManager(
+            String nodeId,
             String currentDomain,
             PollingConfig pollingConfig,
             int counterPersistInterval,
@@ -76,7 +78,7 @@ public class AppMonManager extends InstantActivitySupport {
         this.counterPersistInterval = counterPersistInterval;
         this.domainInfoHolder = domainInfoHolder;
         this.instanceInfoHolder = instanceInfoHolder;
-        this.exportServiceManager = new ExportServiceManager(instanceInfoHolder);
+        this.messageRelayManager = new MessageRelayManager(nodeId, instanceInfoHolder);
         this.persistManager = new PersistManager();
     }
 
@@ -156,11 +158,11 @@ public class AppMonManager extends InstantActivitySupport {
     }
 
     /**
-     * Gets the manager for export services.
-     * @return the export service manager
+     * Gets the manager for message relayers.
+     * @return the message relay manager
      */
-    public ExportServiceManager getExportServiceManager() {
-        return exportServiceManager;
+    public MessageRelayManager getMessageRelayManager() {
+        return messageRelayManager;
     }
 
     /**
