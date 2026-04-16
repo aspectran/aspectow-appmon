@@ -22,6 +22,7 @@ import com.aspectran.aspectow.appmon.engine.config.InstanceInfoHolder;
 import com.aspectran.aspectow.appmon.engine.config.PollingConfig;
 import com.aspectran.aspectow.appmon.engine.persist.PersistManager;
 import com.aspectran.aspectow.appmon.engine.service.ExportServiceManager;
+import com.aspectran.aspectow.node.manager.NodeReporter;
 import com.aspectran.core.activity.InstantAction;
 import com.aspectran.core.activity.InstantActivitySupport;
 import com.aspectran.core.adapter.ApplicationAdapter;
@@ -53,6 +54,8 @@ public class AppMonManager extends InstantActivitySupport {
     private final ExportServiceManager exportServiceManager;
 
     private final PersistManager persistManager;
+
+    private NodeReporter nodeReporter;
 
     /**
      * Instantiates a new AppMonManager.
@@ -166,6 +169,22 @@ public class AppMonManager extends InstantActivitySupport {
      */
     public PersistManager getPersistManager() {
         return persistManager;
+    }
+
+    /**
+     * Gets the node reporter.
+     * @return the node reporter
+     */
+    public NodeReporter getNodeReporter() {
+        return nodeReporter;
+    }
+
+    /**
+     * Sets the node reporter.
+     * @param nodeReporter the node reporter
+     */
+    public void setNodeReporter(NodeReporter nodeReporter) {
+        this.nodeReporter = nodeReporter;
     }
 
     @Override

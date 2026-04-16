@@ -35,6 +35,11 @@ import com.aspectran.aspectow.appmon.engine.exporter.metric.MetricExporter;
 import com.aspectran.aspectow.appmon.engine.exporter.metric.MetricExporterBuilder;
 import com.aspectran.aspectow.appmon.engine.persist.counter.EventCounter;
 import com.aspectran.aspectow.appmon.engine.persist.counter.EventCounterBuilder;
+import com.aspectran.aspectow.node.config.NodeConfig;
+import com.aspectran.aspectow.node.config.NodeConfigBuilder;
+import com.aspectran.aspectow.node.config.NodeConfigResolver;
+import com.aspectran.aspectow.node.manager.NodeReporter;
+import com.aspectran.aspectow.node.redis.RedisConnectionPool;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.Assert;
 import com.aspectran.utils.SystemUtils;
@@ -73,6 +78,18 @@ public abstract class AppMonManagerBuilder {
         Assert.notNull(appMonConfig, "appMonConfig must not be null");
 
         AppMonManager appMonManager = createAppMonManager(context, appMonConfig);
+
+        NodeConfig nodeConfig;
+        if (context.getBeanRegistry().containsBean(NodeConfigResolver.class)) {
+            NodeConfigResolver nodeConfigResolver = context.getBeanRegistry().getBean(NodeConfigResolver.class);
+            nodeConfig = nodeConfigResolver.resolveConfig();
+        } else {
+            nodeConfig = NodeConfigBuilder.build();
+        }
+
+        RedisConnectionPool connectionPool = context.getBeanRegistry().getBean(RedisConnectionPool.class);
+        NodeReporter nodeReporter = new NodeReporter(nodeConfig, connectionPool);
+        appMonManager.setNodeReporter(nodeReporter);
 
         for (InstanceInfo instanceInfo : appMonConfig.getInstanceInfoList()) {
             String instanceName = instanceInfo.getName();
