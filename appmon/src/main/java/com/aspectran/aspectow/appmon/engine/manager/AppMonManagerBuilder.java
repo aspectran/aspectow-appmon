@@ -16,7 +16,6 @@
 package com.aspectran.aspectow.appmon.engine.manager;
 
 import com.aspectran.aspectow.appmon.engine.config.AppMonConfig;
-import com.aspectran.aspectow.appmon.engine.config.DomainInfoHolder;
 import com.aspectran.aspectow.appmon.engine.config.EventInfo;
 import com.aspectran.aspectow.appmon.engine.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.engine.config.InstanceInfoHolder;
@@ -35,15 +34,12 @@ import com.aspectran.aspectow.appmon.engine.exporter.metric.MetricExporter;
 import com.aspectran.aspectow.appmon.engine.exporter.metric.MetricExporterBuilder;
 import com.aspectran.aspectow.appmon.engine.persist.counter.EventCounter;
 import com.aspectran.aspectow.appmon.engine.persist.counter.EventCounterBuilder;
-import com.aspectran.aspectow.node.config.NodeConfig;
-import com.aspectran.aspectow.node.config.NodeConfigBuilder;
-import com.aspectran.aspectow.node.config.NodeConfigResolver;
-import com.aspectran.aspectow.node.manager.NodeReporter;
-import com.aspectran.aspectow.node.redis.RedisConnectionPool;
-import com.aspectran.aspectow.node.redis.RedisMessagePublisher;
+import com.aspectran.aspectow.appmon.engine.relay.MessageRelayManager;
+import com.aspectran.aspectow.appmon.engine.relay.redis.RedisMessageRelayHandler;
+import com.aspectran.aspectow.node.config.NodeInfoHolder;
+import com.aspectran.aspectow.node.manager.NodeManager;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.Assert;
-import com.aspectran.utils.SystemUtils;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,10 +58,6 @@ public abstract class AppMonManagerBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(AppMonManagerBuilder.class);
 
-    public static final String APPMON_DOMAIN_PROPERTY_NAME = "appmon.domain";
-
-    public static final String DEFAULT_DOMAIN = "localhost";
-
     /**
      * Builds a fully configured {@link AppMonManager} instance.
      * @param context the activity context
@@ -78,25 +70,7 @@ public abstract class AppMonManagerBuilder {
         Assert.notNull(context, "context must not be null");
         Assert.notNull(appMonConfig, "appMonConfig must not be null");
 
-        NodeConfig nodeConfig;
-        if (context.getBeanRegistry().containsBean(NodeConfigResolver.class)) {
-            NodeConfigResolver nodeConfigResolver = context.getBeanRegistry().getBean(NodeConfigResolver.class);
-            nodeConfig = nodeConfigResolver.resolveConfig();
-        } else {
-            nodeConfig = NodeConfigBuilder.build();
-        }
-
-        String nodeId = nodeConfig.getNodeInfo().getName();
-        AppMonManager appMonManager = createAppMonManager(context, appMonConfig, nodeId);
-
-        RedisConnectionPool connectionPool = context.getBeanRegistry().getBean(RedisConnectionPool.class);
-        NodeReporter nodeReporter = new NodeReporter(nodeConfig, connectionPool);
-        appMonManager.setNodeReporter(nodeReporter);
-
-        if (context.getBeanRegistry().containsBean(RedisMessagePublisher.class)) {
-            RedisMessagePublisher messagePublisher = context.getBeanRegistry().getBean(RedisMessagePublisher.class);
-            appMonManager.getMessageRelayManager().setMessagePublisher(messagePublisher);
-        }
+        AppMonManager appMonManager = createAppMonManager(context, appMonConfig);
 
         for (InstanceInfo instanceInfo : appMonConfig.getInstanceInfoList()) {
             String instanceName = instanceInfo.getName();
@@ -178,35 +152,33 @@ public abstract class AppMonManagerBuilder {
 
     @NonNull
     private static AppMonManager createAppMonManager(
-            ActivityContext context,
-            @NonNull AppMonConfig appMonConfig,
-            String nodeId) throws Exception {
-        PollingConfig pollingConfig = appMonConfig.getPollingConfig();
-        if (pollingConfig == null) {
-            pollingConfig = new PollingConfig();
+            @NonNull ActivityContext context,
+            @NonNull AppMonConfig appMonConfig) throws Exception {
+        if (!context.getBeanRegistry().containsBean(NodeManager.class)) {
+            throw new Exception("NodeManager is not defined");
         }
+        NodeManager nodeManager = context.getBeanRegistry().getBean(NodeManager.class);
+        String nodeId = nodeManager.getNodeId();
+        NodeInfoHolder nodeInfoHolder = nodeManager.getNodeInfoHolder();
 
+        PollingConfig pollingConfig = appMonConfig.touchPollingConfig();
         int counterPersistInterval = appMonConfig.getCounterPersistInterval(DEFAULT_SAMPLE_INTERVAL_IN_MINUTES);
 
-        DomainInfoHolder domainInfoHolder = new DomainInfoHolder(appMonConfig.getDomainInfoList());
+        InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(nodeId, appMonConfig.getInstanceInfoList());
 
-        String currentDomain = resolveCurrentDomain();
-        if (!domainInfoHolder.hasDomain(currentDomain) && !DEFAULT_DOMAIN.equals(currentDomain)) {
-            throw new Exception("Unknown domain in AppMon: " + currentDomain);
-        }
-        logger.info("Current AppMon domain: {}", currentDomain);
+        MessageRelayManager messageRelayManager = new MessageRelayManager(nodeId, instanceInfoHolder, nodeManager.getRedisMessagePublisher());
 
-        InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(currentDomain, appMonConfig.getInstanceInfoList());
-
-        AppMonManager appMonManager = new AppMonManager(nodeId, currentDomain, pollingConfig, counterPersistInterval,
-                domainInfoHolder, instanceInfoHolder);
+        AppMonManager appMonManager = new AppMonManager(
+                nodeId, pollingConfig, counterPersistInterval,
+                nodeInfoHolder, instanceInfoHolder, messageRelayManager);
         appMonManager.setActivityContext(context);
-        return appMonManager;
-    }
 
-    private static String resolveCurrentDomain() {
-        String domain = SystemUtils.getProperty(APPMON_DOMAIN_PROPERTY_NAME);
-        return (domain != null ? domain : DEFAULT_DOMAIN);
+        if (nodeManager.getRedisMessageSubscriber() != null) {
+            RedisMessageRelayHandler redisMessageRelayHandler = new RedisMessageRelayHandler(nodeId, messageRelayManager);
+            nodeManager.getRedisMessageSubscriber().addListener(redisMessageRelayHandler);
+        }
+
+        return appMonManager;
     }
 
 }

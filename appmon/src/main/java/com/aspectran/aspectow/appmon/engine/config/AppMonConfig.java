@@ -37,7 +37,6 @@ public class AppMonConfig extends DefaultParameters {
 
     private static final ParameterKey pollingConfig;
     private static final ParameterKey counterPersistInterval;
-    private static final ParameterKey domain;
     private static final ParameterKey instance;
 
     private static final ParameterKey[] parameterKeys;
@@ -45,13 +44,11 @@ public class AppMonConfig extends DefaultParameters {
     static {
         pollingConfig = new ParameterKey("pollingConfig", PollingConfig.class);
         counterPersistInterval = new ParameterKey("counterPersistInterval", ValueType.INT);
-        domain = new ParameterKey("domains", new String[] {"domain"}, DomainInfo.class, true, true);
         instance = new ParameterKey("instances", new String[] {"instance"}, InstanceInfo.class, true, true);
 
         parameterKeys = new ParameterKey[] {
                 pollingConfig,
                 counterPersistInterval,
-                domain,
                 instance
         };
     }
@@ -91,6 +88,10 @@ public class AppMonConfig extends DefaultParameters {
         return getParameters(pollingConfig);
     }
 
+    public PollingConfig touchPollingConfig() {
+        return touchParameters(pollingConfig);
+    }
+
     /**
      * Sets the polling configuration.
      * @param pollingConfig the polling configuration
@@ -106,14 +107,6 @@ public class AppMonConfig extends DefaultParameters {
      */
     public int getCounterPersistInterval(int defaultValue) {
         return getInt(counterPersistInterval, defaultValue);
-    }
-
-    /**
-     * Gets the list of domain information.
-     * @return the list of domain information
-     */
-    public List<DomainInfo> getDomainInfoList() {
-        return getParametersList(domain);
     }
 
     /**

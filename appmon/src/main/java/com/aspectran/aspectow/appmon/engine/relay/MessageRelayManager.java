@@ -45,16 +45,17 @@ public class MessageRelayManager {
 
     private final InstanceInfoHolder instanceInfoHolder;
 
-    private RedisMessagePublisher messagePublisher;
+    private final RedisMessagePublisher messagePublisher;
 
     /**
      * Instantiates a new MessageRelayManager.
      * @param nodeId the node ID of the current instance
      * @param instanceInfoHolder the holder for instance information
      */
-    public MessageRelayManager(String nodeId, InstanceInfoHolder instanceInfoHolder) {
+    public MessageRelayManager(String nodeId, InstanceInfoHolder instanceInfoHolder, RedisMessagePublisher messagePublisher) {
         this.nodeId = nodeId;
         this.instanceInfoHolder = instanceInfoHolder;
+        this.messagePublisher = messagePublisher;
     }
 
     /**
@@ -63,14 +64,6 @@ public class MessageRelayManager {
      */
     public RedisMessagePublisher getMessagePublisher() {
         return messagePublisher;
-    }
-
-    /**
-     * Sets the Redis message publisher.
-     * @param messagePublisher the Redis message publisher
-     */
-    public void setMessagePublisher(RedisMessagePublisher messagePublisher) {
-        this.messagePublisher = messagePublisher;
     }
 
     /**

@@ -15,13 +15,8 @@
  */
 package com.aspectran.aspectow.appmon.engine.relay.redis;
 
-import com.aspectran.aspectow.appmon.engine.manager.AppMonManager;
+import com.aspectran.aspectow.appmon.engine.relay.MessageRelayManager;
 import com.aspectran.aspectow.node.redis.RedisMessageListener;
-import com.aspectran.aspectow.node.redis.RedisMessageSubscriber;
-import com.aspectran.core.component.bean.ablility.DisposableBean;
-import com.aspectran.core.component.bean.ablility.InitializableBean;
-import com.aspectran.core.component.bean.annotation.Autowired;
-import com.aspectran.core.component.bean.annotation.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,36 +24,23 @@ import org.slf4j.LoggerFactory;
  * RedisMessageRelayHandler listens to messages from other nodes via Redis
  * and relays them to the local MessageRelayManager.
  */
-@Component
-public class RedisMessageRelayHandler implements RedisMessageListener, InitializableBean, DisposableBean {
+public class RedisMessageRelayHandler implements RedisMessageListener {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisMessageRelayHandler.class);
 
-    private final AppMonManager appMonManager;
+    private final String nodeId;
 
-    private final RedisMessageSubscriber messageSubscriber;
+    private final MessageRelayManager messageRelayManager;
 
-    @Autowired
-    public RedisMessageRelayHandler(AppMonManager appMonManager, RedisMessageSubscriber messageSubscriber) {
-        this.appMonManager = appMonManager;
-        this.messageSubscriber = messageSubscriber;
-    }
-
-    @Override
-    public void initialize() {
-        messageSubscriber.addListener(this);
-        logger.info("RedisMessageRelayHandler initialized and registered as a listener");
-    }
-
-    @Override
-    public void destroy() {
-        messageSubscriber.removeListener(this);
+    public RedisMessageRelayHandler(String nodeId, MessageRelayManager messageRelayManager) {
+        this.nodeId = nodeId;
+        this.messageRelayManager = messageRelayManager;
     }
 
     @Override
     public void onMessage(String nodeId, String message) {
-        if (nodeId.equals(messageSubscriber.getNodeId())) {
-            appMonManager.getMessageRelayManager().relay(message);
+        if (this.nodeId.equals(nodeId)) {
+            messageRelayManager.relay(message);
         }
     }
 

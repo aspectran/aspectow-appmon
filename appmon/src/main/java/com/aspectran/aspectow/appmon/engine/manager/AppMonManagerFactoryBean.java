@@ -20,9 +20,9 @@ import com.aspectran.aspectow.appmon.engine.config.AppMonConfigBuilder;
 import com.aspectran.aspectow.appmon.engine.config.AppMonConfigResolver;
 import com.aspectran.core.component.bean.ablility.DisposableBean;
 import com.aspectran.core.component.bean.ablility.FactoryBean;
+import com.aspectran.core.component.bean.ablility.InitializableFactoryBean;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
-import com.aspectran.core.component.bean.annotation.Initialize;
 import com.aspectran.core.component.bean.aware.ActivityContextAware;
 import com.aspectran.core.context.ActivityContext;
 import org.jspecify.annotations.NonNull;
@@ -35,7 +35,7 @@ import org.jspecify.annotations.NonNull;
  */
 @Component
 @Bean(id = "appMonManager", lazyDestroy = true)
-public class AppMonManagerFactoryBean implements ActivityContextAware, FactoryBean<AppMonManager>, DisposableBean {
+public class AppMonManagerFactoryBean implements ActivityContextAware, InitializableFactoryBean<AppMonManager>, DisposableBean {
 
     private ActivityContext context;
 
@@ -46,12 +46,17 @@ public class AppMonManagerFactoryBean implements ActivityContextAware, FactoryBe
         this.context = context;
     }
 
+    @Override
+    public AppMonManager getObject() {
+        return appMonManager;
+    }
+
     /**
      * Initializes the factory bean by creating the {@link AppMonManager} instance.
      * @throws Exception if the manager cannot be created
      */
-    @Initialize
-    public void createAppMonManager() throws Exception {
+    @Override
+    public void initialize() throws Exception {
         AppMonConfig appMonConfig;
         if (context.getBeanRegistry().containsBean(AppMonConfigResolver.class)) {
             AppMonConfigResolver appMonConfigResolver = context.getBeanRegistry().getBean(AppMonConfigResolver.class);
@@ -59,12 +64,8 @@ public class AppMonManagerFactoryBean implements ActivityContextAware, FactoryBe
         } else {
             appMonConfig = AppMonConfigBuilder.build();
         }
-        appMonManager = AppMonManagerBuilder.build(context, appMonConfig);
-    }
 
-    @Override
-    public AppMonManager getObject() {
-        return appMonManager;
+        appMonManager = AppMonManagerBuilder.build(context, appMonConfig);
     }
 
     @Override

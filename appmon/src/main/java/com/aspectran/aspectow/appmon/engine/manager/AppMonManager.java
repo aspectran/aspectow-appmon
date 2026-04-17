@@ -15,14 +15,13 @@
  */
 package com.aspectran.aspectow.appmon.engine.manager;
 
-import com.aspectran.aspectow.appmon.engine.config.DomainInfo;
-import com.aspectran.aspectow.appmon.engine.config.DomainInfoHolder;
 import com.aspectran.aspectow.appmon.engine.config.InstanceInfo;
 import com.aspectran.aspectow.appmon.engine.config.InstanceInfoHolder;
 import com.aspectran.aspectow.appmon.engine.config.PollingConfig;
 import com.aspectran.aspectow.appmon.engine.persist.PersistManager;
 import com.aspectran.aspectow.appmon.engine.relay.MessageRelayManager;
-import com.aspectran.aspectow.node.manager.NodeReporter;
+import com.aspectran.aspectow.node.config.NodeInfo;
+import com.aspectran.aspectow.node.config.NodeInfoHolder;
 import com.aspectran.core.activity.InstantAction;
 import com.aspectran.core.activity.InstantActivitySupport;
 import com.aspectran.core.adapter.ApplicationAdapter;
@@ -41,13 +40,13 @@ import java.util.List;
  */
 public class AppMonManager extends InstantActivitySupport {
 
-    private final String currentDomain;
+    private final String nodeId;
 
     private final PollingConfig pollingConfig;
 
     private final int counterPersistInterval;
 
-    private final DomainInfoHolder domainInfoHolder;
+    private final NodeInfoHolder nodeInfoHolder;
 
     private final InstanceInfoHolder instanceInfoHolder;
 
@@ -55,30 +54,27 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final PersistManager persistManager;
 
-    private NodeReporter nodeReporter;
-
     /**
      * Instantiates a new AppMonManager.
-     * @param nodeId the node ID of the current instance
-     * @param currentDomain the name of the current domain
+     * @param nodeId the name of the current domain
      * @param pollingConfig the polling configuration
      * @param counterPersistInterval the counter persistence interval in minutes
-     * @param domainInfoHolder the holder for domain information
+     * @param nodeInfoHolder the holder for domain information
      * @param instanceInfoHolder the holder for instance information
      */
     public AppMonManager(
             String nodeId,
-            String currentDomain,
             PollingConfig pollingConfig,
             int counterPersistInterval,
-            DomainInfoHolder domainInfoHolder,
-            InstanceInfoHolder instanceInfoHolder) {
-        this.currentDomain = currentDomain;
+            NodeInfoHolder nodeInfoHolder,
+            InstanceInfoHolder instanceInfoHolder,
+            MessageRelayManager messageRelayManager) {
+        this.nodeId = nodeId;
         this.pollingConfig = pollingConfig;
         this.counterPersistInterval = counterPersistInterval;
-        this.domainInfoHolder = domainInfoHolder;
+        this.nodeInfoHolder = nodeInfoHolder;
         this.instanceInfoHolder = instanceInfoHolder;
-        this.messageRelayManager = new MessageRelayManager(nodeId, instanceInfoHolder);
+        this.messageRelayManager = messageRelayManager;
         this.persistManager = new PersistManager();
     }
 
@@ -98,8 +94,8 @@ public class AppMonManager extends InstantActivitySupport {
      * Gets the name of the current domain.
      * @return the current domain name
      */
-    public String getCurrentDomain() {
-        return currentDomain;
+    public String getNodeId() {
+        return nodeId;
     }
 
     /**
@@ -119,11 +115,11 @@ public class AppMonManager extends InstantActivitySupport {
     }
 
     /**
-     * Gets the list of all domain information.
-     * @return the list of domain information
+     * Gets the list of all node information.
+     * @return the list of node information
      */
-    public List<DomainInfo> getDomainInfoList() {
-        return domainInfoHolder.getDomainInfoList();
+    public List<NodeInfo> getNodeInfoList() {
+        return nodeInfoHolder.getNodeInfoList();
     }
 
     /**
@@ -171,22 +167,6 @@ public class AppMonManager extends InstantActivitySupport {
      */
     public PersistManager getPersistManager() {
         return persistManager;
-    }
-
-    /**
-     * Gets the node reporter.
-     * @return the node reporter
-     */
-    public NodeReporter getNodeReporter() {
-        return nodeReporter;
-    }
-
-    /**
-     * Sets the node reporter.
-     * @param nodeReporter the node reporter
-     */
-    public void setNodeReporter(NodeReporter nodeReporter) {
-        this.nodeReporter = nodeReporter;
     }
 
     @Override
