@@ -21,27 +21,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RedisMessageRelayHandler listens to messages from other nodes via Redis
+ * RedisMessageRelayHandler listens to relay messages from other nodes via Redis
  * and relays them to the local MessageRelayManager.
  */
 public class RedisMessageRelayHandler implements RedisMessageListener {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisMessageRelayHandler.class);
 
-    private final String nodeId;
-
     private final MessageRelayManager messageRelayManager;
 
-    public RedisMessageRelayHandler(String nodeId, MessageRelayManager messageRelayManager) {
-        this.nodeId = nodeId;
+    public RedisMessageRelayHandler(MessageRelayManager messageRelayManager) {
         this.messageRelayManager = messageRelayManager;
     }
 
     @Override
-    public void onMessage(String nodeId, String message) {
-        if (this.nodeId.equals(nodeId)) {
-            messageRelayManager.relay(message);
-        }
+    public void onRelayMessage(String message) {
+        messageRelayManager.relay(message);
     }
 
 }

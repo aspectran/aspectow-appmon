@@ -20,6 +20,8 @@ import com.aspectran.aspectow.appmon.engine.exporter.ExporterManager;
 import com.aspectran.aspectow.node.redis.RedisMessagePublisher;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,7 +39,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class MessageRelayManager {
 
-    private final String nodeId;
+    private static final Logger logger = LoggerFactory.getLogger(MessageRelayManager.class);
 
     private final Set<MessageRelayer> messageRelayers = new CopyOnWriteArraySet<>();
 
@@ -49,21 +51,11 @@ public class MessageRelayManager {
 
     /**
      * Instantiates a new MessageRelayManager.
-     * @param nodeId the node ID of the current instance
      * @param instanceInfoHolder the holder for instance information
      */
-    public MessageRelayManager(String nodeId, InstanceInfoHolder instanceInfoHolder, RedisMessagePublisher messagePublisher) {
-        this.nodeId = nodeId;
+    public MessageRelayManager(InstanceInfoHolder instanceInfoHolder, RedisMessagePublisher messagePublisher) {
         this.instanceInfoHolder = instanceInfoHolder;
         this.messagePublisher = messagePublisher;
-    }
-
-    /**
-     * Gets the Redis message publisher.
-     * @return the Redis message publisher
-     */
-    public RedisMessagePublisher getMessagePublisher() {
-        return messagePublisher;
     }
 
     /**
@@ -95,6 +87,13 @@ public class MessageRelayManager {
      * @param message the message to relay
      */
     public void relay(String message) {
+        if (messagePublisher != null) {
+            try {
+                messagePublisher.publishRelay(message);
+            } catch (Exception e) {
+                logger.error("Failed to publish relay message to Redis", e);
+            }
+        }
         for (MessageRelayer relayer : messageRelayers) {
             relayer.relay(message);
         }

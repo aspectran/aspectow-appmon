@@ -41,8 +41,6 @@ import com.aspectran.aspectow.node.manager.NodeManager;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.Assert;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -55,8 +53,6 @@ import static com.aspectran.aspectow.appmon.engine.schedule.CounterPersistSchedu
  * <p>Created: 2024-12-17</p>
  */
 public abstract class AppMonManagerBuilder {
-
-    private static final Logger logger = LoggerFactory.getLogger(AppMonManagerBuilder.class);
 
     /**
      * Builds a fully configured {@link AppMonManager} instance.
@@ -166,7 +162,7 @@ public abstract class AppMonManagerBuilder {
 
         InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(nodeId, appMonConfig.getInstanceInfoList());
 
-        MessageRelayManager messageRelayManager = new MessageRelayManager(nodeId, instanceInfoHolder, nodeManager.getRedisMessagePublisher());
+        MessageRelayManager messageRelayManager = new MessageRelayManager(instanceInfoHolder, nodeManager.getRedisMessagePublisher());
 
         AppMonManager appMonManager = new AppMonManager(
                 nodeId, pollingConfig, counterPersistInterval,
@@ -174,7 +170,7 @@ public abstract class AppMonManagerBuilder {
         appMonManager.setActivityContext(context);
 
         if (nodeManager.getRedisMessageSubscriber() != null) {
-            RedisMessageRelayHandler redisMessageRelayHandler = new RedisMessageRelayHandler(nodeId, messageRelayManager);
+            RedisMessageRelayHandler redisMessageRelayHandler = new RedisMessageRelayHandler(messageRelayManager);
             nodeManager.getRedisMessageSubscriber().addListener(redisMessageRelayHandler);
         }
 
