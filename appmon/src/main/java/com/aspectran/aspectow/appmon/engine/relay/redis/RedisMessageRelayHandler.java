@@ -17,16 +17,12 @@ package com.aspectran.aspectow.appmon.engine.relay.redis;
 
 import com.aspectran.aspectow.appmon.engine.relay.MessageRelayManager;
 import com.aspectran.aspectow.node.redis.RedisMessageListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * RedisMessageRelayHandler listens to relay messages from other nodes via Redis
  * and relays them to the local MessageRelayManager.
  */
 public class RedisMessageRelayHandler implements RedisMessageListener {
-
-    private static final Logger logger = LoggerFactory.getLogger(RedisMessageRelayHandler.class);
 
     private final MessageRelayManager messageRelayManager;
 
