@@ -22,14 +22,16 @@ import com.aspectran.utils.apon.ValueType;
 import java.util.List;
 
 /**
- * Contains detailed information about a monitored application instance.
- * An instance belongs to a domain and holds configurations for events, metrics, and logs.
+ * Contains configuration for a monitored application instance.
+ *
+ * <p>An instance represents a logical application unit within a node,
+ * aggregating various monitoring components such as events, metrics, and logs.</p>
  *
  * <p>Created: 2020/02/12</p>
  */
 public class InstanceInfo extends DefaultParameters {
 
-    private static final ParameterKey name;
+    private static final ParameterKey id;
     private static final ParameterKey title;
     private static final ParameterKey hidden;
     private static final ParameterKey event;
@@ -39,7 +41,7 @@ public class InstanceInfo extends DefaultParameters {
     private static final ParameterKey[] parameterKeys;
 
     static {
-        name = new ParameterKey("name", ValueType.STRING);
+        id = new ParameterKey("id", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
         hidden = new ParameterKey("hidden", ValueType.BOOLEAN);
         event = new ParameterKey("events", new String[] {"event"}, EventInfo.class, true, true);
@@ -47,7 +49,7 @@ public class InstanceInfo extends DefaultParameters {
         log = new ParameterKey("logs", new String[] {"log"}, LogInfo.class, true, true);
 
         parameterKeys = new ParameterKey[] {
-                name,
+                id,
                 title,
                 hidden,
                 event,
@@ -56,7 +58,7 @@ public class InstanceInfo extends DefaultParameters {
         };
     }
 
-    private String domainName;
+    private String nodeId;
 
     /**
      * Instantiates a new InstanceInfo.
@@ -66,39 +68,39 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the name of the domain this instance belongs to.
-     * @return the domain name
+     * Returns the identifier of the node to which this instance belongs.
+     * @return the node identifier
      */
-    public String getDomainName() {
-        return domainName;
+    public String getNodeId() {
+        return nodeId;
     }
 
     /**
-     * Sets the name of the domain this instance belongs to.
-     * @param domainName the domain name
+     * Sets the identifier of the node to which this instance belongs.
+     * @param nodeId the node identifier
      */
-    public void setDomainName(String domainName) {
-        this.domainName = domainName;
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
     }
 
     /**
-     * Gets the name of the instance.
-     * @return the instance name
+     * Returns the unique identifier of the application instance.
+     * @return the instance identifier
      */
-    public String getName() {
-        return getString(name);
+    public String getInstanceId() {
+        return getString(id);
     }
 
     /**
-     * Sets the name of the instance.
-     * @param name the instance name
+     * Sets the unique identifier of the application instance.
+     * @param instanceId the instance identifier
      */
-    public void setName(String name) {
-        putValue(InstanceInfo.name, name);
+    public void setInstanceId(String instanceId) {
+        putValue(InstanceInfo.id, instanceId);
     }
 
     /**
-     * Gets the display title of the instance.
+     * Returns the display title of the application instance.
      * @return the instance title
      */
     public String getTitle() {
@@ -106,7 +108,7 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the display title of the instance.
+     * Sets the display title of the application instance.
      * @param name the instance title
      */
     public void setTitle(String name) {
@@ -114,7 +116,7 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Checks if the instance should be hidden from the main view.
+     * Returns whether the application instance should be hidden from the monitoring dashboard.
      * @return {@code true} if hidden, {@code false} otherwise
      */
     public boolean isHidden() {
@@ -122,7 +124,7 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Sets whether the instance should be hidden.
+     * Sets whether the application instance should be hidden from the monitoring dashboard.
      * @param hidden {@code true} to hide, {@code false} to show
      */
     public void setHidden(boolean hidden) {
@@ -130,7 +132,7 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the list of event configurations for this instance.
+     * Returns the list of event configurations defined for this application instance.
      * @return a list of {@link EventInfo}
      */
     public List<EventInfo> getEventInfoList() {
@@ -138,7 +140,7 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the list of event configurations for this instance.
+     * Sets the list of event configurations defined for this application instance.
      * @param eventInfoList a list of {@link EventInfo}
      */
     public void setEventInfoList(List<EventInfo> eventInfoList) {
@@ -146,7 +148,7 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the list of metric configurations for this instance.
+     * Returns the list of metric configurations defined for this application instance.
      * @return a list of {@link MetricInfo}
      */
     public List<MetricInfo> getMetricInfoList() {
@@ -154,7 +156,7 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the list of metric configurations for this instance.
+     * Sets the list of metric configurations defined for this application instance.
      * @param metricInfoList a list of {@link MetricInfo}
      */
     public void setMetricInfoList(List<MetricInfo> metricInfoList) {
@@ -162,7 +164,7 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the list of log configurations for this instance.
+     * Returns the list of log configurations defined for this application instance.
      * @return a list of {@link LogInfo}
      */
     public List<LogInfo> getLogInfoList() {
@@ -170,7 +172,7 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the list of log configurations for this instance.
+     * Sets the list of log configurations defined for this application instance.
      * @param logInfoList a list of {@link LogInfo}
      */
     public void setLogInfoList(List<LogInfo> logInfoList) {

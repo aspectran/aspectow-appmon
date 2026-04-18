@@ -34,7 +34,7 @@ public abstract class AbstractEventCounter implements EventCounter {
 
     private final EventInfo eventInfo;
 
-    private final String eventName;
+    private final String eventId;
 
     private final EventCount eventCount = new EventCount();
 
@@ -44,17 +44,17 @@ public abstract class AbstractEventCounter implements EventCounter {
      */
     public AbstractEventCounter(@NonNull EventInfo eventInfo) {
         this.eventInfo = eventInfo;
-        this.eventName = eventInfo.getName();
+        this.eventId = eventInfo.getEventId();
     }
 
     @Override
-    public String getInstanceName() {
-        return eventInfo.getInstanceName();
+    public String getInstanceId() {
+        return eventInfo.getInstanceId();
     }
 
     @Override
-    public String getEventName() {
-        return eventName;
+    public String getEventId() {
+        return eventId;
     }
 
     /**

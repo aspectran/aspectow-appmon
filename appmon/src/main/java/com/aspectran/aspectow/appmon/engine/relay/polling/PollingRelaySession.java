@@ -86,8 +86,8 @@ public class PollingRelaySession implements RelaySession {
     }
 
     @Override
-    public void setJoinedInstances(String[] instanceNames) {
-        this.joinedInstances = instanceNames;
+    public void setJoinedInstances(String[] instanceIds) {
+        this.joinedInstances = instanceIds;
     }
 
     @Override

@@ -8,9 +8,9 @@
  * Responsible for rendering and updating individual charts using Chart.js.
  */
 class DashboardChart {
-    constructor($container, eventName) {
+    constructor($container, eventId) {
         this.$container = $container;
-        this.eventName = eventName;
+        this.eventId = eventId;
         this.chart = null;
         this.dateUnit = null;
         this.dateOffset = null;
@@ -43,7 +43,7 @@ class DashboardChart {
         let dataLabel1;
         let borderColor1;
         let backgroundColor1;
-        switch (this.eventName) {
+        switch (this.eventId) {
             case "activity":
                 dataLabel1 = "Activities";
                 borderColor1 = "#4493c8";

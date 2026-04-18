@@ -66,7 +66,7 @@ public class CounterPersistSchedule {
 
     private final AppMonManager appMonManager;
 
-    private final String currentDomain;
+    private final String currentNodeId;
 
     private final CounterPersist counterPersist;
 
@@ -75,7 +75,7 @@ public class CounterPersistSchedule {
     @Autowired
     public CounterPersistSchedule(@NonNull AppMonManager appMonManager, EventCountMapper dao) {
         this.appMonManager = appMonManager;
-        this.currentDomain = appMonManager.getNodeId();
+        this.currentNodeId = appMonManager.getNodeId();
         this.counterPersist = appMonManager.getPersistManager().getCounterPersist();
         this.dao = dao;
     }
@@ -89,7 +89,7 @@ public class CounterPersistSchedule {
         appMonManager.instantActivity(() -> {
             for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
                 EventCountVO vo = dao.getLastEventCount(
-                        currentDomain, eventCounter.getInstanceName(), eventCounter.getEventName());
+                        currentNodeId, eventCounter.getInstanceId(), eventCounter.getEventId());
                 if (vo != null) {
                     eventCounter.reset(vo.getDatetime(), vo.getTotal(), vo.getDelta(), vo.getError());
                 } else {
@@ -147,8 +147,8 @@ public class CounterPersistSchedule {
                 if (eventCountVO == null) {
                     eventCountVO = createEventCountVO(datetime);
                 }
-                eventCountVO.setInstance(eventCounter.getInstanceName());
-                eventCountVO.setEvent(eventCounter.getEventName());
+                eventCountVO.setInstanceId(eventCounter.getInstanceId());
+                eventCountVO.setEventId(eventCounter.getEventId());
                 eventCountVO.setTotal(eventCount.getTallied().getTotal());
                 eventCountVO.setDelta(eventCount.getTallied().getDelta());
                 eventCountVO.setError(eventCount.getTallied().getError());
@@ -178,7 +178,7 @@ public class CounterPersistSchedule {
     @NonNull
     private EventCountVO createEventCountVO(@NonNull LocalDateTime datetime) {
         EventCountVO eventCountVO = new EventCountVO();
-        eventCountVO.setDomain(currentDomain);
+        eventCountVO.setNodeId(currentNodeId);
         eventCountVO.setDatetime(datetime);
         return eventCountVO;
     }

@@ -44,7 +44,7 @@ public class MetricData {
      * @param metricInfo the metric configuration
      */
     public MetricData(@NonNull MetricInfo metricInfo) {
-        this.name = metricInfo.getName();
+        this.name = metricInfo.getMetricId();
         this.title = metricInfo.getTitle();
         this.heading = metricInfo.isHeading();
         this.format = metricInfo.getFormat();

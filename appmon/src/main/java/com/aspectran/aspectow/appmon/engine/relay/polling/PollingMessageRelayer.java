@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_REFRESH;
+import static com.aspectran.aspectow.node.manager.NodeRegistryProtocol.NODES_BASE_PATH;
 
 /**
  * An {@link MessageRelayer} implementation based on HTTP long-polling.
@@ -47,7 +48,7 @@ import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_
  *
  * <p>Created: 2020. 12. 24.</p>
  */
-@Component("/backend")
+@Component(NODES_BASE_PATH + "/${nodeId}/appmon")
 public class PollingMessageRelayer implements MessageRelayer {
 
     private final AppMonManager appMonManager;
@@ -90,13 +91,13 @@ public class PollingMessageRelayer implements MessageRelayer {
         PollingConfig pollingConfig = appMonManager.getPollingConfig();
 
         String instancesToJoin = translet.getParameter("instances");
-        String[] instanceNames = StringUtils.splitWithComma(instancesToJoin);
-        instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
-        if (StringUtils.hasText(instancesToJoin) && instanceNames.length == 0) {
+        String[] instanceIds = StringUtils.splitWithComma(instancesToJoin);
+        instanceIds = appMonManager.getVerifiedInstanceIds(instanceIds);
+        if (StringUtils.hasText(instancesToJoin) && instanceIds.length == 0) {
             return null;
         }
 
-        PollingRelaySession relaySession = sessionManager.createSession(translet, pollingConfig, instanceNames);
+        PollingRelaySession relaySession = sessionManager.createSession(translet, pollingConfig, instanceIds);
         String timeZone = translet.getParameter("timeZone");
         if (StringUtils.hasText(timeZone)) {
             relaySession.setTimeZone(timeZone);
@@ -184,9 +185,7 @@ public class PollingMessageRelayer implements MessageRelayer {
 
     @Override
     public void relay(RelaySession relaySession, String message) {
-        if (relaySession instanceof PollingRelaySession session) {
-            sessionManager.push(session, message);
-        }
+        // Not applicable for polling service
     }
 
     @Override

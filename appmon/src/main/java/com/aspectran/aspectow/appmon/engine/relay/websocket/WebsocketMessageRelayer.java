@@ -48,7 +48,7 @@ import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_
  */
 @Component
 @ServerEndpoint(
-        value = "/backend/websocket/{token}",
+        value = "/nodes/{nodeId}/appmon/websocket/{token}",
         configurator = AspectranConfigurator.class
 )
 public class WebsocketMessageRelayer extends SimplifiedEndpoint implements MessageRelayer {
@@ -146,10 +146,10 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
             relaySession.setTimeZone(timeZone);
         }
         String instancesToJoin = commandOptions.getInstancesToJoin();
-        String[] instanceNames = StringUtils.splitWithComma(instancesToJoin);
-        instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
-        if (!StringUtils.hasText(instancesToJoin) || instanceNames.length > 0) {
-            relaySession.setJoinedInstances(instanceNames);
+        String[] instanceIds = StringUtils.splitWithComma(instancesToJoin);
+        instanceIds = appMonManager.getVerifiedInstanceIds(instanceIds);
+        if (!StringUtils.hasText(instancesToJoin) || instanceIds.length > 0) {
+            relaySession.setJoinedInstances(instanceIds);
         }
         if (addSession(session)) {
             relay(relaySession, MESSAGE_JOINED);
@@ -189,14 +189,14 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
     }
 
     @Override
-    public boolean isUsingInstance(String instanceName) {
-        if (StringUtils.hasLength(instanceName)) {
+    public boolean isUsingInstance(String instanceId) {
+        if (StringUtils.hasLength(instanceId)) {
             return containsSession(session -> {
                 RelaySession relaySession = new WebsocketRelaySession(session);
-                String[] instanceNames = relaySession.getJoinedInstances();
-                if (instanceNames != null) {
-                    for (String name : instanceNames) {
-                        if (instanceName.equals(name)) {
+                String[] instanceIds = relaySession.getJoinedInstances();
+                if (instanceIds != null) {
+                    for (String id : instanceIds) {
+                        if (instanceId.equals(id)) {
                             return true;
                         }
                     }

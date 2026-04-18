@@ -46,9 +46,9 @@ public class WebsocketRelaySession extends WrappedSession implements RelaySessio
     }
 
     @Override
-    public void setJoinedInstances(String[] instanceNames) {
-        Assert.notNull(instanceNames, "instanceNames must not be null");
-        getSession().getUserProperties().put(JOINED_INSTANCES_PROPERTY, instanceNames);
+    public void setJoinedInstances(String[] instanceIds) {
+        Assert.notNull(instanceIds, "instanceIds must not be null");
+        getSession().getUserProperties().put(JOINED_INSTANCES_PROPERTY, instanceIds);
     }
 
     @Override

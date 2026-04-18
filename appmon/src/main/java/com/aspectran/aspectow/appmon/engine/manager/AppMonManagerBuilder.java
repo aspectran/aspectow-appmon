@@ -69,7 +69,7 @@ public abstract class AppMonManagerBuilder {
         AppMonManager appMonManager = createAppMonManager(context, appMonConfig);
 
         for (InstanceInfo instanceInfo : appMonConfig.getInstanceInfoList()) {
-            String instanceName = instanceInfo.getName();
+            String instanceName = instanceInfo.getInstanceId();
 
             List<EventInfo> eventInfoList = appMonConfig.getEventInfoList(instanceName);
             if (eventInfoList != null && !eventInfoList.isEmpty()) {

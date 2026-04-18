@@ -23,13 +23,15 @@ import com.aspectran.utils.apon.ValueType;
 
 /**
  * Contains configuration for a specific event to be monitored.
- * This includes details about the event's reader, counter, and target for data export.
+ *
+ * <p>An event represents a discrete occurrence or a continuous activity within an application
+ * instance that can be tracked, counted, and analyzed.</p>
  *
  * <p>Created: 2020/02/12</p>
  */
 public class EventInfo extends DefaultParameters {
 
-    private static final ParameterKey name;
+    private static final ParameterKey id;
     private static final ParameterKey title;
     private static final ParameterKey description;
     private static final ParameterKey reader;
@@ -41,7 +43,7 @@ public class EventInfo extends DefaultParameters {
     private static final ParameterKey[] parameterKeys;
 
     static {
-        name = new ParameterKey("name", ValueType.STRING);
+        id = new ParameterKey("id", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
         description = new ParameterKey("description", ValueType.STRING);
         reader = new ParameterKey("reader", ValueType.STRING);
@@ -51,7 +53,7 @@ public class EventInfo extends DefaultParameters {
         sampleInterval = new ParameterKey("sampleInterval", ValueType.INT);
 
         parameterKeys = new ParameterKey[] {
-                name,
+                id,
                 title,
                 description,
                 reader,
@@ -62,9 +64,9 @@ public class EventInfo extends DefaultParameters {
         };
     }
 
-    private String domainName;
+    private String nodeId;
 
-    private String instanceName;
+    private String instanceId;
 
     /**
      * Instantiates a new EventInfo.
@@ -74,55 +76,55 @@ public class EventInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the name of the domain this event belongs to.
-     * @return the domain name
+     * Returns the identifier of the node to which this event belongs.
+     * @return the node identifier
      */
-    public String getDomainName() {
-        return domainName;
+    public String getNodeId() {
+        return nodeId;
     }
 
     /**
-     * Sets the name of the domain this event belongs to.
-     * @param domainName the domain name
+     * Sets the identifier of the node to which this event belongs.
+     * @param nodeId the node identifier
      */
-    public void setDomainName(String domainName) {
-        this.domainName = domainName;
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
     }
 
     /**
-     * Gets the name of the instance this event belongs to.
-     * @return the instance name
+     * Returns the identifier of the application instance to which this event belongs.
+     * @return the instance identifier
      */
-    public String getInstanceName() {
-        return instanceName;
+    public String getInstanceId() {
+        return instanceId;
     }
 
     /**
-     * Sets the name of the instance this event belongs to.
-     * @param instanceName the instance name
+     * Sets the identifier of the application instance to which this event belongs.
+     * @param instanceId the instance identifier
      */
-    void setInstanceName(String instanceName) {
-        this.instanceName = instanceName;
+    void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 
     /**
-     * Gets the name of the event.
-     * @return the event name
+     * Returns the unique identifier of the event.
+     * @return the event identifier
      */
-    public String getName() {
-        return getString(name);
+    public String getEventId() {
+        return getString(id);
     }
 
     /**
-     * Sets the name of the event.
-     * @param name the event name
+     * Sets the unique identifier of the event.
+     * @param name the event identifier
      */
-    public void setName(String name) {
-        putValue(EventInfo.name, name);
+    public void setEventId(String name) {
+        putValue(EventInfo.id, name);
     }
 
     /**
-     * Gets the display title of the event.
+     * Returns the display title of the event.
      * @return the event title
      */
     public String getTitle() {
@@ -138,7 +140,7 @@ public class EventInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the description of the event.
+     * Returns the description of the event.
      * @return the event description
      */
     public String getDescription() {
@@ -154,23 +156,23 @@ public class EventInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the identifier of the event reader bean.
-     * @return the event reader bean ID
+     * Returns the bean identifier of the reader responsible for reading event data.
+     * @return the reader bean identifier
      */
     public String getReader() {
         return getString(reader);
     }
 
     /**
-     * Sets the identifier of the event reader bean.
-     * @param reader the event reader bean ID
+     * Sets the bean identifier of the reader responsible for reading event data.
+     * @param reader the reader bean identifier
      */
     public void setReader(String reader) {
         putValue(EventInfo.reader, reader);
     }
 
     /**
-     * Checks if an event reader is configured.
+     * Returns whether an event reader is configured.
      * @return {@code true} if a reader is set, {@code false} otherwise
      */
     public boolean hasReader() {
@@ -178,23 +180,23 @@ public class EventInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the identifier of the event counter bean.
-     * @return the event counter bean ID
+     * Returns the bean identifier of the counter responsible for tracking event occurrences.
+     * @return the counter bean identifier
      */
     public String getCounter() {
         return getString(counter);
     }
 
     /**
-     * Sets the identifier of the event counter bean.
-     * @param counter the event counter bean ID
+     * Sets the bean identifier of the counter responsible for tracking event occurrences.
+     * @param counter the counter bean identifier
      */
     public void setCounter(String counter) {
         putValue(EventInfo.counter, counter);
     }
 
     /**
-     * Checks if an event counter is configured.
+     * Returns whether an event counter is configured.
      * @return {@code true} if a counter is set, {@code false} otherwise
      */
     public boolean hasCounter() {
@@ -202,23 +204,23 @@ public class EventInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the target for exporting event data.
-     * @return the export target
+     * Returns the target destination for exporting or analyzing event data.
+     * @return the data export target
      */
     public String getTarget() {
         return getString(target);
     }
 
     /**
-     * Sets the target for exporting event data.
-     * @param target the export target
+     * Sets the target destination for exporting or analyzing event data.
+     * @param target the data export target
      */
     public void setTarget(String target) {
         putValue(EventInfo.target, target);
     }
 
     /**
-     * Checks if there are additional parameters for the event.
+     * Returns whether additional parameters are configured for this event.
      * @return {@code true} if parameters exist, {@code false} otherwise
      */
     public boolean hasParameters() {
@@ -226,23 +228,23 @@ public class EventInfo extends DefaultParameters {
     }
 
     /**
-     * Gets additional parameters for the event.
-     * @return the parameters
+     * Returns additional parameters for the event configuration.
+     * @return the additional parameters
      */
     public Parameters getParameters() {
         return getParameters(parameters);
     }
 
     /**
-     * Sets additional parameters for the event.
-     * @param parameters the parameters
+     * Sets additional parameters for the event configuration.
+     * @param parameters the additional parameters
      */
     public void setParameters(Parameters parameters) {
         putValue(EventInfo.parameters, parameters);
     }
 
     /**
-     * Gets the sample interval in seconds for this event.
+     * Returns the interval (in milliseconds) at which the event should be sampled.
      * @return the sample interval
      */
     public int getSampleInterval() {
@@ -250,7 +252,7 @@ public class EventInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the sample interval in seconds for this event.
+     * Sets the interval (in milliseconds) at which the event should be sampled.
      * @param sampleInterval the sample interval
      */
     public void setSampleInterval(int sampleInterval) {
@@ -258,10 +260,11 @@ public class EventInfo extends DefaultParameters {
     }
 
     /**
-     * Validates that all required parameters are present.
+     * Validates that all required configuration parameters for the event are present.
+     * @throws IllegalArgumentException if any required parameter is missing
      */
     public void validateRequiredParameters() {
-        Assert.hasLength(getString(name), "Missing value of required parameter: " + getQualifiedName(name));
+        Assert.hasLength(getString(id), "Missing value of required parameter: " + getQualifiedName(id));
         Assert.hasLength(getString(target), "Missing value of required parameter: " + getQualifiedName(target));
     }
 

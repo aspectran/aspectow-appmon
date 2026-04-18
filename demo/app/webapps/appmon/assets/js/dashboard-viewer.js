@@ -46,8 +46,8 @@ class DashboardViewer {
         }
     }
 
-    putDisplay$(instanceName, eventName, $display) {
-        const key = instanceName + ":event:" + eventName;
+    putDisplay$(instanceId, eventId, $display) {
+        const key = instanceId + ":event:" + eventId;
         this.displays[key] = $display;
         if ($display.hasClass("track-box")) {
             const canvas = $display.find(".traffic-canvas")[0];
@@ -57,21 +57,21 @@ class DashboardViewer {
         }
     }
 
-    putMetric$(instanceName, metricName, $metric) {
-        this.metrics[instanceName + ":metric:" + metricName] = $metric;
+    putMetric$(instanceId, metricId, $metric) {
+        this.metrics[instanceId + ":metric:" + metricId] = $metric;
     }
 
-    putChart$(instanceName, eventName, $chart) {
-        const key = instanceName + ":data:" + eventName;
-        this.charts[key] = new DashboardChart($chart, eventName);
+    putChart$(instanceId, eventId, $chart) {
+        const key = instanceId + ":data:" + eventId;
+        this.charts[key] = new DashboardChart($chart, eventId);
     }
 
-    putConsole$(instanceName, logName, $console) {
-        this.consoles[instanceName + ":log:" + logName] = $console;
+    putConsole$(instanceId, logId, $console) {
+        this.consoles[instanceId + ":log:" + logId] = $console;
     }
 
-    putIndicator$(instanceName, exporterType, exporterName, $indicator) {
-        this.indicators[instanceName + ":" + exporterType + ":" + exporterName] = $indicator;
+    putIndicator$(instanceId, exporterType, exporterName, $indicator) {
+        this.indicators[instanceId + ":" + exporterType + ":" + exporterName] = $indicator;
     }
 
     getDisplay$(key) {
@@ -121,9 +121,9 @@ class DashboardViewer {
         }
     }
 
-    setLoading(instanceName, isLoading) {
+    setLoading(instanceId, isLoading) {
         for (let key in this.charts) {
-            if (key.startsWith(instanceName + ":")) {
+            if (key.startsWith(instanceId + ":")) {
                 const dashboardChart = this.charts[key];
                 const $chartBox = dashboardChart.$container.closest(".chart-box");
                 const $overlay = $chartBox.find(".loading-overlay");
@@ -287,7 +287,7 @@ class DashboardViewer {
             return;
         }
 
-        const instanceName = message.substring(0, idx1);
+        const instanceId = message.substring(0, idx1);
         let exporterType = message.substring(idx1 + 1, idx2);
         const exporterName = message.substring(idx2 + 1, idx3);
 
@@ -298,38 +298,38 @@ class DashboardViewer {
             subType = parts[1];
         }
 
-        const exporterKey = instanceName + ":" + exporterType + ":" + exporterName;
+        const exporterKey = instanceId + ":" + exporterType + ":" + exporterName;
         const messageContent = message.substring(idx3 + 1);
 
         switch (exporterType) {
             case "event":
                 if (messageContent.length) {
                     const eventData = JSON.parse(messageContent);
-                    this.processEventData(instanceName, exporterType, exporterName, exporterKey, eventData);
+                    this.processEventData(instanceId, exporterType, exporterName, exporterKey, eventData);
                 }
                 break;
             case "data":
                 if (messageContent.length) {
                     if (subType === "chart") {
                         const chartData = JSON.parse(messageContent);
-                        this.processChartData(instanceName, exporterType, exporterName, exporterKey, chartData);
+                        this.processChartData(instanceId, exporterType, exporterName, exporterKey, chartData);
                     }
                 }
                 break;
             case "metric":
                 if (messageContent.length) {
                     const metricData = JSON.parse(messageContent);
-                    this.processMetricData(instanceName, exporterType, exporterName, exporterKey, metricData);
+                    this.processMetricData(instanceId, exporterType, exporterName, exporterKey, metricData);
                 }
                 break;
             case "log":
-                this.printLogMessage(instanceName, exporterType, exporterName, exporterKey, messageContent, subType);
+                this.printLogMessage(instanceId, exporterType, exporterName, exporterKey, messageContent, subType);
                 break;
         }
     }
 
-    printLogMessage(instanceName, exporterType, logName, exporterKey, messageContent, subType) {
-        this.indicate(instanceName, exporterType, logName);
+    printLogMessage(instanceId, exporterType, logId, exporterKey, messageContent, subType) {
+        this.indicate(instanceId, exporterType, logId);
         const $console = this.getConsole$(exporterKey);
         if ($console) {
             if (subType === "p") {
@@ -363,10 +363,10 @@ class DashboardViewer {
         }
     }
 
-    processEventData(instanceName, exporterType, eventName, exporterKey, eventData) {
-        switch (eventName) {
+    processEventData(instanceId, exporterType, eventId, exporterKey, eventData) {
+        switch (eventId) {
             case "activity":
-                this.indicate(instanceName, exporterType, eventName);
+                this.indicate(instanceId, exporterType, eventId);
                 if (eventData.activities) {
                     this.printActivityStatus(exporterKey, eventData.activities);
                 }
@@ -392,7 +392,7 @@ class DashboardViewer {
                     this.printCurrentActivityCount(exporterKey, 0);
                 }
                 this.updateActivityCount(
-                    instanceName + ":" + exporterType + ":session",
+                    instanceId + ":" + exporterType + ":session",
                     eventData.sessionId,
                     eventData.activityCount || 0);
                 break;
@@ -402,7 +402,7 @@ class DashboardViewer {
         }
     }
 
-    processMetricData(instanceName, exporterType, metricName, exporterKey, metricData) {
+    processMetricData(instanceId, exporterType, metricId, exporterKey, metricData) {
         const $metric = this.getMetric$(exporterKey);
         if ($metric) {
             let formatted = metricData.format;
@@ -455,12 +455,12 @@ class DashboardViewer {
         this.activeBulletCount = 0;
     }
 
-    indicate(instanceName, exporterType, exporterName) {
-        this.blink(this.getIndicator$("domain:event:"));
+    indicate(instanceId, exporterType, exporterName) {
+        this.blink(this.getIndicator$("node:event:"));
         if (this.visible) {
-            this.blink(this.getIndicator$("instance:event:" + instanceName));
+            this.blink(this.getIndicator$("instance:event:" + instanceId));
             if (exporterType === "log") {
-                this.blink(this.getIndicator$(instanceName + ":log:" + exporterName));
+                this.blink(this.getIndicator$(instanceId + ":log:" + exporterName));
             }
         }
     }
@@ -654,13 +654,13 @@ class DashboardViewer {
         }
     }
 
-    processChartData(instanceName, exporterType, eventName, exporterKey, chartData) {
+    processChartData(instanceId, exporterType, eventId, exporterKey, chartData) {
         const dashboardChart = this.getChart$(exporterKey);
         if (!dashboardChart) return;
-        this.setLoading(instanceName, false);
+        this.setLoading(instanceId, false);
 
-        if (eventName === "activity") {
-            const prefix = instanceName + ":event:" + eventName;
+        if (eventId === "activity") {
+            const prefix = instanceId + ":event:" + eventId;
             if (!dashboardChart.isDrawn()) this.resetInterimTimer(prefix);
             else if (chartData.rolledUp) {
                 this.resetInterimTimer(prefix);
@@ -671,7 +671,7 @@ class DashboardViewer {
         const dateOffset = (chartData.rolledUp ? dashboardChart.dateOffset : chartData.dateOffset);
         const labels = chartData.labels;
         const data1 = chartData.data1;
-        const data2 = chartData.data2.map(n => (eventName === "activity" ? n : null));
+        const data2 = chartData.data2.map(n => (eventId === "activity" ? n : null));
 
         if (!dashboardChart.isDrawn() || !chartData.rolledUp) {
             dashboardChart.ensureCanvas();
@@ -686,7 +686,7 @@ class DashboardViewer {
             } else if (this.client) {
                 setTimeout(() => {
                     const options = [
-                        "instance:" + instanceName,
+                        "instanceId:" + instanceId,
                         "dateUnit:" + dateUnit,
                         "timeZone:" + Intl.DateTimeFormat().resolvedOptions().timeZone
                     ];
@@ -729,10 +729,10 @@ class DashboardViewer {
         return maxLabels;
     }
 
-    getMaxStartDatetime(instanceName) {
+    getMaxStartDatetime(instanceId) {
         let result = "";
         for (let key in this.charts) {
-            if (key.startsWith(instanceName + ":")) {
+            if (key.startsWith(instanceId + ":")) {
                 const dashboardChart = this.charts[key];
                 if (dashboardChart && dashboardChart.isDrawn()) {
                     const labels = dashboardChart.getLabels();

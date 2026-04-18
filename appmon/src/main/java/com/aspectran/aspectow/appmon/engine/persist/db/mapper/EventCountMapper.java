@@ -35,13 +35,13 @@ import java.util.List;
 public interface EventCountMapper {
 
     /**
-     * Retrieves the last recorded event count for the specified domain, instance, and event.
-     * @param domain the domain name
-     * @param instance the instance name
-     * @param event the event name
+     * Retrieves the last recorded event count for the specified node, instance, and event.
+     * @param nodeId the node identifier
+     * @param instanceId the instance identifier
+     * @param eventId the event identifier
      * @return the last event count VO, or null if not found
      */
-    EventCountVO getLastEventCount(String domain, String instance, String event);
+    EventCountVO getLastEventCount(String nodeId, String instanceId, String eventId);
 
     /**
      * Updates the last recorded event count.
@@ -63,57 +63,57 @@ public interface EventCountMapper {
 
     /**
      * Retrieves raw chart data for the specified criteria.
-     * @param domain the domain name
-     * @param instance the instance name
-     * @param event the event name
+     * @param nodeId the node identifier
+     * @param instanceId the instance identifier
+     * @param eventId the event identifier
      * @param dateOffset the start date/time for fetching data
      * @return a list of event count records
      */
-    List<EventCountVO> getChartData(String domain, String instance, String event, LocalDateTime dateOffset);
+    List<EventCountVO> getChartData(String nodeId, String instanceId, String eventId, LocalDateTime dateOffset);
 
     /**
      * Retrieves chart data aggregated by hour for the specified criteria.
-     * @param domain the domain name
-     * @param instance the instance name
-     * @param event the event name
+     * @param nodeId the node identifier
+     * @param instanceId the instance identifier
+     * @param eventId the event identifier
      * @param zoneOffset the time zone offset in seconds
      * @param dateOffset the start date/time for fetching data
      * @return a list of event count records aggregated by hour
      */
-    List<EventCountVO> getChartDataByHour(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset);
+    List<EventCountVO> getChartDataByHour(String nodeId, String instanceId, String eventId, int zoneOffset, LocalDateTime dateOffset);
 
     /**
      * Retrieves chart data aggregated by day for the specified criteria.
-     * @param domain the domain name
-     * @param instance the instance name
-     * @param event the event name
+     * @param nodeId the node identifier
+     * @param instanceId the instance identifier
+     * @param eventId the event identifier
      * @param zoneOffset the time zone offset in seconds
      * @param dateOffset the start date/time for fetching data
      * @return a list of event count records aggregated by day
      */
-    List<EventCountVO> getChartDataByDay(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset);
+    List<EventCountVO> getChartDataByDay(String nodeId, String instanceId, String eventId, int zoneOffset, LocalDateTime dateOffset);
 
     /**
      * Retrieves chart data aggregated by month for the specified criteria.
-     * @param domain the domain name
-     * @param instance the instance name
-     * @param event the event name
+     * @param nodeId the node identifier
+     * @param instanceId the instance identifier
+     * @param eventId the event identifier
      * @param zoneOffset the time zone offset in seconds
      * @param dateOffset the start date/time for fetching data
      * @return a list of event count records aggregated by month
      */
-    List<EventCountVO> getChartDataByMonth(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset);
+    List<EventCountVO> getChartDataByMonth(String nodeId, String instanceId, String eventId, int zoneOffset, LocalDateTime dateOffset);
 
     /**
      * Retrieves chart data aggregated by year for the specified criteria.
-     * @param domain the domain name
-     * @param instance the instance name
-     * @param event the event name
+     * @param nodeId the node identifier
+     * @param instanceId the instance identifier
+     * @param eventId the event identifier
      * @param zoneOffset the time zone offset in seconds
      * @param dateOffset the start date/time for fetching data
      * @return a list of event count records aggregated by year
      */
-    List<EventCountVO> getChartDataByYear(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset);
+    List<EventCountVO> getChartDataByYear(String nodeId, String instanceId, String eventId, int zoneOffset, LocalDateTime dateOffset);
 
     /**
      * Data Access Object (DAO) for {@link EventCountMapper}.
@@ -134,8 +134,8 @@ public interface EventCountMapper {
         }
 
         @Override
-        public EventCountVO getLastEventCount(String domain, String instance, String event) {
-            return mapper().getLastEventCount(domain, instance, event);
+        public EventCountVO getLastEventCount(String nodeId, String instanceId, String eventId) {
+            return mapper().getLastEventCount(nodeId, instanceId, eventId);
         }
 
         @Override
@@ -154,28 +154,28 @@ public interface EventCountMapper {
         }
 
         @Override
-        public List<EventCountVO> getChartData(String domain, String instance, String event, LocalDateTime dateOffset) {
-            return mapper().getChartData(domain, instance, event, dateOffset);
+        public List<EventCountVO> getChartData(String nodeId, String instanceId, String eventId, LocalDateTime dateOffset) {
+            return mapper().getChartData(nodeId, instanceId, eventId, dateOffset);
         }
 
         @Override
-        public List<EventCountVO> getChartDataByHour(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset) {
-            return mapper().getChartDataByHour(domain, instance, event, zoneOffset, dateOffset);
+        public List<EventCountVO> getChartDataByHour(String nodeId, String instanceId, String eventId, int zoneOffset, LocalDateTime dateOffset) {
+            return mapper().getChartDataByHour(nodeId, instanceId, eventId, zoneOffset, dateOffset);
         }
 
         @Override
-        public List<EventCountVO> getChartDataByDay(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset) {
-            return mapper().getChartDataByDay(domain, instance, event, zoneOffset, dateOffset);
+        public List<EventCountVO> getChartDataByDay(String nodeId, String instanceId, String eventId, int zoneOffset, LocalDateTime dateOffset) {
+            return mapper().getChartDataByDay(nodeId, instanceId, eventId, zoneOffset, dateOffset);
         }
 
         @Override
-        public List<EventCountVO> getChartDataByMonth(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset) {
-            return mapper().getChartDataByMonth(domain, instance, event, zoneOffset, dateOffset);
+        public List<EventCountVO> getChartDataByMonth(String nodeId, String instanceId, String eventId, int zoneOffset, LocalDateTime dateOffset) {
+            return mapper().getChartDataByMonth(nodeId, instanceId, eventId, zoneOffset, dateOffset);
         }
 
         @Override
-        public List<EventCountVO> getChartDataByYear(String domain, String instance, String event, int zoneOffset, LocalDateTime dateOffset) {
-            return mapper().getChartDataByYear(domain, instance, event, zoneOffset, dateOffset);
+        public List<EventCountVO> getChartDataByYear(String nodeId, String instanceId, String eventId, int zoneOffset, LocalDateTime dateOffset) {
+            return mapper().getChartDataByYear(nodeId, instanceId, eventId, zoneOffset, dateOffset);
         }
 
     }

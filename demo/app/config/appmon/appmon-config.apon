@@ -8,38 +8,22 @@ pollingConfig: {
     initialBufferSize: 9999
 }
 counterPersistInterval: 1
-domain: {
-    name: backend1
-    title: Localhost(Websocket Mode)
-    endpoint: {
-        mode: auto
-        url: /appmon/backend
-    }
-}
-#domain: {
-#    name: backend2
-#    title: Localhost(Polling Mode)
-#    endpoint: {
-#        mode: polling
-#        url: /appmon/backend
-#    }
-#}
 instance: {
-    name: root
+    id: root
     title: Root
     event: {
-        name: activity
+        id: activity
         target: root
         parameters: {
             +: /**
         }
     }
     event: {
-        name: session
+        id: session
         target: tow.server/root
     }
     metric: {
-        name: heap
+        id: heap
         title: Heap
         description: Shows JVM Heap memory usage status
         reader: com.aspectran.aspectow.appmon.engine.exporter.metric.jvm.HeapMemoryUsageReader
@@ -47,7 +31,7 @@ instance: {
         heading: true
     }
     metric: {
-        name: undertow-tp
+        id: undertow-tp
         title: Undertow TP
         description: Metrics of Undertow thread pool resources
         reader: com.aspectran.aspectow.appmon.engine.exporter.metric.undertow.NioWorkerMetricsReader
@@ -56,23 +40,23 @@ instance: {
         heading: true
     }
     log: {
-        name: app
+        id: app
         file: /logs/root.log
         sampleInterval: 300
         lastLines: 1000
     }
     log: {
-        name: access
+        id: access
         file: /logs/root-access.log
         sampleInterval: 300
         lastLines: 1000
     }
 }
 instance: {
-    name: appmon
+    id: appmon
     title: AppMon
     event: {
-        name: activity
+        id: activity
         target: appmon
         parameters: {
             +: /**
@@ -80,49 +64,49 @@ instance: {
         }
     }
     event: {
-        name: session
+        id: session
         target: tow.server/appmon
     }
     log: {
-        name: app
+        id: app
         file: /logs/appmon.log
         sampleInterval: 300
         lastLines: 1000
     }
     log: {
-        name: access
+        id: access
         file: /logs/appmon-access.log
         sampleInterval: 300
         lastLines: 1000
     }
 }
 instance: {
-    name: jpetstore
+    id: jpetstore
     title: JPetStore
     log: {
-        name: app
+        id: app
         file: /logs/jpetstore.log
         sampleInterval: 300
         lastLines: 1000
     }
     log: {
-        name: access
+        id: access
         file: /logs/jpetstore-access.log
         sampleInterval: 300
         lastLines: 1000
     }
 }
 instance: {
-    name: demo
+    id: demo
     title: Demo
     log: {
-        name: app
+        id: app
         file: /logs/demo.log
         sampleInterval: 300
         lastLines: 1000
     }
     log: {
-        name: access
+        id: access
         file: /logs/demo-access.log
         sampleInterval: 300
         lastLines: 1000

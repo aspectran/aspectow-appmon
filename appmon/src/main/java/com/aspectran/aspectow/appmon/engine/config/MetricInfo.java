@@ -22,14 +22,16 @@ import com.aspectran.utils.apon.Parameters;
 import com.aspectran.utils.apon.ValueType;
 
 /**
- * Contains configuration for a specific metric to be collected.
- * This includes details about the metric's reader, target, and formatting options.
+ * Contains configuration for a specific metric to be collected and analyzed.
+ *
+ * <p>A metric provides quantitative measurements of system or application performance
+ * at specific points in time.</p>
  *
  * <p>Created: 2020/02/12</p>
  */
 public class MetricInfo extends DefaultParameters {
 
-    private static final ParameterKey name;
+    private static final ParameterKey id;
     private static final ParameterKey title;
     private static final ParameterKey description;
     private static final ParameterKey reader;
@@ -43,7 +45,7 @@ public class MetricInfo extends DefaultParameters {
     private static final ParameterKey[] parameterKeys;
 
     static {
-        name = new ParameterKey("name", ValueType.STRING);
+        id = new ParameterKey("id", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
         description = new ParameterKey("description", ValueType.STRING);
         reader = new ParameterKey("reader", ValueType.STRING);
@@ -55,7 +57,7 @@ public class MetricInfo extends DefaultParameters {
         format = new ParameterKey("format", ValueType.STRING);
 
         parameterKeys = new ParameterKey[] {
-                name,
+                id,
                 title,
                 description,
                 reader,
@@ -68,9 +70,9 @@ public class MetricInfo extends DefaultParameters {
         };
     }
 
-    private String domainName;
+    private String nodeId;
 
-    private String instanceName;
+    private String instanceId;
 
     /**
      * Instantiates a new MetricInfo.
@@ -80,55 +82,55 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the name of the domain this metric belongs to.
-     * @return the domain name
+     * Returns the identifier of the node to which this metric belongs.
+     * @return the node identifier
      */
-    public String getDomainName() {
-        return domainName;
+    public String getNodeId() {
+        return nodeId;
     }
 
     /**
-     * Sets the name of the domain this metric belongs to.
-     * @param domainName the domain name
+     * Sets the identifier of the node to which this metric belongs.
+     * @param nodeId the node identifier
      */
-    public void setDomainName(String domainName) {
-        this.domainName = domainName;
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
     }
 
     /**
-     * Gets the name of the instance this metric belongs to.
-     * @return the instance name
+     * Returns the identifier of the application instance to which this metric belongs.
+     * @return the instance identifier
      */
-    public String getInstanceName() {
-        return instanceName;
+    public String getInstanceId() {
+        return instanceId;
     }
 
     /**
-     * Sets the name of the instance this metric belongs to.
-     * @param instanceName the instance name
+     * Sets the identifier of the application instance to which this metric belongs.
+     * @param instanceId the instance identifier
      */
-    void setInstanceName(String instanceName) {
-        this.instanceName = instanceName;
+    void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 
     /**
-     * Gets the name of the metric.
-     * @return the metric name
+     * Returns the unique identifier of the metric.
+     * @return the metric identifier
      */
-    public String getName() {
-        return getString(name);
+    public String getMetricId() {
+        return getString(id);
     }
 
     /**
-     * Sets the name of the metric.
-     * @param name the metric name
+     * Sets the unique identifier of the metric.
+     * @param name the metric identifier
      */
-    public void setName(String name) {
-        putValue(MetricInfo.name, name);
+    public void setMetricId(String name) {
+        putValue(MetricInfo.id, name);
     }
 
     /**
-     * Gets the display title of the metric.
+     * Returns the display title for the metric.
      * @return the metric title
      */
     public String getTitle() {
@@ -136,7 +138,7 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the display title of the metric.
+     * Sets the display title for the metric.
      * @param title the metric title
      */
     public void setTitle(String title) {
@@ -144,7 +146,7 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the description of the metric.
+     * Returns the description of the metric.
      * @return the metric description
      */
     public String getDescription() {
@@ -160,23 +162,23 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the identifier of the metric reader bean.
-     * @return the metric reader bean ID
+     * Returns the bean identifier of the reader responsible for reading metric data.
+     * @return the reader bean identifier
      */
     public String getReader() {
         return getString(reader);
     }
 
     /**
-     * Sets the identifier of the metric reader bean.
-     * @param reader the metric reader bean ID
+     * Sets the bean identifier of the reader responsible for reading metric data.
+     * @param reader the reader bean identifier
      */
     public void setReader(String reader) {
         putValue(MetricInfo.reader, reader);
     }
 
     /**
-     * Checks if a metric reader is configured.
+     * Returns whether a metric reader is configured.
      * @return {@code true} if a reader is set, {@code false} otherwise
      */
     public boolean hasReader() {
@@ -184,23 +186,23 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the target for exporting metric data.
-     * @return the export target
+     * Returns the target destination for exporting or analyzing metric data.
+     * @return the data export target
      */
     public String getTarget() {
         return getString(target);
     }
 
     /**
-     * Sets the target for exporting metric data.
-     * @param target the export target
+     * Sets the target destination for exporting or analyzing metric data.
+     * @param target the data export target
      */
     public void setTarget(String target) {
         putValue(MetricInfo.target, target);
     }
 
     /**
-     * Checks if there are additional parameters for the metric.
+     * Returns whether additional parameters are configured for this metric.
      * @return {@code true} if parameters exist, {@code false} otherwise
      */
     public boolean hasParameters() {
@@ -208,23 +210,23 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Gets additional parameters for the metric.
-     * @return the parameters
+     * Returns additional parameters for the metric configuration.
+     * @return the additional parameters
      */
     public Parameters getParameters() {
         return getParameters(parameters);
     }
 
     /**
-     * Sets additional parameters for the metric.
-     * @param parameters the parameters
+     * Sets additional parameters for the metric configuration.
+     * @param parameters the additional parameters
      */
     public void setParameters(Parameters parameters) {
         putValue(MetricInfo.parameters, parameters);
     }
 
     /**
-     * Gets the sample interval in seconds for this metric.
+     * Returns the interval (in milliseconds) at which the metric should be sampled.
      * @return the sample interval
      */
     public int getSampleInterval() {
@@ -232,7 +234,7 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the sample interval in seconds for this metric.
+     * Sets the interval (in milliseconds) at which the metric should be sampled.
      * @param sampleInterval the sample interval
      */
     public void setSampleInterval(int sampleInterval) {
@@ -240,7 +242,7 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the export interval in seconds for this metric.
+     * Returns the interval (in milliseconds) at which the collected metric data should be exported.
      * @return the export interval
      */
     public int getExportInterval() {
@@ -248,7 +250,7 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the export interval in seconds for this metric.
+     * Sets the interval (in milliseconds) at which the collected metric data should be exported.
      * @param exportInterval the export interval
      */
     public void setExportInterval(int exportInterval) {
@@ -256,7 +258,7 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Checks if a heading should be included in the metric output.
+     * Returns whether a heading should be included when displaying or exporting the metric data.
      * @return {@code true} to include a heading, {@code false} otherwise
      */
     public boolean isHeading() {
@@ -264,7 +266,7 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the raw boolean value for the heading.
+     * Returns the raw boolean value for the heading configuration.
      * @return the heading flag, or {@code null} if not set
      */
     public Boolean getHeading() {
@@ -272,7 +274,7 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Sets whether to include a heading in the metric output.
+     * Sets whether a heading should be included when displaying or exporting the metric data.
      * @param heading {@code true} to include a heading, {@code false} otherwise
      */
     public void setHeading(boolean heading) {
@@ -280,7 +282,7 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Checks if a format string is configured for the metric output.
+     * Returns whether a format string is configured for the metric output.
      * @return {@code true} if a format is set, {@code false} otherwise
      */
     public boolean hasFormat() {
@@ -288,7 +290,7 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the format string for the metric output.
+     * Returns the format string used for displaying or exporting the metric data.
      * @return the format string
      */
     public String getFormat() {
@@ -296,7 +298,7 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the format string for the metric output.
+     * Sets the format string used for displaying or exporting the metric data.
      * @param format the format string
      */
     public void setFormat(String format) {
@@ -304,16 +306,18 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Validates that all required parameters are present.
+     * Validates that all required configuration parameters for the metric are present.
+     * @throws IllegalArgumentException if any required parameter is missing
      */
     public void validateRequiredParameters() {
-        Assert.hasLength(getString(name), "Missing value of required parameter: " + getQualifiedName(name));
+        Assert.hasLength(getString(id), "Missing value of required parameter: " + getQualifiedName(id));
         Assert.hasLength(getString(title), "Missing value of required parameter: " + getQualifiedName(title));
         Assert.hasLength(getString(reader), "Missing value of required parameter: " + getQualifiedName(reader));
     }
 
     /**
-     * Checks that the target parameter is present.
+     * Validates that the target destination parameter is present.
+     * @throws IllegalArgumentException if the target parameter is missing
      */
     public void checkHasTargetParameter() {
         Assert.hasLength(getString(target), "Missing value of required parameter: " + getQualifiedName(target));

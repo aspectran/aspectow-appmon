@@ -72,11 +72,11 @@ public class PollingMessageRelayManager extends AbstractComponent {
      * Creates a new polling session or retrieves an existing one.
      * @param translet the current translet
      * @param pollingConfig the polling configuration
-     * @param instanceNames the names of the instances to join
+     * @param instanceIds the IDs of the instances to join
      * @return a new or existing {@link PollingRelaySession}
      */
     public PollingRelaySession createSession(
-            @NonNull Translet translet, @NonNull PollingConfig pollingConfig, String[] instanceNames) {
+            @NonNull Translet translet, @NonNull PollingConfig pollingConfig, String[] instanceIds) {
         int pollingInterval = pollingConfig.getPollingInterval();
         int sessionTimeout = pollingConfig.getSessionTimeout();
         if (pollingInterval > 0 && sessionTimeout <= 0) {
@@ -94,8 +94,8 @@ public class PollingMessageRelayManager extends AbstractComponent {
             PollingRelaySession newSession = new PollingRelaySession(this);
             newSession.setSessionTimeout(sessionTimeout);
             newSession.setPollingInterval(pollingInterval);
-            if (instanceNames != null) {
-                newSession.setJoinedInstances(instanceNames);
+            if (instanceIds != null) {
+                newSession.setJoinedInstances(instanceIds);
             }
             existingSession = sessions.put(sessionId, newSession);
             if (existingSession != null) {
@@ -185,15 +185,15 @@ public class PollingMessageRelayManager extends AbstractComponent {
         return minLineIndex;
     }
 
-    protected boolean isUsingInstance(String instanceName) {
-        if (StringUtils.hasLength(instanceName)) {
+    protected boolean isUsingInstance(String instanceId) {
+        if (StringUtils.hasLength(instanceId)) {
             synchronized (sessions) {
                 for (PollingRelaySession serviceSession : sessions.values()) {
                     if (serviceSession.isValid()) {
-                        String[] instanceNames = serviceSession.getJoinedInstances();
-                        if (instanceNames != null) {
-                            for (String name : instanceNames) {
-                                if (instanceName.equals(name)) {
+                        String[] instanceIds = serviceSession.getJoinedInstances();
+                        if (instanceIds != null) {
+                            for (String id : instanceIds) {
+                                if (instanceId.equals(id)) {
                                     return true;
                                 }
                             }

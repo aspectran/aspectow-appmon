@@ -64,12 +64,12 @@ public abstract class EventExporterBuilder {
             @NonNull EventInfo eventInfo,
             EventCount eventCount) throws Exception {
         if (!eventInfo.hasReader()) {
-            if ("activity".equals(eventInfo.getName())) {
+            if ("activity".equals(eventInfo.getEventId())) {
                 return new ActivityEventReader(exporterManager, eventInfo, eventCount);
-            } else if ("session".equals(eventInfo.getName())) {
+            } else if ("session".equals(eventInfo.getEventId())) {
                 return new SessionEventReader(exporterManager, eventInfo, eventCount);
             } else {
-                throw new IllegalArgumentException("No event reader specified for " + eventInfo.getName() + " " + eventInfo);
+                throw new IllegalArgumentException("No event reader specified for " + eventInfo.getEventId() + " " + eventInfo);
             }
         }
         try {

@@ -1,0 +1,21 @@
+# Cluster-wide settings
+cluster: {
+    id: cluster
+    mode: direct  # direct or gateway or autoscaling
+}
+node: {
+    id: node1
+    group: group1
+    title: Node-1
+    endpoint: {
+        mode: auto
+    }
+}
+node: {
+    id: node2
+    group: group1
+    title: Node-2
+    endpoint: {
+        mode: auto
+    }
+}

@@ -32,16 +32,16 @@ public interface EventCounter {
     void initialize() throws Exception;
 
     /**
-     * Gets the name of the instance this counter belongs to.
-     * @return the instance name
+     * Gets the identifier of the instance this counter belongs to.
+     * @return the instance identifier
      */
-    String getInstanceName();
+    String getInstanceId();
 
     /**
-     * Gets the name of the event being counted.
-     * @return the event name
+     * Gets the identifier of the event being counted.
+     * @return the event identifier
      */
-    String getEventName();
+    String getEventId();
 
     /**
      * Gets the underlying {@link EventCount} object that holds the count data.

@@ -57,7 +57,7 @@ public abstract class MetricExporterBuilder {
             @NonNull ExporterManager exporterManager,
             @NonNull MetricInfo metricInfo) throws Exception {
         if (!metricInfo.hasReader()) {
-            throw new IllegalArgumentException("No metric reader specified for " + metricInfo.getName() + " " + metricInfo);
+            throw new IllegalArgumentException("No metric reader specified for " + metricInfo.getMetricId() + " " + metricInfo);
         }
         try {
             Class<MetricReader> readerType = ClassUtils.classForName(metricInfo.getReader());

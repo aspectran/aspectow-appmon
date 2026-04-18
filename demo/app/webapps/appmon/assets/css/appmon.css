@@ -6,24 +6,25 @@
 .tabs > .tabs-title .indicator {
     padding: 0;
 }
-.domain.tabs .tabs-title .indicator.disconnected {
+.node.tabs .tabs-title .indicator.disconnected {
     color: #ff9900;
 }
-.domain.tabs .tabs-title .indicator.error {
+.node.tabs .tabs-title .indicator.error {
     color: #a01f27;
 }
 
-.monitoring-page .domain.tabs {
+/* For console-integrated */
+.monitoring-page .node.tabs {
     box-shadow: none;
     @media screen and (max-width: 576px) {
         height: auto;
     }
 }
-.monitoring-page .domain.tabs > .tabs-title > a, .monitoring-page .domain.tabs > .tabs-title button {
+.monitoring-page .node.tabs > .tabs-title > a, .monitoring-page .node.tabs > .tabs-title button {
     background-color: transparent;
 }
-.monitoring-page .domain.metrics-bar {
-    border-top: 1px solid #ccc;
+.monitoring-page .node.metrics-bar {
+    border-top: 1px solid #ddd;
 }
 
 .metrics-bar {
@@ -60,11 +61,11 @@
     align-content: center;
     font-weight: bold;
 }
-.domain.metrics-bar {
+.node.metrics-bar {
     position: relative;
     height: auto;
     padding: 0 50px;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #ddd;
     background-color: unset;
     box-shadow: 0 6px 15px -10px rgba(50, 50, 50, .33);
     @media screen and (max-width: 576px) {
@@ -79,10 +80,10 @@
         width: 50%;
     }
 }
-.domain.metrics-bar.full-width {
+.node.metrics-bar.full-width {
     width: 100%;
 }
-.domain.metrics-bar .title {
+.node.metrics-bar .title {
     position: absolute;
     top: 0;
     left: 13px;
@@ -93,13 +94,13 @@
     font-weight: bold;
     color: #677278;
 }
-.domain.metrics-bar .metric {
+.node.metrics-bar .metric {
     border-left: 1px solid #ccc;
     @media screen and (max-width: 576px) {
         display: block;
     }
 }
-.domain.metrics-bar .metric dl {
+.node.metrics-bar .metric dl {
     @media screen and (max-width: 576px) {
         display: inline-flex;
     }

@@ -125,7 +125,7 @@ public class AppMonConfig extends DefaultParameters {
     public List<EventInfo> getEventInfoList(String instanceName) {
         Assert.notNull(instanceName, "instanceName must not be null");
         for (InstanceInfo instanceInfo : getInstanceInfoList()) {
-            if (instanceName.equals(instanceInfo.getName())) {
+            if (instanceName.equals(instanceInfo.getInstanceId())) {
                 return instanceInfo.getEventInfoList();
             }
         }
@@ -140,7 +140,7 @@ public class AppMonConfig extends DefaultParameters {
     public List<MetricInfo> getMetricInfoList(String instanceName) {
         Assert.notNull(instanceName, "instanceName must not be null");
         for (InstanceInfo instanceInfo : getInstanceInfoList()) {
-            if (instanceName.equals(instanceInfo.getName())) {
+            if (instanceName.equals(instanceInfo.getInstanceId())) {
                 return instanceInfo.getMetricInfoList();
             }
         }
@@ -155,7 +155,7 @@ public class AppMonConfig extends DefaultParameters {
     public List<LogInfo> getLogInfoList(String instanceName) {
         Assert.notNull(instanceName, "instanceName must not be null");
         for (InstanceInfo instanceInfo : getInstanceInfoList()) {
-            if (instanceName.equals(instanceInfo.getName())) {
+            if (instanceName.equals(instanceInfo.getInstanceId())) {
                 return instanceInfo.getLogInfoList();
             }
         }

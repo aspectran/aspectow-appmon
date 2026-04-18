@@ -72,7 +72,7 @@ public class ExporterManager {
      * Gets the name of the instance this manager belongs to.
      * @return the instance name
      */
-    public String getInstanceName() {
+    public String getInstanceId() {
         return instanceName;
     }
 
@@ -167,7 +167,7 @@ public class ExporterManager {
      * @param message the message to broadcast
      */
     public void broadcast(String message) {
-        appMonManager.getExportServiceManager().broadcast(message);
+        appMonManager.getMessageRelayManager().relay(message);
     }
 
     /**

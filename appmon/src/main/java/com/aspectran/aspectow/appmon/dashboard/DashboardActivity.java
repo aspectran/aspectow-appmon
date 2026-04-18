@@ -65,7 +65,7 @@ public class DashboardActivity {
     @Action("page")
     public Map<String, String> dashboard(String instances) {
         return Map.of(
-                "headinclude", "appmon/_domains",
+                "headinclude", "appmon/_nodes",
                 "style", "fluid compact",
                 "instances", StringUtils.nullToEmpty(instances)
         );
@@ -76,7 +76,7 @@ public class DashboardActivity {
      * @param instances a comma-separated list of instance names to get configuration for
      * @return a {@link RestResponse} containing the configuration data
      */
-    @RequestToGet("/backend/config/data")
+    @RequestToGet("/appmon/config/data")
     public RestResponse getConfigData(String instances) {
         Map<String, Object> settings = Map.of(
                 "counterPersistInterval", appMonManager.getCounterPersistInterval()
@@ -84,9 +84,9 @@ public class DashboardActivity {
 
         List<NodeInfo> nodeInfoList = appMonManager.getNodeInfoList();
 
-        String[] instanceNames = StringUtils.splitWithComma(instances);
-        instanceNames = appMonManager.getVerifiedInstanceNames(instanceNames);
-        List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(instanceNames);
+        String[] instanceIds = StringUtils.splitWithComma(instances);
+        instanceIds = appMonManager.getVerifiedInstanceIds(instanceIds);
+        List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(instanceIds);
 
         Map<String, Object> data = Map.of(
                 "token", AppMonTokenIssuer.issueToken(30),

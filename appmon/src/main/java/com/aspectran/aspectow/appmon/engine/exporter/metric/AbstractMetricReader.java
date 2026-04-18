@@ -61,7 +61,7 @@ public abstract class AbstractMetricReader implements MetricReader {
         if (metricExporter == null) {
             synchronized (this) {
                 if (metricExporter == null) {
-                    metricExporter = exporterManager.getExporter(getMetricInfo().getName());
+                    metricExporter = exporterManager.getExporter(getMetricInfo().getMetricId());
                 }
             }
         }

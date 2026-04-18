@@ -52,14 +52,14 @@ public abstract class EventCounterBuilder {
     @Nullable
     private static EventCounter createEventCounter(@NonNull EventInfo eventInfo) throws Exception {
         if (!eventInfo.hasCounter()) {
-            if ("activity".equals(eventInfo.getName())) {
+            if ("activity".equals(eventInfo.getEventId())) {
                 return new ActivityEventCounter(eventInfo);
-            } else if ("session".equals(eventInfo.getName())) {
+            } else if ("session".equals(eventInfo.getEventId())) {
                 return new SessionEventCounter(eventInfo);
             } else if (eventInfo.getReader() != null) {
                 return null;
             } else {
-                String msg = ToStringBuilder.toString("No event counter specified for " + eventInfo.getName(), eventInfo);
+                String msg = ToStringBuilder.toString("No event counter specified for " + eventInfo.getEventId(), eventInfo);
                 throw new IllegalArgumentException(msg);
             }
         }

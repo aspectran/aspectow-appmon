@@ -29,14 +29,14 @@ public class EventCountVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 4071706635617339624L;
 
-    /** The domain name to which the instance belongs */
-    private String domain;
+    /** The node identifier to which the instance belongs */
+    private String nodeId;
 
-    /** The name of the instance where the event occurred */
-    private String instance;
+    /** The identifier of the instance where the event occurred */
+    private String instanceId;
 
-    /** The name of the event being counted */
-    private String event;
+    /** The identifier of the event being counted */
+    private String eventId;
 
     /** The date and time when the event count was recorded */
     private LocalDateTime datetime;
@@ -51,51 +51,51 @@ public class EventCountVO implements Serializable {
     private long error;
 
     /**
-     * Returns the domain name.
-     * @return the domain name
+     * Returns the node identifier.
+     * @return the node identifier
      */
-    public String getDomain() {
-        return domain;
+    public String getNodeId() {
+        return nodeId;
     }
 
     /**
-     * Sets the domain name.
-     * @param domain the domain name
+     * Sets the node identifier.
+     * @param nodeId the node identifier
      */
-    public void setDomain(String domain) {
-        this.domain = domain;
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
     }
 
     /**
-     * Returns the instance name.
-     * @return the instance name
+     * Returns the instance identifier.
+     * @return the instance identifier
      */
-    public String getInstance() {
-        return instance;
+    public String getInstanceId() {
+        return instanceId;
     }
 
     /**
-     * Sets the instance name.
-     * @param instance the instance name
+     * Sets the instance identifier.
+     * @param instanceId the instance identifier
      */
-    public void setInstance(String instance) {
-        this.instance = instance;
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 
     /**
-     * Returns the event name.
-     * @return the event name
+     * Returns the event identifier.
+     * @return the event identifier
      */
-    public String getEvent() {
-        return event;
+    public String getEventId() {
+        return eventId;
     }
 
     /**
-     * Sets the event name.
-     * @param event the event name
+     * Sets the event identifier.
+     * @param eventId the event identifier
      */
-    public void setEvent(String event) {
-        this.event = event;
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
     }
 
     /**

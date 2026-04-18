@@ -1,0 +1,21 @@
+# Cluster-wide settings
+cluster: {
+    id: cluster
+    mode: direct  # direct or gateway or autoscaling
+}
+node: {
+    id: node
+    group: group1
+    title: Localhost(Websocket Mode)
+    endpoint: {
+        mode: auto
+    }
+}
+#node: {
+#    id: node
+#    group: group1
+#    title: Localhost(Polling Mode)
+#    endpoint: {
+#        mode: polling
+#    }
+#}

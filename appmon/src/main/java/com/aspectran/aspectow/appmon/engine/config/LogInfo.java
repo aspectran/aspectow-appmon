@@ -21,14 +21,13 @@ import com.aspectran.utils.apon.ParameterKey;
 import com.aspectran.utils.apon.ValueType;
 
 /**
- * Contains configuration for tailing a specific log file.
- * This includes the file path, character set, and other tailing options.
+ * Contains configuration for monitoring and tailing a specific log file.
  *
  * <p>Created: 2020/02/12</p>
  */
 public class LogInfo extends DefaultParameters {
 
-    private static final ParameterKey name;
+    private static final ParameterKey id;
     private static final ParameterKey title;
     private static final ParameterKey file;
     private static final ParameterKey archivedDir;
@@ -39,7 +38,7 @@ public class LogInfo extends DefaultParameters {
     private static final ParameterKey[] parameterKeys;
 
     static {
-        name = new ParameterKey("name", ValueType.STRING);
+        id = new ParameterKey("id", ValueType.STRING);
         file = new ParameterKey("file", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
         charset = new ParameterKey("charset", ValueType.STRING);
@@ -48,7 +47,7 @@ public class LogInfo extends DefaultParameters {
         archivedDir = new ParameterKey("archivedDir", ValueType.STRING);
 
         parameterKeys = new ParameterKey[] {
-                name,
+                id,
                 title,
                 file,
                 archivedDir,
@@ -58,9 +57,9 @@ public class LogInfo extends DefaultParameters {
         };
     }
 
-    private String domainName;
+    private String nodeId;
 
-    private String instanceName;
+    private String instanceId;
 
     /**
      * Instantiates a new LogInfo.
@@ -70,55 +69,55 @@ public class LogInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the name of the domain this log belongs to.
-     * @return the domain name
+     * Returns the identifier of the node to which this log configuration belongs.
+     * @return the node identifier
      */
-    public String getDomainName() {
-        return domainName;
+    public String getNodeId() {
+        return nodeId;
     }
 
     /**
-     * Sets the name of the domain this log belongs to.
-     * @param domainName the domain name
+     * Sets the identifier of the node to which this log configuration belongs.
+     * @param nodeId the node identifier
      */
-    public void setDomainName(String domainName) {
-        this.domainName = domainName;
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
     }
 
     /**
-     * Gets the name of the instance this log belongs to.
-     * @return the instance name
+     * Returns the identifier of the application instance to which this log configuration belongs.
+     * @return the instance identifier
      */
-    public String getInstanceName() {
-        return instanceName;
+    public String getInstanceId() {
+        return instanceId;
     }
 
     /**
-     * Sets the name of the instance this log belongs to.
-     * @param instanceName the instance name
+     * Sets the identifier of the application instance to which this log configuration belongs.
+     * @param instanceId the instance identifier
      */
-    void setInstanceName(String instanceName) {
-        this.instanceName = instanceName;
+    void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 
     /**
-     * Gets the name of the log configuration.
-     * @return the log name
+     * Returns the unique identifier for this log configuration.
+     * @return the log identifier
      */
-    public String getName() {
-        return getString(name);
+    public String getLogId() {
+        return getString(id);
     }
 
     /**
-     * Sets the name of the log configuration.
-     * @param name the log name
+     * Sets the unique identifier for this log configuration.
+     * @param name the log identifier
      */
-    public void setName(String name) {
-        putValue(LogInfo.name, name);
+    public void setLogId(String name) {
+        putValue(LogInfo.id, name);
     }
 
     /**
-     * Gets the display title of the log.
+     * Returns the display title for the log.
      * @return the log title
      */
     public String getTitle() {
@@ -126,7 +125,7 @@ public class LogInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the display title of the log.
+     * Sets the display title for the log.
      * @param title the log title
      */
     public void setTitle(String title) {
@@ -134,7 +133,7 @@ public class LogInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the path to the log file.
+     * Returns the absolute path to the log file being monitored.
      * @return the log file path
      */
     public String getFile() {
@@ -142,7 +141,7 @@ public class LogInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the path to the log file.
+     * Sets the absolute path to the log file being monitored.
      * @param file the log file path
      */
     public void setFile(String file) {
@@ -150,7 +149,7 @@ public class LogInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the path to the directory where archived log files are stored.
+     * Returns the path to the directory where archived or rotated log files are stored.
      * @return the archived log directory path
      */
     public String getArchivedDir() {
@@ -158,7 +157,7 @@ public class LogInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the path to the directory where archived log files are stored.
+     * Sets the path to the directory where archived or rotated log files are stored.
      * @param archivedDir the archived log directory path
      */
     public void setArchivedDir(String archivedDir) {
@@ -166,23 +165,23 @@ public class LogInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the character set of the log file.
-     * @return the character set
+     * Returns the character encoding of the log file.
+     * @return the character set name
      */
     public String getCharset() {
         return getString(charset);
     }
 
     /**
-     * Sets the character set of the log file.
-     * @param charset the character set
+     * Sets the character encoding of the log file.
+     * @param charset the character set name
      */
     public void setCharset(String charset) {
         putValue(LogInfo.charset, charset);
     }
 
     /**
-     * Gets the sample interval in seconds for tailing the log.
+     * Returns the interval (in milliseconds) at which the log file should be sampled for new entries.
      * @return the sample interval
      */
     public int getSampleInterval() {
@@ -190,7 +189,7 @@ public class LogInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the sample interval in seconds for tailing the log.
+     * Sets the interval (in milliseconds) at which the log file should be sampled for new entries.
      * @param sampleInterval the sample interval
      */
     public void setSampleInterval(int sampleInterval) {
@@ -198,26 +197,27 @@ public class LogInfo extends DefaultParameters {
     }
 
     /**
-     * Gets the number of last lines to read from the log file initially.
-     * @return the number of last lines
+     * Returns the number of initial lines to read from the end of the log file upon initialization.
+     * @return the number of initial lines
      */
     public int getLastLines() {
         return getInt(lastLines, 0);
     }
 
     /**
-     * Sets the number of last lines to read from the log file initially.
-     * @param lastLines the number of last lines
+     * Sets the number of initial lines to read from the end of the log file upon initialization.
+     * @param lastLines the number of initial lines
      */
     public void setLastLines(int lastLines) {
         putValue(LogInfo.lastLines, lastLines);
     }
 
     /**
-     * Validates that all required parameters are present.
+     * Validates that all required configuration parameters for the log are present.
+     * @throws IllegalArgumentException if any required parameter is missing
      */
     public void validateRequiredParameters() {
-        Assert.hasLength(getString(name), "Missing value of required parameter: " + getQualifiedName(name));
+        Assert.hasLength(getString(id), "Missing value of required parameter: " + getQualifiedName(id));
         Assert.hasLength(getString(file), "Missing value of required parameter: " + getQualifiedName(file));
     }
 

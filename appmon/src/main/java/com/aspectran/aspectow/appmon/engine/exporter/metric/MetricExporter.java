@@ -60,7 +60,7 @@ public class MetricExporter extends AbstractExporter {
         this.exporterManager = exporterManager;
         this.metricInfo = metricInfo;
         this.metricReader = metricReader;
-        this.prefix = metricInfo.getInstanceName() + ":" + getType() + ":" + metricInfo.getName() + ":";
+        this.prefix = metricInfo.getInstanceId() + ":" + getType() + ":" + metricInfo.getMetricId() + ":";
 
         int sampleInterval = metricInfo.getSampleInterval();
         int exportInterval = metricInfo.getExportInterval();
@@ -78,7 +78,7 @@ public class MetricExporter extends AbstractExporter {
 
     @Override
     public String getName() {
-        return metricInfo.getName();
+        return metricInfo.getMetricId();
     }
 
     /**

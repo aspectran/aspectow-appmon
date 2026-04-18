@@ -131,23 +131,23 @@ public class AppMonManager extends InstantActivitySupport {
     }
 
     /**
-     * Gets the list of instance information for the specified instance names.
-     * @param instanceNames an array of instance names
+     * Gets the list of instance information for the specified instance IDs.
+     * @param instanceIds an array of instance IDs
      * @return a list of matching instance information
      */
-    public List<InstanceInfo> getInstanceInfoList(String[] instanceNames) {
-        return instanceInfoHolder.getInstanceInfoList(instanceNames);
+    public List<InstanceInfo> getInstanceInfoList(String[] instanceIds) {
+        return instanceInfoHolder.getInstanceInfoList(instanceIds);
     }
 
     /**
-     * Verifies the given instance names against the configured instances and returns the valid ones.
-     * @param instanceNames an array of instance names to verify
-     * @return an array of verified instance names
+     * Verifies the given instance IDs against the configured instances and returns the valid ones.
+     * @param instanceIds an array of instance IDs to verify
+     * @return an array of verified instance IDs
      */
-    public String[] getVerifiedInstanceNames(String[] instanceNames) {
-        List<InstanceInfo> infoList = getInstanceInfoList(instanceNames);
+    public String[] getVerifiedInstanceIds(String[] instanceIds) {
+        List<InstanceInfo> infoList = getInstanceInfoList(instanceIds);
         if (!infoList.isEmpty()) {
-            return InstanceInfoHolder.extractInstanceNames(infoList);
+            return InstanceInfoHolder.extractInstanceIds(infoList);
         } else {
             return new String[0];
         }

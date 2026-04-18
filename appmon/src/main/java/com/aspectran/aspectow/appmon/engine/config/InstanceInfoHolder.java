@@ -34,33 +34,33 @@ public class InstanceInfoHolder {
 
     /**
      * Instantiates a new InstanceInfoHolder.
-     * @param domainName the name of the domain these instances belong to
+     * @param nodeId the id of the node these instances belong to
      * @param instanceInfoList the list of instance information to hold
      */
-    public InstanceInfoHolder(String domainName, @NonNull List<InstanceInfo> instanceInfoList) {
+    public InstanceInfoHolder(String nodeId, @NonNull List<InstanceInfo> instanceInfoList) {
         for (InstanceInfo instanceInfo : instanceInfoList) {
-            instanceInfo.setDomainName(domainName);
-            instanceInfos.put(instanceInfo.getName(), instanceInfo);
+            instanceInfo.setNodeId(nodeId);
+            instanceInfos.put(instanceInfo.getInstanceId(), instanceInfo);
 
             List<EventInfo> eventInfoList = instanceInfo.getEventInfoList();
             if (eventInfoList != null) {
                 for (EventInfo eventInfo : eventInfoList) {
-                    eventInfo.setDomainName(domainName);
-                    eventInfo.setInstanceName(instanceInfo.getName());
+                    eventInfo.setNodeId(nodeId);
+                    eventInfo.setInstanceId(instanceInfo.getInstanceId());
                 }
             }
             List<MetricInfo> metricInfoList = instanceInfo.getMetricInfoList();
             if (metricInfoList != null) {
                 for (MetricInfo metricInfo : metricInfoList) {
-                    metricInfo.setDomainName(domainName);
-                    metricInfo.setInstanceName(instanceInfo.getName());
+                    metricInfo.setNodeId(nodeId);
+                    metricInfo.setInstanceId(instanceInfo.getInstanceId());
                 }
             }
             List<LogInfo> logInfoList = instanceInfo.getLogInfoList();
             if (logInfoList != null) {
                 for (LogInfo logInfo : logInfoList) {
-                    logInfo.setDomainName(domainName);
-                    logInfo.setInstanceName(instanceInfo.getName());
+                    logInfo.setNodeId(nodeId);
+                    logInfo.setInstanceId(instanceInfo.getInstanceId());
                 }
             }
         }
@@ -76,17 +76,17 @@ public class InstanceInfoHolder {
 
     /**
      * Gets a filtered list of instance information.
-     * If instanceNames is null or empty, it returns all visible (not hidden) instances.
-     * Otherwise, it returns instances matching the given names.
-     * @param instanceNames an array of instance names to filter by
+     * If instanceIds is null or empty, it returns all visible (not hidden) instances.
+     * Otherwise, it returns instances matching the given IDs.
+     * @param instanceIds an array of instance IDs to filter by
      * @return a list of matching {@link InstanceInfo}
      */
-    public List<InstanceInfo> getInstanceInfoList(String[] instanceNames) {
+    public List<InstanceInfo> getInstanceInfoList(String[] instanceIds) {
         List<InstanceInfo> infoList = new ArrayList<>(instanceInfos.size());
-        if (instanceNames != null && instanceNames.length > 0) {
-            for (String name : instanceNames) {
+        if (instanceIds != null && instanceIds.length > 0) {
+            for (String id : instanceIds) {
                 for (InstanceInfo info : instanceInfos.values()) {
-                    if (info.getName().equals(name)) {
+                    if (info.getInstanceId().equals(id)) {
                         infoList.add(info);
                     }
                 }
@@ -111,16 +111,16 @@ public class InstanceInfoHolder {
     }
 
     /**
-     * Extracts the names from a list of {@link InstanceInfo} objects.
+     * Extracts the IDs from a list of {@link InstanceInfo} objects.
      * @param instanceInfoList the list of instance information
-     * @return an array of instance names
+     * @return an array of instance IDs
      */
-    public static String @NonNull [] extractInstanceNames(@NonNull List<InstanceInfo> instanceInfoList) {
-        List<String> instanceNames = new ArrayList<>(instanceInfoList.size());
+    public static String @NonNull [] extractInstanceIds(@NonNull List<InstanceInfo> instanceInfoList) {
+        List<String> instanceIds = new ArrayList<>(instanceInfoList.size());
         for (InstanceInfo instanceInfo : instanceInfoList) {
-            instanceNames.add(instanceInfo.getName());
+            instanceIds.add(instanceInfo.getInstanceId());
         }
-        return instanceNames.toArray(new String[0]);
+        return instanceIds.toArray(new String[0]);
     }
 
 }
