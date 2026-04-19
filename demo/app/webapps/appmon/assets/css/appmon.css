@@ -14,6 +14,9 @@
 }
 
 /* For console-integrated */
+.monitoring-page .node-bar {
+    border-bottom: 1px solid #ddd;
+}
 .monitoring-page .node.tabs {
     box-shadow: none;
     @media screen and (max-width: 576px) {
@@ -22,9 +25,6 @@
 }
 .monitoring-page .node.tabs > .tabs-title > a, .monitoring-page .node.tabs > .tabs-title button {
     background-color: transparent;
-}
-.monitoring-page .node.metrics-bar {
-    border-top: 1px solid #ddd;
 }
 
 .metrics-bar {
