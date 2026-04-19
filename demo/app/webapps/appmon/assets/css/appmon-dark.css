@@ -15,8 +15,8 @@
         background-color: #24282b;
         box-shadow: none;
     }
-    .monitoring-page .node.metrics-bar {
-        border-top: 1px solid #353b3e;
+    .monitoring-page .node-bar {
+        border-bottom: 1px solid #353b3e;
     }
     .node.metrics-bar .title {
         color: #677278;
