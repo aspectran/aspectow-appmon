@@ -31,6 +31,11 @@ public class RedisMessageRelayHandler implements RedisMessageListener {
     }
 
     @Override
+    public String getCategory() {
+        return MessageRelayManager.CATEGORY_APPMON;
+    }
+
+    @Override
     public void onRelayMessage(String message) {
         messageRelayManager.relay(message);
     }

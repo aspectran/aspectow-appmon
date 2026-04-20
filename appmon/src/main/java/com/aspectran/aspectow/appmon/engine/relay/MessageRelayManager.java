@@ -41,6 +41,8 @@ public class MessageRelayManager {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageRelayManager.class);
 
+    public static final String CATEGORY_APPMON = "appmon";
+
     private final Set<MessageRelayer> messageRelayers = new CopyOnWriteArraySet<>();
 
     private final List<ExporterManager> exporterManagers = new CopyOnWriteArrayList<>();
@@ -83,17 +85,26 @@ public class MessageRelayManager {
     }
 
     /**
-     * Relays a local message from an exporter.
-     * @param message the message to relay
+     * Publishes a local message to Redis and relays it to all registered relayers.
+     * @param message the message to publish
      */
-    public void relay(String message) {
+    public void publish(String message) {
         if (messagePublisher != null) {
             try {
-                messagePublisher.publishRelay(message);
+                messagePublisher.publishRelay(CATEGORY_APPMON, message);
             } catch (Exception e) {
                 logger.error("Failed to publish relay message to Redis", e);
             }
         }
+        relay(message);
+    }
+
+    /**
+     * Relays a message to all registered relayers.
+     * This method does not publish the message to Redis.
+     * @param message the message to relay
+     */
+    public void relay(String message) {
         for (MessageRelayer relayer : messageRelayers) {
             relayer.relay(message);
         }
