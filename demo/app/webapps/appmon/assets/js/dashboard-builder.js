@@ -13,13 +13,15 @@ class DashboardBuilder {
         this.settings = {};
         this.nodes = [];
         this.instances = [];
+        this.metrics = [];
         this.viewers = [];
         this.clients = [];
     }
 
-    build(basePath, instancesToJoin) {
+    build(basePath, instancesToJoin, nodeIdToJoin) {
         this.basePath = basePath;
         this.instancesToJoin = instancesToJoin;
+        this.nodeIdToJoin = nodeIdToJoin;
         this.clearView();
         $.ajax({
             url: basePath + "/appmon/config/data",
@@ -39,11 +41,12 @@ class DashboardBuilder {
 
                     data.nodes.forEach(nodeData => {
                         console.log("nodeData", nodeData);
+                        const active = (!this.nodeIdToJoin || this.nodeIdToJoin === nodeData.id);
                         const node = {
                             ...nodeData,
                             index: index++,
                             random1000: random1000,
-                            active: true,
+                            active: active,
                             client: { established: false, establishCount: 0 }
                         };
                         node.endpoint.path = basePath + node.endpoint.path + "/" + node.id;
@@ -160,6 +163,19 @@ class DashboardBuilder {
             this.showNode(node);
         }
 
+        this.updateNodeTabs();
+    }
+
+    showNode(node) {
+        this.instances.forEach(instance => {
+            if (instance.active) {
+                this.updateNodeVisibility(node, instance.id);
+            }
+        });
+    }
+
+    updateNodeTabs() {
+        const availableTabs = $(".node.tabs .tabs-title.available");
         const activeCount = this.nodes.filter(d => d.active).length;
         availableTabs.removeClass("active");
         if (availableTabs.length > activeCount) {
@@ -167,25 +183,26 @@ class DashboardBuilder {
                 if (d.active) $(".node.tabs .tabs-title[data-node-index=" + d.index + "]").addClass("active");
             });
         }
-
-        if (availableTabs.length === activeCount) {
-            $(".node.metrics-bar.available").removeClass("full-width");
-        } else {
-            $(".node.metrics-bar.available").addClass("full-width");
-        }
+        $(".node.metrics-bar.available").toggleClass("full-width", this.nodes.length !== activeCount);
     }
 
-    showNode(node) {
+    updateNodeVisibility(node, instanceId) {
         const action = node.active ? "show" : "hide";
-        this.instances.forEach(instance => {
-            if (instance.active) {
-                const selector = `[data-node-index=${node.index}][data-instance-id=${instance.id}]`;
-                $(`.event-box${selector}, .visual-box${selector}, .console-box${selector}`)[action]();
-            }
-        });
+        const selector = `[data-node-index=${node.index}][data-instance-id=${instanceId}]`;
+        const otherSelector = `[data-node-index=${node.index}][data-instance-id!=${instanceId}]`;
+
+        $(`.event-box${otherSelector}, .visual-box${otherSelector}, .console-box${otherSelector}`).hide();
+        $(`.event-box${selector}, .visual-box${selector}, .console-box${selector}`)[action]();
+
         this.viewers[node.index].setVisible(node.active);
         if (node.active) {
-            this.viewers[node.index].refreshConsole();
+            $(`.track-box[data-node-index=${node.index}] .bullet`).remove();
+            $(`.console-box${selector}`).each((_, el) => {
+                const $console = $(el).find(".console");
+                if (!$console.data("pause")) {
+                    this.viewers[node.index].refreshConsole($console);
+                }
+            });
             $(`.node.metrics-bar[data-node-index=${node.index}]`).show();
         } else {
             $(`.node.metrics-bar[data-node-index=${node.index}]`).hide();
@@ -229,20 +246,9 @@ class DashboardBuilder {
         $(".control-bar[data-instance-id!=" + instanceId + "]").hide();
         $(".control-bar[data-instance-id=" + instanceId + "]").show();
         this.nodes.forEach(node => {
-            if (node.active) {
-                $(`.track-box[data-node-index=${node.index}] .bullet`).remove();
-                const selector = `[data-node-index=${node.index}][data-instance-id=${instanceId}]`;
-                const otherSelector = `[data-node-index=${node.index}][data-instance-id!=${instanceId}]`;
-                $(`.event-box${otherSelector}, .visual-box${otherSelector}, .console-box${otherSelector}`).hide();
-                $(`.event-box${selector}, .visual-box${selector}`).show();
-                $(`.console-box${selector}`).show().each((_, el) => {
-                    const $console = $(el).find(".console");
-                    if (!$console.data("pause")) {
-                        this.viewers[node.index].refreshConsole($console);
-                    }
-                });
-            }
+            this.updateNodeVisibility(node, instanceId);
         });
+        this.updateNodeTabs();
     }
 
     initView() {

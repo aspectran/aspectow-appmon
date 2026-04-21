@@ -120,9 +120,9 @@ public abstract class AppMonManagerBuilder {
 
     private static void buildMetricExporters(
             AppMonManager appMonManager,
-            String instanceName,
+            String instanceId,
             @NonNull List<MetricInfo> metricInfoList) throws Exception {
-        ExporterManager metricExporterManager = new ExporterManager(ExporterType.METRIC, appMonManager, instanceName);
+        ExporterManager metricExporterManager = new ExporterManager(ExporterType.METRIC, appMonManager, instanceId);
         for (MetricInfo metricInfo : metricInfoList) {
             metricInfo.validateRequiredParameters();
 
