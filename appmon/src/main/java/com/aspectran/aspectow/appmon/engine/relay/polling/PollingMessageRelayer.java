@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_REFRESH;
-import static com.aspectran.aspectow.node.manager.NodeRegistryProtocol.NODES_BASE_PATH;
+import static com.aspectran.aspectow.node.manager.NodeMessageProtocol.NODES_BASE_PATH;
 
 /**
  * An {@link MessageRelayer} implementation based on HTTP long-polling.

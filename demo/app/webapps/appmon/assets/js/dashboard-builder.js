@@ -38,6 +38,7 @@ class DashboardBuilder {
                     const random1000 = this.random(1, 1000);
 
                     data.nodes.forEach(nodeData => {
+                        console.log("nodeData", nodeData);
                         const node = {
                             ...nodeData,
                             index: index++,
