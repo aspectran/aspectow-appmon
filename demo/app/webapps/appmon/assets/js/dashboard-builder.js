@@ -40,13 +40,15 @@ class DashboardBuilder {
                     const random1000 = this.random(1, 1000);
 
                     data.nodes.forEach(nodeData => {
+                        if (this.nodeIdToJoin && this.nodeIdToJoin !== nodeData.id) {
+                            return;
+                        }
                         console.log("nodeData", nodeData);
-                        const active = (!this.nodeIdToJoin || this.nodeIdToJoin === nodeData.id);
                         const node = {
                             ...nodeData,
                             index: index++,
                             random1000: random1000,
-                            active: active,
+                            active: true,
                             client: { established: false, establishCount: 0 }
                         };
                         node.endpoint.path = basePath + node.endpoint.path + "/" + node.id;
@@ -183,7 +185,7 @@ class DashboardBuilder {
                 if (d.active) $(".node.tabs .tabs-title[data-node-index=" + d.index + "]").addClass("active");
             });
         }
-        $(".node.metrics-bar.available").toggleClass("full-width", this.nodes.length !== activeCount);
+        $(".node.metrics-bar.available").toggleClass("full-width", (this.nodes.length === 1 || this.nodes.length !== activeCount));
     }
 
     updateNodeVisibility(node, instanceId) {
@@ -600,6 +602,8 @@ class DashboardBuilder {
         if (this.nodes.length > 1) {
             $newBar.find(".number").text(" " + (nodeInfo.index + 1));
             $newBar.removeClass("full-width");
+        } else {
+            $newBar.addClass("full-width");
         }
         return $newBar.insertAfter($metricsBar.last());
     }
