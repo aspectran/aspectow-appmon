@@ -78,11 +78,9 @@
                     +: /appmon/**
                 </entry>
                 <entry name="jpetstore">
-                    +: /jpetstore
                     +: /jpetstore/**
                 </entry>
                 <entry name="demo">
-                    +: /demo
                     +: /demo/**
                     -: /demo/examples/gs-rest-service/**
                 </entry>
@@ -97,11 +95,9 @@
                     +: /appmon/**
                 </entry>
                 <entry name="jpetstore">
-                    +: /jpetstore
                     +: /jpetstore/**
                 </entry>
                 <entry name="demo">
-                    +: /demo
                     +: /demo/**
                 </entry>
             </item>
