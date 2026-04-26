@@ -56,7 +56,8 @@ import java.time.temporal.ChronoUnit;
     ),
     jobs = {
         @Job(translet = "appmon/persist/counter/rollup.job")
-    }
+    },
+    isolated = true
 )
 public class CounterPersistSchedule {
 
