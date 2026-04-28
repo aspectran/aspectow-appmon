@@ -33,7 +33,7 @@ public class EventCountVO implements Serializable {
     private String nodeId;
 
     /** The identifier of the instance where the event occurred */
-    private String instanceId;
+    private String appId;
 
     /** The identifier of the event being counted */
     private String eventId;
@@ -71,15 +71,15 @@ public class EventCountVO implements Serializable {
      * @return the instance identifier
      */
     public String getInstanceId() {
-        return instanceId;
+        return appId;
     }
 
     /**
      * Sets the instance identifier.
-     * @param instanceId the instance identifier
+     * @param appId the app identifier
      */
-    public void setInstanceId(String instanceId) {
-        this.instanceId = instanceId;
+    public void setInstanceId(String appId) {
+        this.appId = appId;
     }
 
     /**

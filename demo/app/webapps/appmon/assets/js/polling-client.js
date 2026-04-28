@@ -15,9 +15,9 @@ class PollingClient extends BaseClient {
         this.stopped = false;
     }
 
-    start(instancesToJoin) {
+    start(appsToJoin) {
         this.stopped = false;
-        this.join(instancesToJoin);
+        this.join(appsToJoin);
     }
 
     stop() {
@@ -52,14 +52,14 @@ class PollingClient extends BaseClient {
         }
     }
 
-    join(instancesToJoin) {
+    join(appsToJoin) {
         $.ajax({
             url: this.node.endpoint.path + "/appmon/polling/join",
             type: "post",
             dataType: "json",
             data: {
                 timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                instances: instancesToJoin
+                apps: appsToJoin
             },
             success: (data) => {
                 if (data) {
@@ -73,22 +73,22 @@ class PollingClient extends BaseClient {
                         this.onEstablished(this.node);
                     }
                     this.viewer.printMessage("Polling every " + data.pollingInterval + " milliseconds.");
-                    this.polling(instancesToJoin);
+                    this.polling(appsToJoin);
                 } else {
                     console.log(this.node.id, "connection failed");
                     this.viewer.printErrorMessage("Connection failed.");
-                    this.rejoin(instancesToJoin);
+                    this.rejoin(appsToJoin);
                 }
             },
             error: (xhr, status, error) => {
                 console.log(this.node.id, "connection failed", error);
                 this.viewer.printErrorMessage("Connection failed.");
-                this.rejoin(instancesToJoin);
+                this.rejoin(appsToJoin);
             }
         });
     }
 
-    polling(instancesToJoin) {
+    polling(appsToJoin) {
         if (this.stopped) return;
         let withCommands = null;
         if (this.commands.length) {
@@ -107,7 +107,7 @@ class PollingClient extends BaseClient {
                 if (data && data.messages) {
                     data.messages.forEach(msg => this.viewer.processMessage(msg));
                     this.pollingTimer = setTimeout(() => {
-                        this.polling(instancesToJoin);
+                        this.polling(appsToJoin);
                     }, this.node.endpoint.pollingInterval);
                 } else {
                     console.log(this.node.id, "connection lost");
@@ -115,7 +115,7 @@ class PollingClient extends BaseClient {
                     if (this.onClosed) {
                         this.onClosed(this.node);
                     }
-                    this.rejoin(instancesToJoin);
+                    this.rejoin(appsToJoin);
                 }
             },
             error: (xhr, status, error) => {
@@ -125,7 +125,7 @@ class PollingClient extends BaseClient {
                 if (this.onClosed) {
                     this.onClosed(this.node);
                 }
-                this.rejoin(instancesToJoin);
+                this.rejoin(appsToJoin);
             }
         });
     }

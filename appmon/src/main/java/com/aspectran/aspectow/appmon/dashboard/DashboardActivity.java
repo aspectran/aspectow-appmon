@@ -16,8 +16,7 @@
 package com.aspectran.aspectow.appmon.dashboard;
 
 import com.aspectran.aspectow.appmon.common.auth.AppMonTokenIssuer;
-import com.aspectran.aspectow.appmon.engine.config.InstanceInfo;
-import com.aspectran.aspectow.appmon.engine.config.MetricInfo;
+import com.aspectran.aspectow.appmon.engine.config.AppInfo;
 import com.aspectran.aspectow.appmon.engine.manager.AppMonManager;
 import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.core.component.bean.annotation.Action;
@@ -31,12 +30,8 @@ import com.aspectran.utils.StringUtils;
 import com.aspectran.web.activity.response.DefaultRestResponse;
 import com.aspectran.web.activity.response.RestResponse;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Handles requests for the Application Monitor dashboard.
@@ -62,42 +57,42 @@ public class DashboardActivity {
 
     /**
      * Displays the main monitoring page.
-     * @param instances the comma-separated list of instances to monitor
+     * @param apps the comma-separated list of instances to monitor
      * @return a map of attributes for rendering the view
      */
-    @Request("/dashboard/${instances}")
+    @Request("/dashboard/${apps}")
     @Dispatch("appmon/dashboard")
     @Action("page")
-    public Map<String, String> dashboard(String instances) {
+    public Map<String, String> dashboard(String apps) {
         return Map.of(
                 "headinclude", "appmon/_nodes",
                 "style", "fluid compact",
-                "instances", StringUtils.nullToEmpty(instances)
+                "apps", StringUtils.nullToEmpty(apps)
         );
     }
 
     /**
      * Provides configuration data to a backend agent.
-     * @param instances a comma-separated list of instance names to get configuration for
+     * @param apps a comma-separated list of instance names to get configuration for
      * @return a {@link RestResponse} containing the configuration data
      */
     @RequestToGet("/appmon/config/data")
-    public RestResponse getConfigData(String instances) {
+    public RestResponse getConfigData(String apps) {
         Map<String, Object> settings = Map.of(
                 "counterPersistInterval", appMonManager.getCounterPersistInterval()
         );
 
         List<NodeInfo> nodeInfoList = appMonManager.getNodeInfoList();
 
-        String[] instanceIds = StringUtils.splitWithComma(instances);
-        instanceIds = appMonManager.getVerifiedInstanceIds(instanceIds);
-        List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(instanceIds);
+        String[] appIds = StringUtils.splitWithComma(apps);
+        appIds = appMonManager.getVerifiedAppIds(appIds);
+        List<AppInfo> appInfoList = appMonManager.getAppInfoList(appIds);
 
         Map<String, Object> data = Map.of(
                 "token", AppMonTokenIssuer.issueToken(30),
                 "settings", settings,
                 "nodes", nodeInfoList,
-                "instances", instanceInfoList
+                "apps", appInfoList
         );
         return new DefaultRestResponse(data).nullWritable(false).ok();
     }

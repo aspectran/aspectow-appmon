@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.appmon.engine.relay.polling;
 
-import com.aspectran.aspectow.appmon.engine.config.InstanceInfo;
+import com.aspectran.aspectow.appmon.engine.config.AppInfo;
 import com.aspectran.aspectow.appmon.engine.config.PollingConfig;
 import com.aspectran.aspectow.appmon.engine.manager.AppMonManager;
 import com.aspectran.aspectow.appmon.engine.relay.CommandOptions;
@@ -90,14 +90,14 @@ public class PollingMessageRelayer implements MessageRelayer {
     public Map<String, Object> join(@NonNull Translet translet) throws IOException {
         PollingConfig pollingConfig = appMonManager.getPollingConfig();
 
-        String instancesToJoin = translet.getParameter("instances");
-        String[] instanceIds = StringUtils.splitWithComma(instancesToJoin);
-        instanceIds = appMonManager.getVerifiedInstanceIds(instanceIds);
-        if (StringUtils.hasText(instancesToJoin) && instanceIds.length == 0) {
+        String appsToJoin = translet.getParameter("instances");
+        String[] appIds = StringUtils.splitWithComma(appsToJoin);
+        appIds = appMonManager.getVerifiedAppIds(appIds);
+        if (StringUtils.hasText(appsToJoin) && appIds.length == 0) {
             return null;
         }
 
-        PollingRelaySession relaySession = sessionManager.createSession(translet, pollingConfig, instanceIds);
+        PollingRelaySession relaySession = sessionManager.createSession(translet, pollingConfig, appIds);
         String timeZone = translet.getParameter("timeZone");
         if (StringUtils.hasText(timeZone)) {
             relaySession.setTimeZone(timeZone);
@@ -107,10 +107,10 @@ public class PollingMessageRelayer implements MessageRelayer {
             return null;
         }
 
-        List<InstanceInfo> instanceInfoList = appMonManager.getInstanceInfoList(relaySession.getJoinedInstances());
+        List<AppInfo> appInfoList = appMonManager.getAppInfoList(relaySession.getJoinedInstances());
         List<String> messages = appMonManager.getMessageRelayManager().getLastMessages(relaySession);
         return Map.of(
-                "instances", instanceInfoList,
+                "instances", appInfoList,
                 "pollingInterval", relaySession.getPollingInterval(),
                 "messages", messages
         );
@@ -189,8 +189,8 @@ public class PollingMessageRelayer implements MessageRelayer {
     }
 
     @Override
-    public boolean isUsingInstance(String instanceName) {
-        return sessionManager.isUsingInstance(instanceName);
+    public boolean isUsingInstance(String appId) {
+        return sessionManager.isUsingInstance(appId);
     }
 
 }

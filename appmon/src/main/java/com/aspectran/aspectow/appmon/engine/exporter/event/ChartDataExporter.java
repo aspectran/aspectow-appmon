@@ -69,7 +69,7 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
         super(TYPE);
         this.exporterManager = exporterManager;
         this.eventInfo = eventInfo;
-        this.prefix = eventInfo.getInstanceId() + ":" + TYPE + "/chart:" + eventInfo.getEventId() + ":";
+        this.prefix = eventInfo.getAppId() + ":" + TYPE + "/chart:" + eventInfo.getEventId() + ":";
     }
 
     @Override
@@ -143,14 +143,14 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
         EventCountMapper dao = exporterManager.getBean("appmon.eventCountDao");
         List<EventCountVO> list = exporterManager.instantActivity(() -> {
             String nodeId = eventInfo.getNodeId();
-            String instanceId = eventInfo.getInstanceId();
+            String appId = eventInfo.getAppId();
             String eventId = eventInfo.getEventId();
             return switch (dateUnit) {
-                case "hour" -> dao.getChartDataByHour(nodeId, instanceId, eventId, finalZoneOffsetInSeconds, finalDateOffset);
-                case "day" -> dao.getChartDataByDay(nodeId, instanceId, eventId, finalZoneOffsetInSeconds, finalDateOffset);
-                case "month" -> dao.getChartDataByMonth(nodeId, instanceId, eventId, finalZoneOffsetInSeconds, finalDateOffset);
-                case "year" -> dao.getChartDataByYear(nodeId, instanceId, eventId, finalZoneOffsetInSeconds, finalDateOffset);
-                case null, default -> dao.getChartData(nodeId, instanceId, eventId, finalDateOffset);
+                case "hour" -> dao.getChartDataByHour(nodeId, appId, eventId, finalZoneOffsetInSeconds, finalDateOffset);
+                case "day" -> dao.getChartDataByDay(nodeId, appId, eventId, finalZoneOffsetInSeconds, finalDateOffset);
+                case "month" -> dao.getChartDataByMonth(nodeId, appId, eventId, finalZoneOffsetInSeconds, finalDateOffset);
+                case "year" -> dao.getChartDataByYear(nodeId, appId, eventId, finalZoneOffsetInSeconds, finalDateOffset);
+                case null, default -> dao.getChartData(nodeId, appId, eventId, finalDateOffset);
             };
         });
 

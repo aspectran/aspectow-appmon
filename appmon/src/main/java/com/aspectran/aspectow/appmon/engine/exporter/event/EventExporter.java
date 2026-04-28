@@ -60,7 +60,7 @@ public class EventExporter extends AbstractExporter {
         this.exporterManager = exporterManager;
         this.eventInfo = eventInfo;
         this.eventReader = eventReader;
-        this.prefix = eventInfo.getInstanceId() + ":" + getType() + ":" + eventInfo.getEventId() + ":";
+        this.prefix = eventInfo.getAppId() + ":" + getType() + ":" + eventInfo.getEventId() + ":";
         this.sampleInterval = eventInfo.getSampleInterval();
     }
 

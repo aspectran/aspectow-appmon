@@ -59,7 +59,7 @@ public class LogInfo extends DefaultParameters {
 
     private String nodeId;
 
-    private String instanceId;
+    private String appId;
 
     /**
      * Instantiates a new LogInfo.
@@ -88,16 +88,16 @@ public class LogInfo extends DefaultParameters {
      * Returns the identifier of the application instance to which this log configuration belongs.
      * @return the instance identifier
      */
-    public String getInstanceId() {
-        return instanceId;
+    public String getAppId() {
+        return appId;
     }
 
     /**
      * Sets the identifier of the application instance to which this log configuration belongs.
-     * @param instanceId the instance identifier
+     * @param appId the app identifier
      */
-    void setInstanceId(String instanceId) {
-        this.instanceId = instanceId;
+    void setAppId(String appId) {
+        this.appId = appId;
     }
 
     /**

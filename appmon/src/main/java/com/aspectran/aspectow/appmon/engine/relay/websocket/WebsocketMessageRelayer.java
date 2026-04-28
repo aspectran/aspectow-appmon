@@ -145,11 +145,11 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
         if (StringUtils.hasText(timeZone)) {
             relaySession.setTimeZone(timeZone);
         }
-        String instancesToJoin = commandOptions.getInstancesToJoin();
-        String[] instanceIds = StringUtils.splitWithComma(instancesToJoin);
-        instanceIds = appMonManager.getVerifiedInstanceIds(instanceIds);
-        if (!StringUtils.hasText(instancesToJoin) || instanceIds.length > 0) {
-            relaySession.setJoinedInstances(instanceIds);
+        String appsToJoin = commandOptions.getAppsToJoin();
+        String[] appIds = StringUtils.splitWithComma(appsToJoin);
+        appIds = appMonManager.getVerifiedAppIds(appIds);
+        if (!StringUtils.hasText(appsToJoin) || appIds.length > 0) {
+            relaySession.setJoinedInstances(appIds);
         }
         if (addSession(session)) {
             relay(relaySession, MESSAGE_JOINED);
@@ -189,14 +189,14 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
     }
 
     @Override
-    public boolean isUsingInstance(String instanceId) {
-        if (StringUtils.hasLength(instanceId)) {
+    public boolean isUsingInstance(String appId) {
+        if (StringUtils.hasLength(appId)) {
             return containsSession(session -> {
                 RelaySession relaySession = new WebsocketRelaySession(session);
-                String[] instanceIds = relaySession.getJoinedInstances();
-                if (instanceIds != null) {
-                    for (String id : instanceIds) {
-                        if (instanceId.equals(id)) {
+                String[] appIds = relaySession.getJoinedInstances();
+                if (appIds != null) {
+                    for (String id : appIds) {
+                        if (appId.equals(id)) {
                             return true;
                         }
                     }

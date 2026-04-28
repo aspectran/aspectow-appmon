@@ -72,7 +72,7 @@ public class MetricInfo extends DefaultParameters {
 
     private String nodeId;
 
-    private String instanceId;
+    private String appId;
 
     /**
      * Instantiates a new MetricInfo.
@@ -98,19 +98,19 @@ public class MetricInfo extends DefaultParameters {
     }
 
     /**
-     * Returns the identifier of the application instance to which this metric belongs.
-     * @return the instance identifier
+     * Returns the identifier of the application to which this metric belongs.
+     * @return the app identifier
      */
-    public String getInstanceId() {
-        return instanceId;
+    public String getAppId() {
+        return appId;
     }
 
     /**
-     * Sets the identifier of the application instance to which this metric belongs.
-     * @param instanceId the instance identifier
+     * Sets the identifier of the application to which this metric belongs.
+     * @param appId the app identifier
      */
-    void setInstanceId(String instanceId) {
-        this.instanceId = instanceId;
+    void setAppId(String appId) {
+        this.appId = appId;
     }
 
     /**

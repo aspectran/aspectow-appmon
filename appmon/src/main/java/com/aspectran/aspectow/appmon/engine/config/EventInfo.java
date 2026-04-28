@@ -25,7 +25,7 @@ import com.aspectran.utils.apon.ValueType;
  * Contains configuration for a specific event to be monitored.
  *
  * <p>An event represents a discrete occurrence or a continuous activity within an application
- * instance that can be tracked, counted, and analyzed.</p>
+ * that can be tracked, counted, and analyzed.</p>
  *
  * <p>Created: 2020/02/12</p>
  */
@@ -66,7 +66,7 @@ public class EventInfo extends DefaultParameters {
 
     private String nodeId;
 
-    private String instanceId;
+    private String appId;
 
     /**
      * Instantiates a new EventInfo.
@@ -92,19 +92,19 @@ public class EventInfo extends DefaultParameters {
     }
 
     /**
-     * Returns the identifier of the application instance to which this event belongs.
-     * @return the instance identifier
+     * Returns the identifier of the application to which this event belongs.
+     * @return the app identifier
      */
-    public String getInstanceId() {
-        return instanceId;
+    public String getAppId() {
+        return appId;
     }
 
     /**
-     * Sets the identifier of the application instance to which this event belongs.
-     * @param instanceId the instance identifier
+     * Sets the identifier of the application to which this event belongs.
+     * @param appId the app identifier
      */
-    void setInstanceId(String instanceId) {
-        this.instanceId = instanceId;
+    void setAppId(String appId) {
+        this.appId = appId;
     }
 
     /**

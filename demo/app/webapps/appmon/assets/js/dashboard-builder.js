@@ -12,27 +12,27 @@ class DashboardBuilder {
         this.options = options;
         this.settings = {};
         this.nodes = [];
-        this.instances = [];
+        this.apps = [];
         this.metrics = [];
         this.viewers = [];
         this.clients = [];
     }
 
-    build(basePath, instancesToJoin, nodeIdToJoin) {
+    build(basePath, appsToJoin, nodeIdToJoin) {
         this.basePath = basePath;
-        this.instancesToJoin = instancesToJoin;
+        this.appsToJoin = appsToJoin;
         this.nodeIdToJoin = nodeIdToJoin;
         this.clearView();
         $.ajax({
             url: basePath + "/appmon/config/data",
             type: "get",
             dataType: "json",
-            data: instancesToJoin ? { instances: instancesToJoin } : null,
+            data: appsToJoin ? { apps: appsToJoin } : null,
             success: (data) => {
                 if (data) {
                     this.settings = { ...data.settings };
                     this.nodes = [];
-                    this.instances = [];
+                    this.apps = [];
                     this.viewers = [];
                     this.clients = [];
 
@@ -58,16 +58,16 @@ class DashboardBuilder {
                         console.log("node", node);
                     });
 
-                    data.instances.forEach(instanceData => {
-                        const instance = { ...instanceData, active: false };
-                        this.instances.push(instance);
-                        console.log("instance", instance);
+                    data.apps.forEach(appData => {
+                        const app = { ...appData, active: false };
+                        this.apps.push(app);
+                        console.log("app", app);
                     });
 
                     this.buildView();
                     this.bindEvents();
                     if (this.nodes.length) {
-                        this.establish(0, instancesToJoin);
+                        this.establish(0, appsToJoin);
                     }
                 }
             },
@@ -84,7 +84,7 @@ class DashboardBuilder {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    establish(nodeIndex, instancesToJoin) {
+    establish(nodeIndex, appsToJoin) {
         const node = this.nodes[nodeIndex];
         const viewer = this.viewers[nodeIndex];
 
@@ -110,7 +110,7 @@ class DashboardBuilder {
                 this.clearSessions(node.index);
             }
             if (node.client.establishCount + node.index < this.nodes.length) {
-                this.establish(node.index + 1, instancesToJoin);
+                this.establish(node.index + 1, appsToJoin);
             }
         };
 
@@ -126,7 +126,7 @@ class DashboardBuilder {
                 setTimeout(() => {
                     const client = new PollingClient(node, viewer, onJoined, onEstablished, onClosed, onFailed);
                     this.clients[node.index] = client;
-                    client.start(instancesToJoin);
+                    client.start(appsToJoin);
                 }, (node.index - 1) * 1000);
             }
         };
@@ -140,7 +140,7 @@ class DashboardBuilder {
         }
         viewer.setClient(client);
         this.clients[nodeIndex] = client;
-        client.start(instancesToJoin);
+        client.start(appsToJoin);
     }
 
     changeNode(nodeIndex) {
@@ -169,9 +169,9 @@ class DashboardBuilder {
     }
 
     showNode(node) {
-        this.instances.forEach(instance => {
-            if (instance.active) {
-                this.updateNodeVisibility(node, instance.id);
+        this.apps.forEach(app => {
+            if (app.active) {
+                this.updateNodeVisibility(node, app.id);
             }
         });
     }
@@ -188,10 +188,10 @@ class DashboardBuilder {
         $(".node.metrics-bar.available").toggleClass("full-width", (this.nodes.length === 1 || this.nodes.length !== activeCount));
     }
 
-    updateNodeVisibility(node, instanceId) {
+    updateNodeVisibility(node, appId) {
         const action = node.active ? "show" : "hide";
-        const selector = `[data-node-index=${node.index}][data-instance-id=${instanceId}]`;
-        const otherSelector = `[data-node-index=${node.index}][data-instance-id!=${instanceId}]`;
+        const selector = `[data-node-index=${node.index}][data-app-id=${appId}]`;
+        const otherSelector = `[data-node-index=${node.index}][data-app-id!=${appId}]`;
 
         $(`.event-box${otherSelector}, .visual-box${otherSelector}, .console-box${otherSelector}`).hide();
         $(`.event-box${selector}, .visual-box${selector}, .console-box${selector}`)[action]();
@@ -225,30 +225,30 @@ class DashboardBuilder {
         }
     }
 
-    changeInstance(instanceId) {
+    changeInstance(appId) {
         let exists = false;
-        this.instances.forEach(instance => {
-            if (!instanceId) instanceId = instance.id;
-            const $tabTitle = $(".instance.tabs .tabs-title[data-instance-id=" + instance.id + "]");
-            if (instance.id === instanceId) {
-                instance.active = true;
-                this.showNodeInstance(instanceId);
+        this.apps.forEach(app => {
+            if (!appId) appId = app.id;
+            const $tabTitle = $(".app.tabs .tabs-title[data-app-id=" + app.id + "]");
+            if (app.id === appId) {
+                app.active = true;
+                this.showNodeInstance(appId);
                 $tabTitle.addClass("active");
                 exists = true;
             } else {
-                instance.active = false;
+                app.active = false;
                 $tabTitle.removeClass("active");
             }
         });
-        if (!exists && instanceId) return this.changeInstance();
-        return instanceId;
+        if (!exists && appId) return this.changeInstance();
+        return appId;
     }
 
-    showNodeInstance(instanceId) {
-        $(".control-bar[data-instance-id!=" + instanceId + "]").hide();
-        $(".control-bar[data-instance-id=" + instanceId + "]").show();
+    showNodeInstance(appId) {
+        $(".control-bar[data-app-id!=" + appId + "]").hide();
+        $(".control-bar[data-app-id=" + appId + "]").show();
         this.nodes.forEach(node => {
-            this.updateNodeVisibility(node, instanceId);
+            this.updateNodeVisibility(node, appId);
         });
         this.updateNodeTabs();
     }
@@ -258,9 +258,9 @@ class DashboardBuilder {
         if (this.nodes.some(d => d.endpoint.mode === "polling")) {
             $(".speed-options").removeClass("hide");
         }
-        this.instances.forEach(instance => {
-            const $eventBox = $(`.event-box[data-instance-id=${instance.id}]`);
-            const $visualBox = $(`.visual-box[data-instance-id=${instance.id}]`);
+        this.apps.forEach(app => {
+            const $eventBox = $(`.event-box[data-app-id=${app.id}]`);
+            const $visualBox = $(`.visual-box[data-app-id=${app.id}]`);
             if ($eventBox.length && $visualBox.length && $eventBox.find(".session-box.available").length === 0) {
                 $eventBox.removeClass("col-lg-6").addClass("fixed-layout");
                 $visualBox.removeClass("col-lg-6").addClass("fixed-layout");
@@ -273,45 +273,45 @@ class DashboardBuilder {
             const nodeIndex = $(e.currentTarget).closest(".tabs-title").data("node-index");
             this.changeNode(nodeIndex);
         });
-        $(".instance.tabs .tabs-title.available a").off("click").on("click", (e) => {
-            const instanceId = $(e.currentTarget).closest(".tabs-title").data("instance-id");
-            this.changeInstance(instanceId);
+        $(".app.tabs .tabs-title.available a").off("click").on("click", (e) => {
+            const appId = $(e.currentTarget).closest(".tabs-title").data("app-id");
+            this.changeInstance(appId);
         });
         $(".layout-options .btn").off().on("click", (e) => {
             const $btn = $(e.currentTarget);
-            const instanceId = $btn.closest(".control-bar").data("instance-id");
+            const appId = $btn.closest(".control-bar").data("app-id");
             const isCompact = $btn.hasClass("compact");
             if (!$btn.hasClass("on")) {
                 if (isCompact) {
                     $btn.addClass("on");
-                    $(`.event-box.available:not(.fixed-layout)[data-instance-id=${instanceId}], 
-                       .visual-box.available:not(.fixed-layout)[data-instance-id=${instanceId}], 
-                       .console-box.available[data-instance-id=${instanceId}]`).addClass("col-lg-6");
+                    $(`.event-box.available:not(.fixed-layout)[data-app-id=${appId}], 
+                       .visual-box.available:not(.fixed-layout)[data-app-id=${appId}], 
+                       .console-box.available[data-app-id=${appId}]`).addClass("col-lg-6");
                 }
             } else if (isCompact) {
                 $btn.removeClass("on");
-                $(`.event-box.available:not(.fixed-layout)[data-instance-id=${instanceId}], 
-                   .visual-box.available:not(.fixed-layout)[data-instance-id=${instanceId}], 
-                   .console-box.available[data-instance-id=${instanceId}]`).removeClass("col-lg-6");
+                $(`.event-box.available:not(.fixed-layout)[data-app-id=${appId}], 
+                   .visual-box.available:not(.fixed-layout)[data-app-id=${appId}], 
+                   .console-box.available[data-app-id=${appId}]`).removeClass("col-lg-6");
             }
             this.viewers.forEach(v => v.updateCanvasWidth());
-            this.refreshData(instanceId);
+            this.refreshData(appId);
         });
         $(".date-unit-options .btn").off().on("click", (e) => {
             const $btn = $(e.currentTarget);
             const $controlBar = $btn.closest(".control-bar");
-            const instanceId = $controlBar.data("instance-id");
+            const appId = $controlBar.data("app-id");
             const unit = $btn.data("unit") || "";
             $btn.parent().data("unit", unit).find(".btn").removeClass("on");
             $btn.addClass("on");
             $controlBar.find(".date-offset-options").data("offset", "").find(".btn.current").removeClass("on");
             this.viewers.forEach(v => v.updateCanvasWidth());
-            this.refreshData(instanceId);
+            this.refreshData(appId);
         });
         $(".date-offset-options .btn").off().on("click", (e) => {
             const $btn = $(e.currentTarget);
             const $controlBar = $btn.closest(".control-bar");
-            const instanceId = $controlBar.data("instance-id");
+            const appId = $controlBar.data("app-id");
             const offset = $btn.data("offset") || "";
             const $parent = $btn.parent();
             if (offset !== "current") $parent.find(".btn.current").addClass("on");
@@ -320,7 +320,7 @@ class DashboardBuilder {
                 $parent.find(".btn.current").removeClass("on");
             }
             $parent.data("offset", offset);
-            this.refreshData(instanceId, offset);
+            this.refreshData(appId, offset);
         });
         $(".speed-options .btn").off().on("click", (e) => {
             const $btn = $(e.currentTarget);
@@ -333,7 +333,7 @@ class DashboardBuilder {
             });
         });
         $(".open-popup").off("click").on("click", (e) => {
-            const url = this.basePath + "/appmon/dashboard/popup/" + (this.instancesToJoin || "");
+            const url = this.basePath + "/appmon/dashboard/popup/" + (this.appsToJoin || "");
             const name = "appmon_dashboard_popup";
             const features = "width=1200,height=800,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes";
             const popup = window.open(url, name, features);
@@ -425,7 +425,7 @@ class DashboardBuilder {
             const $consoleBox = $btn.closest(".console-box");
             const $console = $consoleBox.find(".console");
             const nodeIndex = $consoleBox.data("node-index");
-            const instanceId = $consoleBox.data("instance-id");
+            const appId = $consoleBox.data("app-id");
             const logId = $consoleBox.data("log-id");
             const loadedLines = $console.find("p").length;
 
@@ -438,7 +438,7 @@ class DashboardBuilder {
 
             const options = [
                 "command:loadPrevious",
-                "instanceId:" + instanceId,
+                "appId:" + appId,
                 "logId:" + logId,
                 "loadedLines:" + loadedLines
             ];
@@ -452,34 +452,34 @@ class DashboardBuilder {
                 this.viewers.forEach(v => {
                     v.resetCurrentActivityCounts();
                 });
-                this.instances.forEach(instance => {
-                    if (!instance.hidden) {
-                        this.refreshData(instance.id);
+                this.apps.forEach(app => {
+                    if (!app.hidden) {
+                        this.refreshData(app.id);
                     }
                 });
             }
         });
     }
 
-    refreshData(instanceId, dateOffset) {
-        const options = ["instance:" + instanceId];
-        const dateUnit = $(".control-bar[data-instance-id=" + instanceId + "] .date-unit-options").data("unit");
+    refreshData(appId, dateOffset) {
+        const options = ["app:" + appId];
+        const dateUnit = $(".control-bar[data-app-id=" + appId + "] .date-unit-options").data("unit");
         if (dateUnit) options.push("dateUnit:" + dateUnit);
         if (dateOffset === "previous") {
             let maxStartDate = "";
             this.viewers.forEach(v => {
-                const startDate = v.getMaxStartDatetime(instanceId);
+                const startDate = v.getMaxStartDatetime(appId);
                 if (startDate > maxStartDate) maxStartDate = startDate;
             });
             if (maxStartDate) options.push("dateOffset:" + maxStartDate);
             else {
-                $(".control-bar[data-instance-id=" + instanceId + "] .date-offset-options .btn.previous").removeClass("on");
+                $(".control-bar[data-app-id=" + appId + "] .date-offset-options .btn.previous").removeClass("on");
                 return;
             }
         }
         setTimeout(() => {
             this.nodes.forEach(node => {
-                this.viewers[node.index].setLoading(instanceId, true);
+                this.viewers[node.index].setLoading(appId, true);
                 this.clients[node.index].refresh(options);
             });
         }, 50);
@@ -509,10 +509,10 @@ class DashboardBuilder {
 
     clearView() {
         $("#appmon-popup-message").hide();
-        $(".node.tabs .tabs-title.available, .instance.tabs .tabs-title.available, " +
-          ".node.metrics-bar.available, .instance.metrics-bar.available, " +
+        $(".node.tabs .tabs-title.available, .app.tabs .tabs-title.available, " +
+          ".node.metrics-bar.available, .app.metrics-bar.available, " +
           ".event-box.available, .visual-box.available, .chart-box.available, .console-box.available").remove();
-        $(".node.tabs .tabs-title, .instance.tabs .tabs-title, .instance.metrics-bar, .console-box").show();
+        $(".node.tabs .tabs-title, .app.tabs .tabs-title, .app.metrics-bar, .console-box").show();
     }
 
     clearConsole(nodeIndex) {
@@ -529,53 +529,53 @@ class DashboardBuilder {
             this.viewers[node.index].putIndicator$("node", "event", "", $titleTab.find(".indicator"));
             this.addNodeMetricsBar(node);
         });
-        this.instances.forEach(instance => {
-            const $instanceTab = this.addInstanceTab(instance);
-            const $instanceIndicator = $instanceTab.find(".indicator");
-            this.addControlBar(instance);
+        this.apps.forEach(app => {
+            const $appTab = this.addInstanceTab(app);
+            const $appIndicator = $appTab.find(".indicator");
+            this.addControlBar(app);
             this.nodes.forEach(node => {
                 const viewer = this.viewers[node.index];
-                viewer.putIndicator$("instance", "event", instance.id, $instanceIndicator);
-                if (instance.events && instance.events.length) {
-                    const $eventBox = this.addEventBox(node, instance);
-                    instance.events.forEach(event => {
+                viewer.putIndicator$("app", "event", app.id, $appIndicator);
+                if (app.events && app.events.length) {
+                    const $eventBox = this.addEventBox(node, app);
+                    app.events.forEach(event => {
                         if (event.id === "activity") {
-                            const $trackBox = this.addTrackBox($eventBox, node, instance, event);
-                            viewer.putDisplay$(instance.id, event.id, $trackBox);
-                            viewer.putIndicator$(instance.id, "event", event.id, $trackBox.find(".activity-status"));
+                            const $trackBox = this.addTrackBox($eventBox, node, app, event);
+                            viewer.putDisplay$(app.id, event.id, $trackBox);
+                            viewer.putIndicator$(app.id, "event", event.id, $trackBox.find(".activity-status"));
                         } else if (event.id === "session") {
-                            viewer.putDisplay$(instance.id, event.id, this.addSessionBox($eventBox, node, instance, event));
+                            viewer.putDisplay$(app.id, event.id, this.addSessionBox($eventBox, node, app, event));
                         }
                     });
-                    const $visualBox = this.addVisualBox(node, instance);
-                    instance.events.forEach(event => {
+                    const $visualBox = this.addVisualBox(node, app);
+                    app.events.forEach(event => {
                         if (event.id === "activity" || event.id === "session") {
-                            viewer.putChart$(instance.id, event.id, this.addChartBox($visualBox, node, instance, event).find(".chart"));
+                            viewer.putChart$(app.id, event.id, this.addChartBox($visualBox, node, app, event).find(".chart"));
                         }
                     });
                 }
-                if (instance.metrics && instance.metrics.length) {
-                    const $eventBox = $(`.event-box[data-node-index=${node.index}][data-instance-id=${instance.id}]`);
-                    instance.metrics.forEach(metric => {
+                if (app.metrics && app.metrics.length) {
+                    const $eventBox = $(`.event-box[data-node-index=${node.index}][data-app-id=${app.id}]`);
+                    app.metrics.forEach(metric => {
                         const $metric = (metric.heading || !$eventBox.length) ? 
                                        this.addNodeMetric(node, metric) : 
-                                       this.addInstanceMetric($eventBox, node, instance, metric);
-                        viewer.putMetric$(instance.id, metric.id, $metric);
+                                       this.addInstanceMetric($eventBox, node, app, metric);
+                        viewer.putMetric$(app.id, metric.id, $metric);
                     });
                 }
-                instance.logs.forEach(logInfo => {
-                    const $consoleBox = this.addConsoleBox(node, instance, logInfo);
+                app.logs.forEach(logInfo => {
+                    const $consoleBox = this.addConsoleBox(node, app, logInfo);
                     const $console = $consoleBox.find(".console").data("tailing", true);
                     $consoleBox.find(".tailing-status").addClass("on");
-                    viewer.putConsole$(instance.id, logInfo.id, $console);
-                    viewer.putIndicator$(instance.id, "log", logInfo.id, $consoleBox.find(".status-bar"));
+                    viewer.putConsole$(app.id, logInfo.id, $console);
+                    viewer.putIndicator$(app.id, "log", logInfo.id, $consoleBox.find(".status-bar"));
                 });
             });
         });
-        let instanceId = this.changeInstance();
-        if (instanceId && location.hash) {
-            const instanceId2 = location.hash.substring(1);
-            if (instanceId !== instanceId2) this.changeInstance(instanceId2);
+        let appId = this.changeInstance();
+        if (appId && location.hash) {
+            const appId2 = location.hash.substring(1);
+            if (appId !== appId2) this.changeInstance(appId2);
         }
     }
 
@@ -588,11 +588,11 @@ class DashboardBuilder {
         return $tab.show().appendTo($tabs);
     }
 
-    addInstanceTab(instanceInfo) {
-        const $tabs = $(".instance.tabs");
+    addInstanceTab(appInfo) {
+        const $tabs = $(".app.tabs");
         const $tab = $tabs.find(".tabs-title").first().hide().clone().addClass("available")
-            .attr({ "data-instance-id": instanceInfo.id, "title": instanceInfo.title });
-        $tab.find("a .title").text(" " + instanceInfo.title + " ");
+            .attr({ "data-app-id": appInfo.id, "title": appInfo.title });
+        $tab.find("a .title").text(" " + appInfo.title + " ");
         return $tab.show().appendTo($tabs);
     }
 
@@ -615,61 +615,61 @@ class DashboardBuilder {
         return $metric.appendTo($bar).show();
     }
 
-    addControlBar(instanceInfo) {
+    addControlBar(appInfo) {
         const $bar = $(".control-bar");
-        const $newBar = $bar.first().hide().clone().addClass("available").attr("data-instance-id", instanceInfo.id);
+        const $newBar = $bar.first().hide().clone().addClass("available").attr("data-app-id", appInfo.id);
         $newBar.find(".btn.default").text(this.settings.counterPersistInterval + "min.");
         return $newBar.insertAfter($bar.last());
     }
 
-    addEventBox(nodeInfo, instanceInfo) {
+    addEventBox(nodeInfo, appInfo) {
         const $box = $(".event-box").first().hide().clone().addClass("available")
-            .attr({ "data-node-index": nodeInfo.index, "data-instance-id": instanceInfo.id });
+            .attr({ "data-node-index": nodeInfo.index, "data-app-id": appInfo.id });
         const $titleBar = $box.find(".title-bar");
         $titleBar.find("h4").text(nodeInfo.title);
         if (this.nodes.length > 1) $titleBar.find(".number").text(" " + (nodeInfo.index + 1));
         return $box.insertBefore($(".console-box").first());
     }
 
-    addTrackBox($eventBox, nodeInfo, instanceInfo, eventInfo) {
+    addTrackBox($eventBox, nodeInfo, appInfo, eventInfo) {
         const $track = $eventBox.find(".track-box");
         return $track.first().hide().clone().addClass("available")
-            .attr({ "data-node-index": nodeInfo.index, "data-instance-id": instanceInfo.id, "data-event-id": eventInfo.id })
+            .attr({ "data-node-index": nodeInfo.index, "data-app-id": appInfo.id, "data-event-id": eventInfo.id })
             .insertAfter($track.last()).show();
     }
 
-    addInstanceMetric($eventBox, nodeInfo, instanceInfo, metricInfo) {
+    addInstanceMetric($eventBox, nodeInfo, appInfo, metricInfo) {
         const $bar = $eventBox.find(".metrics-bar").show();
         const $metric = $bar.find(".metric").first().hide().clone().addClass("available")
-            .attr({ "data-node-index": nodeInfo.index, "data-instance-id": instanceInfo.id, "data-metric-id": metricInfo.id });
+            .attr({ "data-node-index": nodeInfo.index, "data-app-id": appInfo.id, "data-metric-id": metricInfo.id });
         $metric.find("dt").text(metricInfo.title).attr("title", metricInfo.description);
         return $metric.appendTo($bar).show();
     }
 
-    addSessionBox($eventBox, nodeInfo, instanceInfo, eventInfo) {
+    addSessionBox($eventBox, nodeInfo, appInfo, eventInfo) {
         const $session = $eventBox.find(".session-box");
         return $session.first().hide().clone().addClass("available")
-            .attr({ "data-node-index": nodeInfo.index, "data-instance-id": instanceInfo.id, "data-event-id": eventInfo.id })
+            .attr({ "data-node-index": nodeInfo.index, "data-app-id": appInfo.id, "data-event-id": eventInfo.id })
             .insertAfter($session.last()).show();
     }
 
-    addVisualBox(nodeInfo, instanceInfo) {
+    addVisualBox(nodeInfo, appInfo) {
         return $(".visual-box").first().hide().clone().addClass("available")
-            .attr({ "data-node-index": nodeInfo.index, "data-instance-id": instanceInfo.id })
+            .attr({ "data-node-index": nodeInfo.index, "data-app-id": appInfo.id })
             .insertBefore($(".console-box").first()).show();
     }
 
-    addChartBox($visualBox, nodeInfo, instanceInfo, eventInfo) {
+    addChartBox($visualBox, nodeInfo, appInfo, eventInfo) {
         const $chart = $visualBox.find(".chart-box");
         return $chart.first().hide().clone().addClass("available col-12 col-lg-6")
-            .attr({ "data-node-index": nodeInfo.index, "data-instance-id": instanceInfo.id, "data-event-id": eventInfo.id })
+            .attr({ "data-node-index": nodeInfo.index, "data-app-id": appInfo.id, "data-event-id": eventInfo.id })
             .appendTo($visualBox).show();
     }
 
-    addConsoleBox(nodeInfo, instanceInfo, logInfo) {
+    addConsoleBox(nodeInfo, appInfo, logInfo) {
         const $console = $(".console-box");
         const $newBox = $console.first().hide().clone().addClass("available col-lg-6")
-            .attr({ "data-node-index": nodeInfo.index, "data-instance-id": instanceInfo.id, "data-log-id": logInfo.id });
+            .attr({ "data-node-index": nodeInfo.index, "data-app-id": appInfo.id, "data-log-id": logInfo.id });
         $newBox.find(".status-bar h4").text(nodeInfo.title + " ›› " + logInfo.file);
         return $newBox.insertAfter($console.last());
     }

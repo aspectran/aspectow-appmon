@@ -35,7 +35,7 @@ public interface EventCounter {
      * Gets the identifier of the instance this counter belongs to.
      * @return the instance identifier
      */
-    String getInstanceId();
+    String getAppId();
 
     /**
      * Gets the identifier of the event being counted.

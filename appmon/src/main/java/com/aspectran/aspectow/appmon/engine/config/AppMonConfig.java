@@ -37,19 +37,19 @@ public class AppMonConfig extends DefaultParameters {
 
     private static final ParameterKey pollingConfig;
     private static final ParameterKey counterPersistInterval;
-    private static final ParameterKey instance;
+    private static final ParameterKey app;
 
     private static final ParameterKey[] parameterKeys;
 
     static {
         pollingConfig = new ParameterKey("pollingConfig", PollingConfig.class);
         counterPersistInterval = new ParameterKey("counterPersistInterval", ValueType.INT);
-        instance = new ParameterKey("instances", new String[] {"instance"}, InstanceInfo.class, true, true);
+        app = new ParameterKey("apps", new String[] {"app"}, AppInfo.class, true, true);
 
         parameterKeys = new ParameterKey[] {
                 pollingConfig,
                 counterPersistInterval,
-                instance
+                app
         };
     }
 
@@ -113,20 +113,20 @@ public class AppMonConfig extends DefaultParameters {
      * Gets the list of instance information.
      * @return the list of instance information
      */
-    public List<InstanceInfo> getInstanceInfoList() {
-        return getParametersList(instance);
+    public List<AppInfo> getAppInfoList() {
+        return getParametersList(app);
     }
 
     /**
      * Gets the list of event information for a specific instance.
-     * @param instanceName the name of the instance
+     * @param appId the name of the instance
      * @return the list of event information, or {@code null} if the instance is not found
      */
-    public List<EventInfo> getEventInfoList(String instanceName) {
-        Assert.notNull(instanceName, "instanceName must not be null");
-        for (InstanceInfo instanceInfo : getInstanceInfoList()) {
-            if (instanceName.equals(instanceInfo.getInstanceId())) {
-                return instanceInfo.getEventInfoList();
+    public List<EventInfo> getEventInfoList(String appId) {
+        Assert.notNull(appId, "appId must not be null");
+        for (AppInfo appInfo : getAppInfoList()) {
+            if (appId.equals(appInfo.getAppId())) {
+                return appInfo.getEventInfoList();
             }
         }
         return null;
@@ -134,14 +134,14 @@ public class AppMonConfig extends DefaultParameters {
 
     /**
      * Gets the list of metric information for a specific instance.
-     * @param instanceName the name of the instance
+     * @param appId the name of the instance
      * @return the list of metric information, or {@code null} if the instance is not found
      */
-    public List<MetricInfo> getMetricInfoList(String instanceName) {
-        Assert.notNull(instanceName, "instanceName must not be null");
-        for (InstanceInfo instanceInfo : getInstanceInfoList()) {
-            if (instanceName.equals(instanceInfo.getInstanceId())) {
-                return instanceInfo.getMetricInfoList();
+    public List<MetricInfo> getMetricInfoList(String appId) {
+        Assert.notNull(appId, "appId must not be null");
+        for (AppInfo appInfo : getAppInfoList()) {
+            if (appId.equals(appInfo.getAppId())) {
+                return appInfo.getMetricInfoList();
             }
         }
         return null;
@@ -149,14 +149,14 @@ public class AppMonConfig extends DefaultParameters {
 
     /**
      * Gets the list of log information for a specific instance.
-     * @param instanceName the name of the instance
+     * @param appId the name of the instance
      * @return the list of log information, or {@code null} if the instance is not found
      */
-    public List<LogInfo> getLogInfoList(String instanceName) {
-        Assert.notNull(instanceName, "instanceName must not be null");
-        for (InstanceInfo instanceInfo : getInstanceInfoList()) {
-            if (instanceName.equals(instanceInfo.getInstanceId())) {
-                return instanceInfo.getLogInfoList();
+    public List<LogInfo> getLogInfoList(String appId) {
+        Assert.notNull(appId, "appId must not be null");
+        for (AppInfo appInfo : getAppInfoList()) {
+            if (appId.equals(appInfo.getAppId())) {
+                return appInfo.getLogInfoList();
             }
         }
         return null;

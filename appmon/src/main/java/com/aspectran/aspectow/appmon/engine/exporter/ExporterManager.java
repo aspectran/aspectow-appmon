@@ -44,7 +44,7 @@ public class ExporterManager {
 
     private final AppMonManager appMonManager;
 
-    private final String instanceName;
+    private final String appId;
 
     private Scheduler scheduler;
 
@@ -52,12 +52,12 @@ public class ExporterManager {
      * Instantiates a new ExporterManager.
      * @param exporterType the type of exporters to manage
      * @param appMonManager the main application manager
-     * @param instanceName the name of the instance this manager belongs to
+     * @param appId the name of the instance this manager belongs to
      */
-    public ExporterManager(ExporterType exporterType, AppMonManager appMonManager, String instanceName) {
+    public ExporterManager(ExporterType exporterType, AppMonManager appMonManager, String appId) {
         this.exporterType = exporterType;
         this.appMonManager = appMonManager;
-        this.instanceName = instanceName;
+        this.appId = appId;
     }
 
     /**
@@ -73,7 +73,7 @@ public class ExporterManager {
      * @return the instance name
      */
     public String getInstanceId() {
-        return instanceName;
+        return appId;
     }
 
     /**

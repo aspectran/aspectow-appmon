@@ -46,8 +46,8 @@ class DashboardViewer {
         }
     }
 
-    putDisplay$(instanceId, eventId, $display) {
-        const key = instanceId + ":event:" + eventId;
+    putDisplay$(appId, eventId, $display) {
+        const key = appId + ":event:" + eventId;
         this.displays[key] = $display;
         if ($display.hasClass("track-box")) {
             const canvas = $display.find(".traffic-canvas")[0];
@@ -57,21 +57,21 @@ class DashboardViewer {
         }
     }
 
-    putMetric$(instanceId, metricId, $metric) {
-        this.metrics[instanceId + ":metric:" + metricId] = $metric;
+    putMetric$(appId, metricId, $metric) {
+        this.metrics[appId + ":metric:" + metricId] = $metric;
     }
 
-    putChart$(instanceId, eventId, $chart) {
-        const key = instanceId + ":data:" + eventId;
+    putChart$(appId, eventId, $chart) {
+        const key = appId + ":data:" + eventId;
         this.charts[key] = new DashboardChart($chart, eventId);
     }
 
-    putConsole$(instanceId, logId, $console) {
-        this.consoles[instanceId + ":log:" + logId] = $console;
+    putConsole$(appId, logId, $console) {
+        this.consoles[appId + ":log:" + logId] = $console;
     }
 
-    putIndicator$(instanceId, exporterType, exporterName, $indicator) {
-        this.indicators[instanceId + ":" + exporterType + ":" + exporterName] = $indicator;
+    putIndicator$(appId, exporterType, exporterName, $indicator) {
+        this.indicators[appId + ":" + exporterType + ":" + exporterName] = $indicator;
     }
 
     getDisplay$(key) {
@@ -121,9 +121,9 @@ class DashboardViewer {
         }
     }
 
-    setLoading(instanceId, isLoading) {
+    setLoading(appId, isLoading) {
         for (let key in this.charts) {
-            if (key.startsWith(instanceId + ":")) {
+            if (key.startsWith(appId + ":")) {
                 const dashboardChart = this.charts[key];
                 const $chartBox = dashboardChart.$container.closest(".chart-box");
                 const $overlay = $chartBox.find(".loading-overlay");
@@ -287,7 +287,7 @@ class DashboardViewer {
             return;
         }
 
-        const instanceId = message.substring(0, idx1);
+        const appId = message.substring(0, idx1);
         let exporterType = message.substring(idx1 + 1, idx2);
         const exporterName = message.substring(idx2 + 1, idx3);
 
@@ -298,38 +298,38 @@ class DashboardViewer {
             subType = parts[1];
         }
 
-        const exporterKey = instanceId + ":" + exporterType + ":" + exporterName;
+        const exporterKey = appId + ":" + exporterType + ":" + exporterName;
         const messageContent = message.substring(idx3 + 1);
 
         switch (exporterType) {
             case "event":
                 if (messageContent.length) {
                     const eventData = JSON.parse(messageContent);
-                    this.processEventData(instanceId, exporterType, exporterName, exporterKey, eventData);
+                    this.processEventData(appId, exporterType, exporterName, exporterKey, eventData);
                 }
                 break;
             case "data":
                 if (messageContent.length) {
                     if (subType === "chart") {
                         const chartData = JSON.parse(messageContent);
-                        this.processChartData(instanceId, exporterType, exporterName, exporterKey, chartData);
+                        this.processChartData(appId, exporterType, exporterName, exporterKey, chartData);
                     }
                 }
                 break;
             case "metric":
                 if (messageContent.length) {
                     const metricData = JSON.parse(messageContent);
-                    this.processMetricData(instanceId, exporterType, exporterName, exporterKey, metricData);
+                    this.processMetricData(appId, exporterType, exporterName, exporterKey, metricData);
                 }
                 break;
             case "log":
-                this.printLogMessage(instanceId, exporterType, exporterName, exporterKey, messageContent, subType);
+                this.printLogMessage(appId, exporterType, exporterName, exporterKey, messageContent, subType);
                 break;
         }
     }
 
-    printLogMessage(instanceId, exporterType, logId, exporterKey, messageContent, subType) {
-        this.indicate(instanceId, exporterType, logId);
+    printLogMessage(appId, exporterType, logId, exporterKey, messageContent, subType) {
+        this.indicate(appId, exporterType, logId);
         const $console = this.getConsole$(exporterKey);
         if ($console) {
             if (subType === "p") {
@@ -363,10 +363,10 @@ class DashboardViewer {
         }
     }
 
-    processEventData(instanceId, exporterType, eventId, exporterKey, eventData) {
+    processEventData(appId, exporterType, eventId, exporterKey, eventData) {
         switch (eventId) {
             case "activity":
-                this.indicate(instanceId, exporterType, eventId);
+                this.indicate(appId, exporterType, eventId);
                 if (eventData.activities) {
                     this.printActivityStatus(exporterKey, eventData.activities);
                 }
@@ -392,7 +392,7 @@ class DashboardViewer {
                     this.printCurrentActivityCount(exporterKey, 0);
                 }
                 this.updateActivityCount(
-                    instanceId + ":" + exporterType + ":session",
+                    appId + ":" + exporterType + ":session",
                     eventData.sessionId,
                     eventData.activityCount || 0);
                 break;
@@ -402,7 +402,7 @@ class DashboardViewer {
         }
     }
 
-    processMetricData(instanceId, exporterType, metricId, exporterKey, metricData) {
+    processMetricData(appId, exporterType, metricId, exporterKey, metricData) {
         const $metric = this.getMetric$(exporterKey);
         if ($metric) {
             let formatted = metricData.format;
@@ -455,12 +455,12 @@ class DashboardViewer {
         this.activeBulletCount = 0;
     }
 
-    indicate(instanceId, exporterType, exporterName) {
+    indicate(appId, exporterType, exporterName) {
         this.blink(this.getIndicator$("node:event:"));
         if (this.visible) {
-            this.blink(this.getIndicator$("instance:event:" + instanceId));
+            this.blink(this.getIndicator$("app:event:" + appId));
             if (exporterType === "log") {
-                this.blink(this.getIndicator$(instanceId + ":log:" + exporterName));
+                this.blink(this.getIndicator$(appId + ":log:" + exporterName));
             }
         }
     }
@@ -654,13 +654,13 @@ class DashboardViewer {
         }
     }
 
-    processChartData(instanceId, exporterType, eventId, exporterKey, chartData) {
+    processChartData(appId, exporterType, eventId, exporterKey, chartData) {
         const dashboardChart = this.getChart$(exporterKey);
         if (!dashboardChart) return;
-        this.setLoading(instanceId, false);
+        this.setLoading(appId, false);
 
         if (eventId === "activity") {
-            const prefix = instanceId + ":event:" + eventId;
+            const prefix = appId + ":event:" + eventId;
             if (!dashboardChart.isDrawn()) this.resetInterimTimer(prefix);
             else if (chartData.rolledUp) {
                 this.resetInterimTimer(prefix);
@@ -686,7 +686,7 @@ class DashboardViewer {
             } else if (this.client) {
                 setTimeout(() => {
                     const options = [
-                        "instanceId:" + instanceId,
+                        "appId:" + appId,
                         "dateUnit:" + dateUnit,
                         "timeZone:" + Intl.DateTimeFormat().resolvedOptions().timeZone
                     ];
@@ -729,10 +729,10 @@ class DashboardViewer {
         return maxLabels;
     }
 
-    getMaxStartDatetime(instanceId) {
+    getMaxStartDatetime(appId) {
         let result = "";
         for (let key in this.charts) {
-            if (key.startsWith(instanceId + ":")) {
+            if (key.startsWith(appId + ":")) {
                 const dashboardChart = this.charts[key];
                 if (dashboardChart && dashboardChart.isDrawn()) {
                     const labels = dashboardChart.getLabels();

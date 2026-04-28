@@ -15,8 +15,8 @@
  */
 package com.aspectran.aspectow.appmon.engine.manager;
 
-import com.aspectran.aspectow.appmon.engine.config.InstanceInfo;
-import com.aspectran.aspectow.appmon.engine.config.InstanceInfoHolder;
+import com.aspectran.aspectow.appmon.engine.config.AppInfo;
+import com.aspectran.aspectow.appmon.engine.config.AppInfoHolder;
 import com.aspectran.aspectow.appmon.engine.config.PollingConfig;
 import com.aspectran.aspectow.appmon.engine.persist.PersistManager;
 import com.aspectran.aspectow.appmon.engine.relay.MessageRelayManager;
@@ -48,7 +48,7 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final NodeInfoHolder nodeInfoHolder;
 
-    private final InstanceInfoHolder instanceInfoHolder;
+    private final AppInfoHolder appInfoHolder;
 
     private final MessageRelayManager messageRelayManager;
 
@@ -60,20 +60,20 @@ public class AppMonManager extends InstantActivitySupport {
      * @param pollingConfig the polling configuration
      * @param counterPersistInterval the counter persistence interval in minutes
      * @param nodeInfoHolder the holder for domain information
-     * @param instanceInfoHolder the holder for instance information
+     * @param appInfoHolder the holder for instance information
      */
     public AppMonManager(
             String nodeId,
             PollingConfig pollingConfig,
             int counterPersistInterval,
             NodeInfoHolder nodeInfoHolder,
-            InstanceInfoHolder instanceInfoHolder,
+            AppInfoHolder appInfoHolder,
             MessageRelayManager messageRelayManager) {
         this.nodeId = nodeId;
         this.pollingConfig = pollingConfig;
         this.counterPersistInterval = counterPersistInterval;
         this.nodeInfoHolder = nodeInfoHolder;
-        this.instanceInfoHolder = instanceInfoHolder;
+        this.appInfoHolder = appInfoHolder;
         this.messageRelayManager = messageRelayManager;
         this.persistManager = new PersistManager();
     }
@@ -126,28 +126,28 @@ public class AppMonManager extends InstantActivitySupport {
      * Gets the list of all instance information.
      * @return the list of instance information
      */
-    public List<InstanceInfo> getInstanceInfoList() {
-        return instanceInfoHolder.getInstanceInfoList();
+    public List<AppInfo> getAppInfoList() {
+        return appInfoHolder.getAppInfoList();
     }
 
     /**
      * Gets the list of instance information for the specified instance IDs.
-     * @param instanceIds an array of instance IDs
+     * @param appIds an array of instance IDs
      * @return a list of matching instance information
      */
-    public List<InstanceInfo> getInstanceInfoList(String[] instanceIds) {
-        return instanceInfoHolder.getInstanceInfoList(instanceIds);
+    public List<AppInfo> getAppInfoList(String[] appIds) {
+        return appInfoHolder.getAppInfoList(appIds);
     }
 
     /**
      * Verifies the given instance IDs against the configured instances and returns the valid ones.
-     * @param instanceIds an array of instance IDs to verify
+     * @param appIds an array of instance IDs to verify
      * @return an array of verified instance IDs
      */
-    public String[] getVerifiedInstanceIds(String[] instanceIds) {
-        List<InstanceInfo> infoList = getInstanceInfoList(instanceIds);
+    public String[] getVerifiedAppIds(String[] appIds) {
+        List<AppInfo> infoList = getAppInfoList(appIds);
         if (!infoList.isEmpty()) {
-            return InstanceInfoHolder.extractInstanceIds(infoList);
+            return AppInfoHolder.extractAppIds(infoList);
         } else {
             return new String[0];
         }

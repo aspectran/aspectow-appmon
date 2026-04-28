@@ -22,14 +22,14 @@ import com.aspectran.utils.apon.ValueType;
 import java.util.List;
 
 /**
- * Contains configuration for a monitored application instance.
+ * Contains configuration for a monitored application.
  *
- * <p>An instance represents a logical application unit within a node,
+ * <p>An app represents a logical application unit within a node,
  * aggregating various monitoring components such as events, metrics, and logs.</p>
  *
  * <p>Created: 2020/02/12</p>
  */
-public class InstanceInfo extends DefaultParameters {
+public class AppInfo extends DefaultParameters {
 
     private static final ParameterKey id;
     private static final ParameterKey title;
@@ -61,14 +61,14 @@ public class InstanceInfo extends DefaultParameters {
     private String nodeId;
 
     /**
-     * Instantiates a new InstanceInfo.
+     * Instantiates a new AppInfo.
      */
-    public InstanceInfo() {
+    public AppInfo() {
         super(parameterKeys);
     }
 
     /**
-     * Returns the identifier of the node to which this instance belongs.
+     * Returns the identifier of the node to which this app belongs.
      * @return the node identifier
      */
     public String getNodeId() {
@@ -76,7 +76,7 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the identifier of the node to which this instance belongs.
+     * Sets the identifier of the node to which this app belongs.
      * @param nodeId the node identifier
      */
     public void setNodeId(String nodeId) {
@@ -84,39 +84,39 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Returns the unique identifier of the application instance.
-     * @return the instance identifier
+     * Returns the unique identifier of the application.
+     * @return the app identifier
      */
-    public String getInstanceId() {
+    public String getAppId() {
         return getString(id);
     }
 
     /**
-     * Sets the unique identifier of the application instance.
-     * @param instanceId the instance identifier
+     * Sets the unique identifier of the application.
+     * @param appId the app identifier
      */
-    public void setInstanceId(String instanceId) {
-        putValue(InstanceInfo.id, instanceId);
+    public void setAppId(String appId) {
+        putValue(AppInfo.id, appId);
     }
 
     /**
-     * Returns the display title of the application instance.
-     * @return the instance title
+     * Returns the display title of the application.
+     * @return the app title
      */
     public String getTitle() {
         return getString(title);
     }
 
     /**
-     * Sets the display title of the application instance.
-     * @param name the instance title
+     * Sets the display title of the application.
+     * @param name the app title
      */
     public void setTitle(String name) {
-        putValue(InstanceInfo.title, name);
+        putValue(AppInfo.title, name);
     }
 
     /**
-     * Returns whether the application instance should be hidden from the monitoring dashboard.
+     * Returns whether the application should be hidden from the monitoring dashboard.
      * @return {@code true} if hidden, {@code false} otherwise
      */
     public boolean isHidden() {
@@ -124,15 +124,15 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Sets whether the application instance should be hidden from the monitoring dashboard.
+     * Sets whether the application should be hidden from the monitoring dashboard.
      * @param hidden {@code true} to hide, {@code false} to show
      */
     public void setHidden(boolean hidden) {
-        putValue(InstanceInfo.hidden, hidden);
+        putValue(AppInfo.hidden, hidden);
     }
 
     /**
-     * Returns the list of event configurations defined for this application instance.
+     * Returns the list of event configurations defined for this application.
      * @return a list of {@link EventInfo}
      */
     public List<EventInfo> getEventInfoList() {
@@ -140,15 +140,15 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the list of event configurations defined for this application instance.
+     * Sets the list of event configurations defined for this application.
      * @param eventInfoList a list of {@link EventInfo}
      */
     public void setEventInfoList(List<EventInfo> eventInfoList) {
-        putValue(InstanceInfo.event, eventInfoList);
+        putValue(AppInfo.event, eventInfoList);
     }
 
     /**
-     * Returns the list of metric configurations defined for this application instance.
+     * Returns the list of metric configurations defined for this application.
      * @return a list of {@link MetricInfo}
      */
     public List<MetricInfo> getMetricInfoList() {
@@ -156,15 +156,15 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the list of metric configurations defined for this application instance.
+     * Sets the list of metric configurations defined for this application.
      * @param metricInfoList a list of {@link MetricInfo}
      */
     public void setMetricInfoList(List<MetricInfo> metricInfoList) {
-        putValue(InstanceInfo.metric, metricInfoList);
+        putValue(AppInfo.metric, metricInfoList);
     }
 
     /**
-     * Returns the list of log configurations defined for this application instance.
+     * Returns the list of log configurations defined for this application.
      * @return a list of {@link LogInfo}
      */
     public List<LogInfo> getLogInfoList() {
@@ -172,11 +172,11 @@ public class InstanceInfo extends DefaultParameters {
     }
 
     /**
-     * Sets the list of log configurations defined for this application instance.
+     * Sets the list of log configurations defined for this application.
      * @param logInfoList a list of {@link LogInfo}
      */
     public void setLogInfoList(List<LogInfo> logInfoList) {
-        putValue(InstanceInfo.log, logInfoList);
+        putValue(AppInfo.log, logInfoList);
     }
 
 }

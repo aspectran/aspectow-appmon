@@ -31,9 +31,9 @@ public interface RelaySession {
 
     /**
      * Sets the names of the instances that this session has joined.
-     * @param instanceIds an array of instance IDs
+     * @param appIds an array of instance IDs
      */
-    void setJoinedInstances(String[] instanceIds);
+    void setJoinedInstances(String[] appIds);
 
     /**
      * Removes the joined instances from this session.

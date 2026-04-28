@@ -48,8 +48,8 @@ public abstract class AbstractEventCounter implements EventCounter {
     }
 
     @Override
-    public String getInstanceId() {
-        return eventInfo.getInstanceId();
+    public String getAppId() {
+        return eventInfo.getAppId();
     }
 
     @Override

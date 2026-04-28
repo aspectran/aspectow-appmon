@@ -37,8 +37,8 @@ public class CommandOptions extends DefaultParameters {
     public static final String COMMAND_LOAD_PREVIOUS = "loadPrevious";
 
     private static final ParameterKey command;
-    private static final ParameterKey instancesToJoin;
-    private static final ParameterKey instance;
+    private static final ParameterKey appsToJoin;
+    private static final ParameterKey app;
     private static final ParameterKey logName;
     private static final ParameterKey loadedLines;
     private static final ParameterKey timeZone;
@@ -49,8 +49,8 @@ public class CommandOptions extends DefaultParameters {
 
     static {
         command = new ParameterKey("command", ValueType.STRING);
-        instancesToJoin = new ParameterKey("instancesToJoin", ValueType.STRING);
-        instance = new ParameterKey("instance", ValueType.STRING);
+        appsToJoin = new ParameterKey("appsToJoin", ValueType.STRING);
+        app = new ParameterKey("app", ValueType.STRING);
         timeZone = new ParameterKey("timeZone", ValueType.STRING);
         dateUnit = new ParameterKey("dateUnit", ValueType.STRING);
         dateOffset = new ParameterKey("dateOffset", ValueType.STRING);
@@ -59,8 +59,8 @@ public class CommandOptions extends DefaultParameters {
 
         parameterKeys = new ParameterKey[] {
                 command,
-                instancesToJoin,
-                instance,
+                appsToJoin,
+                app,
                 timeZone,
                 dateUnit,
                 dateOffset,
@@ -127,32 +127,32 @@ public class CommandOptions extends DefaultParameters {
      * Returns the list of instances to join, usually as a comma-separated string.
      * @return the instances to join
      */
-    public String getInstancesToJoin() {
-        return getString(instancesToJoin);
+    public String getAppsToJoin() {
+        return getString(appsToJoin);
     }
 
     /**
      * Sets the list of instances to join.
-     * @param instancesToJoin the instances to join
+     * @param appsToJoin the instances to join
      */
-    public void setInstancesToJoin(String instancesToJoin) {
-        putValue(CommandOptions.instancesToJoin, instancesToJoin);
+    public void setAppsToJoin(String appsToJoin) {
+        putValue(CommandOptions.appsToJoin, appsToJoin);
     }
 
     /**
      * Returns the specific instance name.
      * @return the instance name
      */
-    public String getInstance() {
-        return getString(instance);
+    public String getApp() {
+        return getString(app);
     }
 
     /**
      * Sets the specific instance name.
-     * @param instance the instance name
+     * @param app the instance name
      */
-    public void setInstance(String instance) {
-        putValue(CommandOptions.instance, instance);
+    public void setApp(String app) {
+        putValue(CommandOptions.app, app);
     }
 
     /**

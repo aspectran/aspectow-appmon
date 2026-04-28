@@ -17,8 +17,8 @@ package com.aspectran.aspectow.appmon.engine.manager;
 
 import com.aspectran.aspectow.appmon.engine.config.AppMonConfig;
 import com.aspectran.aspectow.appmon.engine.config.EventInfo;
-import com.aspectran.aspectow.appmon.engine.config.InstanceInfo;
-import com.aspectran.aspectow.appmon.engine.config.InstanceInfoHolder;
+import com.aspectran.aspectow.appmon.engine.config.AppInfo;
+import com.aspectran.aspectow.appmon.engine.config.AppInfoHolder;
 import com.aspectran.aspectow.appmon.engine.config.LogInfo;
 import com.aspectran.aspectow.appmon.engine.config.MetricInfo;
 import com.aspectran.aspectow.appmon.engine.config.PollingConfig;
@@ -68,22 +68,22 @@ public abstract class AppMonManagerBuilder {
 
         AppMonManager appMonManager = createAppMonManager(context, appMonConfig);
 
-        for (InstanceInfo instanceInfo : appMonConfig.getInstanceInfoList()) {
-            String instanceName = instanceInfo.getInstanceId();
+        for (AppInfo appInfo : appMonConfig.getAppInfoList()) {
+            String appId = appInfo.getAppId();
 
-            List<EventInfo> eventInfoList = appMonConfig.getEventInfoList(instanceName);
+            List<EventInfo> eventInfoList = appMonConfig.getEventInfoList(appId);
             if (eventInfoList != null && !eventInfoList.isEmpty()) {
-                buildEventExporters(appMonManager, instanceName, eventInfoList);
+                buildEventExporters(appMonManager, appId, eventInfoList);
             }
 
-            List<MetricInfo> metricInfoList = appMonConfig.getMetricInfoList(instanceName);
+            List<MetricInfo> metricInfoList = appMonConfig.getMetricInfoList(appId);
             if (metricInfoList != null && !metricInfoList.isEmpty()) {
-                buildMetricExporters(appMonManager, instanceName, metricInfoList);
+                buildMetricExporters(appMonManager, appId, metricInfoList);
             }
 
-            List<LogInfo> logInfoList = appMonConfig.getLogInfoList(instanceName);
+            List<LogInfo> logInfoList = appMonConfig.getLogInfoList(appId);
             if (logInfoList != null && !logInfoList.isEmpty()) {
-                buildLogExporters(appMonManager, instanceName, logInfoList);
+                buildLogExporters(appMonManager, appId, logInfoList);
             }
         }
 
@@ -92,10 +92,10 @@ public abstract class AppMonManagerBuilder {
 
     private static void buildEventExporters(
             AppMonManager appMonManager,
-            String instanceName,
+            String appId,
             @NonNull List<EventInfo> eventInfoList) throws Exception {
-        ExporterManager eventExporterManager = new ExporterManager(ExporterType.EVENT, appMonManager, instanceName);
-        ExporterManager dataExporterManager = new ExporterManager(ExporterType.DATA, appMonManager, instanceName);
+        ExporterManager eventExporterManager = new ExporterManager(ExporterType.EVENT, appMonManager, appId);
+        ExporterManager dataExporterManager = new ExporterManager(ExporterType.DATA, appMonManager, appId);
         for (EventInfo eventInfo : eventInfoList) {
             eventInfo.validateRequiredParameters();
 
@@ -120,9 +120,9 @@ public abstract class AppMonManagerBuilder {
 
     private static void buildMetricExporters(
             AppMonManager appMonManager,
-            String instanceId,
+            String appId,
             @NonNull List<MetricInfo> metricInfoList) throws Exception {
-        ExporterManager metricExporterManager = new ExporterManager(ExporterType.METRIC, appMonManager, instanceId);
+        ExporterManager metricExporterManager = new ExporterManager(ExporterType.METRIC, appMonManager, appId);
         for (MetricInfo metricInfo : metricInfoList) {
             metricInfo.validateRequiredParameters();
 
@@ -134,9 +134,9 @@ public abstract class AppMonManagerBuilder {
 
     private static void buildLogExporters(
             AppMonManager appMonManager,
-            String instanceName,
+            String appId,
             @NonNull List<LogInfo> logInfoList) throws Exception {
-        ExporterManager logExporterManager = new ExporterManager(ExporterType.LOG, appMonManager, instanceName);
+        ExporterManager logExporterManager = new ExporterManager(ExporterType.LOG, appMonManager, appId);
         for (LogInfo logInfo : logInfoList) {
             logInfo.validateRequiredParameters();
 
@@ -160,13 +160,13 @@ public abstract class AppMonManagerBuilder {
         PollingConfig pollingConfig = appMonConfig.touchPollingConfig();
         int counterPersistInterval = appMonConfig.getCounterPersistInterval(DEFAULT_SAMPLE_INTERVAL_IN_MINUTES);
 
-        InstanceInfoHolder instanceInfoHolder = new InstanceInfoHolder(nodeId, appMonConfig.getInstanceInfoList());
+        AppInfoHolder appInfoHolder = new AppInfoHolder(nodeId, appMonConfig.getAppInfoList());
 
-        MessageRelayManager messageRelayManager = new MessageRelayManager(instanceInfoHolder, nodeManager.getRedisMessagePublisher());
+        MessageRelayManager messageRelayManager = new MessageRelayManager(appInfoHolder, nodeManager.getRedisMessagePublisher());
 
         AppMonManager appMonManager = new AppMonManager(
                 nodeId, pollingConfig, counterPersistInterval,
-                nodeInfoHolder, instanceInfoHolder, messageRelayManager);
+                nodeInfoHolder, appInfoHolder, messageRelayManager);
         appMonManager.setActivityContext(context);
 
         if (nodeManager.getRedisMessageSubscriber() != null) {

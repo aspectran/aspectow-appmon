@@ -45,7 +45,7 @@
                 </div>
             </div>
         </div>
-        <ul class="instance tabs nav nav-tabs mt-3">
+        <ul class="app tabs nav nav-tabs mt-3">
             <li class="tabs-title nav-item">
                 <a class="nav-link"><i class="bi bi-box"></i> <span class="title">Instance</span> <i class="indicator bi bi-lightning-charge-fill"></i></a>
             </li>
@@ -90,7 +90,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="instance metrics-bar">
+                <div class="app metrics-bar">
                     <div class="metric">
                         <dl>
                             <dt></dt>
@@ -173,7 +173,7 @@
     <script layout:fragment="script" th:inline="javascript">
     $(function () {
         const BASE_PATH = [[@{/}]].replace(/\/$/, '');
-        const INSTANCES = [[${page.instances}]];
+        const INSTANCES = [[${page.apps}]];
         const options = {
             // flagsUrl: "https://cdn.jsdelivr.net/gh/aspectran/aspectran-assets@main/assets/countries/flags/"
         };

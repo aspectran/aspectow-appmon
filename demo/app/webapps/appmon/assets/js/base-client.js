@@ -22,9 +22,9 @@ class BaseClient {
 
     /**
      * Starts the client connection.
-     * @param {string} [instancesToJoin] - Names of instances to join.
+     * @param {string} [appsToJoin] - Names of apps to join.
      */
-    start(instancesToJoin) {
+    start(appsToJoin) {
         throw new Error("Method 'start()' must be implemented.");
     }
 
@@ -53,16 +53,16 @@ class BaseClient {
 
     /**
      * Handles reconnection logic when a connection is lost or fails.
-     * @param {string} [instancesToJoin] - Names of instances to join.
+     * @param {string} [appsToJoin] - Names of apps to join.
      */
-    rejoin(instancesToJoin) {
+    rejoin(appsToJoin) {
         if (this.retryCount++ < this.maxRetries) {
             const retryInterval = (this.retryInterval * this.retryCount) + (this.node.index * 200) + this.node.random1000;
             const status = "(" + this.retryCount + "/" + this.maxRetries + ", interval=" + retryInterval + ")";
             console.log(this.node.id, "trying to reconnect", status);
             this.viewer.printMessage("Trying to reconnect... " + status);
             setTimeout(() => {
-                this.start(instancesToJoin);
+                this.start(appsToJoin);
             }, retryInterval);
         } else {
             console.log(this.node.id, "abort reconnect attempt");

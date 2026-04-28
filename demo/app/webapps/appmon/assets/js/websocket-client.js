@@ -17,8 +17,8 @@ class WebsocketClient extends BaseClient {
         this.established = false;
     }
 
-    start(instancesToJoin) {
-        this.openSocket(instancesToJoin);
+    start(appsToJoin) {
+        this.openSocket(appsToJoin);
     }
 
     stop() {
@@ -39,7 +39,7 @@ class WebsocketClient extends BaseClient {
         }
     }
 
-    openSocket(instancesToJoin) {
+    openSocket(appsToJoin) {
         this.closeSocket(false);
         const url = new URL(this.node.endpoint.path + "/appmon/websocket/" + this.node.endpoint.token, location.href);
         url.protocol = url.protocol.replace("https:", "wss:").replace("http:", "ws:");
@@ -53,8 +53,8 @@ class WebsocketClient extends BaseClient {
                 "command:join",
                 "timeZone:" + Intl.DateTimeFormat().resolvedOptions().timeZone
             ];
-            if (instancesToJoin) {
-                options.push("instancesToJoin:" + instancesToJoin);
+            if (appsToJoin) {
+                options.push("appsToJoin:" + appsToJoin);
             }
             this.socket.send(options.join(";"));
             this.heartbeatPing();
@@ -95,7 +95,7 @@ class WebsocketClient extends BaseClient {
                     this.viewer.printMessage("Socket connection closed.");
                 }
                 if (event.code !== 1000) {
-                    this.rejoin(instancesToJoin);
+                    this.rejoin(appsToJoin);
                 }
             }
         };

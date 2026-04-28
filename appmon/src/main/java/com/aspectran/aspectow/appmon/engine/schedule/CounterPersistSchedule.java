@@ -90,7 +90,7 @@ public class CounterPersistSchedule {
         appMonManager.instantActivity(() -> {
             for (EventCounter eventCounter : counterPersist.getEventCounterList()) {
                 EventCountVO vo = dao.getLastEventCount(
-                        currentNodeId, eventCounter.getInstanceId(), eventCounter.getEventId());
+                        currentNodeId, eventCounter.getAppId(), eventCounter.getEventId());
                 if (vo != null) {
                     eventCounter.reset(vo.getDatetime(), vo.getTotal(), vo.getDelta(), vo.getError());
                 } else {
@@ -148,7 +148,7 @@ public class CounterPersistSchedule {
                 if (eventCountVO == null) {
                     eventCountVO = createEventCountVO(datetime);
                 }
-                eventCountVO.setInstanceId(eventCounter.getInstanceId());
+                eventCountVO.setInstanceId(eventCounter.getAppId());
                 eventCountVO.setEventId(eventCounter.getEventId());
                 eventCountVO.setTotal(eventCount.getTallied().getTotal());
                 eventCountVO.setDelta(eventCount.getTallied().getDelta());
