@@ -8,7 +8,7 @@ pollingConfig: {
     initialBufferSize: 9999
 }
 counterPersistInterval: 1
-instance: {
+app: {
     id: root
     title: Root
     event: {
@@ -52,7 +52,7 @@ instance: {
         lastLines: 1000
     }
 }
-instance: {
+app: {
     id: appmon
     title: AppMon
     event: {
@@ -80,7 +80,7 @@ instance: {
         lastLines: 1000
     }
 }
-instance: {
+app: {
     id: jpetstore
     title: JPetStore
     log: {
@@ -96,7 +96,7 @@ instance: {
         lastLines: 1000
     }
 }
-instance: {
+app: {
     id: demo
     title: Demo
     log: {
