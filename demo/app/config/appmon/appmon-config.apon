@@ -60,7 +60,7 @@ app: {
         target: appmon
         parameters: {
             +: /**
-            -: /backend/polling/**
+            -: /nodes/**/appmon/polling/**  # Ignore polling requests
         }
     }
     event: {

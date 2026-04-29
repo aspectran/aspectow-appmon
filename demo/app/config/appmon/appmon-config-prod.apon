@@ -7,22 +7,6 @@ pollingConfig: {
     # The initial capacity of the shared message buffer
     initialBufferSize: 9999
 }
-domain: {
-    id: backend1
-    title: Server-1
-    endpoint: {
-        mode: auto
-        url: /appmon/backend1
-    }
-}
-domain: {
-    id: backend2
-    title: Server-2
-    endpoint: {
-        mode: auto
-        url: /appmon/backend2
-    }
-}
 app: {
     id: root
     title: Root
@@ -76,6 +60,7 @@ app: {
         target: appmon
         parameters: {
             +: /**
+            -: /nodes/**/appmon/polling/**  # Ignore polling requests
         }
     }
     event: {

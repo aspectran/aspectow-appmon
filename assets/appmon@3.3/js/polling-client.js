@@ -7,17 +7,17 @@
  * HTTP Polling implementation of the AppMon client.
  */
 class PollingClient extends BaseClient {
-    constructor(domain, viewer, onJoined, onEstablished, onClosed, onFailed) {
-        super(domain, viewer, onJoined, onEstablished, onClosed, onFailed);
+    constructor(node, viewer, onJoined, onEstablished, onClosed, onFailed) {
+        super(node, viewer, onJoined, onEstablished, onClosed, onFailed);
         this.endpointMode = "polling";
         this.commands = [];
         this.pollingTimer = null;
         this.stopped = false;
     }
 
-    start(instancesToJoin) {
+    start(appsToJoin) {
         this.stopped = false;
-        this.join(instancesToJoin);
+        this.join(appsToJoin);
     }
 
     stop() {
@@ -52,43 +52,43 @@ class PollingClient extends BaseClient {
         }
     }
 
-    join(instancesToJoin) {
+    join(appsToJoin) {
         $.ajax({
-            url: this.domain.endpoint.url + "/polling/join",
+            url: this.node.endpoint.path + "/appmon/polling/join",
             type: "post",
             dataType: "json",
             data: {
                 timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                instances: instancesToJoin
+                apps: appsToJoin
             },
             success: (data) => {
                 if (data) {
                     this.retryCount = 0;
-                    this.domain.endpoint['mode'] = this.endpointMode;
-                    this.domain.endpoint['pollingInterval'] = data.pollingInterval;
+                    this.node.endpoint['mode'] = this.endpointMode;
+                    this.node.endpoint['pollingInterval'] = data.pollingInterval;
                     if (this.onJoined) {
-                        this.onJoined(this.domain, data);
+                        this.onJoined(this.node, data);
                     }
                     if (this.onEstablished) {
-                        this.onEstablished(this.domain);
+                        this.onEstablished(this.node);
                     }
                     this.viewer.printMessage("Polling every " + data.pollingInterval + " milliseconds.");
-                    this.polling(instancesToJoin);
+                    this.polling(appsToJoin);
                 } else {
-                    console.log(this.domain.name, "connection failed");
+                    console.log(this.node.id, "connection failed");
                     this.viewer.printErrorMessage("Connection failed.");
-                    this.rejoin(instancesToJoin);
+                    this.rejoin(appsToJoin);
                 }
             },
             error: (xhr, status, error) => {
-                console.log(this.domain.name, "connection failed", error);
+                console.log(this.node.id, "connection failed", error);
                 this.viewer.printErrorMessage("Connection failed.");
-                this.rejoin(instancesToJoin);
+                this.rejoin(appsToJoin);
             }
         });
     }
 
-    polling(instancesToJoin) {
+    polling(appsToJoin) {
         if (this.stopped) return;
         let withCommands = null;
         if (this.commands.length) {
@@ -96,7 +96,7 @@ class PollingClient extends BaseClient {
             this.commands.length = 0;
         }
         $.ajax({
-            url: this.domain.endpoint.url + "/polling/pull",
+            url: this.node.endpoint.path + "/appmon/polling/pull",
             type: "get",
             cache: false,
             data: withCommands ? {
@@ -107,47 +107,47 @@ class PollingClient extends BaseClient {
                 if (data && data.messages) {
                     data.messages.forEach(msg => this.viewer.processMessage(msg));
                     this.pollingTimer = setTimeout(() => {
-                        this.polling(instancesToJoin);
-                    }, this.domain.endpoint.pollingInterval);
+                        this.polling(appsToJoin);
+                    }, this.node.endpoint.pollingInterval);
                 } else {
-                    console.log(this.domain.name, "connection lost");
+                    console.log(this.node.id, "connection lost");
                     this.viewer.printErrorMessage("Connection lost.");
                     if (this.onClosed) {
-                        this.onClosed(this.domain);
+                        this.onClosed(this.node);
                     }
-                    this.rejoin(instancesToJoin);
+                    this.rejoin(appsToJoin);
                 }
             },
             error: (xhr, status, error) => {
                 if (this.stopped) return;
-                console.log(this.domain.name, "connection lost", error);
+                console.log(this.node.id, "connection lost", error);
                 this.viewer.printErrorMessage("Connection lost.");
                 if (this.onClosed) {
-                    this.onClosed(this.domain);
+                    this.onClosed(this.node);
                 }
-                this.rejoin(instancesToJoin);
+                this.rejoin(appsToJoin);
             }
         });
     }
 
     changePollingInterval(speed) {
         $.ajax({
-            url: this.domain.endpoint.url + "/polling/interval",
+            url: this.node.endpoint.path + "/appmon/polling/interval",
             type: "post",
             dataType: "json",
             data: { speed: speed },
             success: (data) => {
                 if (data && data.pollingInterval) {
-                    this.domain.endpoint.pollingInterval = data.pollingInterval;
-                    console.log(this.domain.name, "pollingInterval", data.pollingInterval);
+                    this.node.endpoint.pollingInterval = data.pollingInterval;
+                    console.log(this.node.id, "pollingInterval", data.pollingInterval);
                     this.viewer.printMessage("Polling every " + data.pollingInterval + " milliseconds.");
                 } else {
-                    console.log(this.domain.name, "failed to change polling interval");
+                    console.log(this.node.id, "failed to change polling interval");
                     this.viewer.printMessage("Failed to change polling interval.");
                 }
             },
             error: (xhr, status, error) => {
-                console.log(this.domain.name, "failed to change polling interval", error);
+                console.log(this.node.id, "failed to change polling interval", error);
                 this.viewer.printMessage("Failed to change polling interval.");
             }
         });

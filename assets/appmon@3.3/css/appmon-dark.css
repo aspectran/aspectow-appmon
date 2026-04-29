@@ -10,18 +10,18 @@
     .metrics-bar {
         background-color: #52595e;
     }
-    .domain.metrics-bar {
+    .node.metrics-bar {
         border-bottom: 1px solid #353b3e;
         background-color: #24282b;
         box-shadow: none;
     }
-    .monitoring-page .domain.metrics-bar {
-        border-top: 1px solid #353b3e;
+    .monitoring-page .node-bar {
+        border-bottom: 1px solid #353b3e;
     }
-    .domain.metrics-bar .title {
+    .node.metrics-bar .title {
         color: #677278;
     }
-    .domain.metrics-bar .metric {
+    .node.metrics-bar .metric {
         border-left: 1px solid #52595e;
     }
     .instance.metrics-bar {

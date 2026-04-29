@@ -8,8 +8,8 @@
  * Provides common functionality for connection management and retries.
  */
 class BaseClient {
-    constructor(domain, viewer, onJoined, onEstablished, onClosed, onFailed) {
-        this.domain = domain;
+    constructor(node, viewer, onJoined, onEstablished, onClosed, onFailed) {
+        this.node = node;
         this.viewer = viewer;
         this.onJoined = onJoined;
         this.onEstablished = onEstablished;
@@ -22,9 +22,9 @@ class BaseClient {
 
     /**
      * Starts the client connection.
-     * @param {string} [instancesToJoin] - Names of instances to join.
+     * @param {string} [appsToJoin] - Names of apps to join.
      */
-    start(instancesToJoin) {
+    start(appsToJoin) {
         throw new Error("Method 'start()' must be implemented.");
     }
 
@@ -53,22 +53,22 @@ class BaseClient {
 
     /**
      * Handles reconnection logic when a connection is lost or fails.
-     * @param {string} [instancesToJoin] - Names of instances to join.
+     * @param {string} [appsToJoin] - Names of apps to join.
      */
-    rejoin(instancesToJoin) {
+    rejoin(appsToJoin) {
         if (this.retryCount++ < this.maxRetries) {
-            const retryInterval = (this.retryInterval * this.retryCount) + (this.domain.index * 200) + this.domain.random1000;
+            const retryInterval = (this.retryInterval * this.retryCount) + (this.node.index * 200) + this.node.random1000;
             const status = "(" + this.retryCount + "/" + this.maxRetries + ", interval=" + retryInterval + ")";
-            console.log(this.domain.name, "trying to reconnect", status);
+            console.log(this.node.id, "trying to reconnect", status);
             this.viewer.printMessage("Trying to reconnect... " + status);
             setTimeout(() => {
-                this.start(instancesToJoin);
+                this.start(appsToJoin);
             }, retryInterval);
         } else {
-            console.log(this.domain.name, "abort reconnect attempt");
+            console.log(this.node.id, "abort reconnect attempt");
             this.viewer.printMessage("Max connection attempts exceeded.");
             if (this.onFailed) {
-                this.onFailed(this.domain);
+                this.onFailed(this.node);
             }
         }
     }

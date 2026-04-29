@@ -7,8 +7,8 @@
  * WebSocket implementation of the AppMon client.
  */
 class WebsocketClient extends BaseClient {
-    constructor(domain, viewer, onJoined, onEstablished, onClosed, onFailed) {
-        super(domain, viewer, onJoined, onEstablished, onClosed, onFailed);
+    constructor(node, viewer, onJoined, onEstablished, onClosed, onFailed) {
+        super(node, viewer, onJoined, onEstablished, onClosed, onFailed);
         this.endpointMode = "websocket";
         this.heartbeatInterval = 5000;
         this.socket = null;
@@ -17,8 +17,8 @@ class WebsocketClient extends BaseClient {
         this.established = false;
     }
 
-    start(instancesToJoin) {
-        this.openSocket(instancesToJoin);
+    start(appsToJoin) {
+        this.openSocket(appsToJoin);
     }
 
     stop() {
@@ -39,22 +39,22 @@ class WebsocketClient extends BaseClient {
         }
     }
 
-    openSocket(instancesToJoin) {
+    openSocket(appsToJoin) {
         this.closeSocket(false);
-        const url = new URL(this.domain.endpoint.url + "/websocket/" + this.domain.endpoint.token, location.href);
+        const url = new URL(this.node.endpoint.path + "/appmon/websocket/" + this.node.endpoint.token, location.href);
         url.protocol = url.protocol.replace("https:", "wss:").replace("http:", "ws:");
 
         this.socket = new WebSocket(url.href);
 
         this.socket.onopen = () => {
-            console.log(this.domain.name, "socket connected:", this.domain.endpoint.url);
+            console.log(this.node.id, "socket connected:", this.node.endpoint.path);
             this.pendingMessages.push("Socket connection successful");
             const options = [
                 "command:join",
                 "timeZone:" + Intl.DateTimeFormat().resolvedOptions().timeZone
             ];
-            if (instancesToJoin) {
-                options.push("instancesToJoin:" + instancesToJoin);
+            if (appsToJoin) {
+                options.push("appsToJoin:" + appsToJoin);
             }
             this.socket.send(options.join(";"));
             this.heartbeatPing();
@@ -66,13 +66,13 @@ class WebsocketClient extends BaseClient {
                 const msg = event.data;
                 if (this.established) {
                     if (msg.startsWith("pong:")) {
-                        this.domain.endpoint.token = msg.substring(5);
+                        this.node.endpoint.token = msg.substring(5);
                         this.heartbeatPing();
                     } else {
                         this.viewer.processMessage(msg);
                     }
                 } else if (msg.startsWith("joined:")) {
-                    console.log(this.domain.name, msg, this.domain.endpoint.token);
+                    console.log(this.node.id, msg, this.node.endpoint.token);
                     const payload = (msg.length > 7 ? JSON.parse(msg.substring(7)) : null);
                     this.establish(payload);
                 }
@@ -81,32 +81,32 @@ class WebsocketClient extends BaseClient {
 
         this.socket.onclose = (event) => {
             this.closeSocket(true);
-            if (this.domain.endpoint.mode === this.endpointMode) {
+            if (this.node.endpoint.mode === this.endpointMode) {
                 if (this.onClosed) {
-                    this.onClosed(this.domain);
+                    this.onClosed(this.node);
                 }
                 if (event.code === 1003) {
-                    console.log(this.domain.name, "socket connection refused: ", event.code);
+                    console.log(this.node.id, "socket connection refused: ", event.code);
                     this.viewer.printErrorMessage("Socket connection refused by server.");
                     return;
                 }
                 if (event.code === 1000 || this.retryCount === 0) {
-                    console.log(this.domain.name, "socket connection closed: ", event.code);
+                    console.log(this.node.id, "socket connection closed: ", event.code);
                     this.viewer.printMessage("Socket connection closed.");
                 }
                 if (event.code !== 1000) {
-                    this.rejoin(instancesToJoin);
+                    this.rejoin(appsToJoin);
                 }
             }
         };
 
         this.socket.onerror = (event) => {
-            if (this.domain.endpoint.mode === this.endpointMode) {
-                console.log(this.domain.name, "websocket error:", event);
+            if (this.node.endpoint.mode === this.endpointMode) {
+                console.log(this.node.id, "websocket error:", event);
                 this.viewer.printErrorMessage("Could not connect to the WebSocket server.");
             }
             if (this.onFailed) {
-                this.onFailed(this.domain);
+                this.onFailed(this.node);
             }
         };
     }
@@ -126,15 +126,15 @@ class WebsocketClient extends BaseClient {
     }
 
     establish(payload) {
-        this.domain.endpoint['mode'] = this.endpointMode;
+        this.node.endpoint['mode'] = this.endpointMode;
         if (this.onJoined) {
-            this.onJoined(this.domain, payload);
+            this.onJoined(this.node, payload);
         }
         while (this.pendingMessages.length) {
             this.viewer.printMessage(this.pendingMessages.shift());
         }
         if (this.onEstablished) {
-            this.onEstablished(this.domain);
+            this.onEstablished(this.node);
         }
         while (this.pendingMessages.length) {
             this.viewer.printMessage(this.pendingMessages.shift());

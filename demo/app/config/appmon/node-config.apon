@@ -4,7 +4,7 @@ cluster: {
     mode: direct  # direct or gateway or autoscaling
 }
 node: {
-    id: node
+    id: node1
     group: group1
     title: Localhost(Websocket Mode)
     endpoint: {
@@ -12,7 +12,7 @@ node: {
     }
 }
 #node: {
-#    id: node
+#    id: node2
 #    group: group1
 #    title: Localhost(Polling Mode)
 #    endpoint: {
