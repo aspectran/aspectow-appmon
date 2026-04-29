@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{templates/default}">
+<body>
+<th:block layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0"><i class="bi bi-braces-asterisk me-2"></i> AsEL Tester</h4>
+        <a href="https://aspectran.com/en/docs/guides/introduce-asel/" target="_blank" class="btn btn-outline-info btn-sm">
+            <i class="bi bi-book me-1"></i> AsEL Guide
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-body-tertiary">
+                    <h6 class="mb-0 small fw-bold">Expression Evaluation</h6>
+                </div>
+                <div class="card-body">
+                    <form id="aselForm" autocomplete="off">
+                        <div class="mb-3">
+                            <label for="expression" class="form-label small">Expression</label>
+                            <textarea class="form-control font-monospace" id="expression" name="expression" rows="3" placeholder="e.g. #{aselTestBean^metadata}['version']" required></textarea>
+                            <div class="form-text small">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Tokens (<code>#{}</code>, <code>@{}</code>) find objects; use OGNL (<code>.</code>, <code>[]</code>, <code>?:</code>, <code>+</code>) <strong>outside</strong> the braces.
+                            </div>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-play-fill me-1"></i> Evaluate Expression
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm d-none" id="resultCard">
+                <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-2">
+                    <h6 class="mb-0 small fw-bold">Evaluation Result</h6>
+                    <span class="badge bg-secondary font-monospace" id="resultType" style="font-size: 0.7rem;">java.lang.String</span>
+                </div>
+                <div class="card-body">
+                    <div class="p-3 bg-body-tertiary border rounded">
+                        <pre id="resultValue" class="mb-0 font-monospace text-primary" style="white-space: pre-wrap; word-break: break-all;"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-body-tertiary">
+                    <h6 class="mb-0 small fw-bold">Quick Examples</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0 small">
+                            <thead>
+                            <tr>
+                                <th class="ps-3">Type</th>
+                                <th>Expression</th>
+                                <th class="text-end pe-3">Apply</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td class="ps-3"><span class="badge bg-secondary">String</span></td>
+                                <td class="font-monospace">${id} + '(' + ${status} + ')'</td>
+                                <td class="text-end pe-3"><button class="btn btn-sm btn-link p-0" onclick="applyExample('${id} + \'(\' + ${status} + \')\'')"><i class="bi bi-arrow-left"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3"><span class="badge bg-dark">Prop</span></td>
+                                <td class="font-monospace">%{asel.test.app.name}</td>
+                                <td class="text-end pe-3"><button class="btn btn-sm btn-link p-0" onclick="applyExample('%{asel.test.app.name}')"><i class="bi bi-arrow-left"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3"><span class="badge bg-info">Attr</span></td>
+                                <td class="font-monospace">@{sampleUser^nickname} ?: 'Guest'</td>
+                                <td class="text-end pe-3"><button class="btn btn-sm btn-link p-0" onclick="applyExample('@{sampleUser^nickname} ?: \'Guest\'')"><i class="bi bi-arrow-left"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3"><span class="badge bg-success">Map</span></td>
+                                <td class="font-monospace">#{aselTestBean^metadata}['version']</td>
+                                <td class="text-end pe-3"><button class="btn btn-sm btn-link p-0" onclick="applyExample('#{aselTestBean^metadata}[\'version\']')"><i class="bi bi-arrow-left"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3"><span class="badge bg-warning text-dark">Method</span></td>
+                                <td class="font-monospace">#{aselTestBean}.isAvailable()</td>
+                                <td class="text-end pe-3"><button class="btn btn-sm btn-link p-0" onclick="applyExample('#{aselTestBean}.isAvailable()')"><i class="bi bi-arrow-left"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3"><span class="badge bg-primary">Bean</span></td>
+                                <td class="font-monospace">#{aselTestBean^name}</td>
+                                <td class="text-end pe-3"><button class="btn btn-sm btn-link p-0" onclick="applyExample('#{aselTestBean^name}')"><i class="bi bi-arrow-left"></i></button></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 small fw-bold">Execution History</h6>
+                    <button class="btn btn-link btn-sm text-danger p-0" onclick="clearHistory()">
+                        <i class="bi bi-trash me-1"></i> Clear
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 250px;">
+                        <table class="table table-hover table-sm mb-0 small" id="historyTable">
+                            <thead class="sticky-top">
+                            <tr>
+                                <th class="ps-3" style="width: 100px;">Time</th>
+                                <th>Expression</th>
+                                <th class="text-end pe-3">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                        <div id="noHistory" class="text-center py-4 text-muted">
+                            <i class="bi bi-clock-history fs-3 d-block mb-2"></i>
+                            No history yet.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white py-2 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 small fw-bold"><i class="bi bi-info-square me-2"></i> Sandbox Context Information</h6>
+                    <span class="badge bg-primary" style="font-size: 0.65rem;">AVAILABLE DATA</span>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <label class="small text-muted fw-bold mb-2 text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Bean: <code>#{aselTestBean}</code> (Java Source)</label>
+                            <div class="p-3 bg-body-tertiary border rounded" style="max-height: 568px; overflow-y: auto;">
+<pre class="mb-0 font-monospace" style="font-size: 0.8rem; color: var(--bs-body-color); line-height: 1.5;">
+<span style="color: #d73a49;">@Component</span>
+<span style="color: #d73a49;">@Bean</span>(<span style="color: #032f62;">"aselTestBean"</span>)
+<span style="color: #d73a49;">public class</span> <span style="color: #6f42c1;">AselTestBean</span> {
+
+    <span style="color: #d73a49;">public</span> String <span style="color: #6f42c1;">getName</span>() {
+        <span style="color: #d73a49;">return</span> <span style="color: #032f62;">"AsEL Expression Tester"</span>;
+    }
+
+    <span style="color: #d73a49;">public int</span> <span style="color: #6f42c1;">getValue</span>() {
+        <span style="color: #005cc5;">return 12345</span>;
+    }
+
+    <span style="color: #d73a49;">public boolean</span> <span style="color: #6f42c1;">isAvailable</span>() {
+        <span style="color: #d73a49;">return true</span>;
+    }
+
+    <span style="color: #d73a49;">public</span> LocalDateTime <span style="color: #6f42c1;">getServerTime</span>() {
+        <span style="color: #d73a49;">return</span> LocalDateTime.now();
+    }
+
+    <span style="color: #d73a49;">public</span> List&lt;String&gt; <span style="color: #6f42c1;">getTags</span>() {
+        <span style="color: #d73a49;">return</span> List.of(<span style="color: #032f62;">"aspectran"</span>, <span style="color: #032f62;">"asel"</span>, <span style="color: #032f62;">"expression"</span>);
+    }
+
+    <span style="color: #d73a49;">public</span> Map&lt;String, Object&gt; <span style="color: #6f42c1;">getMetadata</span>() {
+        <span style="color: #d73a49;">return</span> Map.of(<span style="color: #032f62;">"version"</span>, <span style="color: #032f62;">"1.0.0"</span>, <span style="color: #032f62;">"environment"</span>, <span style="color: #032f62;">"console"</span>);
+    }
+
+    <span style="color: #d73a49;">public</span> String <span style="color: #6f42c1;">greet</span>(String user) {
+        <span style="color: #d73a49;">return</span> <span style="color: #032f62;">"Hello, "</span> + user + <span style="color: #032f62;">"! Welcome to AsEL."</span>;
+    }
+}
+</pre>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 border-start">
+                            <div class="mb-4">
+                                <label class="small text-muted fw-bold mb-2 text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Attributes: <code>@{}</code></label>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered small mb-0">
+                                        <thead class="table-group-divider">
+                                            <tr><th style="width: 35%;">Token</th><th>Description</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td><code>@{sampleAttr}</code></td><td>Sample string data</td></tr>
+                                            <tr><td><code>@{sampleRole}</code></td><td>Sample role (ADMIN)</td></tr>
+                                            <tr><td><code>@{sampleUser}</code></td><td>Sample user (Map object)</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="small text-muted fw-bold mb-2 text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Parameters: <code>${}</code></label>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered small mb-0">
+                                        <thead class="table-group-divider">
+                                            <tr><th style="width: 35%;">Token</th><th>Description</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td><code>${id}</code></td><td>Sample user ID ("tester")</td></tr>
+                                            <tr><td><code>${status}</code></td><td>Sample status ("active")</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="small text-muted fw-bold mb-2 text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Properties: <code>%{}</code></label>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered small mb-0">
+                                        <thead class="table-group-divider">
+                                            <tr><th style="width: 35%;">Token</th><th>Description</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td><code>%{asel.test.app.name}</code></td><td>Sample application name</td></tr>
+                                            <tr><td><code>%{asel.test.app.version}</code></td><td>Sample version info</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="form-text mt-1 text-danger" style="font-size: 0.7rem;">
+                                    <i class="bi bi-shield-lock-fill me-1"></i>
+                                    System properties (system:, classpath:) are restricted for security.
+                                </div>
+                            </div>
+                            <div class="alert alert-info py-2 mb-0 border-0 shadow-none" style="font-size: 0.75rem;">
+                                <h6 class="alert-heading fw-bold mb-1" style="font-size: 0.8rem;"><i class="bi bi-lightbulb me-1"></i> Sandbox Tips</h6>
+                                <ul class="ps-3 mb-0">
+                                    <li>Try <code>${id} + ' (' + ${status} + ')'</code></li>
+                                    <li>Try <code>@{sampleUser^nickname} ?: 'Guest'</code></li>
+                                    <li>Try <code>#{aselTestBean^metadata}['version']</code></li>
+                                    <li>Try <code>#{aselTestBean}.isAvailable()</code></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        const HISTORY_KEY = 'asel_tester_history';
+
+        $(function() {
+            loadHistory();
+
+            $('#aselForm').on('submit', function(e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                
+                $.ajax({
+                    url: /*[[@{/framework/asel/test}]]*/ '/framework/asel/test',
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.success) {
+                            renderResult(res.data.result, res.data.type);
+                            addToHistory({
+                                time: new Date().toLocaleTimeString(),
+                                expression: $('#expression').val(),
+                                result: res.data.result,
+                                type: res.data.type
+                            });
+                        } else {
+                            const msg = (res.error && res.error.message) ? res.error.message : 'Evaluation failed';
+                            renderError(msg);
+                        }
+                    },
+                    error: function() {
+                        alert('System error occurred');
+                    }
+                });
+            });
+        });
+
+        function renderResult(value, type) {
+            const $card = $('#resultCard');
+            const $val = $('#resultValue');
+            const $type = $('#resultType');
+            
+            $card.removeClass('d-none');
+            $type.text(type).removeClass('bg-danger').addClass('bg-secondary');
+            
+            if (typeof value === 'object' && value !== null) {
+                $val.text(JSON.stringify(value, null, 2));
+            } else {
+                $val.text(value === null ? 'null' : String(value));
+            }
+            $val.removeClass('text-danger').addClass('text-primary');
+        }
+
+        function renderError(msg) {
+            const $card = $('#resultCard');
+            const $val = $('#resultValue');
+            const $type = $('#resultType');
+            
+            $card.removeClass('d-none');
+            $type.text('Error').removeClass('bg-secondary').addClass('bg-danger');
+            $val.text(msg).removeClass('text-primary').addClass('text-danger');
+        }
+
+        function addToHistory(item) {
+            let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            if (history.length > 0 && history[0].expression === item.expression) return;
+            history.unshift(item);
+            if (history.length > 20) history.pop();
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            renderHistory();
+        }
+
+        function loadHistory() {
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            const $tbody = $('#historyTable tbody');
+            const $noHistory = $('#noHistory');
+            
+            $tbody.empty();
+            if (history.length === 0) {
+                $noHistory.removeClass('d-none');
+            } else {
+                $noHistory.addClass('d-none');
+                history.forEach((item, index) => {
+                    const row = `
+                        <tr>
+                            <td class="ps-3 text-muted">${item.time}</td>
+                            <td class="text-truncate font-monospace" style="max-width: 250px;">${item.expression}</td>
+                            <td class="text-end pe-3">
+                                <button class="btn btn-sm btn-outline-secondary py-0" onclick="restoreFromHistory(${index})">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    $tbody.append(row);
+                });
+            }
+        }
+
+        function restoreFromHistory(index) {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            const item = history[index];
+            if (item) {
+                $('#expression').val(item.expression);
+                renderResult(item.result, item.type);
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('Clear all history?')) {
+                localStorage.removeItem(HISTORY_KEY);
+                renderHistory();
+            }
+        }
+
+        function applyExample(expr) {
+            $('#expression').val(expr);
+            $('#aselForm').submit();
+        }
+    </script>
+</th:block>
+</body>
+</html>

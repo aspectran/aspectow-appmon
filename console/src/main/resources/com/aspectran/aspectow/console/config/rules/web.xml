@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 9.0//EN"
+        "https://aspectran.com/dtd/aspectran-9.dtd">
+<aspectran>
+
+    <description>
+        Aspectran configuration to configure the web environment.
+        Note that names of translets that match the request URI always start with a forward slash (/).
+    </description>
+
+    <bean id="thymeleaf" class="com.aspectran.thymeleaf.ThymeleafTemplateEngine">
+        <argument>
+            <bean class="com.aspectran.thymeleaf.TemplateEngineFactoryBean">
+                <property name="templateResolvers" type="set">
+                    <bean class="com.aspectran.thymeleaf.template.FileTemplateResolver">
+                        <property name="prefix">#{basePath}/webapps/console/WEB-INF/thymeleaf/</property>
+                        <property name="suffix">.html</property>
+                        <property name="templateMode">HTML</property>
+                        <property name="cacheable" valueType="boolean">false</property>
+                    </bean>
+                </property>
+                <property type="set" name="dialects">
+                    <bean class="nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect"/>
+                </property>
+            </bean>
+        </argument>
+    </bean>
+
+    <bean id="thymeleafViewDispatcher" class="com.aspectran.thymeleaf.view.ThymeleafViewDispatcher">
+        <description>
+            Register a Thymeleaf View Dispatcher.
+        </description>
+        <argument>#{thymeleaf}</argument>
+    </bean>
+
+    <aspect id="thymeleafTransletSettings">
+        <joinpoint>
+            pointcut: {
+                +: /**
+            }
+        </joinpoint>
+        <settings>
+            <setting name="characterEncoding" value="utf-8"/>
+            <setting name="viewDispatcher" value="thymeleafViewDispatcher"/>
+            <setting name="proxyProtocolAware" value="true"/>
+        </settings>
+    </aspect>
+
+</aspectran>

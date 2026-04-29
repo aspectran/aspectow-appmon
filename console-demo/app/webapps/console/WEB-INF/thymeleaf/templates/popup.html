@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="utf-8"/>
+    <th:block th:replace="~{templates/base-head :: theme-script}"></th:block>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${page.title != null ? page.title + ' - Aspectow Console' : 'Aspectow Console'}">Aspectow Console</title>
+    <th:block th:replace="~{templates/base-head :: common-assets}"></th:block>
+    <link rel="stylesheet" th:href="@{/assets/css/console.css}"/>
+</head>
+<body th:class="${page.style}">
+    <main id="content-area">
+        <div class="container-fluid my-3">
+            <th:block layout:fragment="content"/>
+        </div>
+    </main>
+    <th:block layout:fragment="script"></th:block>
+</body>
+</html>

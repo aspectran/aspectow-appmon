@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{templates/default}">
+<head>
+    <style>
+        .command-container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            height: calc(100vh - 250px);
+            min-height: 650px;
+        }
+        .history-panel {
+            background: var(--bs-body-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .history-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .history-item {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+        .history-item:hover {
+            background: var(--bs-tertiary-bg);
+        }
+        .history-item.active {
+            background: var(--bs-primary-bg-subtle);
+            border-color: var(--bs-primary-border-subtle);
+        }
+        .editor-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .command-editor {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            min-height: 200px;
+            width: 100%;
+            resize: vertical;
+            outline: none;
+        }
+        .result-panel {
+            flex-grow: 1;
+            background: var(--bs-secondary-bg);
+            border-radius: 12px;
+            padding: 20px;
+            overflow-y: auto;
+            border: 1px solid var(--bs-border-color);
+        }
+        .status-pill {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .target-selector {
+            background: var(--bs-tertiary-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid var(--bs-border-color);
+        }
+    </style>
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">Remote Commands</h2>
+            </div>
+            <div class="d-flex gap-1 align-items-center">
+                <div>
+                    <span class="text-muted small">Target Mode:</span>
+                    <span class="fw-bold text-primary" th:text="${page.clusterMode.toUpperCase()}">GATEWAY</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="target-selector">
+            <div class="row align-items-center g-3">
+                <div class="col-auto">
+                    <label class="fw-bold small text-muted text-uppercase">Target Nodes</label>
+                </div>
+                <div class="col-md-4">
+                    <select id="target-type" class="form-select form-select-sm" onchange="onTargetTypeChange()">
+                        <option value="all" th:selected="${page.node == null}">All Nodes in Cluster</option>
+                        <option value="group">Specific Group</option>
+                        <option value="node" th:selected="${page.node != null}">Individual Node</option>
+                    </select>
+                </div>
+                <div class="col-md-4" id="target-value-container">
+                    <select id="target-value" class="form-select form-select-sm">
+                        <!-- Dynamic options -->
+                    </select>
+                </div>
+                <div class="col text-end">
+                    <span id="connection-indicator" class="status-pill bg-secondary text-white">CONNECTING...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="command-container">
+            <!-- Left: History -->
+            <div class="history-panel">
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Command History</h6>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="clearHistory()">Clear</button>
+                </div>
+                <div class="history-list" id="history-list">
+                    <div class="text-center text-muted mt-5">No recent commands.</div>
+                </div>
+            </div>
+
+            <!-- Right: Editor & Result -->
+            <div class="editor-panel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0">New Command Payload</h6>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    Load Template
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#" onclick="loadTemplate('sysinfo')">System Info</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="loadTemplate('polling')">Polling Interval</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="loadTemplate('translet')">Execute Translet</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#" onclick="loadTemplate('restart')">Restart Daemon</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <textarea id="command-editor" class="command-editor" spellcheck="false">command: sysinfo
+arguments: {
+    item: { value: mem }
+}</textarea>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button class="btn btn-primary px-4" onclick="dispatchCommand()">
+                                <i class="bi bi-send-fill me-2"></i> Dispatch Command
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-panel">
+                    <h6 class="fw-bold mb-3 border-bottom pb-2">Command Result</h6>
+                    <div id="result-view" class="text-muted small font-monospace">
+                        Select a command from history or dispatch a new one to see results.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block layout:fragment="script">
+        <script th:src="@{/assets/js/console-client.js}"></script>
+        <script th:inline="javascript">
+            let nodes = [[${page.nodes}]];
+            const currentNodeId = [[${page.node?.id}]];
+            const BASE_PATH = [[@{/}]].replace(/\/$/, '');
+
+            let client = null;
+            let commandHistory = [];
+            const templates = {
+                sysinfo: 'command: sysinfo\narguments: {\n    item: { value: mem }\n    item: { value: props }\n}',
+                polling: 'command: pollingInterval\narguments: {\n    item: { value: 5000, valueType: long }\n}',
+                translet: 'command: translet\ntranslet: hello',
+                restart: 'command: restart\nrequeuable: false'
+            };
+
+            function refreshNodeList() {
+                return fetch(BASE_PATH + "/nodes/commands/list")
+                    .then(res => res.json())
+                    .then(data => {
+                        nodes = data;
+                        return data;
+                    });
+            }
+
+            function onTargetTypeChange(forceCheck = false) {
+                if (forceCheck) {
+                    refreshNodeList().then(() => doTargetTypeChange());
+                } else {
+                    doTargetTypeChange();
+                }
+            }
+
+            function doTargetTypeChange() {
+                const type = $('#target-type').val();
+                const $container = $('#target-value-container');
+                const $select = $('#target-value');
+                const prevValue = $select.val();
+                $select.empty();
+
+                if (type === 'all') {
+                    $container.hide();
+                    const url = new URL(window.location);
+                    url.searchParams.delete('nodeId');
+                    window.history.replaceState({}, '', url);
+                    resetDeadStatus();
+                } else if (type === 'group') {
+                    $container.show();
+                    const groups = [...new Set(nodes.map(n => n.group).filter(g => g))];
+                    groups.forEach(g => $select.append(new Option(g, g)));
+                    resetDeadStatus();
+                } else {
+                    $container.show();
+                    nodes.forEach(n => {
+                        const option = new Option(n.title + ' (' + n.id + ')', n.id);
+                        if (n.status && n.status.toUpperCase() === 'DEAD') {
+                            $(option).addClass('text-danger');
+                            option.text += ' [DEAD]';
+                        }
+                        $select.append(option);
+                    });
+                    
+                    const targetNodeId = prevValue || currentNodeId;
+                    if (targetNodeId) {
+                        $select.val(targetNodeId);
+                        updateUrl(targetNodeId);
+                        checkSelectedNodeStatus(targetNodeId);
+                    }
+                }
+            }
+
+            function updateUrl(nodeId) {
+                const url = new URL(window.location);
+                url.searchParams.set('nodeId', nodeId);
+                window.history.replaceState({}, '', url);
+            }
+
+            function checkSelectedNodeStatus(nodeId) {
+                const nodeInfo = nodes.find(n => n.id === nodeId);
+                if (nodeInfo && nodeInfo.status && nodeInfo.status.toUpperCase() === 'DEAD') {
+                    $('#connection-indicator').text("TARGET DEAD").removeClass("bg-success bg-warning bg-secondary").addClass("bg-danger");
+                    $('#result-view').html(`
+                        <div class="text-center py-4">
+                            <i class="bi bi-exclamation-octagon fs-2 text-danger mb-2"></i>
+                            <h6 class="fw-bold">Target Node Unreachable</h6>
+                            <p class="text-muted small">Node <strong>${nodeId}</strong> is currently DEAD.</p>
+                            <button class="btn btn-xs btn-outline-primary" onclick="onTargetTypeChange(true)">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh Status
+                            </button>
+                        </div>
+                    `);
+                    return false;
+                } else {
+                    if (client && client.established) {
+                        $('#connection-indicator').text("CONNECTED").removeClass("bg-danger bg-warning bg-secondary").addClass("bg-success");
+                    }
+                    return true;
+                }
+            }
+
+            function resetDeadStatus() {
+                if (client && client.established) {
+                    $('#connection-indicator').text("CONNECTED").removeClass("bg-danger bg-warning bg-secondary").addClass("bg-success");
+                }
+                $('#result-view').html('<div class="text-muted small">Select a command from history or dispatch a new one to see results.</div>');
+            }
+
+            function loadTemplate(key) {
+                $('#command-editor').val(templates[key]);
+            }
+
+            function dispatchCommand() {
+                const apon = $('#command-editor').val().trim();
+                if (!apon) return;
+
+                const targetType = $('#target-type').val();
+                const targetValue = $('#target-value').val();
+                
+                if (targetType === 'node' && !checkSelectedNodeStatus(targetValue)) {
+                    return;
+                }
+
+                let targetDisplay = 'All Nodes';
+                if (targetType === 'group') targetDisplay = 'Group: ' + targetValue;
+                if (targetType === 'node') targetDisplay = 'Node: ' + targetValue;
+
+                const cmdId = 'cmd_' + Date.now();
+                const newCmd = {
+                    id: cmdId,
+                    time: new Date().toLocaleTimeString(),
+                    target: targetDisplay,
+                    content: apon,
+                    status: 'queued',
+                    result: null
+                };
+
+                commandHistory.unshift(newCmd);
+                updateHistoryUI();
+                
+                if (client) {
+                    const message = {
+                        header: "execute",
+                        command: apon
+                    };
+                    if (targetType === 'node') message.targetNodeId = targetValue;
+                    if (targetType === 'group') message.targetGroup = targetValue;
+                    if (targetType === 'all') message.targetAll = true;
+
+                    client.sendMessage(JSON.stringify(message));
+                }
+            }
+
+            function updateHistoryUI() {
+                const $list = $('#history-list');
+                $list.empty();
+
+                if (commandHistory.length === 0) {
+                    $list.append('<div class="text-center text-muted mt-5">No recent commands.</div>');
+                    return;
+                }
+
+                commandHistory.forEach((cmd, index) => {
+                    const statusClass = cmd.status === 'completed' ? 'bg-success' : (cmd.status === 'failed' ? 'bg-danger' : 'bg-warning');
+                    const $item = $(`
+                        <div class="history-item ${index === 0 ? 'active' : ''}" onclick="showDetail('${cmd.id}')">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <span class="fw-bold small text-truncate" style="max-width: 180px;">${cmd.target}</span>
+                                <span class="status-pill ${statusClass} text-white">${cmd.status}</span>
+                            </div>
+                            <div class="text-muted" style="font-size: 0.75rem; display: flex; justify-content: space-between;">
+                                <span>${cmd.content.split('\n')[0]}</span>
+                                <span>${cmd.time}</span>
+                            </div>
+                        </div>
+                    `);
+                    $list.append($item);
+                });
+
+                if (commandHistory.length > 0) {
+                    showDetail(commandHistory[0].id);
+                }
+            }
+
+            function showDetail(id) {
+                const cmd = commandHistory.find(c => c.id === id);
+                if (!cmd) return;
+
+                $('.history-item').removeClass('active');
+                $(`.history-item[onclick*="${id}"]`).addClass('active');
+
+                const $view = $('#result-view');
+                $view.empty();
+
+                const $detail = $(`
+                    <div class="mb-3">
+                        <div class="text-muted mb-1 small text-uppercase fw-bold">Target & Payload:</div>
+                        <div class="p-2 bg-dark rounded-top border-bottom border-secondary small text-warning">Target: ${cmd.target}</div>
+                        <pre class="bg-dark text-info p-3 rounded-bottom" style="font-size: 0.85rem;">${cmd.content}</pre>
+                    </div>
+                    <div>
+                        <div class="text-muted mb-1 small text-uppercase fw-bold">Execution Result:</div>
+                        <pre style="font-size: 0.85rem;">${cmd.result || (cmd.status === 'queued' ? 'Wait for response...' : 'No result.')}</pre>
+                    </div>
+                `);
+                $view.append($detail);
+            }
+
+            function clearHistory() {
+                commandHistory = [];
+                updateHistoryUI();
+                $('#result-view').html('<div class="text-muted small">History cleared.</div>');
+            }
+
+            $(function() {
+                onTargetTypeChange();
+
+                $('#target-value').on('change', function() {
+                    const type = $('#target-type').val();
+                    if (type === 'node') {
+                        const nodeId = $(this).val();
+                        updateUrl(nodeId);
+                        checkSelectedNodeStatus(nodeId);
+                    }
+                });
+
+                const commandsNode = {
+                    id: currentNodeId || 'gateway',
+                    endpoint: {
+                        path: BASE_PATH + "/remote-commands"
+                    }
+                };
+
+                client = new ConsoleClient(commandsNode, {
+                    onBeforeConnect: () => {
+                        return fetch(BASE_PATH + "/nodes/token")
+                            .then(response => response.text())
+                            .catch(err => {
+                                console.error("Failed to fetch new token:", err);
+                                return null;
+                            });
+                    },
+                    onEstablished: () => {
+                        $('#connection-indicator').text("CONNECTED").removeClass("bg-secondary bg-danger bg-warning").addClass("bg-success");
+                        const type = $('#target-type').val();
+                        const val = $('#target-value').val();
+                        if (type === 'node' && val) {
+                            checkSelectedNodeStatus(val);
+                        }
+                    },
+                    onRetry: (count, max) => {
+                        $('#connection-indicator').text(`RECONNECTING (${count}/${max})...`).removeClass("bg-success bg-danger").addClass("bg-warning");
+                    },
+                    onClose: (event) => {
+                        if (event.code === 1003) {
+                            $('#connection-indicator').text("SESSION EXPIRED").removeClass("bg-success bg-warning").addClass("bg-danger");
+                        } else {
+                            $('#connection-indicator').text("DISCONNECTED").removeClass("bg-success bg-warning").addClass("bg-danger");
+                        }
+
+                        let changed = false;
+                        commandHistory.forEach(cmd => {
+                            if (cmd.status === 'queued') {
+                                if (cmd.content.includes('command: restart')) {
+                                    cmd.status = 'completed';
+                                    cmd.result = 'Restart command dispatched. Connection lost as expected.';
+                                } else {
+                                    cmd.status = 'failed';
+                                    cmd.result = 'Connection closed before response was received.';
+                                }
+                                changed = true;
+                            }
+                        });
+                        if (changed) {
+                            updateHistoryUI();
+                        }
+                    },
+                    onMessage: (message) => {
+                        const result = message.result;
+                        const error = message.error;
+
+                        const target = commandHistory.find(c => c.status === 'queued');
+                        if (target) {
+                            if (error) {
+                                target.status = 'failed';
+                                target.result = error;
+                            } else {
+                                target.status = result && result.includes('[FAILED]') ? 'failed' : 'completed';
+                                target.result = result;
+                            }
+                            updateHistoryUI();
+                        }
+                    }
+                });
+
+                client.start('');
+            });
+        </script>
+    </th:block>
+</body>
+</html>

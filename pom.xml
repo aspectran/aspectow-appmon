@@ -18,14 +18,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.aspectran</groupId>
-    <artifactId>aspectow-appmon-project</artifactId>
-    <version>3.3.0-SNAPSHOT</version>
+    <artifactId>aspectow</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Aspectow AppMon Project</name>
-    <description>Aspectow AppMon is a lightweight APM (Application Performance Management) solution for Aspectran applications.</description>
-    <url>https://aspectran.com/aspectow-appmon</url>
-    <inceptionYear>2020</inceptionYear>
+    <name>Aspectow</name>
+    <description>Aspectow is an enterprise-grade platform management system for Aspectran-based applications, providing integrated observability, controllability, and governance.</description>
+    <url>https://aspectran.com/aspectow</url>
+    <inceptionYear>2026</inceptionYear>
 
     <organization>
         <name>The Aspectran Project</name>
@@ -56,20 +56,20 @@
     </developers>
 
     <scm>
-        <url>https://github.com/aspectran/aspectow-appmon</url>
-        <connection>scm:git:ssh://git@github.com/aspectran/aspectow-appmon.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/aspectran/aspectow-appmon.git</developerConnection>
+        <url>https://github.com/aspectran/aspectow</url>
+        <connection>scm:git:ssh://git@github.com/aspectran/aspectow.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/aspectran/aspectow.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
         <system>GitHub Issue Management</system>
-        <url>https://github.com/aspectran/aspectow-appmon/issues</url>
+        <url>https://github.com/aspectran/aspectow/issues</url>
     </issueManagement>
 
     <ciManagement>
         <system>GitHub Workflows</system>
-        <url>https://github.com/aspectran/aspectow-appmon/actions</url>
+        <url>https://github.com/aspectran/aspectow/actions</url>
     </ciManagement>
 
     <distributionManagement>
@@ -95,8 +95,11 @@
     </repositories>
 
     <modules>
+        <module>node</module>
         <module>appmon</module>
-        <module>demo</module>
+        <module>appmon-demo</module>
+        <module>console</module>
+        <module>console-demo</module>
     </modules>
 
     <properties>

@@ -1,22 +1,22 @@
-# Aspectow AppMon
+# Aspectow
 
-[![Build Status](https://github.com/aspectran/aspectow-appmon/workflows/Java%20CI/badge.svg)](https://github.com/aspectran/aspectow-appmon/actions?query=workflow%3A%22Java+CI%22)
-[![Maven Central Version](https://img.shields.io/maven-central/v/com.aspectran/aspectow-appmon)](https://central.sonatype.com/artifact/com.aspectran/aspectow-appmon)
-[![javadoc](https://javadoc.io/badge2/com.aspectran/aspectow-appmon/javadoc.svg)](https://javadoc.io/doc/com.aspectran/aspectow-appmon)
+[![Build Status](https://github.com/aspectran/aspectow/workflows/Java%20CI/badge.svg)](https://github.com/aspectran/aspectow/actions?query=workflow%3A%22Java+CI%22)
+[![Maven Central Version](https://img.shields.io/maven-central/v/com.aspectran/aspectow)](https://central.sonatype.com/artifact/com.aspectran/aspectow)
 [![License](https://img.shields.io/:license-apache-brightgreen.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
-Aspectow AppMon is a powerful monitoring tool that provides an integrated, real-time view of logs, events, and metrics for your Aspectran-based application servers. It helps you observe and analyze the behavior of your applications, making it easier to debug issues, optimize performance, and ensure stability.
+Aspectow is an enterprise-grade platform management system for Aspectran-based applications, providing integrated **Observability**, **Controllability**, and **Governance**. It features the **Aspectow Management Console** as its central control system, designed to manage framework assets and securely handle sensitive resources.
 
-<img width="1042" alt="AppMon v3.0 Dashboard Screenshot" src="https://appmon-assets.aspectran.com/screenshots/appmon-v3-dashboard-dark.jpg">
+## Key Vision
+
+- **Integrated Management**: Combines monitoring (AppMon), framework introspection (Anatomy), and security asset (PBE) management into a single console.
+- **Real-time Control**: Provides real-time diagnosis and configuration control for running applications.
+- **Enterprise-Ready**: Supports clustering environments and ensures operational stability through strict Role-Based Access Control (RBAC).
 
 ## Features
 
-- **Real-time Monitoring**: Observe logs, application events, and performance metrics as they happen.
-- **Agent-Based Collection**: A lightweight agent collects data from your Aspectran application without significant overhead.
-- **Live Data Streaming**: Supports WebSockets and long-polling for streaming live data to the monitoring dashboard.
-- **Data Persistence**: Persists event and metric data for historical analysis and reporting.
-- **Activity Charting**: Visualize application activity with real-time charts.
-- **Extensible Exporters**: Easily extend the system to export data to other monitoring systems or databases.
+- **Security & Admin**: RBAC-based user management and a secure Vault for PBE Token management.
+- **Framework Introspection**: Visualize Translets, Beans, Aspects, and Schedules. Live Bean Explorer for real-time state diagnosis.
+- **Operations & Monitoring**: Integrated AppMon dashboard for logs and metrics, plus dynamic configuration and scheduler control.
 
 ## Requirements
 
@@ -25,42 +25,35 @@ Aspectow AppMon is a powerful monitoring tool that provides an integrated, real-
 
 ## Building from Source
 
-To build Aspectow AppMon from the source code, follow these steps:
+To build Aspectow from the source code, follow these steps:
 
 1.  **Clone the repository:**
     ```sh
-    git clone https://github.com/aspectran/aspectow-appmon.git
+    git clone https://github.com/aspectran/aspectow.git
     ```
 
 2.  **Navigate to the project directory:**
     ```sh
-    cd aspectow-appmon
+    cd aspectow
     ```
 
 3.  **Build the project:**
-    Use the provided build script to compile the code and package the application. The `rebuild` command cleans the project before building.
     ```sh
     ./build rebuild
     ```
 
 ## Running the Demo
 
-After a successful build, you can run the included demo application to see Aspectow AppMon in action.
+After a successful build, you can run the included demo application.
 
 1.  **Start the demo server:**
     ```sh
     ./build demo
     ```
 
-2.  **Access the dashboard:**
-    Open your web browser and navigate to [http://localhost:8083](http://localhost:8083).
-
-The demo will showcase the real-time monitoring dashboard with sample data.
-
-## Contributing
-
-Contributions are welcome! If you would like to contribute, please feel free to fork the repository and submit a pull request. For major changes, please open an issue first to discuss what you would like to change.
+2.  **Access the console:**
+    Open your web browser and navigate to [http://localhost:8082/console](http://localhost:8082/console).
 
 ## License
 
-Aspectow AppMon is licensed under the [Apache License 2.0](LICENSE.txt).
+Aspectow is licensed under the [Apache License 2.0](LICENSE.txt).

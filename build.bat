@@ -59,7 +59,7 @@ exit /b 1
     goto :eof
 
 :command_demo
-    call demo\app\bin\shell.bat %*
+    call console-demo\app\bin\shell.bat %*
     goto :eof
 
 :command_release-prepare

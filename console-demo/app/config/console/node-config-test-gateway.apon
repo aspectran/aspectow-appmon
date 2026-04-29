@@ -1,0 +1,26 @@
+# Cluster-wide settings
+cluster: {
+    id: cluster1
+    mode: gateway  # direct or gateway or autoscaling
+    scheduler: {
+        releasedOnUnlock: false
+    }
+}
+node: {
+    id: node1
+    group: group1
+    title: Node-1
+    port: 8082
+    endpoint: {
+        mode: auto
+    }
+}
+node: {
+    id: node2
+    group: group1
+    title: Node-2
+    port: 8082
+    endpoint: {
+        mode: auto
+    }
+}

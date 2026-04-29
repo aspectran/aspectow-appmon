@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{templates/default}">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/apon@1.2.0/lib/apon.js"></script>
+    <style>
+        .converter-textarea {
+            height: 700px !important;
+            font-family: 'JetBrains Mono', var(--bs-font-monospace);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            white-space: pre;
+            overflow-x: auto;
+            background-color: var(--bs-body-bg);
+        }
+        .action-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--bs-secondary-color);
+        }
+    </style>
+</head>
+<body>
+<th:block layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0"><i class="bi bi-arrow-left-right me-2"></i> APON Converter</h4>
+        <div class="d-flex gap-2">
+            <a href="https://aspectran.com/en/docs/guides/introduce-apon/" target="_blank" class="btn btn-outline-info btn-sm">
+                <i class="bi bi-book me-1"></i> APON Guide
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- APON Input -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-2">
+                    <h6 class="mb-0 small fw-bold">APON</h6>
+                    <button class="btn btn-sm btn-link p-0 text-secondary" onclick="copyToClipboard('apon-input')">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+                <div class="card-body d-flex flex-column p-0">
+                    <textarea id="apon-input" class="form-control converter-textarea border-0 rounded-0" spellcheck="false" placeholder="Enter APON text here..."># Sample APON structure
+server: {
+  name: Aspectow-Console
+  port(int): 8082
+  features: [
+    Web
+    Shell
+    Cluster
+  ]
+}
+description: (
+  |APON (Aspectran Parameters Object Notation)
+  |is a highly readable data format.
+)</textarea>
+                    <div class="p-3 bg-body-tertiary border-top mt-auto">
+                        <button class="btn btn-primary w-100" onclick="runParse()">
+                            Parse to JSON <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Action (Mobile only) -->
+        <div class="col-12 d-lg-none text-center py-2">
+            <div class="action-arrow">
+                <i class="bi bi-arrow-down-up"></i>
+            </div>
+        </div>
+
+        <!-- JSON Output -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-2">
+                    <h6 class="mb-0 small fw-bold">JSON</h6>
+                    <button class="btn btn-sm btn-link p-0 text-secondary" onclick="copyToClipboard('json-output')">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+                <div class="card-body d-flex flex-column p-0">
+                    <textarea id="json-output" class="form-control converter-textarea border-0 rounded-0 text-primary" spellcheck="false" placeholder="JSON output will appear here..."></textarea>
+                    <div class="p-3 bg-body-tertiary border-top mt-auto">
+                        <div class="row g-2">
+                            <div class="col-8">
+                                <select id="apon-style" class="form-select form-select-sm">
+                                    <option value="PRETTY">Style: PRETTY</option>
+                                    <option value="SINGLE_LINE">Style: SINGLE_LINE</option>
+                                    <option value="COMPACT">Style: COMPACT</option>
+                                </select>
+                            </div>
+                            <div class="col-4 text-end">
+                                <button class="btn btn-success btn-sm w-100 h-100" onclick="runStringify()">
+                                    <i class="bi bi-arrow-left me-1"></i> APON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Helper Sidebar -->
+        <div class="col-lg-2">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-body-tertiary">
+                    <h6 class="mb-0 small fw-bold">Quick Tools</h6>
+                </div>
+                <div class="card-body p-2">
+                    <button class="btn btn-sm btn-outline-secondary w-100 mb-2" onclick="clearAll()">
+                        <i class="bi bi-eraser me-1"></i> Clear All
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary w-100" onclick="loadSample()">
+                        <i class="bi bi-file-earmark-text me-1"></i> Load Sample
+                    </button>
+                </div>
+            </div>
+            <div class="alert alert-secondary py-2 border-0 small" style="font-size: 0.75rem;">
+                <i class="bi bi-lightbulb-fill text-warning me-1"></i>
+                APON is used extensively in Aspectran for configuration and data exchange.
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Alert (Floating) -->
+    <div id="error-toast" class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="liveToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="error-message">Error message here</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        const aponInput = document.getElementById('apon-input');
+        const jsonOutput = document.getElementById('json-output');
+        let errorToast;
+
+        $(function() {
+            errorToast = new bootstrap.Toast(document.getElementById('liveToast'));
+            runParse(); // Initial parse
+        });
+
+        function runParse() {
+            try {
+                const parsed = APON.parse(aponInput.value);
+                jsonOutput.value = JSON.stringify(parsed, null, 2);
+            } catch (e) {
+                showError("APON Parse Error: " + e.message);
+            }
+        }
+
+        function runStringify() {
+            try {
+                const obj = JSON.parse(jsonOutput.value);
+                const style = document.getElementById('apon-style').value;
+                aponInput.value = APON.stringify(obj, { indent: '  ', style: style });
+            } catch (e) {
+                showError("JSON Parse Error: " + e.message);
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('error-message').textContent = msg;
+            errorToast.show();
+        }
+
+        function clearAll() {
+            aponInput.value = '';
+            jsonOutput.value = '';
+        }
+
+        function loadSample() {
+            aponInput.value = "name: Sample,\nversion: 1.0,\nitems: [\n  { id: 1, val: A },\n  { id: 2, val: B }\n]";
+            runParse();
+        }
+
+        function copyToClipboard(elementId) {
+            const el = document.getElementById(elementId);
+            navigator.clipboard.writeText(el.value).then(() => {
+                const btn = event.currentTarget;
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check-lg text-success"></i>';
+                setTimeout(() => btn.innerHTML = originalHtml, 2000);
+            });
+        }
+    </script>
+</th:block>
+</body>
+</html>

@@ -47,7 +47,7 @@ function command_rebuild() {
 
 # Run the demo application
 function command_demo() {
-  exec demo/app/bin/shell.sh "$@"
+  exec console-demo/app/bin/shell.sh "$@"
 }
 
 # Main command dispatcher

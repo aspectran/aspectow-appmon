@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{templates/default}">
+<head>
+    <style>
+        .node-card {
+            border: 1px solid var(--bs-border-color);
+            border-radius: 12px;
+            background: var(--bs-body-bg);
+            transition: all 0.2s ease;
+        }
+        .node-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: var(--accent-color);
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .node-id-badge {
+            font-family: var(--bs-font-monospace);
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">Cluster Nodes</h2>
+                <p class="text-muted mb-0">Monitor and manage all active instances in the cluster.</p>
+            </div>
+            <button class="btn btn-outline-primary btn-sm" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4" th:each="node : ${page.nodes}">
+                <div class="node-card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-0" th:text="${node.title}">Node Title</h5>
+                            <span class="badge bg-secondary node-id-badge mt-1" th:text="${node.id}">node-id</span>
+                        </div>
+                        <div class="d-flex flex-column align-items-end">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="status-dot" th:classappend="${node.status == 'live' ? 'bg-success' : (node.status == 'stopping' ? 'bg-warning' : 'bg-danger')}"></span>
+                                <span class="small fw-bold text-uppercase" th:classappend="${node.status == 'live' ? 'text-success' : (node.status == 'stopping' ? 'text-warning' : 'text-danger')}" th:text="${node.status}">LIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-top pt-3">
+                        <div class="row g-2 small">
+                            <div class="col-5 text-muted">Host Address</div>
+                            <div class="col-7 text-end fw-medium" th:text="${node.host}">127.0.0.1</div>
+                            
+                            <div class="col-5 text-muted">Service Port</div>
+                            <div class="col-7 text-end fw-medium" th:text="${node.port}">8080</div>
+                            
+                            <div class="col-5 text-muted">Node Group</div>
+                            <div class="col-7 text-end fw-medium" th:text="${node.group ?: 'N/A'}">Group</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex gap-2">
+                        <a th:href="@{/nodes/commands(nodeId=${node.id})}" class="btn btn-sm btn-outline-secondary flex-grow-1">
+                            <i class="bi bi-terminal"></i> Commands
+                        </a>
+                        <a href="javascript:void(0)" th:onclick="openAppMon([[${node.id}]])" class="btn btn-sm btn-outline-secondary flex-grow-1">
+                            <i class="bi bi-activity"></i> Metrics
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block layout:fragment="script">
+        <script th:src="@{/assets/js/console-client.js}"></script>
+        <script th:inline="javascript">
+            const BASE_PATH = [[@{/}]].replace(/\/$/, '');
+
+            function openAppMon(nodeId) {
+                const url = BASE_PATH + "/appmon/dashboard/popup/?nodeId=" + nodeId;
+                const name = "appmon_dashboard_popup_" + nodeId.replace(/[^a-zA-Z0-9]/g, '_');
+                const features = "width=1500,height=1045,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes";
+                const popup = window.open(url, name, features);
+                if (popup) {
+                    popup.focus();
+                } else {
+                    alert("Please allow popups for this site.");
+                }
+            }
+
+            $(function() {
+                const clusterMode = [[${page.clusterMode}]];
+
+                let isUnloading = false;
+                $(window).on('beforeunload', function() {
+                    isUnloading = true;
+                });
+
+                function updateNodeStatus(nodeId, data) {
+                    const $card = $(`.node-id-badge:contains("${nodeId}")`).closest('.node-card');
+                    if ($card.length) {
+                        const $dot = $card.find('.status-dot');
+                        const $statusText = $card.find('.small.fw-bold');
+                        const status = data.status || (data.type === 'control' ? JSON.parse(data.message).status : null);
+                        
+                        if (status) {
+                            $dot.removeClass('bg-success bg-warning bg-danger')
+                                .addClass(status === 'live' ? 'bg-success' : (status === 'stopping' ? 'bg-warning' : 'bg-danger'));
+                            $statusText.removeClass('text-success text-warning text-danger')
+                                .addClass(status === 'live' ? 'text-success' : (status === 'stopping' ? 'text-warning' : 'text-danger'))
+                                .text(status.toUpperCase());
+                        }
+                    }
+                }
+
+                if (clusterMode === 'direct') {
+                    const nodes = [[${page.nodes}]];
+                    nodes.forEach(n => {
+                        const node = {
+                            id: n.id,
+                            endpoint: {
+                                path: BASE_PATH + "/nodes/" + n.id,
+                                token: token
+                            }
+                        };
+                        const client = new ConsoleClient(node, {
+                            onBeforeConnect: () => {
+                                return fetch(BASE_PATH + "/nodes/token")
+                                    .then(response => response.text())
+                                    .catch(err => {
+                                        console.error("Failed to fetch new token:", err);
+                                        return null;
+                                    });
+                            },
+                            onMessage: (msg) => {
+                                try {
+                                    const event = JSON.parse(msg);
+                                    updateNodeStatus(n.id, event);
+                                } catch (e) {
+                                    console.warn("Invalid message from node " + n.id, msg);
+                                }
+                            },
+                            onOpen: () => updateNodeStatus(n.id, { status: 'live' }),
+                            onClose: () => {
+                                if (!isUnloading) {
+                                    updateNodeStatus(n.id, { status: 'dead' });
+                                }
+                            }
+                        });
+                        client.start('');
+                    });
+                } else {
+                    const node = [[${page.node}]];
+                    node.endpoint.path = BASE_PATH + "/nodes/" + node.id;
+                    const client = new ConsoleClient(node, {
+                        onBeforeConnect: () => {
+                            return fetch(BASE_PATH + "/nodes/token")
+                                .then(response => response.text())
+                                .catch(err => {
+                                    console.error("Failed to fetch new token:", err);
+                                    return null;
+                                });
+                        },
+                        onMessage: (msg) => {
+                            if (isUnloading) return;
+                            try {
+                                const event = JSON.parse(msg);
+                                if (event.nodeId) {
+                                    updateNodeStatus(event.nodeId, event);
+                                }
+                            } catch (e) {
+                                console.warn("Invalid message from gateway", msg);
+                            }
+                        }
+                    });
+                    client.start('');
+                }
+            });
+        </script>
+    </th:block>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 9.0//EN"
+        "https://aspectran.com/dtd/aspectran-9.dtd">
+<aspectran>
+
+    <bean id="appmonAssets" class="com.aspectran.core.support.PropertiesFactoryBean">
+        <properties>
+            <item name="ignoreInvalidResource" valueType="boolean">false</item>
+        </properties>
+        <properties profile="prod">
+            <item name="locations" type="array">
+                <value>/config/appmon/appmon-assets-prod.properties</value>
+            </item>
+        </properties>
+        <properties profile="!prod">
+            <item name="locations" type="array">
+                <value>/config/appmon/appmon-assets-dev.properties</value>
+            </item>
+        </properties>
+    </bean>
+
+    <bean class="com.aspectran.aspectow.appmon.engine.config.AppMonConfigResolver">
+        <properties profile="!prod">
+            <item name="configLocation">/config/appmon/appmon-config.apon</item>
+        </properties>
+        <properties profile="prod">
+            <item name="configLocation">/config/appmon/appmon-config-prod.apon</item>
+        </properties>
+    </bean>
+
+    <append resource="com/aspectran/aspectow/appmon/config/rules/scheduler.xml"/>
+    <append resource="com/aspectran/aspectow/appmon/config/rules/db.xml"/>
+
+</aspectran>

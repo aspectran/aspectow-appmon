@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{templates/default}">
+<body>
+<th:block layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0"><i class="bi bi-safe me-2"></i> Vault Management</h4>
+        <div class="d-flex align-items-center gap-3">
+            <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" id="hideExpired" onchange="filterExpired()">
+                <label class="form-check-label small text-muted" for="hideExpired">Hide Expired</label>
+            </div>
+            <a th:href="@{/vault/tool}" class="btn btn-outline-primary">
+                <i class="bi bi-tools"></i> Vault Tool
+            </a>
+            <button type="button" class="btn btn-primary" onclick="openVaultModal()">
+                <i class="bi bi-plus-lg"></i> New Token
+            </button>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-body-tertiary py-2">
+            <h6 class="mb-0 text-secondary small fw-bold"><i class="bi bi-shield-lock-fill me-2"></i> System Encryption Configuration</h6>
+        </div>
+        <div class="card-body py-2">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <label class="small text-muted mb-0">Algorithm</label>
+                    <div class="fw-bold font-monospace text-primary" th:text="${page.encryptionAlgorithm}">PBEWITHHMACSHA256ANDAES_128</div>
+                </div>
+                <div class="col-md-4 border-start">
+                    <label class="small text-muted mb-0">Password</label>
+                    <div class="d-flex align-items-center">
+                        <input type="text" class="form-control form-control-sm font-monospace border-0 bg-transparent p-0 fw-bold text-primary"
+                               value="********" readonly id="sys_pwd" style="-webkit-text-security: disc; width: auto; min-width: 150px;">
+                        <button class="btn btn-link btn-sm text-secondary p-0 ms-2" type="button" onclick="toggleSystemPassword(this)" title="Show/Hide Password">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4 border-start">
+                    <label class="small text-muted mb-0">Salt</label>
+                    <div class="fw-bold font-monospace text-primary" th:text="${#strings.isEmpty(page.encryptionSalt) ? '(none)' : page.encryptionSalt}">salt_value</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0 align-middle" id="vaultTable">
+                    <thead>
+                    <tr>
+                        <th class="ps-3 text-muted small text-uppercase" style="width: 60px;">ID</th>
+                        <th class="text-muted small text-uppercase">Label</th>
+                        <th class="text-muted small text-uppercase">Type</th>
+                        <th class="text-muted small text-uppercase">Encrypted Value</th>
+                        <th class="text-muted small text-uppercase">Description</th>
+                        <th class="text-muted small text-uppercase">Expiration</th>
+                        <th class="text-muted small text-uppercase">Updated At</th>
+                        <th class="text-end pe-3 text-muted small text-uppercase">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="v : ${page.vaultList}" th:data-expired="${v.validUntil != null && v.validUntil.isBefore(page.now)}">
+                        <td class="ps-3" th:text="${v.vaultId}">1</td>
+                        <td class="fw-bold" th:text="${v.label}">DB_PASSWORD</td>
+                        <td>
+                            <span th:class="${v.tokenType == 'SIMPLE' ? 'badge bg-secondary' : (v.tokenType == 'PERSISTENT' ? 'badge bg-info' : 'badge bg-primary')}"
+                                  th:text="${v.tokenType}">SIMPLE</span>
+                        </td>
+                        <td>
+                            <div class="input-group input-group-sm" style="max-width: 400px;">
+                                <input type="text" class="form-control font-monospace" th:value="${v.encryptedValue}" readonly th:id="'val_' + ${v.vaultId}" style="-webkit-text-security: disc;">
+                                <button class="btn btn-outline-secondary" type="button" th:onclick="copyToClipboard('val_' + [[${v.vaultId}]])" title="Copy to clipboard">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary" type="button" th:onclick="verifyToken([[${v.vaultId}]], [[${v.encryptedValue}]], [[${v.tokenType}]])" title="Verify Decryption">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                        <td th:text="${v.description}" class="small text-muted">Usage for production DB</td>
+                        <td>
+                            <div th:if="${v.validUntil != null}" class="small">
+                                <span th:if="${v.validUntil.isBefore(page.now)}" class="badge bg-danger">EXPIRED</span>
+                                <span th:if="${v.validUntil.isAfter(page.now)}" class="text-muted" th:text="${#temporals.format(v.validUntil, 'yyyy-MM-dd HH:mm')}">2023-12-31</span>
+                            </div>
+                            <span th:if="${v.validUntil == null}" class="text-muted small">-</span>
+                        </td>
+                        <td th:text="${#temporals.format(v.updatedAt, 'yyyy-MM-dd HH:mm:ss')}" class="small text-muted">2023-10-01</td>
+                        <td class="text-end pe-3">
+                            <div class="d-flex justify-content-end flex-wrap gap-1">
+                                <button class="btn btn-sm btn-outline-secondary"
+                                        th:onclick="openVaultModal([[${v.vaultId}]], [[${v.label}]], [[${v.description}]], [[${v.tokenType}]], [[${v.encryptedValue}]], [[${#temporals.format(v.validUntil, 'yyyy-MM-dd HH:mm:ss')}]] )">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" th:onclick="deleteVault([[${v.vaultId}]])">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(page.vaultList)}">
+                        <td colspan="8" class="text-center py-4 text-muted">No tokens found in vault.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vault Modal -->
+    <div class="modal fade" id="vaultModal" tabindex="-1" aria-labelledby="vaultModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="vaultForm" th:action="@{/vault/save}" method="post" autocomplete="off">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="vaultModalLabel">Security Token</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="vaultId" name="vaultId" />
+                        
+                        <div class="mb-3">
+                            <label for="label" class="form-label">Label</label>
+                            <input type="text" class="form-control" id="label" name="label" required placeholder="e.g. DB_PASSWORD">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tokenType" class="form-label">Token Type</label>
+                            <select class="form-select" id="tokenType" name="tokenType" onchange="onTokenTypeChange()">
+                                <option value="SIMPLE">Simple (Raw Encryption)</option>
+                                <option value="PERSISTENT">Persistent (Data via APON)</option>
+                                <option value="TIME_LIMITED">Time-Limited (Data via APON + Expiry)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="plainText" class="form-label" id="plainTextLabel">Plain Text Value</label>
+                            <textarea class="form-control font-monospace" id="plainText" name="plainText" rows="3" placeholder="Enter value"></textarea>
+                            <div id="plainTextHelp" class="form-text">This value will be encrypted and stored.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="expirationMinutes" class="form-label">Expiration (Minutes)</label>
+                            <input type="number" class="form-control" id="expirationMinutes" name="expirationMinutes" min="0" placeholder="0 for no expiration">
+                            <div class="form-text">Set validity period in minutes from now.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save & Encrypt</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Result Modal -->
+    <div class="modal fade" id="verifyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title">Decryption Result</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="decryptedValue" class="fw-bold fs-5 font-monospace text-primary" style="white-space: pre-wrap; word-break: break-all;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        let vaultModal;
+        let verifyModal;
+        
+        $(function() {
+            vaultModal = new bootstrap.Modal('#vaultModal');
+            verifyModal = new bootstrap.Modal('#verifyModal');
+            
+            const $vaultForm = $('#vaultForm');
+            $vaultForm.on('submit', function(e) {
+                e.preventDefault();
+                
+                // Temporarily enable disabled fields for serialization
+                const $disabledFields = $vaultForm.find(':disabled').prop('disabled', false);
+                const formData = $vaultForm.serialize();
+                $disabledFields.prop('disabled', true); // Re-disable
+
+                $.ajax({
+                    url: $vaultForm.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.success) {
+                            vaultModal.hide();
+                            location.reload();
+                        } else {
+                            const msg = (res.error && res.error.message) ? res.error.message : 'Unknown error';
+                            alert('Error: ' + msg);
+                        }
+                    },
+                    error: function(xhr) {
+                        let msg = 'Error saving token.';
+                        if (xhr.responseJSON) {
+                            const res = xhr.responseJSON;
+                            const error = res.error || (res.data && res.data.error);
+                            if (error) msg = error.message;
+                        }
+                        alert(msg);
+                    }
+                });
+            });
+        });
+
+        function onTokenTypeChange() {
+            const type = $('#tokenType').val();
+            const $exp = $('#expirationMinutes').closest('.mb-3');
+            const $label = $('#plainTextLabel');
+            const $help = $('#plainTextHelp');
+            
+            if (type === 'SIMPLE') {
+                $exp.hide();
+                $label.text('Plain Text Value');
+                $help.text('Simple raw encryption for config values.');
+            } else {
+                $label.text('APON Payload');
+                $help.text('Enter data in APON format (e.g. { key: value }).');
+                if (type === 'TIME_LIMITED') {
+                    $exp.show();
+                } else {
+                    $exp.hide();
+                }
+            }
+        }
+
+        function filterExpired() {
+            const hide = $('#hideExpired').is(':checked');
+            $('#vaultTable tbody tr').each(function() {
+                const isExpired = $(this).data('expired');
+                if (hide && isExpired) {
+                    $(this).hide();
+                } else {
+                    $(this).show();
+                }
+            });
+        }
+
+        function toggleVisibility(id, btn) {
+            const $input = $('#' + id);
+            const $icon = $(btn).find('i');
+            if ($input.css('-webkit-text-security') === 'none') {
+                $input.css('-webkit-text-security', 'disc');
+                $icon.removeClass('bi-eye-slash').addClass('bi-eye');
+            } else {
+                $input.css('-webkit-text-security', 'none');
+                $icon.removeClass('bi-eye').addClass('bi-eye-slash');
+            }
+        }
+
+        function toggleSystemPassword(btn) {
+            const $input = $('#sys_pwd');
+            const $icon = $(btn).find('i');
+            if ($input.css('-webkit-text-security') === 'none') {
+                // Hide and clear
+                $input.val('********');
+                $input.css('-webkit-text-security', 'disc');
+                $icon.removeClass('bi-eye-slash').addClass('bi-eye');
+            } else {
+                // Fetch and Show
+                $.ajax({
+                    url: /*[[@{/vault/encryption-password}]]*/ '/vault/encryption-password',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.success) {
+                            $input.val(res.data);
+                            $input.css('-webkit-text-security', 'none');
+                            $icon.removeClass('bi-eye').addClass('bi-eye-slash');
+                        } else {
+                            alert('Failed to fetch password');
+                        }
+                    },
+                    error: function() {
+                        alert('System error occurred');
+                    }
+                });
+            }
+        }
+
+        function openVaultModal(id, label, description, type, encryptedValue, validUntil) {
+            const $form = $('#vaultForm');
+            $form[0].reset();
+            
+            $('#vaultId').val(id || '');
+            $('#label').val(label || '');
+            $('#description').val(description || '');
+            $('#tokenType').val(type || 'SIMPLE');
+            
+            let remainingMinutes = '';
+            if (validUntil) {
+                const expiry = new Date(validUntil);
+                const now = new Date();
+                const diffMs = expiry - now;
+                if (diffMs > 0) {
+                    remainingMinutes = Math.ceil(diffMs / 1000 / 60);
+                }
+            }
+            $('#expirationMinutes').val(remainingMinutes);
+            
+            onTokenTypeChange();
+            
+            const isEdit = !!id;
+            $('#tokenType').prop('disabled', isEdit);
+            $('#expirationMinutes').prop('readonly', isEdit);
+            $('#plainText').prop('readonly', isEdit);
+            $('#vaultModalLabel').text(isEdit ? 'View/Edit Token Meta' : 'New Token');
+
+            vaultModal.show();
+
+            if (isEdit && encryptedValue) {
+                // Fetch current decrypted value for viewing
+                $.ajax({
+                    url: /*[[@{/vault/decrypt}]]*/ '/vault/decrypt',
+                    type: 'POST',
+                    data: { encryptedValue: encryptedValue, tokenType: type },
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.success) {
+                            $('#plainText').val(res.data);
+                        } else {
+                            const msg = (res.error && res.error.message) ? res.error.message : 'Decryption failed.';
+                            $('#plainText').val('[' + msg + ']');
+                            $('#plainTextHelp').html('<span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle me-1"></i>' + msg + '</span>');
+                        }
+                    }
+                });
+                $('#plainTextHelp').text('Token value and type cannot be modified after issuance.');
+                $('#plainText').prop('required', false);
+            } else {
+                $('#plainTextHelp').text('This value will be encrypted and stored.');
+                $('#plainText').prop('required', true);
+            }
+        }
+
+        function deleteVault(id) {
+            if (confirm('Are you sure you want to delete this token from vault?')) {
+                $.ajax({
+                    url: /*[[@{/vault/delete}]]*/ '/vault/delete',
+                    type: 'POST',
+                    data: { vaultId: id },
+                    dataType: 'json',
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert('Error deleting token.');
+                    }
+                });
+            }
+        }
+
+        function verifyToken(id, encryptedValue, tokenType) {
+            $.ajax({
+                url: /*[[@{/vault/decrypt}]]*/ '/vault/decrypt',
+                type: 'POST',
+                data: { encryptedValue: encryptedValue, tokenType: tokenType },
+                dataType: 'json',
+                success: function(res) {
+                    const $val = $('#decryptedValue');
+                    if (res.success) {
+                        $val.text(res.data).removeClass('text-danger').addClass('text-primary');
+                    } else {
+                        const msg = (res.error && res.error.message) ? res.error.message : 'Decryption failed.';
+                        $val.text(msg).removeClass('text-primary').addClass('text-danger');
+                    }
+                    verifyModal.show();
+                },
+                error: function(xhr) {
+                    const $val = $('#decryptedValue');
+                    $val.text('System error occurred.').removeClass('text-primary').addClass('text-danger');
+                    verifyModal.show();
+                }
+            });
+        }
+
+        function copyToClipboard(elementId) {
+            const $input = $('#' + elementId);
+            const val = $input.val();
+            
+            navigator.clipboard.writeText(val).then(() => {
+                const btn = event.currentTarget;
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check-lg text-success"></i>';
+                setTimeout(() => btn.innerHTML = originalHtml, 2000);
+            });
+        }
+    </script>
+</th:block>
+</body>
+</html>

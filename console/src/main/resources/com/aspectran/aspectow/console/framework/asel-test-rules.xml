@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 9.0//EN"
+        "https://aspectran.com/dtd/aspectran-9.dtd">
+<aspectran>
+    <description>Rules for AsEL testing environment</description>
+
+    <environment>
+        <property name="asel.test.app.name">AsEL Expression Tester</property>
+        <property name="asel.test.app.version">1.0.0</property>
+        <property name="asel.test.app.author">Aspectow</property>
+        <property name="asel.test.app.active">true</property>
+    </environment>
+</aspectran>

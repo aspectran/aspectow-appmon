@@ -19,8 +19,8 @@
 
     <parent>
         <groupId>com.aspectran</groupId>
-        <artifactId>aspectow-appmon-project</artifactId>
-        <version>3.3.0-SNAPSHOT</version>
+        <artifactId>aspectow</artifactId>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>aspectow-appmon</artifactId>
@@ -71,9 +71,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.aspectran</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>aspectow-node</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>

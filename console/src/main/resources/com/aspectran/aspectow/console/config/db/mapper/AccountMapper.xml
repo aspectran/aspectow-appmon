@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aspectran.aspectow.console.common.db.mapper.AccountMapper">
+
+    <cache />
+
+    <resultMap id="UserResultMap" type="com.aspectran.aspectow.console.common.db.model.User">
+        <id property="userId" column="user_id" />
+        <result property="username" column="username" />
+        <result property="password" column="password" />
+        <result property="nickname" column="nickname" />
+        <result property="email" column="email" />
+        <result property="status" column="status" />
+        <result property="lastLoginAt" column="last_login_at" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+        <collection property="roles" ofType="com.aspectran.aspectow.console.common.db.model.Role"
+                    select="getRolesByUserId" column="user_id" />
+    </resultMap>
+
+    <resultMap id="RoleResultMap" type="com.aspectran.aspectow.console.common.db.model.Role">
+        <id property="roleId" column="role_id" />
+        <result property="roleName" column="role_name" />
+        <result property="description" column="description" />
+        <collection property="permissions" ofType="com.aspectran.aspectow.console.common.db.model.Permission"
+                    select="getPermissionsByRoleId" column="role_id" />
+    </resultMap>
+
+    <select id="getUserById" parameterType="long" resultMap="UserResultMap">
+        select * from asc_user where user_id = #{userId}
+    </select>
+
+    <select id="getUserByUsername" parameterType="string" resultMap="UserResultMap">
+        select * from asc_user where username = #{username}
+    </select>
+
+    <select id="getUserList" resultMap="UserResultMap">
+        select * from asc_user order by user_id desc
+    </select>
+
+    <insert id="insertUser" parameterType="com.aspectran.aspectow.console.common.db.model.User" useGeneratedKeys="true" keyProperty="userId">
+        insert into asc_user (username, password, nickname, email, status)
+        values (#{username}, #{password}, #{nickname}, #{email}, #{status})
+    </insert>
+
+    <update id="updateUser" parameterType="com.aspectran.aspectow.console.common.db.model.User">
+        update asc_user
+        set nickname = #{nickname},
+            email = #{email},
+            status = #{status},
+            updated_at = current_timestamp
+        where user_id = #{userId}
+    </update>
+
+    <delete id="deleteUser" parameterType="long">
+        delete from asc_user where user_id = #{userId}
+    </delete>
+
+    <update id="updateLastLogin" parameterType="string">
+        update asc_user
+        set last_login_at = current_timestamp
+        where username = #{username}
+    </update>
+
+    <select id="getRolesByUserId" parameterType="long" resultMap="RoleResultMap">
+        select r.*
+        from asc_role r
+        inner join asc_user_role ur on r.role_id = ur.role_id
+        where ur.user_id = #{userId}
+    </select>
+
+    <select id="getRoleList" resultMap="RoleResultMap">
+        select * from asc_role
+    </select>
+
+    <insert id="insertUserRole">
+        insert into asc_user_role (user_id, role_id)
+        values (#{userId}, #{roleId})
+    </insert>
+
+    <delete id="deleteUserRoles" parameterType="long">
+        delete from asc_user_role where user_id = #{userId}
+    </delete>
+
+    <select id="getPermissionsByRoleId" parameterType="long" resultType="com.aspectran.aspectow.console.common.db.model.Permission">
+        select p.*
+        from asc_permission p
+        inner join asc_role_permission rp on p.perm_id = rp.perm_id
+        where rp.role_id = #{roleId}
+    </select>
+
+    <select id="getPermissionList" resultType="com.aspectran.aspectow.console.common.db.model.Permission">
+        select * from asc_permission
+    </select>
+
+    <insert id="insertLoginHistory" parameterType="com.aspectran.aspectow.console.common.db.model.LoginHistory">
+        insert into asc_login_history (username, ip_address, user_agent, success_yn)
+        values (#{username}, #{ipAddress}, #{userAgent}, #{successYn})
+    </insert>
+
+    <select id="getLoginHistoryList" parameterType="string" resultType="com.aspectran.aspectow.console.common.db.model.LoginHistory">
+        select * from asc_login_history
+        <if test="username != null and username != ''">
+            where username = #{username}
+        </if>
+        order by history_id desc
+    </select>
+
+
+</mapper>

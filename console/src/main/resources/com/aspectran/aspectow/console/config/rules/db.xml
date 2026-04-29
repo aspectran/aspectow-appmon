@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 9.0//EN"
+        "https://aspectran.com/dtd/aspectran-9.dtd">
+<aspectran>
+
+    <description>
+        Configuration for database transactions
+    </description>
+
+    <bean id="consoleDBProperties" class="com.aspectran.core.support.PropertiesFactoryBean">
+        <properties>
+            <item name="ignoreInvalidResource" valueType="boolean">true</item>
+        </properties>
+        <properties profile="h2">
+            <item name="locations" type="array">
+                <value>classpath:com/aspectran/aspectow/console/config/db/aspectow-console.db-h2.properties</value>
+                <value>classpath:com/aspectran/aspectow/console/config/db/aspectow-console.db-h2.system.properties</value>
+                <value>/config/console/aspectow-console.db-h2.properties</value>
+            </item>
+        </properties>
+        <properties profile="mariadb">
+            <item name="locations" type="array">
+                <value>classpath:com/aspectran/aspectow/console/config/db/aspectow-console.db-mariadb.properties</value>
+                <value>classpath:com/aspectran/aspectow/console/config/db/aspectow-console.db-mariadb.system.properties</value>
+                <value>/config/console/aspectow-console.db-mariadb.properties</value>
+            </item>
+        </properties>
+        <properties profile="mysql">
+            <item name="locations" type="array">
+                <value>classpath:com/aspectran/aspectow/console/config/db/aspectow-console.db-mysql.properties</value>
+                <value>classpath:com/aspectran/aspectow/console/config/db/aspectow-console.db-mysql.system.properties</value>
+                <value>/config/console/aspectow-console.db-mysql.properties</value>
+            </item>
+        </properties>
+        <properties profile="postgresql">
+            <item name="locations" type="array">
+                <value>classpath:com/aspectran/aspectow/console/config/db/aspectow-console.db-postgresql.properties</value>
+                <value>classpath:com/aspectran/aspectow/console/config/db/aspectow-console.db-postgresql.system.properties</value>
+                <value>/config/console/aspectow-console.db-postgresql.properties</value>
+            </item>
+        </properties>
+        <properties profile="oracle">
+            <item name="locations" type="array">
+                <value>classpath:com/aspectran/aspectow/console/config/db/aspectow-console.db-oracle.properties</value>
+                <value>classpath:com/aspectran/aspectow/console/config/db/aspectow-console.db-oracle.system.properties</value>
+                <value>/config/console/aspectow-console.db-oracle.properties</value>
+            </item>
+        </properties>
+    </bean>
+
+    <bean id="consoleSqlSessionFactory" class="com.aspectran.mybatis.SqlSessionFactoryBean" lazyDestroy="true">
+        <description>
+            FactoryBean that creates an MyBatis SqlSessionFactory using default MyBatis Configuration.
+        </description>
+        <properties>
+            <item name="configLocation" value="classpath:com/aspectran/aspectow/console/config/db/mybatis-config.xml"/>
+            <item name="environmentId" value="default"/>
+            <item name="variables" type="properties">
+                <entry name="driver">#{consoleDBProperties^driver}</entry>
+                <entry name="url">#{consoleDBProperties^url}</entry>
+                <entry name="username">#{consoleDBProperties^username}</entry>
+                <entry name="password">#{consoleDBProperties^password}</entry>
+            </item>
+        </properties>
+    </bean>
+
+</aspectran>

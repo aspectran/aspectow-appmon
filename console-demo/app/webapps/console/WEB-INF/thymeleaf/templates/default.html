@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="utf-8"/>
+    <th:block th:replace="~{templates/base-head :: theme-script}"></th:block>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${page.title != null ? page.title + ' - Aspectow Console' : 'Aspectow Console'}">Aspectow Console</title>
+    <th:block th:replace="~{templates/base-head :: common-assets}"></th:block>
+    <link rel="stylesheet" th:href="@{/assets/css/console.css}"/>
+</head>
+<body th:class="${page.style}">
+    <aside id="sidebar">
+        <div class="logo-container">
+            <a th:href="@{/}" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
+                <img src="https://assets.aspectran.com/img/aspectran-logo.svg" class="logo-img me-2" alt="Aspectran"/>
+                <span class="fw-bold" style="font-size: 1.1rem;">Console</span>
+            </a>
+            <button class="btn d-lg-none ms-auto" id="sidebar-close">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <nav class="nav-links">
+            <a th:href="@{/}" class="nav-link" th:classappend="${page.include == 'home' ? 'active' : ''}">
+                <i class="bi bi-house-door"></i> Home
+            </a>
+            
+            <div class="mt-4 px-3 small text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Management</div>
+
+            <!-- Cluster Group -->
+            <div class="nav-group">
+                <a class="nav-link d-flex justify-content-between align-items-center"
+                   th:classappend="${page.group == 'cluster-menu' ? 'active' : 'collapsed'}"
+                   data-bs-toggle="collapse" href="#cluster-menu" role="button" aria-expanded="false">
+                    <span><i class="bi bi-cpu"></i> Cluster</span>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse" th:classappend="${page.group == 'cluster-menu' ? 'show' : ''}" id="cluster-menu">
+                    <a th:href="@{/nodes/list}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'nodes-page' ? 'active' : ''}">
+                        Nodes
+                    </a>
+                    <a th:href="@{/nodes/commands}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'commands-page' ? 'active' : ''}">
+                        Remote Commands
+                    </a>
+                    <a th:href="@{/nodes/scheduler}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'scheduler-page' ? 'active' : ''}">
+                        Scheduler Manager
+                    </a>
+                    <a th:href="@{/appmon/dashboard/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'monitoring-page' ? 'active' : ''}">
+                        Monitoring
+                    </a>
+                </div>
+            </div>
+
+            <!-- Security Group -->
+            <div class="nav-group">
+                <a class="nav-link d-flex justify-content-between align-items-center" th:classappend="${page.group == 'security-menu' ? 'active' : 'collapsed'}"
+                   data-bs-toggle="collapse" href="#security-menu" role="button" aria-expanded="false">
+                    <span><i class="bi bi-shield-lock"></i> Security</span>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse" th:classappend="${page.group == 'security-menu' ? 'show' : ''}" id="security-menu">
+                    <a th:href="@{/vault}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'vault-page' ? 'active' : ''}">
+                        Vault
+                    </a>
+                </div>
+            </div>
+
+            <!-- Framework Group -->
+            <div class="nav-group">
+                <a class="nav-link d-flex justify-content-between align-items-center" th:classappend="${page.group == 'framework-menu' ? 'active' : 'collapsed'}"
+                   data-bs-toggle="collapse" href="#framework-menu" role="button" aria-expanded="false">
+                    <span><i class="bi bi-diagram-3"></i> Framework</span>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse" th:classappend="${page.group == 'framework-menu' ? 'show' : ''}" id="framework-menu">
+                    <a th:href="@{/framework/anatomy/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'anatomy-page' ? 'active' : ''}">
+                        Anatomy
+                    </a>
+                    <a href="#" class="nav-link ps-5 py-2 small">
+                        Configuration
+                    </a>
+                    <a href="#" class="nav-link ps-5 py-2 small">
+                        Beans
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-4 px-3 small text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Utilities</div>
+
+            <!-- Developer Tools Group -->
+            <div class="nav-group">
+                <a class="nav-link d-flex justify-content-between align-items-center"
+                   th:classappend="${page.group == 'tools-menu' ? 'active' : 'collapsed'}"
+                   data-bs-toggle="collapse" href="#tools-menu" role="button" aria-expanded="false">
+                    <span><i class="bi bi-wrench-adjustable"></i> Developer Tools</span>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse" th:classappend="${page.group == 'tools-menu' ? 'show' : ''}" id="tools-menu">
+                    <a th:href="@{/vault/tool}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'vault-tool-page' ? 'active' : ''}">
+                        Vault Tool
+                    </a>
+                    <a th:href="@{/framework/wildcard/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'wildcard-page' ? 'active' : ''}">
+                        Wildcard Tester
+                    </a>
+                    <a th:href="@{/framework/asel/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'asel-page' ? 'active' : ''}">
+                        AsEL Tester
+                    </a>
+                    <a th:href="@{/framework/apon/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'apon-page' ? 'active' : ''}">
+                        APON Converter
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-4 px-3 small text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Governance</div>
+            
+            <!-- Accounts Group -->
+            <div class="nav-group">
+                <a class="nav-link d-flex justify-content-between align-items-center" th:classappend="${page.style == 'user-page' ? 'active' : 'collapsed'}"
+                   data-bs-toggle="collapse" href="#user-menu" role="button" aria-expanded="false">
+                    <span><i class="bi bi-person-badge"></i> Accounts</span>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse" th:classappend="${page.style == 'user-page' ? 'show' : ''}" id="user-menu">
+                    <a th:href="@{/user}" class="nav-link ps-5 py-2 small" th:classappend="${page.include == 'user' ? 'active' : ''}">
+                        Users
+                    </a>
+                    <a th:href="@{/user/login-history}" class="nav-link ps-5 py-2 small" th:classappend="${page.include == 'login-history' ? 'active' : ''}">
+                        Login History
+                    </a>
+                </div>
+            </div>
+
+            <a href="#" class="nav-link">
+                <i class="bi bi-gear"></i> Settings
+            </a>
+        </nav>
+        <div class="p-3 border-top">
+            <div class="d-flex align-items-center gap-2 mb-2" th:if="${session.USER_INFO != null}">
+                <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <span th:text="${#strings.substring(session.USER_INFO.nickname ?: session.USER_INFO.username, 0, 1).toUpperCase()}">U</span>
+                </div>
+                <div class="small flex-grow-1 overflow-hidden">
+                    <div class="fw-bold text-truncate" th:text="${session.USER_INFO.nickname ?: session.USER_INFO.username}">User</div>
+                    <div class="text-muted text-truncate" style="font-size: 0.75rem;" th:text="${session.USER_INFO.username}">username</div>
+                </div>
+                <a th:href="@{/auth/logout}" class="text-muted" title="Logout">
+                    <i class="bi bi-box-arrow-right fs-5"></i>
+                </a>
+            </div>
+            <div class="small text-muted">Aspectow Console v1.0.0</div>
+        </div>
+    </aside>
+
+    <div id="sidebar-overlay"></div>
+    <div id="main-container">
+        <header id="header-bar" class="px-lg-4">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn d-lg-none p-0" id="sidebar-toggle">
+                    <i class="bi bi-list fs-3"></i>
+                </button>
+                <nav aria-label="breadcrumb" class="d-none d-sm-block">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
+                        <li th:if="${page.group == 'cluster-menu'}" class="breadcrumb-item">Cluster</li>
+                        <li th:if="${page.group == 'security-menu'}" class="breadcrumb-item">Security</li>
+                        <li th:if="${page.group == 'framework-menu'}" class="breadcrumb-item">Framework</li>
+                        <li th:if="${page.group == 'tools-menu'}" class="breadcrumb-item">Developer Tools</li>
+                        <li th:if="${page.group == 'accounts-menu'}" class="breadcrumb-item">Accounts</li>
+                        <li class="breadcrumb-item active" aria-current="page" th:text="${page.title}">Dashboard</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <!-- Theme Toggler -->
+                <div class="theme-toggler dropdown">
+                    <button class="btn dropdown-toggle" type="button" id="theme-toggler-btn" data-bs-toggle="dropdown">
+                        <i class="bi theme-icon-active"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li><button class="dropdown-item d-flex align-items-center" data-bs-theme-value="light"><i class="bi bi-sun-fill me-2"></i> Light</button></li>
+                        <li><button class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark"><i class="bi bi-moon-stars-fill me-2"></i> Dark</button></li>
+                        <li><button class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto"><i class="bi bi-circle-half me-2"></i> Auto</button></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <main id="content-area">
+            <th:block th:if="${page.headinclude != null}">
+                <div th:insert="~{${page.headinclude}}"></div>
+            </th:block>
+            <div class="container-fluid g-lg-5 my-3">
+                <th:block layout:fragment="content"/>
+            </div>
+        </main>
+    </div>
+    <th:block layout:fragment="script"></th:block>
+    <script>
+        $(function() {
+            const $sidebar = $('#sidebar');
+            const $overlay = $('#sidebar-overlay');
+            const toggleSidebar = () => {
+                $sidebar.toggleClass('show');
+                $overlay.toggleClass('show');
+            };
+            $('#sidebar-toggle, #sidebar-close, #sidebar-overlay').on('click', toggleSidebar);
+        });
+    </script>
+</body>
+</html>

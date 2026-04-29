@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{templates/default}">
+<body>
+<th:block layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">
+            <i class="bi bi-clock-history me-2"></i> 
+            <span th:if="${!#strings.isEmpty(page.username)}" th:text="|Login History for '${page.username}'|">Login History</span>
+            <span th:if="${#strings.isEmpty(page.username)}">All Login History</span>
+        </h4>
+        <div th:if="${!#strings.isEmpty(page.username)}">
+            <a th:href="@{/user/login-history}" class="btn btn-outline-secondary btn-sm">Show All</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0 align-middle">
+                    <thead>
+                    <tr>
+                        <th class="ps-3 text-muted small text-uppercase" style="width: 60px;">ID</th>
+                        <th class="text-muted small text-uppercase">Username</th>
+                        <th class="text-muted small text-uppercase">IP Address</th>
+                        <th class="text-muted small text-uppercase">Status</th>
+                        <th class="text-muted small text-uppercase">Time</th>
+                        <th class="pe-3 text-muted small text-uppercase">User Agent</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="history : ${page.historyList}">
+                        <td class="ps-3" th:text="${history.historyId}">1</td>
+                        <td>
+                            <a th:href="@{/user/login-history(username=${history.username})}" 
+                               class="text-decoration-none fw-bold" th:text="${history.username}">admin</a>
+                        </td>
+                        <td th:text="${history.ipAddress}">127.0.0.1</td>
+                        <td>
+                            <span th:class="${#strings.equals(history.successYn, 'Y') ? 'badge bg-success' : 'badge bg-danger'}"
+                                  th:text="${#strings.equals(history.successYn, 'Y') ? 'SUCCESS' : 'FAILED'}">SUCCESS</span>
+                        </td>
+                        <td th:text="${#temporals.format(history.loginAt, 'yyyy-MM-dd HH:mm:ss')}">2023-10-01 12:00:00</td>
+                        <td class="pe-3 small text-muted text-truncate" style="max-width: 300px;" 
+                            th:text="${history.userAgent}" th:title="${history.userAgent}">Mozilla/5.0...</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(page.historyList)}">
+                        <td colspan="6" class="text-center py-4 text-muted">No login history found.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        $(function() {
+            // Future extensions
+        });
+    </script>
+</th:block>
+</body>
+</html>

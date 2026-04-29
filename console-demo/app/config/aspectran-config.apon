@@ -1,0 +1,132 @@
+system: {
+    properties: {
+        # The current algorithm is not secure.
+        # For higher security, use PBEWITHHMACSHA256ANDAES_128.
+        aspectran.encryption.algorithm: PBEWithMD5AndTripleDES
+        aspectran.encryption.password: demo!
+        # To change the encoding of the properties file,
+        # modify the value below or pass it as a -D option when starting the JVM.
+        aspectran.properties.encoding: UTF-8
+        # Enables statistics collection for the JBoss thread pool (Enhanced Queue Executor),
+        # which is useful for performance monitoring and debugging.
+        jboss.threads.eqe.statistics: true
+        jboss.threads.eqe.statistics.active-count: true
+    }
+}
+context: {
+    name: root
+    rules: [
+        /config/app-description.xml
+        /config/server/server.xml
+        /config/aspectran-rules.xml
+        /config/console/aspectow-nodes.xml
+    ]
+    resources: [
+        /lib/ext
+    ]
+    scan: [
+        com.aspectran.aspectow.console.demo
+    ]
+    profiles: {
+        default: [
+            dev
+        ]
+    }
+    autoReload: {
+        reloadMode: hard
+        scanIntervalSeconds: 5
+        enabled: false
+    }
+    singleton: true
+}
+scheduler: {
+    startDelaySeconds: 3
+    waitOnShutdown: true
+    enabled: false
+}
+shell: {
+    style: {
+         primary: GRAY
+         secondary: green
+         success: cyan
+         danger: red
+         warning: YELLOW
+         info: BLUE
+    }
+    greetings: (
+        |
+        |{{WHITE  }}     ___                         _
+        |{{CYAN   }}    / __\ ___  _ __   ___  ___  | |  ___
+        |{{GREEN  }}   / /   / _ \| '_ \ / __|/ _ \ | | / _ \
+        |{{YELLOW }}  / /___| (_) | | | |\__ \ (_) || ||  __/
+        |{{RED    }}  \____/ \___/|_| |_||___/\___/ |_| \___|    {{WHITE}}Management Console
+        |{{gray   }}=============================================================================
+        |{{MAGENTA}}:: Built with Aspectran :: {{RED}}#{class:com.aspectran.core.AboutMe^version}{{reset}}
+        |
+        |{{gray   }}To see a list of all built-in commands, type {{GREEN}}help{{reset}}.
+        |{{gray   }}To get help for a specific command, type {{GREEN}}command_name -h{{reset}}.
+        |{{gray   }}To list all available translets, type {{CYAN}}translet -l{{reset}}.
+        |{{gray   }}To run a translet, type {{CYAN}}translet <translet_name>{{gray}} or just {{CYAN}}translet_name{{reset}}.
+    )
+    prompt: "{{green}}console>{{reset}} "
+    commands: [
+        com.aspectran.undertow.shell.command.UndertowCommand
+        com.aspectran.shell.command.builtins.TransletCommand
+        com.aspectran.shell.command.builtins.AspectCommand
+        com.aspectran.shell.command.builtins.JobCommand
+        com.aspectran.shell.command.builtins.PBEncryptCommand
+        com.aspectran.shell.command.builtins.PBDecryptCommand
+        com.aspectran.shell.command.builtins.SysInfoCommand
+        com.aspectran.shell.command.builtins.EchoCommand
+        com.aspectran.shell.command.builtins.HistoryCommand
+        com.aspectran.shell.command.builtins.ClearCommand
+        com.aspectran.shell.command.builtins.VerboseCommand
+        com.aspectran.shell.command.builtins.HelpCommand
+        com.aspectran.shell.command.builtins.RestartCommand
+        com.aspectran.shell.command.builtins.QuitCommand
+    ]
+    session: {
+        enabled: false
+    }
+    historyFile: /logs/history.log
+    verbose: true
+    acceptable: {
+        -: /**
+    }
+}
+daemon: {
+    executor: {
+        maxThreads: 5
+    }
+    polling: {
+        pollingInterval: 5000
+        requeuable: true
+        incoming: /cmd/incoming
+        enabled: true
+    }
+    commands: [
+        com.aspectran.undertow.daemon.command.UndertowCommand
+        com.aspectran.daemon.command.builtins.InvokeActionCommand
+        com.aspectran.daemon.command.builtins.TransletCommand
+        com.aspectran.daemon.command.builtins.ComponentCommand
+        com.aspectran.daemon.command.builtins.SysInfoCommand
+        com.aspectran.daemon.command.builtins.PollingIntervalCommand
+        com.aspectran.daemon.command.builtins.RestartCommand
+        com.aspectran.daemon.command.builtins.QuitCommand
+    ]
+    session: {
+        enabled: false
+    }
+    acceptable: {
+        -: /**
+    }
+}
+web: {
+    uriDecoding: utf-8
+    defaultServletName: none
+    trailingSlashRedirect: true
+    legacyHeadHandling: true
+    acceptable: {
+        +: /**
+    }
+}

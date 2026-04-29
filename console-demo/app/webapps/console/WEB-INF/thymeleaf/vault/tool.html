@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{templates/default}">
+<body>
+<th:block layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0"><i class="bi bi-tools me-2"></i> Vault Tool</h4>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="small text-muted d-none d-md-inline">For detailed usage, refer to:</span>
+            <a href="https://aspectran.com/en/docs/guides/practical-guide-to-pbe-token-based-authentication/" target="_blank" class="btn btn-outline-info btn-sm">
+                <i class="bi bi-book me-1"></i> User Guide
+            </a>
+            <a th:href="@{/vault/}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back to Management
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-5">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-body-tertiary">
+                    <h6 class="mb-0 small fw-bold">Encryption/Decryption Execution</h6>
+                </div>
+                <div class="card-body">
+                    <form id="toolForm" autocomplete="off">
+                        <div class="mb-3">
+                            <label for="algorithm" class="form-label small">Algorithm</label>
+                            <select class="form-select form-select-sm font-monospace" id="algorithm" name="algorithm" required>
+                                <option th:each="algo : ${page.algorithms}" th:value="${algo}" th:text="${algo}" th:selected="${algo == page.defaultAlgorithm}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label small">Password</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control font-monospace" id="password" name="password" required autocomplete="off" style="-webkit-text-security: disc;">
+                                <button class="btn btn-outline-secondary" type="button" onclick="toggleVisibility('password', this)" title="Show/Hide Password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="salt" class="form-label small">Salt (Optional)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="salt" name="salt">
+                        </div>
+                        <hr class="my-3">
+                        <div class="mb-3">
+                            <label class="form-label small">Operation Mode</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="mode" id="modeEncrypt" value="encrypt" checked>
+                                    <label class="form-check-label small" for="modeEncrypt">Encrypt</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="mode" id="modeDecrypt" value="decrypt">
+                                    <label class="form-check-label small" for="modeDecrypt">Decrypt</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="text" class="form-label small">Input Text</label>
+                            <textarea class="form-control form-control-sm font-monospace" id="text" name="text" rows="3" required placeholder="Text to encrypt or decrypt"></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-lightning-fill me-1"></i> Execute
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm d-none" id="resultCard">
+                <div class="card-header bg-success text-white py-2">
+                    <h6 class="mb-0 small fw-bold">Execution Result</h6>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <textarea class="form-control font-monospace text-primary bg-body-tertiary" id="resultText" rows="3" readonly></textarea>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyResult()">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 small fw-bold">Execution History</h6>
+                    <button class="btn btn-link btn-sm text-danger p-0" onclick="clearHistory()">
+                        <i class="bi bi-trash me-1"></i> Clear
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0 small" id="historyTable">
+                            <thead>
+                            <tr>
+                                <th class="ps-3" style="width: 100px;">Time</th>
+                                <th style="width: 80px;">Mode</th>
+                                <th>Algorithm</th>
+                                <th class="text-end pe-3">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- History items will be rendered here -->
+                            </tbody>
+                        </table>
+                        <div id="noHistory" class="text-center py-5 text-muted">
+                            <i class="bi bi-clock-history fs-2 d-block mb-2"></i>
+                            No execution history yet.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        const HISTORY_KEY = 'vault_tool_history';
+
+        $(function() {
+            loadHistory();
+
+            $('#toolForm').on('submit', function(e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                const mode = $('input[name="mode"]:checked').val();
+                
+                $.ajax({
+                    url: /*[[@{/vault/tool/execute}]]*/ '/vault/tool/execute',
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.success) {
+                            $('#resultText').val(res.data);
+                            $('#resultCard').removeClass('d-none');
+                            
+                            // Add to history
+                            addToHistory({
+                                time: new Date().toLocaleTimeString(),
+                                mode: mode,
+                                algorithm: $('#algorithm').val(),
+                                password: $('#password').val(),
+                                salt: $('#salt').val(),
+                                input: $('#text').val(),
+                                output: res.data
+                            });
+                        } else {
+                            const msg = (res.error && res.error.message) ? res.error.message : 'Unknown error';
+                            alert('Error: ' + msg);
+                        }
+                    },
+                    error: function() {
+                        alert('System error occurred');
+                    }
+                });
+            });
+        });
+
+        function addToHistory(item) {
+            let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            history.unshift(item);
+            if (history.length > 20) history.pop(); // Keep last 20
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            renderHistory();
+        }
+
+        function toggleVisibility(id, btn) {
+            const $input = $('#' + id);
+            const $icon = $(btn).find('i');
+            if ($input.css('-webkit-text-security') === 'none') {
+                $input.css('-webkit-text-security', 'disc');
+                $icon.removeClass('bi-eye-slash').addClass('bi-eye');
+            } else {
+                $input.css('-webkit-text-security', 'none');
+                $icon.removeClass('bi-eye').addClass('bi-eye-slash');
+            }
+        }
+
+        function loadHistory() {
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            const $tbody = $('#historyTable tbody');
+            const $noHistory = $('#noHistory');
+            
+            $tbody.empty();
+            if (history.length === 0) {
+                $noHistory.removeClass('d-none');
+            } else {
+                $noHistory.addClass('d-none');
+                history.forEach((item, index) => {
+                    const modeBadge = item.mode === 'encrypt' ? 'bg-primary' : 'bg-info';
+                    const row = `
+                        <tr>
+                            <td class="ps-3 text-muted">${item.time}</td>
+                            <td><span class="badge ${modeBadge}">${item.mode.toUpperCase()}</span></td>
+                            <td class="text-truncate" style="max-width: 200px;" title="${item.algorithm}">${item.algorithm}</td>
+                            <td class="text-end pe-3">
+                                <button class="btn btn-sm btn-outline-secondary py-0" onclick="restoreFromHistory(${index})">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    $tbody.append(row);
+                });
+            }
+        }
+
+        function restoreFromHistory(index) {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            const item = history[index];
+            if (item) {
+                $('#algorithm').val(item.algorithm);
+                $('#password').val(item.password);
+                $('#salt').val(item.salt);
+                $('#text').val(item.input);
+                $(`input[name="mode"][value="${item.mode}"]`).prop('checked', true);
+                $('#resultText').val(item.output);
+                $('#resultCard').removeClass('d-none');
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('Clear all execution history?')) {
+                localStorage.removeItem(HISTORY_KEY);
+                renderHistory();
+            }
+        }
+
+        function copyResult() {
+            const text = $('#resultText').val();
+            navigator.clipboard.writeText(text).then(() => {
+                const $btn = $('#resultCard button');
+                const originalHtml = $btn.html();
+                $btn.html('<i class="bi bi-check-lg text-success"></i>');
+                setTimeout(() => $btn.html(originalHtml), 2000);
+            });
+        }
+    </script>
+</th:block>
+</body>
+</html>

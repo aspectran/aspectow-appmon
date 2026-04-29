@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aspectran.aspectow.console.common.db.mapper.VaultMapper">
+
+    <resultMap id="VaultResultMap" type="com.aspectran.aspectow.console.common.db.model.Vault">
+        <id property="vaultId" column="vault_id" />
+        <result property="label" column="label" />
+        <result property="tokenType" column="token_type" />
+        <result property="encryptedValue" column="encrypted_value" />
+        <result property="description" column="description" />
+        <result property="validUntil" column="valid_until" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <select id="getVaultById" parameterType="long" resultMap="VaultResultMap">
+        select * from asc_vault where vault_id = #{vaultId}
+    </select>
+
+    <select id="getVaultList" resultMap="VaultResultMap">
+        select * from asc_vault order by vault_id desc
+    </select>
+
+    <insert id="insertVault" parameterType="com.aspectran.aspectow.console.common.db.model.Vault" useGeneratedKeys="true" keyProperty="vaultId">
+        insert into asc_vault (label, token_type, encrypted_value, description, valid_until)
+        values (#{label}, #{tokenType}, #{encryptedValue}, #{description}, #{validUntil})
+    </insert>
+
+    <update id="updateVault" parameterType="com.aspectran.aspectow.console.common.db.model.Vault">
+        update asc_vault
+        set label = #{label},
+            token_type = #{tokenType},
+            <if test="encryptedValue != null and encryptedValue != ''">
+            encrypted_value = #{encryptedValue},
+            </if>
+            description = #{description},
+            valid_until = #{validUntil},
+            updated_at = current_timestamp
+        where vault_id = #{vaultId}
+    </update>
+
+    <delete id="deleteVault" parameterType="long">
+        delete from asc_vault where vault_id = #{vaultId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,25 @@
+context: {
+    name: console
+    rules: [
+        classpath:com/aspectran/aspectow/console/config/rules/root.xml
+        /config/appmon/appmon-rules.xml
+    ]
+    scan: [
+        com.aspectran.aspectow.appmon
+        com.aspectran.aspectow.console
+    ]
+    profiles: {
+        base: [
+            console-integrated
+            h2
+        ]
+        default: [
+            dev
+        ]
+    }
+}
+scheduler: {
+    startDelaySeconds: 2
+    waitOnShutdown: true
+    enabled: true
+}

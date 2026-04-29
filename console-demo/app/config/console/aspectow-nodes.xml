@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 9.0//EN"
+        "https://aspectran.com/dtd/aspectran-9.dtd">
+<aspectran>
+
+    <bean class="com.aspectran.aspectow.node.config.NodeConfigResolver">
+        <properties profile="prod">
+            <item name="configLocation">/config/console/node-config-prod.apon</item>
+        </properties>
+        <properties profile="!prod">
+            <item name="configLocation">/config/console/node-config-test-gateway.apon</item>
+        </properties>
+    </bean>
+
+    <bean id="redisConnectionPoolConfig" class="com.aspectran.aspectow.node.redis.RedisConnectionPoolConfig">
+        <argument>
+            <bean class="com.aspectran.core.support.PropertiesFactoryBean">
+                <properties>
+                    <item name="ignoreInvalidResource" valueType="boolean">false</item>
+                </properties>
+                <properties profile="prod">
+                    <item name="locations" type="array">
+                        <value>/config/console/redis-prod.properties</value>
+                    </item>
+                </properties>
+                <properties profile="!prod">
+                    <item name="locations" type="array">
+                        <value>/config/console/redis-dev.properties</value>
+                    </item>
+                </properties>
+            </bean>
+        </argument>
+    </bean>
+
+    <bean id="nodeManager" class="com.aspectran.aspectow.node.manager.NodeManagerFactoryBean" lazyInit="true" lazyDestroy="true">
+        <properties>
+            <item name="redisConnectionPoolConfig">#{redisConnectionPoolConfig}</item>
+        </properties>
+    </bean>
+
+</aspectran>
