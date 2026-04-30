@@ -51,10 +51,12 @@ public abstract class NodeManagerBuilder {
 
     private static final String DEFAULT_CLUSTER_ID = "cluster";
 
-    private static final String DEFAULT_NODE_ID = "node";
+    private static final String DEFAULT_NODE_ID = "node1";
 
     @NonNull
-    public static NodeManager build(ActivityContext context, NodeConfig nodeConfig, RedisConnectionPoolConfig redisConnectionPoolConfig) throws Exception {
+    public static NodeManager build(
+            ActivityContext context, NodeConfig nodeConfig,
+            RedisConnectionPoolConfig redisConnectionPoolConfig) throws Exception {
         Assert.notNull(context, "context must not be null");
         Assert.notNull(nodeConfig, "nodeConfig must not be null");
 
