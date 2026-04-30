@@ -28,7 +28,4 @@
         </properties>
     </bean>
 
-    <append resource="com/aspectran/aspectow/appmon/config/rules/scheduler.xml"/>
-    <append resource="com/aspectran/aspectow/appmon/config/rules/db.xml"/>
-
 </aspectran>

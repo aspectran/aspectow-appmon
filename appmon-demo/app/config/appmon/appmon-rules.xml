@@ -17,6 +17,6 @@
         </properties>
     </bean>
 
-    <append file="/config/appmon/aspectow-nodes.xml"/>
+    <append file="/config/appmon/node-rules.xml"/>
 
 </aspectran>

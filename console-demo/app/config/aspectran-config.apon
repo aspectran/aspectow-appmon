@@ -17,9 +17,10 @@ context: {
     name: root
     rules: [
         /config/app-description.xml
-        /config/server/server.xml
         /config/aspectran-rules.xml
-        /config/console/aspectow-nodes.xml
+        /config/server/server.xml
+        /config/console/node-rules.xml
+        /config/appmon/appmon-rules.xml
     ]
     resources: [
         /lib/ext
