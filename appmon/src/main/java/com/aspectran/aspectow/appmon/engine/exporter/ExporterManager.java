@@ -72,7 +72,7 @@ public class ExporterManager {
      * Gets the name of the instance this manager belongs to.
      * @return the instance name
      */
-    public String getInstanceId() {
+    public String getAppId() {
         return appId;
     }
 

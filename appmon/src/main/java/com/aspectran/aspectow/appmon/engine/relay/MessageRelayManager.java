@@ -31,7 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * Manages all {@link MessageRelayer} and {@link ExporterManager} instances.
+ * Manages all {@link MessageRelayer} and {@link ExporterManager} apps.
  * This class is a central hub for handling client sessions (join/release),
  * collecting messages from exporters, and relaying them to clients.
  *
@@ -53,7 +53,7 @@ public class MessageRelayManager {
 
     /**
      * Instantiates a new MessageRelayManager.
-     * @param appInfoHolder the holder for instance information
+     * @param appInfoHolder the holder for app information
      */
     public MessageRelayManager(AppInfoHolder appInfoHolder, RedisMessagePublisher messagePublisher) {
         this.appInfoHolder = appInfoHolder;
@@ -122,8 +122,8 @@ public class MessageRelayManager {
     }
 
     /**
-     * Handles a client joining to monitor instances.
-     * Starts the necessary exporters for the joined instances.
+     * Handles a client joining to monitor apps.
+     * Starts the necessary exporters for the joined apps.
      * @param session the client session that is joining
      * @return {@code true} if the join was successful, {@code false} otherwise
      */
@@ -145,7 +145,7 @@ public class MessageRelayManager {
 
     private void startExporters(String appId) {
         for (ExporterManager exporterManager : exporterManagers) {
-            if (appId == null || exporterManager.getInstanceId().equals(appId)) {
+            if (appId == null || exporterManager.getAppId().equals(appId)) {
                 exporterManager.start();
             }
         }
@@ -157,7 +157,7 @@ public class MessageRelayManager {
      * @param session the client session that is being released
      */
     public synchronized void release(RelaySession session) {
-        String[] appIds = getUnusedInstances(session);
+        String[] appIds = getUnusedApps(session);
         if (appIds != null) {
             for (String id : appIds) {
                 stopExporters(id);
@@ -168,14 +168,14 @@ public class MessageRelayManager {
 
     private void stopExporters(String appId) {
         for (ExporterManager exporterManager : exporterManagers) {
-            if (appId == null || exporterManager.getInstanceId().equals(appId)) {
+            if (appId == null || exporterManager.getAppId().equals(appId)) {
                 exporterManager.stop();
             }
         }
     }
 
     /**
-     * Gets the last known messages for the instances joined by the session.
+     * Gets the last known messages for the apps joined by the session.
      * @param session the client session
      * @return a list of messages
      */
@@ -198,7 +198,7 @@ public class MessageRelayManager {
 
     private void collectLastMessages(String appId, List<String> messages, CommandOptions commandOptions) {
         for (ExporterManager exporterManager : exporterManagers) {
-            if (appId == null || exporterManager.getInstanceId().equals(appId)) {
+            if (appId == null || exporterManager.getAppId().equals(appId)) {
                 exporterManager.collectMessages(messages, commandOptions);
             }
         }
@@ -230,18 +230,18 @@ public class MessageRelayManager {
 
     private void collectNewMessages(String appId, List<String> messages, CommandOptions commandOptions) {
         for (ExporterManager exporterManager : exporterManagers) {
-            if (appId == null || exporterManager.getInstanceId().equals(appId)) {
+            if (appId == null || exporterManager.getAppId().equals(appId)) {
                 exporterManager.collectNewMessages(messages, commandOptions);
             }
         }
     }
 
-    private String @Nullable [] getUnusedInstances(RelaySession session) {
-        String[] appIds = getJoinedInstances(session);
+    private String @Nullable [] getUnusedApps(RelaySession session) {
+        String[] appIds = getJoinedApps(session);
         if (appIds == null || appIds.length == 0) {
             return null;
         }
-        List<String> unusedInstances = new ArrayList<>(appIds.length);
+        List<String> unusedApps = new ArrayList<>(appIds.length);
         for (String id : appIds) {
             boolean using = false;
             for (MessageRelayer messageRelayer : messageRelayers) {
@@ -251,29 +251,29 @@ public class MessageRelayManager {
                 }
             }
             if (!using) {
-                unusedInstances.add(id);
+                unusedApps.add(id);
             }
         }
-        if (!unusedInstances.isEmpty()) {
-            return unusedInstances.toArray(new String[0]);
+        if (!unusedApps.isEmpty()) {
+            return unusedApps.toArray(new String[0]);
         } else {
             return null;
         }
     }
 
-    private String @Nullable [] getJoinedInstances(@NonNull RelaySession session) {
+    private String @Nullable [] getJoinedApps(@NonNull RelaySession session) {
         String[] appIds = session.getJoinedApps();
         if (appIds == null) {
             return null;
         }
-        Set<String> validJoinedInstances = new HashSet<>();
+        Set<String> validJoinedApps = new HashSet<>();
         for (String id : appIds) {
             if (appInfoHolder.containsApp(id)) {
-                validJoinedInstances.add(id);
+                validJoinedApps.add(id);
             }
         }
-        if (!validJoinedInstances.isEmpty()) {
-            return validJoinedInstances.toArray(new String[0]);
+        if (!validJoinedApps.isEmpty()) {
+            return validJoinedApps.toArray(new String[0]);
         } else {
             return null;
         }
