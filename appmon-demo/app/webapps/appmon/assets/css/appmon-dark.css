@@ -8,7 +8,7 @@
         filter: invert(1) hue-rotate(180deg);
     }
     .metrics-bar {
-        background-color: #52595e;
+        background-color: #3b3f42;
     }
     .node.metrics-bar {
         border-bottom: 1px solid #353b3e;
@@ -22,7 +22,7 @@
         color: #677278;
     }
     .node.metrics-bar .metric {
-        border-left: 1px solid #52595e;
+        border-left: 1px solid #3b3f42;
     }
     .instance.metrics-bar {
         background-color: #2a2f33;

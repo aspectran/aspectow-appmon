@@ -7,7 +7,6 @@
     <style>
         .scheduler-card {
             border: 1px solid var(--bs-border-color);
-            border-radius: 12px;
             background: var(--bs-body-bg);
             margin-bottom: 2rem;
         }
@@ -15,7 +14,6 @@
             background: var(--bs-tertiary-bg);
             border-bottom: 1px solid var(--bs-border-color);
             padding: 1rem 1.5rem;
-            border-radius: 12px 12px 0 0;
         }
         .schedule-row {
             transition: background-color 0.2s;
@@ -45,7 +43,6 @@
         }
         .target-selector {
             background: var(--bs-tertiary-bg);
-            border-radius: 12px;
             padding: 15px;
             margin-bottom: 20px;
             border: 1px solid var(--bs-border-color);
@@ -72,7 +69,7 @@
             </div>
         </div>
 
-        <div class="target-selector mb-4">
+        <div class="card target-selector mb-4">
             <div class="row align-items-center g-3">
                 <div class="col-auto">
                     <label class="fw-bold small text-muted text-uppercase">Target Node</label>
@@ -96,25 +93,25 @@
         <!-- Summary Section -->
         <div class="row g-4 mb-4">
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm p-3">
+                <div class="card shadow-sm p-3">
                     <div class="small text-muted text-uppercase fw-bold">Active Schedules</div>
                     <div class="h3 fw-bold mb-0" id="stat-active-schedules">-</div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm p-3">
+                <div class="card shadow-sm p-3">
                     <div class="small text-muted text-uppercase fw-bold">Active Jobs</div>
                     <div class="h3 fw-bold mb-0" id="stat-active-jobs">-</div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm p-3 text-warning">
+                <div class="card shadow-sm p-3 text-warning">
                     <div class="small text-uppercase fw-bold">Isolated Items</div>
                     <div class="h3 fw-bold mb-0" id="stat-isolated">-</div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm p-3 text-info">
+                <div class="card shadow-sm p-3 text-info">
                     <div class="small text-uppercase fw-bold">Target Node</div>
                     <div class="h3 fw-bold mb-0 text-truncate" id="stat-current-node">-</div>
                 </div>
@@ -280,7 +277,7 @@
 
                 services.forEach(service => {
                     const serviceId = service.serviceName.replace(/[^a-zA-Z0-9]/g, '_');
-                    html += `<div class="scheduler-card shadow-sm">
+                    html += `<div class="card scheduler-card shadow-sm overflow-hidden">
                         <div class="service-header d-flex align-items-center gap-3">
                             <i class="bi bi-gear-wide-connected fs-4 text-primary"></i>
                             <div>
@@ -290,7 +287,7 @@
                         </div>
                         <div class="table-responsive">
                             <table class="table mb-0 align-middle">
-                                <thead class="table-light">
+                                <thead>
                                     <tr>
                                         <th style="width: 50px;"></th>
                                         <th>Schedule ID</th>
