@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Manages {@link PollingRelaySession} instances for the polling export service.
+ * Manages {@link PollingRelaySession} apps for the polling export service.
  * It handles session creation, retrieval, and expiration, as well as managing a central message buffer.
  *
  * <p>Created: 2020. 12. 24.</p>
@@ -72,7 +72,7 @@ public class PollingMessageRelayManager extends AbstractComponent {
      * Creates a new polling session or retrieves an existing one.
      * @param translet the current translet
      * @param pollingConfig the polling configuration
-     * @param appIds the IDs of the instances to join
+     * @param appIds the IDs of the apps to join
      * @return a new or existing {@link PollingRelaySession}
      */
     public PollingRelaySession createSession(
@@ -185,7 +185,7 @@ public class PollingMessageRelayManager extends AbstractComponent {
         return minLineIndex;
     }
 
-    protected boolean isUsingInstance(String appId) {
+    protected boolean isUsingApp(String appId) {
         if (StringUtils.hasLength(appId)) {
             synchronized (sessions) {
                 for (PollingRelaySession serviceSession : sessions.values()) {

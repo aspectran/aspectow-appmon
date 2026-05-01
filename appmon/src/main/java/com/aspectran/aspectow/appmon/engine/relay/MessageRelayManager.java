@@ -245,7 +245,7 @@ public class MessageRelayManager {
         for (String id : appIds) {
             boolean using = false;
             for (MessageRelayer messageRelayer : messageRelayers) {
-                if (messageRelayer.isUsingInstance(id)) {
+                if (messageRelayer.isUsingApp(id)) {
                     using = true;
                     break;
                 }

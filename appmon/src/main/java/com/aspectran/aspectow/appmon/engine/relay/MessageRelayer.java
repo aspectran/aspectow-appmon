@@ -41,6 +41,6 @@ public interface MessageRelayer {
      * @param appId the name of the instance
      * @return {@code true} if the instance is using this relayer, {@code false} otherwise
      */
-    boolean isUsingInstance(String appId);
+    boolean isUsingApp(String appId);
 
 }

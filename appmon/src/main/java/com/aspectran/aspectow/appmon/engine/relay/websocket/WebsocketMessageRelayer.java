@@ -189,7 +189,7 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
     }
 
     @Override
-    public boolean isUsingInstance(String appId) {
+    public boolean isUsingApp(String appId) {
         if (StringUtils.hasLength(appId)) {
             return containsSession(session -> {
                 RelaySession relaySession = new WebsocketRelaySession(session);

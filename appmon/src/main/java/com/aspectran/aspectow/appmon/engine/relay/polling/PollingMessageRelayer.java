@@ -189,8 +189,8 @@ public class PollingMessageRelayer implements MessageRelayer {
     }
 
     @Override
-    public boolean isUsingInstance(String appId) {
-        return relayManager.isUsingInstance(appId);
+    public boolean isUsingApp(String appId) {
+        return relayManager.isUsingApp(appId);
     }
 
 }
