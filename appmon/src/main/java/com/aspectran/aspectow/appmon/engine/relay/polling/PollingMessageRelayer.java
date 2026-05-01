@@ -53,12 +53,12 @@ public class PollingMessageRelayer implements MessageRelayer {
 
     private final AppMonManager appMonManager;
 
-    private final PollingMessageRelayManager sessionManager;
+    private final PollingMessageRelayManager relayManager;
 
     @Autowired
     public PollingMessageRelayer(@NonNull AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
-        this.sessionManager = new PollingMessageRelayManager(appMonManager);
+        this.relayManager = new PollingMessageRelayManager(appMonManager);
     }
 
     /**
@@ -66,7 +66,7 @@ public class PollingMessageRelayer implements MessageRelayer {
      */
     @Initialize
     public void registerRelayer() throws Exception {
-        sessionManager.initialize();
+        relayManager.initialize();
         appMonManager.getMessageRelayManager().addRelayer(this);
     }
 
@@ -75,14 +75,14 @@ public class PollingMessageRelayer implements MessageRelayer {
      */
     @Destroy
     public void destroy() throws Exception {
-        sessionManager.destroy();
+        relayManager.destroy();
         appMonManager.getMessageRelayManager().removeRelayer(this);
     }
 
     /**
      * Allows a client to join and start a polling session.
      * @param translet the current translet
-     * @return a map containing the instance info, and initial messages
+     * @return a map containing the app info, and initial messages
      * @throws IOException if an I/O error occurs
      */
     @RequestToPost("/polling/join")
@@ -90,14 +90,14 @@ public class PollingMessageRelayer implements MessageRelayer {
     public Map<String, Object> join(@NonNull Translet translet) throws IOException {
         PollingConfig pollingConfig = appMonManager.getPollingConfig();
 
-        String appsToJoin = translet.getParameter("instances");
+        String appsToJoin = translet.getParameter("appsToJoin");
         String[] appIds = StringUtils.splitWithComma(appsToJoin);
         appIds = appMonManager.getVerifiedAppIds(appIds);
         if (StringUtils.hasText(appsToJoin) && appIds.length == 0) {
             return null;
         }
 
-        PollingRelaySession relaySession = sessionManager.createSession(translet, pollingConfig, appIds);
+        PollingRelaySession relaySession = relayManager.createSession(translet, pollingConfig, appIds);
         String timeZone = translet.getParameter("timeZone");
         if (StringUtils.hasText(timeZone)) {
             relaySession.setTimeZone(timeZone);
@@ -107,10 +107,10 @@ public class PollingMessageRelayer implements MessageRelayer {
             return null;
         }
 
-        List<AppInfo> appInfoList = appMonManager.getAppInfoList(relaySession.getJoinedInstances());
+        List<AppInfo> appInfoList = appMonManager.getAppInfoList(relaySession.getJoinedApps());
         List<String> messages = appMonManager.getMessageRelayManager().getLastMessages(relaySession);
         return Map.of(
-                "instances", appInfoList,
+                "apps", appInfoList,
                 "pollingInterval", relaySession.getPollingInterval(),
                 "messages", messages
         );
@@ -127,7 +127,7 @@ public class PollingMessageRelayer implements MessageRelayer {
     @Transform(FormatType.JSON)
     public Map<String, Object> pull(
             @NonNull Translet translet, @Qualifier("commands[]") String[] commands) throws IOException {
-        PollingRelaySession relaySession = sessionManager.getSession(translet);
+        PollingRelaySession relaySession = relayManager.getSession(translet);
         if (relaySession == null || !relaySession.isValid()) {
             return null;
         }
@@ -141,12 +141,12 @@ public class PollingMessageRelayer implements MessageRelayer {
                     commandOptions.hasCommand(CommandOptions.COMMAND_LOAD_PREVIOUS)) {
                 List<String> newMessages = appMonManager.getMessageRelayManager().getNewMessages(relaySession, commandOptions);
                 for (String msg : newMessages) {
-                    sessionManager.push(msg);
+                    relayManager.push(msg);
                 }
             }
         }
 
-        String[] messages = sessionManager.pull(relaySession);
+        String[] messages = relayManager.pull(relaySession);
         return Map.of(
                 "messages", (messages != null ? messages : new String[0])
         );
@@ -161,7 +161,7 @@ public class PollingMessageRelayer implements MessageRelayer {
     @RequestToPost("/polling/interval")
     @Transform(FormatType.JSON)
     public Map<String, Object> pollingInterval(@NonNull Translet translet, int speed) {
-        PollingRelaySession relaySession = sessionManager.getSession(translet);
+        PollingRelaySession relaySession = relayManager.getSession(translet);
         if (relaySession == null) {
             return null;
         }
@@ -180,7 +180,7 @@ public class PollingMessageRelayer implements MessageRelayer {
 
     @Override
     public void relay(String message) {
-        sessionManager.push(message);
+        relayManager.push(message);
     }
 
     @Override
@@ -190,7 +190,7 @@ public class PollingMessageRelayer implements MessageRelayer {
 
     @Override
     public boolean isUsingInstance(String appId) {
-        return sessionManager.isUsingInstance(appId);
+        return relayManager.isUsingInstance(appId);
     }
 
 }

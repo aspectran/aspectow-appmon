@@ -149,7 +149,7 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
         String[] appIds = StringUtils.splitWithComma(appsToJoin);
         appIds = appMonManager.getVerifiedAppIds(appIds);
         if (!StringUtils.hasText(appsToJoin) || appIds.length > 0) {
-            relaySession.setJoinedInstances(appIds);
+            relaySession.setJoinedApps(appIds);
         }
         if (addSession(session)) {
             relay(relaySession, MESSAGE_JOINED);
@@ -193,7 +193,7 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
         if (StringUtils.hasLength(appId)) {
             return containsSession(session -> {
                 RelaySession relaySession = new WebsocketRelaySession(session);
-                String[] appIds = relaySession.getJoinedInstances();
+                String[] appIds = relaySession.getJoinedApps();
                 if (appIds != null) {
                     for (String id : appIds) {
                         if (appId.equals(id)) {

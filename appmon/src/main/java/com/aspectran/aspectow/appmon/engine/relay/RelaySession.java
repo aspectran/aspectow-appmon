@@ -17,28 +17,28 @@ package com.aspectran.aspectow.appmon.engine.relay;
 
 /**
  * An interface representing a client session for an export service.
- * It provides a protocol-agnostic way to manage session state, such as joined instances.
+ * It provides a protocol-agnostic way to manage session state, such as joined apps.
  *
  * <p>Created: 2025. 2. 12.</p>
  */
 public interface RelaySession {
 
     /**
-     * Gets the names of the instances that this session has joined.
-     * @return an array of instance names
+     * Gets the names of the apps that this session has joined.
+     * @return an array of app names
      */
-    String[] getJoinedInstances();
+    String[] getJoinedApps();
 
     /**
-     * Sets the names of the instances that this session has joined.
-     * @param appIds an array of instance IDs
+     * Sets the names of the apps that this session has joined.
+     * @param appIds an array of app IDs
      */
-    void setJoinedInstances(String[] appIds);
+    void setJoinedApps(String[] appIds);
 
     /**
-     * Removes the joined instances from this session.
+     * Removes the joined apps from this session.
      */
-    void removeJoinedInstances();
+    void removeJoinedApps();
 
     /**
      * Gets the time zone of the client.

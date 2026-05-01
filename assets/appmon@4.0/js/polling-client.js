@@ -1,6 +1,6 @@
 /*
- * Aspectow AppMon 3.3
- * Last modified: 2026-03-20
+ * Aspectow AppMon 4.0
+ * Last modified: 2026-04-29
  */
 
 /**
@@ -59,7 +59,7 @@ class PollingClient extends BaseClient {
             dataType: "json",
             data: {
                 timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                apps: appsToJoin
+                appsToJoin: appsToJoin
             },
             success: (data) => {
                 if (data) {

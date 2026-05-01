@@ -28,7 +28,7 @@ import jakarta.websocket.Session;
  */
 public class WebsocketRelaySession extends WrappedSession implements RelaySession {
 
-    private static final String JOINED_INSTANCES_PROPERTY = "appmon:JoinedInstances";
+    private static final String JOINED_APPS_PROPERTY = "appmon:JoinedApps";
 
     private static final String TIME_ZONE_PROPERTY = "appmon:timeZone";
 
@@ -41,19 +41,19 @@ public class WebsocketRelaySession extends WrappedSession implements RelaySessio
     }
 
     @Override
-    public String[] getJoinedInstances() {
-        return (String[])getSession().getUserProperties().get(JOINED_INSTANCES_PROPERTY);
+    public String[] getJoinedApps() {
+        return (String[])getSession().getUserProperties().get(JOINED_APPS_PROPERTY);
     }
 
     @Override
-    public void setJoinedInstances(String[] appIds) {
+    public void setJoinedApps(String[] appIds) {
         Assert.notNull(appIds, "appIds must not be null");
-        getSession().getUserProperties().put(JOINED_INSTANCES_PROPERTY, appIds);
+        getSession().getUserProperties().put(JOINED_APPS_PROPERTY, appIds);
     }
 
     @Override
-    public void removeJoinedInstances() {
-        getSession().getUserProperties().remove(JOINED_INSTANCES_PROPERTY);
+    public void removeJoinedApps() {
+        getSession().getUserProperties().remove(JOINED_APPS_PROPERTY);
     }
 
     @Override

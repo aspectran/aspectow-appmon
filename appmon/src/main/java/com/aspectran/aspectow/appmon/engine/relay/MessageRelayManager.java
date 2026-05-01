@@ -129,7 +129,7 @@ public class MessageRelayManager {
      */
     public synchronized boolean join(@NonNull RelaySession session) {
         if (session.isValid()) {
-            String[] appIds = session.getJoinedInstances();
+            String[] appIds = session.getJoinedApps();
             if (appIds != null && appIds.length > 0) {
                 for (String id : appIds) {
                     startExporters(id);
@@ -163,7 +163,7 @@ public class MessageRelayManager {
                 stopExporters(id);
             }
         }
-        session.removeJoinedInstances();
+        session.removeJoinedApps();
     }
 
     private void stopExporters(String appId) {
@@ -184,7 +184,7 @@ public class MessageRelayManager {
         commandOptions.setTimeZone(session.getTimeZone());
         List<String> messages = new ArrayList<>();
         if (session.isValid()) {
-            String[] appIds = session.getJoinedInstances();
+            String[] appIds = session.getJoinedApps();
             if (appIds != null && appIds.length > 0) {
                 for (String id : appIds) {
                     collectLastMessages(id, messages, commandOptions);
@@ -214,7 +214,7 @@ public class MessageRelayManager {
         String appId = commandOptions.getApp();
         List<String> messages = new ArrayList<>();
         if (session.isValid()) {
-            String[] appIds = session.getJoinedInstances();
+            String[] appIds = session.getJoinedApps();
             if (appIds != null && appIds.length > 0) {
                 for (String id : appIds) {
                     if (appId == null || id.equals(appId)) {
@@ -262,7 +262,7 @@ public class MessageRelayManager {
     }
 
     private String @Nullable [] getJoinedInstances(@NonNull RelaySession session) {
-        String[] appIds = session.getJoinedInstances();
+        String[] appIds = session.getJoinedApps();
         if (appIds == null) {
             return null;
         }

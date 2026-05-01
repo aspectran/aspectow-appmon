@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Represents a client session for the {@link PollingMessageRelayer}.
- * It manages session-specific state like timeouts, polling intervals, and joined instances.
+ * It manages session-specific state like timeouts, polling intervals, and joined apps.
  *
  * <p>Created: 2020. 12. 24.</p>
  */
@@ -37,7 +37,7 @@ public class PollingRelaySession implements RelaySession {
 
     private final AutoLock autoLock = new AutoLock();
 
-    private final PollingMessageRelayManager sessionManager;
+    private final PollingMessageRelayManager relayManager;
 
     private final SessionExpiryTimer expiryTimer;
 
@@ -51,16 +51,16 @@ public class PollingRelaySession implements RelaySession {
 
     private boolean expired;
 
-    private String[] joinedInstances;
+    private String[] joinedApps;
 
     private String timeZone;
 
     /**
      * Instantiates a new PollingServiceSession.
-     * @param sessionManager the session manager that created this session
+     * @param relayManager the session manager that created this session
      */
-    public PollingRelaySession(PollingMessageRelayManager sessionManager) {
-        this.sessionManager = sessionManager;
+    public PollingRelaySession(PollingMessageRelayManager relayManager) {
+        this.relayManager = relayManager;
         this.expiryTimer = new SessionExpiryTimer();
     }
 
@@ -81,18 +81,18 @@ public class PollingRelaySession implements RelaySession {
     }
 
     @Override
-    public String[] getJoinedInstances() {
-        return joinedInstances;
+    public String[] getJoinedApps() {
+        return joinedApps;
     }
 
     @Override
-    public void setJoinedInstances(String[] appIds) {
-        this.joinedInstances = appIds;
+    public void setJoinedApps(String[] appIds) {
+        this.joinedApps = appIds;
     }
 
     @Override
-    public void removeJoinedInstances() {
-        this.joinedInstances = null;
+    public void removeJoinedApps() {
+        this.joinedApps = null;
     }
 
     @Override
@@ -187,7 +187,7 @@ public class PollingRelaySession implements RelaySession {
         try (AutoLock ignored = lock()) {
             if (!expired) {
                 expired = true;
-                sessionManager.scavenge();
+                relayManager.scavenge();
             }
         }
     }
@@ -200,7 +200,7 @@ public class PollingRelaySession implements RelaySession {
         private final CyclicTimeout timer;
 
         SessionExpiryTimer() {
-            timer = new CyclicTimeout(sessionManager.getScheduler()) {
+            timer = new CyclicTimeout(relayManager.getScheduler()) {
                 @Override
                 public void onTimeoutExpired() {
                     doExpiry();

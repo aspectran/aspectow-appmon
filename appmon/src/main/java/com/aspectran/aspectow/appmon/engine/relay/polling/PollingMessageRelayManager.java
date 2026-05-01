@@ -95,7 +95,7 @@ public class PollingMessageRelayManager extends AbstractComponent {
             newSession.setSessionTimeout(sessionTimeout);
             newSession.setPollingInterval(pollingInterval);
             if (appIds != null) {
-                newSession.setJoinedInstances(appIds);
+                newSession.setJoinedApps(appIds);
             }
             existingSession = sessions.put(sessionId, newSession);
             if (existingSession != null) {
@@ -190,7 +190,7 @@ public class PollingMessageRelayManager extends AbstractComponent {
             synchronized (sessions) {
                 for (PollingRelaySession serviceSession : sessions.values()) {
                     if (serviceSession.isValid()) {
-                        String[] appIds = serviceSession.getJoinedInstances();
+                        String[] appIds = serviceSession.getJoinedApps();
                         if (appIds != null) {
                             for (String id : appIds) {
                                 if (appId.equals(id)) {
