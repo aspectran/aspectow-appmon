@@ -48,8 +48,8 @@
 
         /* Blink effect */
         .highlight-blink {
-            background-color: #85898d !important;
-            color: #fff !important;
+            border-color: var(--bs-info) !important;
+            background-color: var(--bs-tertiary-bg) !important;
             transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out;
         }
     </style>
@@ -57,46 +57,46 @@
 <body>
     <div layout:fragment="content" class="container-fluid pt-3">
         <div class="row g-3">
-            <!-- Domains Panel -->
+            <!-- Nodes Panel -->
             <div class="col-lg-5">
                 <div class="card h-100">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-hdd-stack"></i> Domains</h5>
+                        <h5 class="mb-0"><i class="bi bi-hdd-stack"></i> Nodes</h5>
                     </div>
                     <div class="card-body">
-                        <p class="card-text text-muted">List of servers in the cluster. Click a domain to see related instances.</p>
-                        <th:block th:if="${not #lists.isEmpty(page.domainInfoList)}">
+                        <p class="card-text text-muted">List of servers in the cluster. Click a node to see related apps.</p>
+                        <th:block th:if="${not #lists.isEmpty(page.nodeInfoList)}">
                             <div class="row row-cols-1 row-cols-sm-2 mt-3">
-                                <div class="col" th:each="domainInfo : ${page.domainInfoList}">
-                                    <a href="#" class="domain-link">
-                                        <i class="bi bi-server"></i> [[${domainInfo.title}]]
+                                <div class="col" th:each="nodeInfo : ${page.nodeInfoList}">
+                                    <a href="#" class="node-link">
+                                        <i class="bi bi-server"></i> [[${nodeInfo.title}]]
                                     </a>
                                 </div>
                             </div>
                         </th:block>
-                        <p th:unless="${not #lists.isEmpty(page.domainInfoList)}" class="text-muted mt-3">No domains found.</p>
+                        <p th:unless="${not #lists.isEmpty(page.nodeInfoList)}" class="text-muted mt-3">No nodes found.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Instance Configurations Panel -->
+            <!-- App Configurations Panel -->
             <div class="col-lg-7">
                 <div class="card h-100">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-display"></i> Instance Configurations</h5>
+                        <h5 class="mb-0"><i class="bi bi-display"></i> App Configurations</h5>
                     </div>
                     <div class="card-body">
-                        <p class="card-text text-muted">Common instance configurations running on each domain.</p>
-                        <th:block th:if="${not #lists.isEmpty(page.instanceInfoList)}">
+                        <p class="card-text text-muted">Common app configurations running on each node.</p>
+                        <th:block th:if="${not #lists.isEmpty(page.appInfoList)}">
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mt-3">
-                                <div class="col" th:each="instanceInfo : ${page.instanceInfoList}">
-                                    <a th:href="@{/dashboard/#${instanceInfo.name}}" class="instance-link">
-                                        <i class="bi bi-box"></i> [[${instanceInfo.title}]]
+                                <div class="col" th:each="appInfo : ${page.appInfoList}">
+                                    <a th:href="@{/dashboard/#${appInfo.name}}" class="app-link">
+                                        <i class="bi bi-box"></i> [[${appInfo.title}]]
                                     </a>
                                 </div>
                             </div>
                         </th:block>
-                        <p th:unless="${not #lists.isEmpty(page.instanceInfoList)}" class="text-muted mt-3">No instance configurations found.</p>
+                        <p th:unless="${not #lists.isEmpty(page.appInfoList)}" class="text-muted mt-3">No app configurations found.</p>
                     </div>
                 </div>
             </div>
@@ -127,11 +127,11 @@
 
     <script layout:fragment="script">
     $(function() {
-        $('.domain-link').on('click', function(e) {
+        $('.node-link').on('click', function(e) {
             e.preventDefault();
 
-            const $instances = $('.instance-link');
-            if ($instances.length === 0) {
+            const $apps = $('.app-link');
+            if ($apps.length === 0) {
                 return;
             }
 
@@ -139,12 +139,12 @@
             const blinkDuration = 300; // The duration of the highlight
             const blinkInterval = 150; // The time between the start of each blink
 
-            $instances.each(function() {
-                const $instance = $(this);
+            $apps.each(function() {
+                const $app = $(this);
                 setTimeout(function() {
-                    $instance.addClass('highlight-blink');
+                    $app.addClass('highlight-blink');
                     setTimeout(function() {
-                        $instance.removeClass('highlight-blink');
+                        $app.removeClass('highlight-blink');
                     }, blinkDuration);
                 }, delay);
                 delay += blinkInterval;
