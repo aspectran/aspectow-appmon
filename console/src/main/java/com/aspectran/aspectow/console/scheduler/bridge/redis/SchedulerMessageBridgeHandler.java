@@ -18,16 +18,13 @@ package com.aspectran.aspectow.console.scheduler.bridge.redis;
 import com.aspectran.aspectow.console.scheduler.manager.SchedulerManager;
 import com.aspectran.aspectow.node.manager.NodeMessageProtocol;
 import com.aspectran.aspectow.node.redis.RedisMessageListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jspecify.annotations.NonNull;
 
 /**
  * SchedulerMessageBridgeHandler listens to Redis relay messages related to
  * scheduler management and forwards them to the SchedulerManager.
  */
 public class SchedulerMessageBridgeHandler implements RedisMessageListener {
-
-    private static final Logger logger = LoggerFactory.getLogger(SchedulerMessageBridgeHandler.class);
 
     private final SchedulerManager schedulerManager;
 
@@ -41,7 +38,7 @@ public class SchedulerMessageBridgeHandler implements RedisMessageListener {
     }
 
     @Override
-    public void onRelayMessage(String nodeId, String message) {
+    public void onRelayMessage(String nodeId, @NonNull String message) {
         if (message.startsWith("command:")) {
             schedulerManager.process(message);
         } else {

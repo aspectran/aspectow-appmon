@@ -21,6 +21,7 @@ import com.aspectran.core.context.rule.ScheduleRule;
 import com.aspectran.core.context.rule.ScheduledJobRule;
 import com.aspectran.core.context.rule.converter.RulesToParameters;
 import com.aspectran.core.context.rule.params.ScheduleParameters;
+import com.aspectran.core.scheduler.service.SchedulerService;
 import com.aspectran.core.service.CoreService;
 import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.utils.json.JsonBuilder;
@@ -50,19 +51,22 @@ public class LocalSchedulerService {
         int serviceCount = 0;
         for (CoreService service : CoreServiceHolder.getAllServices()) {
             if (service.getServiceLifeCycle().isActive()) {
-                ScheduleRuleRegistry registry = service.getActivityContext().getScheduleRuleRegistry();
-                if (registry != null) {
-                    jsonBuilder.object();
-                    jsonBuilder.put("serviceName", service.getServiceName());
-                    jsonBuilder.put("contextName", service.getActivityContext().getName());
-                    jsonBuilder.array("schedules");
-                    for (ScheduleRule scheduleRule : registry.getScheduleRules()) {
-                        ScheduleParameters params = RulesToParameters.toScheduleParameters(scheduleRule);
-                        jsonBuilder.put(params);
+                SchedulerService schedulerService = service.getSchedulerService();
+                if (schedulerService != null) {
+                    ScheduleRuleRegistry registry = schedulerService.getActivityContext().getScheduleRuleRegistry();
+                    if (registry != null) {
+                        jsonBuilder.object();
+                        jsonBuilder.put("serviceName", schedulerService.getServiceName());
+                        jsonBuilder.put("contextName", schedulerService.getActivityContext().getName());
+                        jsonBuilder.array("schedules");
+                        for (ScheduleRule scheduleRule : registry.getScheduleRules()) {
+                            ScheduleParameters params = RulesToParameters.toScheduleParameters(scheduleRule);
+                            jsonBuilder.put(params);
+                        }
+                        jsonBuilder.endArray();
+                        jsonBuilder.endObject();
+                        serviceCount++;
                     }
-                    jsonBuilder.endArray();
-                    jsonBuilder.endObject();
-                    serviceCount++;
                 }
             }
         }
@@ -87,28 +91,31 @@ public class LocalSchedulerService {
     public String updateState(String serviceName, String type, String id, boolean disabled) {
         boolean changed = false;
         for (CoreService service : CoreServiceHolder.getAllServices()) {
-            if (service.getServiceName().equals(serviceName) && service.getServiceLifeCycle().isActive()) {
-                ScheduleRuleRegistry registry = service.getActivityContext().getScheduleRuleRegistry();
-                if (registry != null) {
-                    if ("schedule".equals(type)) {
-                        ScheduleRule scheduleRule = registry.getScheduleRule(id);
-                        if (scheduleRule != null && !scheduleRule.isIsolated()) {
-                            scheduleRule.setDisabled(disabled);
-                            changed = true;
-                        }
-                    } else if ("job".equals(type)) {
-                        Set<ScheduledJobRule> jobRules = registry.getScheduledJobRules(new String[] { id });
-                        if (!jobRules.isEmpty()) {
-                            for (ScheduledJobRule jobRule : jobRules) {
-                                if (!jobRule.isIsolated()) {
-                                    jobRule.setDisabled(disabled);
-                                    changed = true;
+            if (service.getServiceLifeCycle().isActive()) {
+                SchedulerService schedulerService = service.getSchedulerService();
+                if (schedulerService != null && schedulerService.getServiceName().equals(serviceName)) {
+                    ScheduleRuleRegistry registry = schedulerService.getActivityContext().getScheduleRuleRegistry();
+                    if (registry != null) {
+                        if ("schedule".equals(type)) {
+                            ScheduleRule scheduleRule = registry.getScheduleRule(id);
+                            if (scheduleRule != null && !scheduleRule.isIsolated()) {
+                                scheduleRule.setDisabled(disabled);
+                                changed = true;
+                            }
+                        } else if ("job".equals(type)) {
+                            Set<ScheduledJobRule> jobRules = registry.getScheduledJobRules(new String[]{id});
+                            if (!jobRules.isEmpty()) {
+                                for (ScheduledJobRule jobRule : jobRules) {
+                                    if (!jobRule.isIsolated()) {
+                                        jobRule.setDisabled(disabled);
+                                        changed = true;
+                                    }
                                 }
                             }
                         }
                     }
+                    break;
                 }
-                break;
             }
         }
 

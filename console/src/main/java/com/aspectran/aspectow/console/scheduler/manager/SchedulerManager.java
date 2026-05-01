@@ -25,6 +25,7 @@ import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.utils.StringUtils;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,6 +139,7 @@ public class SchedulerManager implements InitializableBean {
      * @param request the structured request parameters
      * @return the execution result as JSON string, or null if unhandled
      */
+    @Nullable
     private String execute(SchedulerRequestParameters request) {
         try {
             String command = request.getCommand();
@@ -154,7 +156,8 @@ public class SchedulerManager implements InitializableBean {
         return null;
     }
 
-    private String performStateChange(SchedulerRequestParameters request, boolean disabled) {
+    @Nullable
+    private String performStateChange(@NonNull SchedulerRequestParameters request, boolean disabled) {
         String serviceName = request.getServiceName();
         String scheduleId = request.getScheduleId();
         String jobName = request.getJobName();
