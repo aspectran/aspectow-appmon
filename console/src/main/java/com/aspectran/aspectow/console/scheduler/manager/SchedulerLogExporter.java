@@ -66,7 +66,7 @@ public class SchedulerLogExporter extends AbstractLifeCycle {
     }
 
     public SchedulerLogExporter(String loggingGroup, File logFile, SchedulerBroker broker, String charsetName) {
-        this(loggingGroup, logFile, broker, charsetName, 1000L, 1000);
+        this(loggingGroup, logFile, broker, charsetName, 1000L, 100);
     }
 
     public SchedulerLogExporter(
@@ -130,18 +130,12 @@ public class SchedulerLogExporter extends AbstractLifeCycle {
         }
     }
 
-    public void readPreviousLines(@NonNull List<String> messages, int loadedLines) {
+    public List<String> readPreviousLines(int loadedLines) {
         try {
-            List<String> lines = readPreviousLines(loadedLines, lastLines);
-            if (!lines.isEmpty()) {
-                for (String line : lines) {
-                    messages.add(plogPrefix + line);
-                }
-            } else {
-                messages.add(plogPrefix);
-            }
+            return readPreviousLines(loadedLines, lastLines);
         } catch (IOException e) {
-            logger.error("Failed to read previous log lines", e);
+            logger.error("Failed to read previous log lines from {}", logFile, e);
+            return Collections.emptyList();
         }
     }
 

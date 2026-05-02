@@ -19,6 +19,7 @@ import com.aspectran.aspectow.console.scheduler.bridge.SchedulerBroker;
 import com.aspectran.aspectow.console.scheduler.bridge.SchedulerRequestParameters;
 import com.aspectran.aspectow.console.scheduler.bridge.redis.SchedulerMessageBridgeHandler;
 import com.aspectran.aspectow.node.manager.NodeManager;
+import com.aspectran.aspectow.node.manager.NodeMessageProtocol;
 import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.core.component.bean.ablility.InitializableBean;
 import com.aspectran.core.component.bean.annotation.Autowired;
@@ -55,6 +56,7 @@ public class SchedulerManager implements ApplicationAdapterAware, InitializableB
     private static final String OP_LIST = "list";
     private static final String OP_ENABLE = "enable";
     private static final String OP_DISABLE = "disable";
+    private static final String OP_PREVIOUS = "previousLines";
 
     private final Map<String, SchedulerLogExporter> logExporters = new ConcurrentHashMap<>();
 
@@ -173,6 +175,7 @@ public class SchedulerManager implements ApplicationAdapterAware, InitializableB
                     if (!logExporters.containsKey(loggingGroup)) {
                         File logFile = new File(logsDir, loggingGroup + "-scheduler.log");
                         if (logFile.exists()) {
+                            // Currently using default settings; future: apply injected overrides
                             SchedulerLogExporter exporter = new SchedulerLogExporter(
                                     loggingGroup, logFile, broker, logCharset);
                             logExporters.put(loggingGroup, exporter);
@@ -266,9 +269,29 @@ public class SchedulerManager implements ApplicationAdapterAware, InitializableB
                 return performStateChange(request, false);
             } else if (OP_DISABLE.equals(command)) {
                 return performStateChange(request, true);
+            } else if (OP_PREVIOUS.equals(command)) {
+                return readPreviousLines(request);
             }
         } catch (Exception e) {
             logger.error("Failed to execute scheduler request", e);
+        }
+        return null;
+    }
+
+    private String readPreviousLines(@NonNull SchedulerRequestParameters request) {
+        String loggingGroup = request.getLoggingGroup();
+        int loadedLines = request.getLoadedLines();
+        if (loggingGroup != null) {
+            SchedulerLogExporter exporter = logExporters.get(loggingGroup);
+            if (exporter != null) {
+                List<String> lines = exporter.readPreviousLines(loadedLines);
+                return new com.aspectran.utils.json.JsonBuilder().object()
+                        .put("type", "previousLines")
+                        .put("loggingGroup", loggingGroup)
+                        .put("lines", lines)
+                        .endObject()
+                        .toString();
+            }
         }
         return null;
     }

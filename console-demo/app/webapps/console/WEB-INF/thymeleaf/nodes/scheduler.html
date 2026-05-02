@@ -225,7 +225,7 @@
                 const node = {
                     id: nodeId,
                     endpoint: {
-                        path: BASE_PATH + "/nodes" // Standard base path
+                        path: BASE_PATH + "/nodes"
                     }
                 };
 
@@ -245,18 +245,31 @@
                             return;
                         }
 
+                        // Handle header-based messages (e.g., joined, pong)
+                        if (message.header && message.header !== 'result') {
+                            handleRelayMessage(message);
+                            return;
+                        }
+
                         const result = message.result;
                         if (result) {
-                            if (typeof result === 'string' && result.startsWith('scheduler:log:')) {
-                                handleRelayMessage(result);
-                            } else {
-                                try {
-                                    // result can be a JSON string or an already parsed object depending on transport
-                                    const event = (typeof result === 'string' ? JSON.parse(result) : result);
-                                    handleRelayMessage(event);
-                                } catch (e) {
-                                    console.error("Failed to parse scheduler result:", e, result);
+                            if (typeof result === 'string') {
+                                if (result.startsWith('scheduler:log:')) {
+                                    handleRelayMessage(result);
+                                } else if (result.startsWith('scheduler:log/p:')) {
+                                    handleRelayMessage(result);
+                                } else {
+                                    // It's a JSON string of a command result (like service list)
+                                    try {
+                                        const event = JSON.parse(result);
+                                        handleRelayMessage(event);
+                                    } catch (e) {
+                                        console.error("Failed to parse scheduler result string:", e, result);
+                                    }
                                 }
+                            } else {
+                                // result is already an object
+                                handleRelayMessage(result);
                             }
                         }
                     },
@@ -277,16 +290,24 @@
                             .removeClass("bg-success bg-warning").addClass("bg-danger");
                     }
                 });
-                consoleClient.start('scheduler'); // Appends 'scheduler' to '/nodes'
+                consoleClient.start('scheduler');
             }
 
             function handleRelayMessage(data) {
-                if (typeof data === 'string' && data.startsWith('scheduler:log:')) {
-                    appendLogLine(data);
-                    return;
+                if (typeof data === 'string') {
+                    if (data.startsWith('scheduler:log:')) {
+                        appendLogLine(data);
+                        return;
+                    } else if (data.startsWith('scheduler:log/p:')) {
+                        // Compatibility with old individual log/p messages if any
+                        prependLogLines({ loggingGroup: data.split(':')[2], lines: [data.substring(data.indexOf(':', 16) + 1)] });
+                        return;
+                    }
                 }
                 if (data.type === 'list') {
                     renderSchedulerList(data.services);
+                } else if (data.type === 'previousLines') {
+                    prependLogLines(data);
                 } else if (data.type === 'result') {
                     if (data.success) {
                         // Success message toast could be added here
@@ -421,11 +442,12 @@
                                 </button>
                                 <div class="form-check form-check-inline m-0 d-flex align-items-center">
                                     <input class="form-check-input me-2" type="checkbox" id="auto-scroll-${service.loggingGroup}" checked style="cursor:pointer">
-                                    <label class="form-check-label text-secondary" for="auto-scroll-${service.loggingGroup}" style="cursor:pointer;">Auto-scroll</label>
+                                    <label class="form-check-label text-secondary" for="auto-scroll-${service.loggingGroup}" style="cursor:pointer; font-size: 0.75rem;">Auto-scroll</label>
                                 </div>
                             </div>
                         </div>
-                        <div id="log-viewer-${service.loggingGroup}" class="log-container">
+                        <div id="log-viewer-${service.loggingGroup}" class="log-container" 
+                             onscroll="onLogScroll(this, '${service.loggingGroup}')">
                             <div class="text-muted italic">Waiting for logs...</div>
                         </div>`;
                     }
@@ -448,7 +470,9 @@
                 const $container = $(`#log-viewer-${loggingGroup}`);
                 if ($container.length === 0) return;
 
-                // Remove placeholder on first message
+                // Stop auto-scroll if currently loading previous logs
+                if ($container.data('loading')) return;
+
                 if ($container.find('.text-muted').length > 0) {
                     $container.empty();
                 }
@@ -456,9 +480,8 @@
                 const $line = $('<p class="log-line"></p>').text(content);
                 $container.append($line);
 
-                // Limit lines to 1000 for performance
-                if ($container.children().length > 1000) {
-                    $container.children().first().remove();
+                if ($container.children('.log-line').length > 2000) {
+                    $container.children('.log-line').first().remove();
                 }
 
                 if ($(`#auto-scroll-${loggingGroup}`).is(':checked')) {
@@ -466,9 +489,77 @@
                 }
             }
 
+            function prependLogLines(data) {
+                const loggingGroup = data.loggingGroup;
+                const lines = data.lines;
+                
+                const $container = $(`#log-viewer-${loggingGroup}`);
+                if ($container.length === 0) return;
+
+                if (!lines || lines.length === 0) {
+                    $container.data('no-more-logs', true);
+                    $container.find('.loading-logs').remove();
+                    $container.data('loading', false);
+                    return;
+                }
+
+                if ($container.find('.text-muted').length > 0) {
+                    $container.empty();
+                }
+
+                const scrollHeightBefore = $container[0].scrollHeight;
+                
+                // Add all lines at once
+                const $fragment = $(document.createDocumentFragment());
+                lines.forEach(line => {
+                    $fragment.append($('<p class="log-line"></p>').text(line));
+                });
+                
+                const $loading = $container.find('.loading-logs');
+                if ($loading.length > 0) {
+                    $loading.after($fragment);
+                } else {
+                    $container.prepend($fragment);
+                }
+
+                // Adjust scroll to maintain position
+                const scrollHeightAfter = $container[0].scrollHeight;
+                $container.scrollTop($container.scrollTop() + (scrollHeightAfter - scrollHeightBefore));
+
+                $container.data('loading', false);
+                $container.find('.loading-logs').remove();
+            }
+
+            function onLogScroll(container, loggingGroup) {
+                const $container = $(container);
+                if ($container.scrollTop() === 0 && !$container.data('loading') && !$container.data('no-more-logs')) {
+                    fetchPreviousLogs(loggingGroup);
+                }
+            }
+
+            function fetchPreviousLogs(loggingGroup) {
+                const $container = $(`#log-viewer-${loggingGroup}`);
+                const loadedCount = $container.children('.log-line').length;
+                if (loadedCount === 0) return;
+
+                $container.data('loading', true);
+                $container.prepend('<div class="loading-logs text-info small italic py-2"><i class="bi bi-arrow-up-circle me-2"></i>Loading previous logs...</div>');
+
+                const message = {
+                    header: "execute",
+                    command: "previousLines",
+                    targetNodeId: currentNodeId,
+                    loggingGroup: loggingGroup,
+                    loadedLines: loadedCount
+                };
+                consoleClient.sendMessage(JSON.stringify(message));
+            }
+
             function clearLog(loggingGroup) {
                 const $container = $(`#log-viewer-${loggingGroup}`);
                 $container.empty().append('<div class="text-muted italic">Log cleared.</div>');
+                $container.data('no-more-logs', false);
+                $container.data('loading', false);
             }
 
             function updateStats(schedules, jobs, isolated, node) {

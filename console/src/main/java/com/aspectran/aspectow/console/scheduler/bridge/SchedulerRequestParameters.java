@@ -30,6 +30,8 @@ public class SchedulerRequestParameters extends DefaultParameters {
     public static final ParameterKey serviceName;
     public static final ParameterKey scheduleId;
     public static final ParameterKey jobName;
+    public static final ParameterKey loggingGroup;
+    public static final ParameterKey loadedLines;
 
     private static final ParameterKey[] parameterKeys;
 
@@ -40,6 +42,8 @@ public class SchedulerRequestParameters extends DefaultParameters {
         serviceName = new ParameterKey("serviceName", ValueType.STRING);
         scheduleId = new ParameterKey("scheduleId", ValueType.STRING);
         jobName = new ParameterKey("jobName", ValueType.STRING);
+        loggingGroup = new ParameterKey("loggingGroup", ValueType.STRING);
+        loadedLines = new ParameterKey("loadedLines", ValueType.INT);
 
         parameterKeys = new ParameterKey[] {
                 header,
@@ -47,7 +51,9 @@ public class SchedulerRequestParameters extends DefaultParameters {
                 command,
                 serviceName,
                 scheduleId,
-                jobName
+                jobName,
+                loggingGroup,
+                loadedLines
         };
     }
 
@@ -77,6 +83,14 @@ public class SchedulerRequestParameters extends DefaultParameters {
 
     public String getJobName() {
         return getString(jobName);
+    }
+
+    public String getLoggingGroup() {
+        return getString(loggingGroup);
+    }
+
+    public int getLoadedLines() {
+        return getInt(loadedLines, 0);
     }
 
 }
