@@ -52,7 +52,7 @@
             color: #d4d4d4;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.8rem;
-            padding: 15px;
+            padding: 0.5rem;
             height: 300px;
             overflow-y: auto;
             border-bottom-left-radius: 8px;
@@ -60,11 +60,9 @@
             border: 1px solid #333;
         }
         .log-line {
-            white-space: pre-wrap;
-            word-break: break-all;
-            margin-bottom: 2px;
-            border-bottom: 1px solid #2d2d2d;
-            padding-bottom: 2px;
+            white-space: pre;
+            margin-bottom: 0;
+            padding: 0;
         }
         .log-header {
             background: #2d2d2d;
@@ -227,7 +225,7 @@
                 const node = {
                     id: nodeId,
                     endpoint: {
-                        path: BASE_PATH + "/nodes/scheduler"
+                        path: BASE_PATH + "/nodes" // Standard base path
                     }
                 };
 
@@ -241,22 +239,24 @@
                             });
                     },
                     onMessage: (message) => {
-                        const result = message.result;
                         const error = message.error;
                         if (error) {
                             console.error("Received error from scheduler bridge:", error);
                             return;
                         }
+
+                        const result = message.result;
                         if (result) {
                             if (typeof result === 'string' && result.startsWith('scheduler:log:')) {
                                 handleRelayMessage(result);
-                                return;
-                            }
-                            try {
-                                const event = (typeof result === 'string' ? JSON.parse(result) : result);
-                                handleRelayMessage(event);
-                            } catch (e) {
-                                console.error("Failed to parse scheduler result:", e, result);
+                            } else {
+                                try {
+                                    // result can be a JSON string or an already parsed object depending on transport
+                                    const event = (typeof result === 'string' ? JSON.parse(result) : result);
+                                    handleRelayMessage(event);
+                                } catch (e) {
+                                    console.error("Failed to parse scheduler result:", e, result);
+                                }
                             }
                         }
                     },
@@ -277,7 +277,7 @@
                             .removeClass("bg-success bg-warning").addClass("bg-danger");
                     }
                 });
-                consoleClient.start('');
+                consoleClient.start('scheduler'); // Appends 'scheduler' to '/nodes'
             }
 
             function handleRelayMessage(data) {
@@ -409,8 +409,10 @@
 
                     html += `   </tbody>
                             </table>
-                        </div>
-                        <!-- Log Viewer Section -->
+                        </div>`;
+
+                    if (service.schedules && service.schedules.length > 0) {
+                        html += `<!-- Log Viewer Section -->
                         <div class="log-header">
                             <span><i class="bi bi-terminal me-2"></i>Live Scheduler Logs</span>
                             <div class="d-flex align-items-center gap-3">
@@ -425,8 +427,10 @@
                         </div>
                         <div id="log-viewer-${service.loggingGroup}" class="log-container">
                             <div class="text-muted italic">Waiting for logs...</div>
-                        </div>
-                    </div>`;
+                        </div>`;
+                    }
+
+                    html += `</div>`;
                 });
 
                 $('#scheduler-container').html(html);
@@ -439,7 +443,6 @@
                 if (parts.length < 4) return;
 
                 const loggingGroup = parts[2];
-                // Extract everything after the 3rd colon
                 const content = rawMessage.substring(rawMessage.indexOf(':', 14) + 1);
 
                 const $container = $(`#log-viewer-${loggingGroup}`);
@@ -450,7 +453,7 @@
                     $container.empty();
                 }
 
-                const $line = $('<div class="log-line"></div>').text(content);
+                const $line = $('<p class="log-line"></p>').text(content);
                 $container.append($line);
 
                 // Limit lines to 1000 for performance

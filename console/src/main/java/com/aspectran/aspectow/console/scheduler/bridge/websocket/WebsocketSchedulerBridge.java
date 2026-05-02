@@ -103,6 +103,8 @@ public class WebsocketSchedulerBridge extends SimplifiedEndpoint implements Sche
                 execute(session, parameters);
             } else if ("join".equals(header)) {
                 join(session);
+            } else if ("established".equals(header)) {
+                joinComplete(session);
             } else if ("ping".equals(header)) {
                 pong(session);
             }
@@ -116,13 +118,18 @@ public class WebsocketSchedulerBridge extends SimplifiedEndpoint implements Sche
         WebsocketSchedulerSession schedulerSession = new WebsocketSchedulerSession(session);
         schedulerSession.setNodeId(nodeManager.getNodeId());
         if (addSession(session)) {
-            schedulerManager.getBroker().join(schedulerSession);
             SchedulerResponseParameters responseParameters = new SchedulerResponseParameters()
                     .setHeader("joined")
                     .setNodeId(nodeManager.getNodeId());
             sendText(session, responseParameters.toString());
             logger.debug("ConsoleClient joined scheduler management: session {}", session.getId());
         }
+    }
+
+    private void joinComplete(@NonNull Session session) {
+        WebsocketSchedulerSession schedulerSession = new WebsocketSchedulerSession(session);
+        schedulerManager.getBroker().join(schedulerSession);
+        logger.debug("Scheduler management session established: session {}", session.getId());
     }
 
     private void pong(Session session) {
@@ -140,20 +147,30 @@ public class WebsocketSchedulerBridge extends SimplifiedEndpoint implements Sche
             }
 
             final String finalTargetNodeId = targetNodeId;
-            try {
-                Thread.ofVirtual().start(() -> {
-                    try {
-                        schedulerManager.dispatch(finalTargetNodeId, requestParameters);
-                    } catch (Exception e) {
-                        logger.error("Failed to execute scheduler request from session {}", session.getId(), e);
-                        sendText(session, "[ERROR] " + e.getMessage());
-                    }
-                });
-                logger.debug("Scheduler request execution initiated from session {}: target={}, command={}",
-                        session.getId(), finalTargetNodeId, command);
-            } catch (Exception e) {
-                logger.error("Failed to initiate scheduler request execution from session {}", session.getId(), e);
-                sendText(session, "[ERROR] " + e.getMessage());
+            if ("list".equals(command)) {
+                try {
+                    schedulerManager.dispatch(finalTargetNodeId, requestParameters);
+                    logger.debug("Scheduler list request processed synchronously");
+                } catch (Exception e) {
+                    logger.error("Failed to execute scheduler list request", e);
+                    sendText(session, "[ERROR] " + e.getMessage());
+                }
+            } else {
+                try {
+                    Thread.ofVirtual().start(() -> {
+                        try {
+                            schedulerManager.dispatch(finalTargetNodeId, requestParameters);
+                        } catch (Exception e) {
+                            logger.error("Failed to execute scheduler request from session {}", session.getId(), e);
+                            sendText(session, "[ERROR] " + e.getMessage());
+                        }
+                    });
+                    logger.debug("Scheduler request execution initiated from session {}: target={}, command={}",
+                            session.getId(), finalTargetNodeId, command);
+                } catch (Exception e) {
+                    logger.error("Failed to initiate scheduler request execution from session {}", session.getId(), e);
+                    sendText(session, "[ERROR] " + e.getMessage());
+                }
             }
         }
     }

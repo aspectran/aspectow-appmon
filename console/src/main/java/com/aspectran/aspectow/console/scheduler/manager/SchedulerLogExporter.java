@@ -16,6 +16,7 @@
 package com.aspectran.aspectow.console.scheduler.manager;
 
 import com.aspectran.aspectow.console.scheduler.bridge.SchedulerBroker;
+import com.aspectran.logging.LoggingDefaults;
 import com.aspectran.utils.lifecycle.AbstractLifeCycle;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.io.input.Tailer;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -48,6 +50,8 @@ public class SchedulerLogExporter extends AbstractLifeCycle {
     private final SchedulerBroker broker;
 
     private final String prefix;
+
+    private final String plogPrefix;
 
     private final Charset charset;
 
@@ -72,6 +76,7 @@ public class SchedulerLogExporter extends AbstractLifeCycle {
         this.logFile = logFile;
         this.broker = broker;
         this.prefix = "scheduler:log:" + loggingGroup + ":";
+        this.plogPrefix = "scheduler:log/p:" + loggingGroup + ":";
         this.charset = (charsetName != null ? Charset.forName(charsetName) : DEFAULT_CHARSET);
         this.sampleInterval = sampleInterval;
         this.lastLines = lastLines;
@@ -90,22 +95,174 @@ public class SchedulerLogExporter extends AbstractLifeCycle {
      * @param messages the list to add log lines to
      */
     public void read(@NonNull List<String> messages) {
-        if (lastLines > 0 && logFile.exists()) {
+        readLastLines(messages);
+    }
+
+    public void readLastLines(@NonNull List<String> messages) {
+        if (lastLines > 0) {
+            try {
+                List<String> lines = new ArrayList<>();
+                if (logFile.exists()) {
+                    lines.addAll(readLastLines(logFile, lastLines));
+                }
+                if (lines.size() < lastLines) {
+                    File archivedDir = getArchivedDir();
+                    if (archivedDir.exists() && archivedDir.isDirectory()) {
+                        File[] archivedFiles = getArchivedFiles(archivedDir);
+                        if (archivedFiles != null) {
+                            for (File archivedFile : archivedFiles) {
+                                int remaining = lastLines - lines.size();
+                                List<String> archivedLines = readLastLines(archivedFile, remaining);
+                                lines.addAll(0, archivedLines);
+                                if (lines.size() >= lastLines) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!lines.isEmpty()) {
+                    messages.addAll(lines);
+                }
+            } catch (IOException e) {
+                logger.error("Failed to read log file {}", logFile, e);
+            }
+        }
+    }
+
+    public void readPreviousLines(@NonNull List<String> messages, int loadedLines) {
+        try {
+            List<String> lines = readPreviousLines(loadedLines, lastLines);
+            if (!lines.isEmpty()) {
+                for (String line : lines) {
+                    messages.add(plogPrefix + line);
+                }
+            } else {
+                messages.add(plogPrefix);
+            }
+        } catch (IOException e) {
+            logger.error("Failed to read previous log lines", e);
+        }
+    }
+
+    @NonNull
+    private List<String> readPreviousLines(int loadedLines, int countToRead) throws IOException {
+        int totalSkipped = 0;
+        List<String> lines = new ArrayList<>();
+
+        // Main log file
+        if (logFile.exists()) {
             try (ReversedLinesFileReader reader = ReversedLinesFileReader.builder()
                     .setFile(logFile)
                     .setCharset(charset)
                     .get()) {
-                List<String> lines = new ArrayList<>();
-                String line;
-                while (lines.size() < lastLines && (line = reader.readLine()) != null) {
-                    lines.add(prefix + line);
+                while (totalSkipped < loadedLines) {
+                    if (reader.readLine() == null) {
+                        break;
+                    }
+                    totalSkipped++;
                 }
-                Collections.reverse(lines);
-                messages.addAll(lines);
-            } catch (IOException e) {
-                logger.error("Failed to read last lines from scheduler log file: {}", logFile, e);
+                if (totalSkipped == loadedLines) {
+                    String line;
+                    while (lines.size() < countToRead && (line = reader.readLine()) != null) {
+                        lines.add(line);
+                    }
+                    if (!lines.isEmpty()) {
+                        Collections.reverse(lines);
+                    }
+                }
             }
         }
+
+        if (lines.size() >= countToRead) {
+            return lines;
+        }
+
+        // Archived files
+        File archivedDir = getArchivedDir();
+        if (archivedDir.exists() && archivedDir.isDirectory()) {
+            File[] archivedFiles = getArchivedFiles(archivedDir);
+            if (archivedFiles != null) {
+                for (File archivedFile : archivedFiles) {
+                    try (ReversedLinesFileReader reader = ReversedLinesFileReader.builder()
+                            .setFile(archivedFile)
+                            .setCharset(charset)
+                            .get()) {
+                        while (totalSkipped < loadedLines) {
+                            if (reader.readLine() == null) {
+                                break;
+                            }
+                            totalSkipped++;
+                        }
+                        if (totalSkipped == loadedLines) {
+                            List<String> moreLines = new ArrayList<>();
+                            int remaining = countToRead - lines.size();
+                            String line;
+                            while (moreLines.size() < remaining && (line = reader.readLine()) != null) {
+                                moreLines.add(line);
+                            }
+                            if (!moreLines.isEmpty()) {
+                                Collections.reverse(moreLines);
+                                lines.addAll(0, moreLines);
+                            }
+                        }
+                    }
+                    if (lines.size() >= countToRead) {
+                        break;
+                    }
+                }
+            }
+        }
+        return lines;
+    }
+
+    @NonNull
+    private File getArchivedDir() {
+        String archivedDirPath = System.getProperty(LoggingDefaults.ARCHIVED_LOGS_DIR_PROPERTY);
+        File archivedDir;
+        if (archivedDirPath != null) {
+            archivedDir = new File(archivedDirPath);
+            if (!archivedDir.isAbsolute()) {
+                archivedDir = new File(logFile.getParentFile(), archivedDirPath);
+            }
+        } else {
+            archivedDir = new File(logFile.getParentFile(), LoggingDefaults.DEFAULT_ARCHIVED_LOGS_DIR);
+        }
+        return archivedDir;
+    }
+
+    private File[] getArchivedFiles(File archivedDir) {
+        String baseName = logFile.getName();
+        int dotIdx = baseName.lastIndexOf('.');
+        if (dotIdx != -1) {
+            baseName = baseName.substring(0, dotIdx);
+        }
+        final String fileNamePrefix = baseName + ".";
+        File[] archivedFiles = archivedDir.listFiles((dir, name) -> name.startsWith(fileNamePrefix));
+        if (archivedFiles != null && archivedFiles.length > 0) {
+            Arrays.sort(archivedFiles, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+        }
+        return archivedFiles;
+    }
+
+    @NonNull
+    private List<String> readLastLines(File file, int lastLines) throws IOException {
+        List<String> list = new ArrayList<>();
+        try (ReversedLinesFileReader reversedLinesFileReader = ReversedLinesFileReader.builder()
+                .setFile(file)
+                .setCharset(charset)
+                .get()) {
+            int count = 0;
+            while (count++ < lastLines) {
+                String line = reversedLinesFileReader.readLine();
+                if (line == null) {
+                    break;
+                }
+                list.add(prefix + line);
+            }
+            Collections.reverse(list);
+        }
+        return list;
     }
 
     public void broadcast(String message) {
