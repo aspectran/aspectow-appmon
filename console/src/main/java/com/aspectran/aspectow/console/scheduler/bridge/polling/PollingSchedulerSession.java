@@ -16,7 +16,10 @@
 package com.aspectran.aspectow.console.scheduler.bridge.polling;
 
 import com.aspectran.aspectow.console.scheduler.bridge.SchedulerSession;
+import com.aspectran.utils.concurrent.AutoLock;
+import com.aspectran.utils.timer.CyclicTimeout;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -25,20 +28,36 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class PollingSchedulerSession implements SchedulerSession {
 
+    private static final int MIN_SESSION_TIMEOUT = 500;
+
+    private final AutoLock autoLock = new AutoLock();
+
+    private final String id;
+
     private final PollingSchedulerBridge bridge;
+
+    private final PollingSessionManager sessionManager;
+
+    private final SessionExpiryTimer expiryTimer;
 
     private String nodeId;
 
     private volatile int sessionTimeout;
 
-    private volatile long lastAccessTime;
-
     private final AtomicInteger lastLineIndex = new AtomicInteger(-1);
 
-    private volatile boolean expired;
+    private boolean expired;
 
-    public PollingSchedulerSession(PollingSchedulerBridge bridge) {
+    public PollingSchedulerSession(String id, PollingSchedulerBridge bridge, PollingSessionManager sessionManager) {
+        this.id = id;
         this.bridge = bridge;
+        this.sessionManager = sessionManager;
+        this.expiryTimer = new SessionExpiryTimer();
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override
@@ -53,7 +72,7 @@ public class PollingSchedulerSession implements SchedulerSession {
 
     @Override
     public boolean isValid() {
-        return !expired;
+        return !isExpired();
     }
 
     public int getSessionTimeout() {
@@ -61,31 +80,27 @@ public class PollingSchedulerSession implements SchedulerSession {
     }
 
     public void setSessionTimeout(int sessionTimeout) {
-        this.sessionTimeout = sessionTimeout;
+        this.sessionTimeout = Math.max(sessionTimeout, MIN_SESSION_TIMEOUT);
     }
 
     public void access(boolean first) {
-        this.lastAccessTime = System.currentTimeMillis();
-        if (first && bridge != null) {
-            this.lastLineIndex.set(bridge.getBufferedMessages().getCurrentLineIndex());
+        try (AutoLock ignored = autoLock.lock()) {
+            if (isValid()) {
+                if (!first) {
+                    expiryTimer.cancel();
+                }
+                if (first && bridge != null) {
+                    this.lastLineIndex.set(bridge.getBufferedMessages().getCurrentLineIndex());
+                }
+                expiryTimer.schedule(sessionTimeout);
+            }
         }
-    }
-
-    public long getLastAccessTime() {
-        return lastAccessTime;
     }
 
     public boolean isExpired() {
-        if (expired) {
-            return true;
+        try (AutoLock ignored = autoLock.lock()) {
+            return expired;
         }
-        if (sessionTimeout > 0 && lastAccessTime > 0) {
-            if (System.currentTimeMillis() - lastAccessTime > (long)sessionTimeout * 1000L) {
-                expired = true;
-                return true;
-            }
-        }
-        return false;
     }
 
     public int getLastLineIndex() {
@@ -96,12 +111,52 @@ public class PollingSchedulerSession implements SchedulerSession {
         this.lastLineIndex.set(lastLineIndex);
     }
 
-    public void expire() {
-        this.expired = true;
+    public void destroy() {
+        try (AutoLock ignored = autoLock.lock()) {
+            expired = true;
+            expiryTimer.destroy();
+        }
     }
 
-    public void destroy() {
-        expire();
+    private void doExpiry() {
+        try (AutoLock ignored = autoLock.lock()) {
+            if (!expired) {
+                expired = true;
+                sessionManager.scavenge();
+            }
+        }
+    }
+
+    /**
+     * A timer to handle session expiration.
+     */
+    public class SessionExpiryTimer {
+
+        private final CyclicTimeout timer;
+
+        SessionExpiryTimer() {
+            timer = new CyclicTimeout(sessionManager.getScheduler()) {
+                @Override
+                public void onTimeoutExpired() {
+                    doExpiry();
+                }
+            };
+        }
+
+        public void schedule(long delay) {
+            if (delay >= 0) {
+                timer.schedule(delay, TimeUnit.MILLISECONDS);
+            }
+        }
+
+        public void cancel() {
+            timer.cancel();
+        }
+
+        public void destroy() {
+            timer.destroy();
+        }
+
     }
 
 }

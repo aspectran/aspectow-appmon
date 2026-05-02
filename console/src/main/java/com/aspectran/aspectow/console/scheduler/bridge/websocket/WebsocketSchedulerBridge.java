@@ -36,13 +36,15 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.aspectran.aspectow.node.manager.NodeMessageProtocol.NODES_BASE_PATH;
+
 /**
  * WebsocketSchedulerBridge provides a WebSocket endpoint for real-time
  * scheduler management.
  */
 @Component
 @ServerEndpoint(
-        value = "/nodes/scheduler/websocket/{token}",
+        value = NODES_BASE_PATH + "/scheduler/websocket/{token}",
         configurator = AspectranConfigurator.class
 )
 public class WebsocketSchedulerBridge extends SimplifiedEndpoint implements SchedulerBridge {
@@ -114,6 +116,7 @@ public class WebsocketSchedulerBridge extends SimplifiedEndpoint implements Sche
         WebsocketSchedulerSession schedulerSession = new WebsocketSchedulerSession(session);
         schedulerSession.setNodeId(nodeManager.getNodeId());
         if (addSession(session)) {
+            schedulerManager.getBroker().join(schedulerSession);
             SchedulerResponseParameters responseParameters = new SchedulerResponseParameters()
                     .setHeader("joined")
                     .setNodeId(nodeManager.getNodeId());
@@ -157,6 +160,8 @@ public class WebsocketSchedulerBridge extends SimplifiedEndpoint implements Sche
 
     @Override
     protected void onSessionRemoved(@NonNull Session session) {
+        WebsocketSchedulerSession schedulerSession = new WebsocketSchedulerSession(session);
+        schedulerManager.getBroker().release(schedulerSession);
         logger.debug("Scheduler WebSocket session removed: {}", session.getId());
     }
 

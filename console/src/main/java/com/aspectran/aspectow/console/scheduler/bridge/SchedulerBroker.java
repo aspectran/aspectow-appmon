@@ -16,6 +16,7 @@
 package com.aspectran.aspectow.console.scheduler.bridge;
 
 import com.aspectran.aspectow.node.redis.RedisMessagePublisher;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,11 +31,17 @@ public class SchedulerBroker {
 
     private static final Logger logger = LoggerFactory.getLogger(SchedulerBroker.class);
 
+    public static final String CONTROL_JOIN = "scheduler:join";
+
+    public static final String CONTROL_RELEASE = "scheduler:release";
+
     private final String nodeId;
 
     private final RedisMessagePublisher messagePublisher;
 
     private final Set<SchedulerBridge> bridges = new CopyOnWriteArraySet<>();
+
+    private final SubscriptionRegistry subscriptionRegistry = new SubscriptionRegistry();
 
     public SchedulerBroker(String nodeId, RedisMessagePublisher messagePublisher) {
         this.nodeId = nodeId;
@@ -49,12 +56,40 @@ public class SchedulerBroker {
         return messagePublisher;
     }
 
+    public SubscriptionRegistry getSubscriptionRegistry() {
+        return subscriptionRegistry;
+    }
+
     public void addBridge(SchedulerBridge bridge) {
         bridges.add(bridge);
     }
 
     public void removeBridge(SchedulerBridge bridge) {
         bridges.remove(bridge);
+    }
+
+    public synchronized void join(@NonNull SchedulerSession session) {
+        if (session.isValid()) {
+            subscriptionRegistry.addLocalSubscription(session.getId());
+            publishControl(CONTROL_JOIN);
+        }
+    }
+
+    public synchronized void release(@NonNull SchedulerSession session) {
+        subscriptionRegistry.removeLocalSubscription(session.getId());
+        if (!subscriptionRegistry.isInUseLocally()) {
+            publishControl(CONTROL_RELEASE);
+        }
+    }
+
+    private void publishControl(String message) {
+        if (messagePublisher != null) {
+            try {
+                messagePublisher.publishControl(message);
+            } catch (Exception e) {
+                logger.error("Failed to publish control message to Redis", e);
+            }
+        }
     }
 
     /**

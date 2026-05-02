@@ -38,6 +38,11 @@ public class SchedulerMessageBridgeHandler implements RedisMessageListener {
     }
 
     @Override
+    public void onControlMessage(String nodeId, String message) {
+        schedulerManager.handleControlMessage(nodeId, message);
+    }
+
+    @Override
     public void onRelayMessage(String nodeId, @NonNull String message) {
         if (message.startsWith("command:")) {
             schedulerManager.process(message);

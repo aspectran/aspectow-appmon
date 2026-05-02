@@ -21,6 +21,12 @@ package com.aspectran.aspectow.console.scheduler.bridge;
 public interface SchedulerSession {
 
     /**
+     * Gets the unique identifier of this session.
+     * @return the session ID
+     */
+    String getId();
+
+    /**
      * Gets the ID of the node that this session is interacting with.
      * @return the node ID
      */

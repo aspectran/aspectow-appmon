@@ -68,6 +68,26 @@ public class SchedulerManager implements InitializableBean {
         }
     }
 
+    public void handleControlMessage(String nodeId, @NonNull String message) {
+        if (message.startsWith(SchedulerBroker.CONTROL_JOIN)) {
+            broker.getSubscriptionRegistry().addRemoteSubscription(nodeId);
+            startExporters();
+        } else if (message.startsWith(SchedulerBroker.CONTROL_RELEASE)) {
+            broker.getSubscriptionRegistry().removeRemoteSubscription(nodeId);
+            if (!broker.getSubscriptionRegistry().isInUse()) {
+                stopExporters();
+            }
+        }
+    }
+
+    private void startExporters() {
+        // Future implementation: Start scheduler log exporter
+    }
+
+    private void stopExporters() {
+        // Future implementation: Stop scheduler log exporter
+    }
+
     public SchedulerBroker getBroker() {
         return broker;
     }

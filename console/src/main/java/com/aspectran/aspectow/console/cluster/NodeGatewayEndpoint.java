@@ -35,6 +35,8 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.aspectran.aspectow.node.manager.NodeMessageProtocol.NODES_BASE_PATH;
+
 /**
  * NodeGatewayEndpoint provides real-time, bidirectional communication for cluster node management.
  *
@@ -42,7 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component
 @ServerEndpoint(
-        value = "/nodes/{nodeId}/websocket/{token}",
+        value = NODES_BASE_PATH + "/{nodeId}/websocket/{token}",
         configurator = AspectranConfigurator.class
 )
 public class NodeGatewayEndpoint extends SimplifiedEndpoint implements RedisMessageListener {
