@@ -13,7 +13,6 @@
         .service-header {
             background: var(--bs-tertiary-bg);
             border-bottom: 1px solid var(--bs-border-color);
-            padding: 1rem 1.5rem;
         }
         .schedule-row {
             transition: background-color 0.2s;
@@ -333,10 +332,10 @@
                 services.forEach(service => {
                     const serviceId = service.serviceName.replace(/[^a-zA-Z0-9]/g, '_');
                     html += `<div class="card scheduler-card shadow-sm overflow-hidden">
-                        <div class="service-header d-flex align-items-center gap-3">
-                            <i class="bi bi-gear-wide-connected fs-4 text-primary"></i>
+                        <div class="service-header d-flex align-items-center gap-3 p-3">
+                            <i class="bi bi-gear-wide-connected fs-4 text-primary d-none d-md-block"></i>
                             <div>
-                                <h5 class="fw-bold mb-0">${service.serviceName}</h5>
+                                <h5 class="fw-bold mb-0 fs-sm-6">${service.serviceName}</h5>
                                 <small class="text-muted">Context: ${service.contextName}</small>
                             </div>
                         </div>

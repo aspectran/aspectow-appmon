@@ -39,13 +39,16 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
+import static com.aspectran.aspectow.console.commands.bridge.CommandBroker.CATEGORY_COMMANDS;
+import static com.aspectran.aspectow.node.manager.NodeMessageProtocol.NODES_BASE_PATH;
+
 /**
  * WebsocketCommandBridge provides a WebSocket endpoint for real-time
  * remote command result delivery.
  */
 @Component
 @ServerEndpoint(
-        value = "/remote-commands/websocket/{token}",
+        value = NODES_BASE_PATH + "/" + CATEGORY_COMMANDS + "/websocket/{token}",
         configurator = AspectranConfigurator.class
 )
 public class WebsocketCommandBridge extends SimplifiedEndpoint implements CommandBridge {
@@ -104,7 +107,7 @@ public class WebsocketCommandBridge extends SimplifiedEndpoint implements Comman
             if ("execute".equals(header)) {
                 execute(session, parameters);
             } else if ("join".equals(header)) {
-                join(session);
+                join(session, parameters);
             } else if ("ping".equals(header)) {
                 pong(session);
             }
@@ -114,16 +117,22 @@ public class WebsocketCommandBridge extends SimplifiedEndpoint implements Comman
         }
     }
 
-    private void join(Session session) {
+    private void join(Session session, @NonNull RemoteCommandParameters parameters) {
         WebsocketCommandSession commandSession = new WebsocketCommandSession(session);
-        commandSession.setNodeId(nodeManager.getNodeId());
+        String targetNodeId = parameters.getTargetNodeId();
+        if (targetNodeId != null && !targetNodeId.isEmpty()) {
+            commandSession.setNodeId(targetNodeId);
+        } else {
+            commandSession.setNodeId(nodeManager.getNodeId());
+        }
+
         if (addSession(session)) {
             remoteCommandManager.getBroker().join(commandSession);
             RemoteCommandResultParameters resultParameters = new RemoteCommandResultParameters()
                     .setHeader("joined")
                     .setNodeId(nodeManager.getNodeId());
             sendText(session, resultParameters.toString());
-            logger.debug("ConsoleClient joined remote command management: session {}", session.getId());
+            logger.debug("ConsoleClient joined remote command management: session {}, targetNodeId: {}", session.getId(), commandSession.getNodeId());
         }
     }
 

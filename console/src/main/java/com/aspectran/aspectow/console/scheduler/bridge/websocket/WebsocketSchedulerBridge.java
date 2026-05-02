@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
+import static com.aspectran.aspectow.console.scheduler.bridge.SchedulerBroker.CATEGORY_SCHEDULER;
 import static com.aspectran.aspectow.node.manager.NodeMessageProtocol.NODES_BASE_PATH;
 
 /**
@@ -46,7 +47,7 @@ import static com.aspectran.aspectow.node.manager.NodeMessageProtocol.NODES_BASE
  */
 @Component
 @ServerEndpoint(
-        value = NODES_BASE_PATH + "/scheduler/websocket/{token}",
+        value = NODES_BASE_PATH + "/" + CATEGORY_SCHEDULER + "/websocket/{token}",
         configurator = AspectranConfigurator.class
 )
 public class WebsocketSchedulerBridge extends SimplifiedEndpoint implements SchedulerBridge {
@@ -104,7 +105,7 @@ public class WebsocketSchedulerBridge extends SimplifiedEndpoint implements Sche
             if ("execute".equals(header)) {
                 execute(session, parameters);
             } else if ("join".equals(header)) {
-                join(session);
+                join(session, parameters);
             } else if ("established".equals(header)) {
                 joinComplete(session);
             } else if ("ping".equals(header)) {
@@ -116,15 +117,21 @@ public class WebsocketSchedulerBridge extends SimplifiedEndpoint implements Sche
         }
     }
 
-    private void join(Session session) {
+    private void join(Session session, @NonNull SchedulerRequestParameters parameters) {
         WebsocketSchedulerSession schedulerSession = new WebsocketSchedulerSession(session);
-        schedulerSession.setNodeId(nodeManager.getNodeId());
+        String targetNodeId = parameters.getTargetNodeId();
+        if (targetNodeId != null && !targetNodeId.isEmpty()) {
+            schedulerSession.setNodeId(targetNodeId);
+        } else {
+            schedulerSession.setNodeId(nodeManager.getNodeId());
+        }
+
         if (addSession(session)) {
             SchedulerResponseParameters responseParameters = new SchedulerResponseParameters()
                     .setHeader("joined")
                     .setNodeId(nodeManager.getNodeId());
             sendText(session, responseParameters.toString());
-            logger.debug("ConsoleClient joined scheduler management: session {}", session.getId());
+            logger.debug("ConsoleClient joined scheduler management: session {}, targetNodeId: {}", session.getId(), schedulerSession.getNodeId());
         }
     }
 
@@ -144,7 +151,7 @@ public class WebsocketSchedulerBridge extends SimplifiedEndpoint implements Sche
         String command = requestParameters.getCommand();
         if (command != null) {
             String targetNodeId = requestParameters.getTargetNodeId();
-            if (targetNodeId == null || targetNodeId.isEmpty()) {
+            if (StringUtils.isEmpty(targetNodeId)) {
                 targetNodeId = nodeManager.getNodeId();
             }
 

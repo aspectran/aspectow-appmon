@@ -152,6 +152,8 @@ public class SchedulerActivity {
         String serviceName = translet.getParameter("serviceName");
         String scheduleId = translet.getParameter("scheduleId");
         String jobName = translet.getParameter("jobName");
+        String loggingGroup = translet.getParameter("loggingGroup");
+        String loadedLines = translet.getParameter("loadedLines");
 
         if (StringUtils.isEmpty(command)) {
             throw new IllegalArgumentException("Command is required");
@@ -161,10 +163,14 @@ public class SchedulerActivity {
         }
 
         SchedulerRequestParameters parameters = new SchedulerRequestParameters();
-        parameters.putValue(SchedulerRequestParameters.command, command);
-        if (serviceName != null) parameters.putValue(SchedulerRequestParameters.serviceName, serviceName);
-        if (scheduleId != null) parameters.putValue(SchedulerRequestParameters.scheduleId, scheduleId);
-        if (jobName != null) parameters.putValue(SchedulerRequestParameters.jobName, jobName);
+        parameters.setCommand(command);
+        parameters.setServiceName(serviceName);
+        parameters.setScheduleId(scheduleId);
+        parameters.setJobName(jobName);
+        parameters.setLoggingGroup(loggingGroup);
+        if (StringUtils.hasText(loadedLines)) {
+            parameters.setLoadedLines(Integer.parseInt(loadedLines));
+        }
 
         schedulerManager.dispatch(targetNodeId, parameters);
 

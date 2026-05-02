@@ -395,7 +395,7 @@ arguments: {
                 const commandsNode = {
                     id: currentNodeId || 'gateway',
                     endpoint: {
-                        path: BASE_PATH + "/remote-commands"
+                        path: BASE_PATH + "/nodes"
                     }
                 };
 
@@ -461,7 +461,7 @@ arguments: {
                     }
                 });
 
-                client.start('');
+                client.start('commands');
             });
         </script>
     </th:block>

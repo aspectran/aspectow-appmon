@@ -65,32 +65,64 @@ public class SchedulerRequestParameters extends DefaultParameters {
         return getString(header);
     }
 
+    public void setHeader(String header) {
+        putValue(SchedulerRequestParameters.header, header);
+    }
+
     public String getTargetNodeId() {
         return getString(targetNodeId);
+    }
+
+    public void setTargetNodeId(String targetNodeId) {
+        putValue(SchedulerRequestParameters.targetNodeId, targetNodeId);
     }
 
     public String getCommand() {
         return getString(command);
     }
 
+    public void setCommand(String command) {
+        putValue(SchedulerRequestParameters.command, command);
+    }
+
     public String getServiceName() {
         return getString(serviceName);
+    }
+
+    public void setServiceName(String serviceName) {
+        putValue(SchedulerRequestParameters.serviceName, serviceName);
     }
 
     public String getScheduleId() {
         return getString(scheduleId);
     }
 
+    public void setScheduleId(String scheduleId) {
+        putValue(SchedulerRequestParameters.scheduleId, scheduleId);
+    }
+
     public String getJobName() {
         return getString(jobName);
+    }
+
+    public void setJobName(String jobName) {
+        putValue(SchedulerRequestParameters.jobName, jobName);
     }
 
     public String getLoggingGroup() {
         return getString(loggingGroup);
     }
 
+    public void setLoggingGroup(String loggingGroup) {
+        putValue(SchedulerRequestParameters.loggingGroup, loggingGroup);
+    }
+
     public int getLoadedLines() {
         return getInt(loadedLines, 0);
+    }
+
+    public void setLoadedLines(int loadedLines) {
+        putValue(SchedulerRequestParameters.loadedLines, loadedLines);
     }
 
 }
