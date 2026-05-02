@@ -27,8 +27,6 @@ public abstract class NodeMessageProtocol {
 
     public static final String CATEGORY_CLUSTER = "cluster";
 
-    public static final String CATEGORY_SCHEDULER = "scheduler";
-
     private static final String KEY_PREFIX = "aspectow:cluster:";
 
     private static final String NODES_HASH_KEY_PREFIX = KEY_PREFIX + "nodes:";

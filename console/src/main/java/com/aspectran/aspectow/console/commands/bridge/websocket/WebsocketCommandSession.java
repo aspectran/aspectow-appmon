@@ -36,6 +36,11 @@ public class WebsocketCommandSession extends WrappedSession implements CommandSe
     }
 
     @Override
+    public String getId() {
+        return getSession().getId();
+    }
+
+    @Override
     public String getNodeId() {
         return (String)getSession().getUserProperties().get(NODE_ID_PROPERTY);
     }

@@ -16,20 +16,15 @@
 package com.aspectran.aspectow.console.commands.bridge.polling;
 
 import com.aspectran.aspectow.console.commands.bridge.CommandBridge;
+import com.aspectran.aspectow.console.commands.bridge.CommandBroker;
 import com.aspectran.aspectow.console.commands.bridge.CommandSession;
 import com.aspectran.aspectow.console.commands.manager.RemoteCommandManager;
 import com.aspectran.core.component.AbstractComponent;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
-import com.aspectran.core.component.session.SessionIdGenerator;
-import com.aspectran.utils.CopyOnWriteMap;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * PollingCommandBridge manages client sessions for HTTP long-polling
@@ -40,9 +35,7 @@ public class PollingCommandBridge extends AbstractComponent implements CommandBr
 
     private static final Logger logger = LoggerFactory.getLogger(PollingCommandBridge.class);
 
-    private final SessionIdGenerator sessionIdGenerator = new SessionIdGenerator();
-
-    private final Map<String, PollingCommandSession> sessions = new CopyOnWriteMap<>();
+    private final PollingSessionManager sessionManager;
 
     private final RemoteCommandManager remoteCommandManager;
 
@@ -51,11 +44,13 @@ public class PollingCommandBridge extends AbstractComponent implements CommandBr
     @Autowired
     public PollingCommandBridge(RemoteCommandManager remoteCommandManager) {
         this.remoteCommandManager = remoteCommandManager;
+        this.sessionManager = new PollingSessionManager(this);
         this.bufferedMessages = new BufferedMessages(100);
     }
 
     @Override
     protected void doInitialize() throws Exception {
+        sessionManager.initialize();
         if (remoteCommandManager.getBroker() != null) {
             remoteCommandManager.getBroker().addBridge(this);
             logger.info("PollingCommandBridge registered with CommandBroker");
@@ -66,43 +61,35 @@ public class PollingCommandBridge extends AbstractComponent implements CommandBr
 
     @Override
     protected void doDestroy() throws Exception {
+        sessionManager.destroy();
         if (remoteCommandManager.getBroker() != null) {
             remoteCommandManager.getBroker().removeBridge(this);
         }
         bufferedMessages.clear();
-        sessions.clear();
     }
 
     public PollingCommandSession createSession(String nodeId) {
-        String sessionId = sessionIdGenerator.createSessionId();
-        PollingCommandSession newSession = new PollingCommandSession(this);
-        newSession.setNodeId(nodeId);
-        newSession.setSessionTimeout(60); // 1 minute default
-        newSession.access(true);
-        sessions.put(sessionId, newSession);
-        return newSession;
+        return sessionManager.createSession(nodeId);
     }
 
     public PollingCommandSession getSession(String sessionId) {
-        PollingCommandSession session = sessions.get(sessionId);
-        if (session != null) {
-            session.access(false);
-        }
-        return session;
+        return sessionManager.getSession(sessionId);
     }
 
     @Override
     public void bridge(String data) {
-        if (!sessions.isEmpty()) {
+        if (!sessionManager.getSessions().isEmpty()) {
             bufferedMessages.push(data);
         }
     }
 
     @Override
     public void bridge(@NonNull CommandSession session, String data) {
-        // For individual bridging, we might need a separate mechanism
-        // but typically commands are broadcasted or targeted via NodeId
         bridge(data);
+    }
+
+    public CommandBroker getBroker() {
+        return remoteCommandManager.getBroker();
     }
 
     public String[] pull(PollingCommandSession session) {
@@ -113,7 +100,7 @@ public class PollingCommandBridge extends AbstractComponent implements CommandBr
         return messages;
     }
 
-    private void shrinkBuffer() {
+    public void shrinkBuffer() {
         int minLineIndex = getMinLineIndex();
         if (minLineIndex > -1) {
             bufferedMessages.shrink(minLineIndex);
@@ -122,7 +109,7 @@ public class PollingCommandBridge extends AbstractComponent implements CommandBr
 
     private int getMinLineIndex() {
         int minLineIndex = -1;
-        for (PollingCommandSession session : sessions.values()) {
+        for (PollingCommandSession session : sessionManager.getSessions().values()) {
             if (minLineIndex == -1) {
                 minLineIndex = session.getLastLineIndex();
             } else if (session.getLastLineIndex() < minLineIndex) {
@@ -130,29 +117,6 @@ public class PollingCommandBridge extends AbstractComponent implements CommandBr
             }
         }
         return minLineIndex;
-    }
-
-    /**
-     * Scavenges for and removes expired sessions.
-     */
-    public void scavenge() {
-        List<String> expiredSessions = new ArrayList<>();
-        for (Map.Entry<String, PollingCommandSession> entry : sessions.entrySet()) {
-            if (entry.getValue().isExpired()) {
-                expiredSessions.add(entry.getKey());
-            }
-        }
-        for (String id : expiredSessions) {
-            PollingCommandSession session = sessions.remove(id);
-            if (session != null) {
-                session.destroy();
-            }
-        }
-        if (sessions.isEmpty()) {
-            bufferedMessages.clear();
-        } else {
-            shrinkBuffer();
-        }
     }
 
     public BufferedMessages getBufferedMessages() {

@@ -31,6 +31,8 @@ public class SchedulerBroker {
 
     private static final Logger logger = LoggerFactory.getLogger(SchedulerBroker.class);
 
+    public static final String CATEGORY_SCHEDULER = "scheduler";
+
     public static final String CONTROL_JOIN = "scheduler:join";
 
     public static final String CONTROL_RELEASE = "scheduler:release";

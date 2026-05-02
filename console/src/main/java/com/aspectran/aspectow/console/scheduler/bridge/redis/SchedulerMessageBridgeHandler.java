@@ -15,8 +15,8 @@
  */
 package com.aspectran.aspectow.console.scheduler.bridge.redis;
 
+import com.aspectran.aspectow.console.scheduler.bridge.SchedulerBroker;
 import com.aspectran.aspectow.console.scheduler.manager.SchedulerManager;
-import com.aspectran.aspectow.node.manager.NodeMessageProtocol;
 import com.aspectran.aspectow.node.redis.RedisMessageListener;
 import org.jspecify.annotations.NonNull;
 
@@ -34,7 +34,7 @@ public class SchedulerMessageBridgeHandler implements RedisMessageListener {
 
     @Override
     public String getCategory() {
-        return NodeMessageProtocol.CATEGORY_SCHEDULER;
+        return SchedulerBroker.CATEGORY_SCHEDULER;
     }
 
     @Override

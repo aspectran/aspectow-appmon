@@ -21,7 +21,6 @@ import com.aspectran.aspectow.node.manager.NodeManager;
 import com.aspectran.core.component.bean.ablility.InitializableBean;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
-import com.aspectran.utils.StringUtils;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +57,26 @@ public class RemoteCommandManager implements InitializableBean {
             CommandMessageBridgeHandler bridgeHandler = new CommandMessageBridgeHandler(this);
             nodeManager.getRedisMessageSubscriber().addListener(bridgeHandler);
         }
+    }
+
+    public void handleControlMessage(String nodeId, @NonNull String message) {
+        if (message.startsWith(CommandBroker.CONTROL_JOIN)) {
+            broker.getSubscriptionRegistry().addRemoteSubscription(nodeId);
+            startExporters();
+        } else if (message.startsWith(CommandBroker.CONTROL_RELEASE)) {
+            broker.getSubscriptionRegistry().removeRemoteSubscription(nodeId);
+            if (!broker.getSubscriptionRegistry().isInUse()) {
+                stopExporters();
+            }
+        }
+    }
+
+    private void startExporters() {
+        // Future implementation: Start command-related exporters (e.g., log streaming)
+    }
+
+    private void stopExporters() {
+        // Future implementation: Stop command-related exporters
     }
 
     public CommandBroker getBroker() {
@@ -99,7 +118,7 @@ public class RemoteCommandManager implements InitializableBean {
      * @param message the raw relay message
      */
     public void process(String message) {
-        // Since categorization is handled by the BridgeHandler, 
+        // Since categorization is handled by the BridgeHandler,
         // we just need to distinguish between a command and a result.
         // For RemoteCommandManager, we assume if it's not a known result format, it's a command.
         // But for consistency with SchedulerManager, we can use a prefix or check the content.

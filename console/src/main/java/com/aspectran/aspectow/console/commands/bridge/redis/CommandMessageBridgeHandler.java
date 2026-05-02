@@ -41,6 +41,11 @@ public class CommandMessageBridgeHandler implements RedisMessageListener {
     }
 
     @Override
+    public void onControlMessage(String nodeId, String message) {
+        remoteCommandManager.handleControlMessage(nodeId, message);
+    }
+
+    @Override
     public void onRelayMessage(String nodeId, String message) {
         remoteCommandManager.process(message);
     }

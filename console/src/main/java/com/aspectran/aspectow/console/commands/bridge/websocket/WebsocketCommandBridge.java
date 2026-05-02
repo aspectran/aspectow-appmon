@@ -116,11 +116,12 @@ public class WebsocketCommandBridge extends SimplifiedEndpoint implements Comman
         WebsocketCommandSession commandSession = new WebsocketCommandSession(session);
         commandSession.setNodeId(nodeManager.getNodeId());
         if (addSession(session)) {
+            remoteCommandManager.getBroker().join(commandSession);
             RemoteCommandResultParameters resultParameters = new RemoteCommandResultParameters()
                     .setHeader("joined")
                     .setNodeId(nodeManager.getNodeId());
             sendText(session, resultParameters.toString());
-            logger.debug("ConsoleClient joined: session {}", session.getId());
+            logger.debug("ConsoleClient joined remote command management: session {}", session.getId());
         }
     }
 
@@ -159,7 +160,9 @@ public class WebsocketCommandBridge extends SimplifiedEndpoint implements Comman
 
     @Override
     protected void onSessionRemoved(@NonNull Session session) {
-        logger.debug("WebSocket session removed: {} (Total: {})", session.getId(), countSessions());
+        WebsocketCommandSession commandSession = new WebsocketCommandSession(session);
+        remoteCommandManager.getBroker().release(commandSession);
+        logger.debug("Remote command WebSocket session removed: {} (Total: {})", session.getId(), countSessions());
     }
 
     @Override

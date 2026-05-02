@@ -19,7 +19,6 @@ import com.aspectran.aspectow.console.scheduler.bridge.SchedulerBroker;
 import com.aspectran.aspectow.console.scheduler.bridge.SchedulerRequestParameters;
 import com.aspectran.aspectow.console.scheduler.bridge.redis.SchedulerMessageBridgeHandler;
 import com.aspectran.aspectow.node.manager.NodeManager;
-import com.aspectran.aspectow.node.manager.NodeMessageProtocol;
 import com.aspectran.core.component.bean.ablility.InitializableBean;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Bean;
@@ -109,7 +108,7 @@ public class SchedulerManager implements InitializableBean {
                 try {
                     // Convert to string only when sending over the network (Redis)
                     String message = "command:" + request.toString() + ";" + targetNodeId;
-                    nodeManager.getRedisMessagePublisher().publishRelay(NodeMessageProtocol.CATEGORY_SCHEDULER, message);
+                    nodeManager.getRedisMessagePublisher().publishRelay(SchedulerBroker.CATEGORY_SCHEDULER, message);
                     logger.debug("Scheduler request dispatched to node {}: {}", targetNodeId, request.getCommand());
                 } catch (Exception e) {
                     logger.error("Failed to dispatch scheduler request to node {}", targetNodeId, e);
@@ -148,7 +147,7 @@ public class SchedulerManager implements InitializableBean {
 
                 String response = execute(request);
                 if (response != null && nodeManager.getRedisMessagePublisher() != null) {
-                    nodeManager.getRedisMessagePublisher().publishRelay(NodeMessageProtocol.CATEGORY_SCHEDULER, response);
+                    nodeManager.getRedisMessagePublisher().publishRelay(SchedulerBroker.CATEGORY_SCHEDULER, response);
                 }
             } catch (Exception e) {
                 logger.error("Failed to process scheduler relay message", e);

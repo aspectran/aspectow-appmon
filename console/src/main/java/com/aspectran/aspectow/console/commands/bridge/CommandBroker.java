@@ -16,6 +16,7 @@
 package com.aspectran.aspectow.console.commands.bridge;
 
 import com.aspectran.aspectow.node.redis.RedisMessagePublisher;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,11 +33,17 @@ public class CommandBroker {
 
     public static final String CATEGORY_COMMANDS = "commands";
 
+    public static final String CONTROL_JOIN = "commands:join";
+
+    public static final String CONTROL_RELEASE = "commands:release";
+
     private final String nodeId;
 
     private final RedisMessagePublisher messagePublisher;
 
     private final Set<CommandBridge> bridges = new CopyOnWriteArraySet<>();
+
+    private final SubscriptionRegistry subscriptionRegistry = new SubscriptionRegistry();
 
     public CommandBroker(String nodeId, RedisMessagePublisher messagePublisher) {
         this.nodeId = nodeId;
@@ -51,12 +58,40 @@ public class CommandBroker {
         return messagePublisher;
     }
 
+    public SubscriptionRegistry getSubscriptionRegistry() {
+        return subscriptionRegistry;
+    }
+
     public void addBridge(CommandBridge bridge) {
         bridges.add(bridge);
     }
 
     public void removeBridge(CommandBridge bridge) {
         bridges.remove(bridge);
+    }
+
+    public synchronized void join(@NonNull CommandSession session) {
+        if (session.isValid()) {
+            subscriptionRegistry.addLocalSubscription(session.getId());
+            publishControl(CONTROL_JOIN);
+        }
+    }
+
+    public synchronized void release(@NonNull CommandSession session) {
+        subscriptionRegistry.removeLocalSubscription(session.getId());
+        if (!subscriptionRegistry.isInUseLocally()) {
+            publishControl(CONTROL_RELEASE);
+        }
+    }
+
+    private void publishControl(String message) {
+        if (messagePublisher != null) {
+            try {
+                messagePublisher.publishControl(message);
+            } catch (Exception e) {
+                logger.error("Failed to publish control message to Redis", e);
+            }
+        }
     }
 
     /**

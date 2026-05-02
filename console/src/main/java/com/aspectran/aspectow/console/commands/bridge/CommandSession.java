@@ -22,6 +22,12 @@ package com.aspectran.aspectow.console.commands.bridge;
 public interface CommandSession {
 
     /**
+     * Gets the unique identifier of this session.
+     * @return the session ID
+     */
+    String getId();
+
+    /**
      * Gets the ID of the node that this session is interacting with.
      * @return the node ID
      */
