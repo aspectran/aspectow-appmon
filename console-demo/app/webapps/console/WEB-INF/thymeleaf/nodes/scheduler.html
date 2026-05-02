@@ -47,6 +47,34 @@
             margin-bottom: 20px;
             border: 1px solid var(--bs-border-color);
         }
+        .log-container {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border: 1px solid #333;
+        }
+        .log-line {
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-bottom: 2px;
+            border-bottom: 1px solid #2d2d2d;
+            padding-bottom: 2px;
+        }
+        .log-header {
+            background: #2d2d2d;
+            color: #aaa;
+            padding: 5px 15px;
+            font-size: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -220,11 +248,13 @@
                             return;
                         }
                         if (result) {
+                            if (typeof result === 'string' && result.startsWith('scheduler:log:')) {
+                                handleRelayMessage(result);
+                                return;
+                            }
                             try {
                                 const event = (typeof result === 'string' ? JSON.parse(result) : result);
-                                if (event && (event.type === 'list' || event.type === 'result')) {
-                                    handleRelayMessage(event);
-                                }
+                                handleRelayMessage(event);
                             } catch (e) {
                                 console.error("Failed to parse scheduler result:", e, result);
                             }
@@ -251,6 +281,10 @@
             }
 
             function handleRelayMessage(data) {
+                if (typeof data === 'string' && data.startsWith('scheduler:log:')) {
+                    appendLogLine(data);
+                    return;
+                }
                 if (data.type === 'list') {
                     renderSchedulerList(data.services);
                 } else if (data.type === 'result') {
@@ -376,11 +410,62 @@
                     html += `   </tbody>
                             </table>
                         </div>
+                        <!-- Log Viewer Section -->
+                        <div class="log-header">
+                            <span><i class="bi bi-terminal me-2"></i>Live Scheduler Logs</span>
+                            <div class="d-flex align-items-center gap-3">
+                                <button class="btn btn-link btn-xs text-secondary p-0 me-3 text-decoration-none" onclick="clearLog('${service.loggingGroup}')">
+                                    <i class="bi bi-trash3"></i> Clear
+                                </button>
+                                <div class="form-check form-check-inline mb-0 p-0 d-flex align-items-center">
+                                    <input class="form-check-input mt-0 me-2" type="checkbox" id="auto-scroll-${service.loggingGroup}" checked style="cursor:pointer">
+                                    <label class="form-check-label text-secondary" for="auto-scroll-${service.loggingGroup}" style="cursor:pointer; font-size: 0.75rem;">Auto-scroll</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="log-viewer-${service.loggingGroup}" class="log-container">
+                            <div class="text-muted italic">Waiting for logs...</div>
+                        </div>
                     </div>`;
                 });
 
                 $('#scheduler-container').html(html);
                 updateStats(totalActiveSchedules, totalActiveJobs, totalIsolated, currentNodeId);
+            }
+
+            function appendLogLine(rawMessage) {
+                // Format: scheduler:log:{loggingGroup}:{line}
+                const parts = rawMessage.split(':');
+                if (parts.length < 4) return;
+
+                const loggingGroup = parts[2];
+                // Extract everything after the 3rd colon
+                const content = rawMessage.substring(rawMessage.indexOf(':', 14) + 1);
+
+                const $container = $(`#log-viewer-${loggingGroup}`);
+                if ($container.length === 0) return;
+
+                // Remove placeholder on first message
+                if ($container.find('.text-muted').length > 0) {
+                    $container.empty();
+                }
+
+                const $line = $('<div class="log-line"></div>').text(content);
+                $container.append($line);
+
+                // Limit lines to 1000 for performance
+                if ($container.children().length > 1000) {
+                    $container.children().first().remove();
+                }
+
+                if ($(`#auto-scroll-${loggingGroup}`).is(':checked')) {
+                    $container.scrollTop($container[0].scrollHeight);
+                }
+            }
+
+            function clearLog(loggingGroup) {
+                const $container = $(`#log-viewer-${loggingGroup}`);
+                $container.empty().append('<div class="text-muted italic">Log cleared.</div>');
             }
 
             function updateStats(schedules, jobs, isolated, node) {
