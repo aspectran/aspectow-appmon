@@ -26,6 +26,8 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+
 /**
  * PollingSchedulerBridge manages client sessions for HTTP long-polling
  * and uses a central message buffer to distribute scheduler management results.
@@ -74,6 +76,10 @@ public class PollingSchedulerBridge extends AbstractComponent implements Schedul
 
     public PollingSchedulerSession getSession(String sessionId) {
         return sessionManager.getSession(sessionId);
+    }
+
+    public Collection<PollingSchedulerSession> getSessions() {
+        return sessionManager.getSessions().values();
     }
 
     @Override

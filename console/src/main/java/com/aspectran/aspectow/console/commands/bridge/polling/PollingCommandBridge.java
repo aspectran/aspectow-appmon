@@ -26,6 +26,8 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+
 /**
  * PollingCommandBridge manages client sessions for HTTP long-polling
  * and uses a central message buffer to distribute command results.
@@ -74,6 +76,10 @@ public class PollingCommandBridge extends AbstractComponent implements CommandBr
 
     public PollingCommandSession getSession(String sessionId) {
         return sessionManager.getSession(sessionId);
+    }
+
+    public Collection<PollingCommandSession> getSessions() {
+        return sessionManager.getSessions().values();
     }
 
     @Override

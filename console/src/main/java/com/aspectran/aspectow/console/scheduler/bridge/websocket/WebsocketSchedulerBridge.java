@@ -36,6 +36,8 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Set;
+
 import static com.aspectran.aspectow.node.manager.NodeMessageProtocol.NODES_BASE_PATH;
 
 /**
@@ -202,6 +204,12 @@ public class WebsocketSchedulerBridge extends SimplifiedEndpoint implements Sche
                     .setResult(data);
             sendText(websocketSchedulerSession.getSession(), responseParameters.toString());
         }
+    }
+
+    public void getSessions(Set<SchedulerSession> sessions) {
+        forEachSession(session -> {
+            sessions.add(new WebsocketSchedulerSession(session));
+        });
     }
 
 }

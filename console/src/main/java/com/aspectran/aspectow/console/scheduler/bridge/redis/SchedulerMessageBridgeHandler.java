@@ -46,6 +46,16 @@ public class SchedulerMessageBridgeHandler implements RedisMessageListener {
     public void onRelayMessage(String nodeId, @NonNull String message) {
         if (message.startsWith("command:")) {
             schedulerManager.process(message);
+        } else if (message.startsWith("log/s:")) {
+            // Target specific session: "log/s:<sessionId>:<loggingGroup>:<line>"
+            int idx = message.indexOf(':', 6);
+            if (idx != -1) {
+                String sessionId = message.substring(6, idx);
+                String content = "scheduler:log:" + message.substring(idx + 1);
+                schedulerManager.getBroker().getSessions().stream()
+                        .filter(session -> session.getId().equals(sessionId))
+                        .forEach(session -> schedulerManager.getBroker().bridge(session, content));
+            }
         } else {
             schedulerManager.broadcast(message);
         }

@@ -37,6 +37,8 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Set;
+
 /**
  * WebsocketCommandBridge provides a WebSocket endpoint for real-time
  * remote command result delivery.
@@ -185,6 +187,12 @@ public class WebsocketCommandBridge extends SimplifiedEndpoint implements Comman
                     .setResult(data);
             sendText(websocketCommandSession.getSession(), resultParameters.toString());
         }
+    }
+
+    public void getSessions(Set<CommandSession> sessions) {
+        forEachSession(session -> {
+            sessions.add(new WebsocketCommandSession(session));
+        });
     }
 
 }

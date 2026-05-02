@@ -15,12 +15,15 @@
  */
 package com.aspectran.aspectow.console.commands.bridge;
 
+import com.aspectran.aspectow.console.commands.bridge.polling.PollingCommandBridge;
+import com.aspectran.aspectow.console.commands.bridge.websocket.WebsocketCommandBridge;
 import com.aspectran.aspectow.console.commands.manager.RemoteCommandManager;
 import com.aspectran.aspectow.node.redis.RedisMessagePublisher;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -72,6 +75,18 @@ public class CommandBroker {
 
     public void removeBridge(CommandBridge bridge) {
         bridges.remove(bridge);
+    }
+
+    public Set<CommandSession> getSessions() {
+        Set<CommandSession> sessions = new HashSet<>();
+        for (CommandBridge bridge : bridges) {
+            if (bridge instanceof WebsocketCommandBridge websocketBridge) {
+                websocketBridge.getSessions(sessions);
+            } else if (bridge instanceof PollingCommandBridge pollingBridge) {
+                sessions.addAll(pollingBridge.getSessions());
+            }
+        }
+        return sessions;
     }
 
     public synchronized void join(@NonNull CommandSession session) {

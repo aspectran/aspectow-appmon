@@ -90,8 +90,27 @@ public class SchedulerManager implements ApplicationAdapterAware, InitializableB
 
     public void handleControlMessage(String nodeId, @NonNull String message) {
         if (message.startsWith(SchedulerBroker.CONTROL_JOIN)) {
+            String sessionId = (message.length() > SchedulerBroker.CONTROL_JOIN.length() + 1 ?
+                    message.substring(SchedulerBroker.CONTROL_JOIN.length() + 1) : null);
             broker.getSubscriptionRegistry().addRemoteSubscription(nodeId);
             startExporters();
+
+            if (sessionId != null) {
+                // Send local last lines to the remote session
+                List<String> lastMessages = collectLastMessages();
+                if (!lastMessages.isEmpty() && nodeManager.getRedisMessagePublisher() != null) {
+                    try {
+                        for (String msg : lastMessages) {
+                            // Target the message to the specific session
+                            // Prefix is "scheduler:log/s:<sessionId>:<loggingGroup>:<line>"
+                            String taggedMsg = "log/s:" + sessionId + ":" + msg.substring(14);
+                            nodeManager.getRedisMessagePublisher().publishRelay(SchedulerBroker.CATEGORY_SCHEDULER, taggedMsg);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Failed to publish last lines to remote session: {}", sessionId, e);
+                    }
+                }
+            }
         } else if (message.startsWith(SchedulerBroker.CONTROL_RELEASE)) {
             broker.getSubscriptionRegistry().removeRemoteSubscription(nodeId);
             if (!broker.getSubscriptionRegistry().isInUse()) {

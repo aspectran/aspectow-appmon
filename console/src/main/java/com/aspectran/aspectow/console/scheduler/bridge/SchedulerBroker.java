@@ -15,12 +15,15 @@
  */
 package com.aspectran.aspectow.console.scheduler.bridge;
 
+import com.aspectran.aspectow.console.scheduler.bridge.polling.PollingSchedulerBridge;
+import com.aspectran.aspectow.console.scheduler.bridge.websocket.WebsocketSchedulerBridge;
 import com.aspectran.aspectow.console.scheduler.manager.SchedulerManager;
 import com.aspectran.aspectow.node.redis.RedisMessagePublisher;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -74,6 +77,18 @@ public class SchedulerBroker {
         bridges.remove(bridge);
     }
 
+    public Set<SchedulerSession> getSessions() {
+        Set<SchedulerSession> sessions = new HashSet<>();
+        for (SchedulerBridge bridge : bridges) {
+            if (bridge instanceof WebsocketSchedulerBridge websocketBridge) {
+                websocketBridge.getSessions(sessions);
+            } else if (bridge instanceof PollingSchedulerBridge pollingBridge) {
+                sessions.addAll(pollingBridge.getSessions());
+            }
+        }
+        return sessions;
+    }
+
     public synchronized void join(@NonNull SchedulerSession session) {
         if (session.isValid()) {
             boolean alreadyInUse = subscriptionRegistry.isInUse();
@@ -81,7 +96,7 @@ public class SchedulerBroker {
             if (!alreadyInUse) {
                 schedulerManager.startExporters();
             }
-            publishControl(CONTROL_JOIN);
+            publishControl(CONTROL_JOIN + ":" + session.getId());
 
             // Send initial log lines to the new session
             for (String message : schedulerManager.collectLastMessages()) {
