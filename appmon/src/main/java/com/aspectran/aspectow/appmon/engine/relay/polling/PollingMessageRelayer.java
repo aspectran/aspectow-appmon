@@ -53,12 +53,12 @@ public class PollingMessageRelayer implements MessageRelayer {
 
     private final AppMonManager appMonManager;
 
-    private final PollingMessageRelayManager relayManager;
+    private final PollingSessionManager pollingSessionManager;
 
     @Autowired
     public PollingMessageRelayer(@NonNull AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
-        this.relayManager = new PollingMessageRelayManager(appMonManager);
+        this.pollingSessionManager = new PollingSessionManager(appMonManager);
     }
 
     /**
@@ -66,7 +66,7 @@ public class PollingMessageRelayer implements MessageRelayer {
      */
     @Initialize
     public void registerRelayer() throws Exception {
-        relayManager.initialize();
+        pollingSessionManager.initialize();
         appMonManager.getMessageRelayManager().addRelayer(this);
     }
 
@@ -75,7 +75,7 @@ public class PollingMessageRelayer implements MessageRelayer {
      */
     @Destroy
     public void destroy() throws Exception {
-        relayManager.destroy();
+        pollingSessionManager.destroy();
         appMonManager.getMessageRelayManager().removeRelayer(this);
     }
 
@@ -97,7 +97,7 @@ public class PollingMessageRelayer implements MessageRelayer {
             return null;
         }
 
-        PollingRelaySession relaySession = relayManager.createSession(translet, pollingConfig, appIds);
+        PollingRelaySession relaySession = pollingSessionManager.createSession(translet, pollingConfig, appIds);
         String timeZone = translet.getParameter("timeZone");
         if (StringUtils.hasText(timeZone)) {
             relaySession.setTimeZone(timeZone);
@@ -127,7 +127,7 @@ public class PollingMessageRelayer implements MessageRelayer {
     @Transform(FormatType.JSON)
     public Map<String, Object> pull(
             @NonNull Translet translet, @Qualifier("commands[]") String[] commands) throws IOException {
-        PollingRelaySession relaySession = relayManager.getSession(translet);
+        PollingRelaySession relaySession = pollingSessionManager.getSession(translet);
         if (relaySession == null || !relaySession.isValid()) {
             return null;
         }
@@ -141,12 +141,12 @@ public class PollingMessageRelayer implements MessageRelayer {
                     commandOptions.hasCommand(CommandOptions.COMMAND_LOAD_PREVIOUS)) {
                 List<String> newMessages = appMonManager.getMessageRelayManager().getNewMessages(relaySession, commandOptions);
                 for (String msg : newMessages) {
-                    relayManager.push(msg);
+                    pollingSessionManager.push(msg);
                 }
             }
         }
 
-        String[] messages = relayManager.pull(relaySession);
+        String[] messages = pollingSessionManager.pull(relaySession);
         return Map.of(
                 "messages", (messages != null ? messages : new String[0])
         );
@@ -161,7 +161,7 @@ public class PollingMessageRelayer implements MessageRelayer {
     @RequestToPost("/polling/interval")
     @Transform(FormatType.JSON)
     public Map<String, Object> pollingInterval(@NonNull Translet translet, int speed) {
-        PollingRelaySession relaySession = relayManager.getSession(translet);
+        PollingRelaySession relaySession = pollingSessionManager.getSession(translet);
         if (relaySession == null) {
             return null;
         }
@@ -180,17 +180,12 @@ public class PollingMessageRelayer implements MessageRelayer {
 
     @Override
     public void relay(String message) {
-        relayManager.push(message);
+        pollingSessionManager.push(message);
     }
 
     @Override
     public void relay(RelaySession relaySession, String message) {
         // Not applicable for polling service
-    }
-
-    @Override
-    public boolean isUsingApp(String appId) {
-        return relayManager.isUsingApp(appId);
     }
 
 }

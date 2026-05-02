@@ -41,6 +41,11 @@ public class WebsocketRelaySession extends WrappedSession implements RelaySessio
     }
 
     @Override
+    public String getId() {
+        return getSession().getId();
+    }
+
+    @Override
     public String[] getJoinedApps() {
         return (String[])getSession().getUserProperties().get(JOINED_APPS_PROPERTY);
     }

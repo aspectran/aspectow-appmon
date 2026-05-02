@@ -15,19 +15,15 @@
  */
 package com.aspectran.aspectow.appmon.engine.relay;
 
-import com.aspectran.aspectow.appmon.engine.config.AppInfoHolder;
 import com.aspectran.aspectow.appmon.engine.exporter.ExporterManager;
 import com.aspectran.aspectow.node.redis.RedisMessagePublisher;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -44,28 +40,28 @@ public class MessageRelayManager {
 
     public static final String CATEGORY_APPMON = "appmon";
 
+    private static final String CONTROL_JOIN = "appmon:join";
+
+    private static final String CONTROL_RELEASE = "appmon:release";
+
     private final Set<MessageRelayer> messageRelayers = new CopyOnWriteArraySet<>();
 
     private final List<ExporterManager> exporterManagers = new CopyOnWriteArrayList<>();
 
-    private final String nodeId;
-
-    private final AppInfoHolder appInfoHolder;
+    private final SubscriptionRegistry subscriptionRegistry = new SubscriptionRegistry();
 
     private final RedisMessagePublisher messagePublisher;
 
-    private final Map<String, Set<String>> joinedAppsByNode = new ConcurrentHashMap<>();
-
     /**
      * Instantiates a new MessageRelayManager.
-     * @param nodeId the unique identifier of the current node
-     * @param appInfoHolder the holder for app information
      * @param messagePublisher the Redis message publisher
      */
-    public MessageRelayManager(String nodeId, AppInfoHolder appInfoHolder, RedisMessagePublisher messagePublisher) {
-        this.nodeId = nodeId;
-        this.appInfoHolder = appInfoHolder;
+    public MessageRelayManager(RedisMessagePublisher messagePublisher) {
         this.messagePublisher = messagePublisher;
+    }
+
+    public SubscriptionRegistry getSubscriptionRegistry() {
+        return subscriptionRegistry;
     }
 
     /**
@@ -152,14 +148,15 @@ public class MessageRelayManager {
     public synchronized boolean join(@NonNull RelaySession session) {
         if (session.isValid()) {
             String[] appIds = session.getJoinedApps();
+            subscriptionRegistry.addLocalSubscription(session.getId(), appIds);
             if (appIds != null && appIds.length > 0) {
                 for (String id : appIds) {
                     startExporters(id);
-                    publishControl("appmon:join:" + id);
+                    publishControl(CONTROL_JOIN + ":" + id);
                 }
             } else {
                 startExporters(null);
-                publishControl("appmon:join");
+                publishControl(CONTROL_JOIN);
             }
             return true;
         } else {
@@ -182,25 +179,26 @@ public class MessageRelayManager {
      */
     public synchronized void release(@NonNull RelaySession session) {
         String[] appIds = session.getJoinedApps();
+        subscriptionRegistry.removeLocalSubscription(session.getId());
         if (appIds != null && appIds.length > 0) {
             for (String id : appIds) {
                 if (messagePublisher != null) {
-                    if (!isUsingAppLocally(id)) {
-                        publishControl("appmon:release:" + id);
+                    if (!subscriptionRegistry.isAppInUseLocally(id)) {
+                        publishControl(CONTROL_RELEASE + ":" + id);
                     }
                 } else {
-                    if (!isUsingAppLocally(id)) {
+                    if (!subscriptionRegistry.isAppInUseLocally(id)) {
                         stopExporters(id);
                     }
                 }
             }
         } else {
             if (messagePublisher != null) {
-                if (!isUsingAppLocally(null)) {
-                    publishControl("appmon:release");
+                if (!subscriptionRegistry.isAppInUseLocally(null)) {
+                    publishControl(CONTROL_RELEASE);
                 }
             } else {
-                if (!isUsingAppLocally(null)) {
+                if (!subscriptionRegistry.isAppInUseLocally(null)) {
                     stopExporters(null);
                 }
             }
@@ -222,58 +220,19 @@ public class MessageRelayManager {
      * @param message the control message
      */
     public void handleControlMessage(String nodeId, @NonNull String message) {
-        if (message.startsWith("appmon:join")) {
-            String appId = (message.length() > 12 ? message.substring(12) : null);
-            addNodeJoinedApp(nodeId, appId);
+        if (message.startsWith(CONTROL_JOIN)) {
+            String appId = (message.length() > CONTROL_JOIN.length() + 1 ?
+                    message.substring(CONTROL_JOIN.length() + 1) : null);
+            subscriptionRegistry.addRemoteSubscription(nodeId, appId);
             startExporters(appId);
-        } else if (message.startsWith("appmon:release")) {
-            String appId = (message.length() > 15 ? message.substring(15) : null);
-            removeNodeJoinedApp(nodeId, appId);
-            if (!isAppInUse(appId)) {
+        } else if (message.startsWith(CONTROL_RELEASE)) {
+            String appId = (message.length() > CONTROL_RELEASE.length() + 1 ?
+                    message.substring(CONTROL_RELEASE.length() + 1) : null);
+            subscriptionRegistry.removeRemoteSubscription(nodeId, appId);
+            if (!subscriptionRegistry.isAppInUse(appId)) {
                 stopExporters(appId);
             }
         }
-    }
-
-    private void addNodeJoinedApp(String nodeId, String appId) {
-        if (appId == null) {
-            appId = "";
-        }
-        joinedAppsByNode.computeIfAbsent(appId, k -> ConcurrentHashMap.newKeySet()).add(nodeId);
-    }
-
-    private void removeNodeJoinedApp(String nodeId, String appId) {
-        if (appId == null) {
-            appId = "";
-        }
-        Set<String> nodes = joinedAppsByNode.get(appId);
-        if (nodes != null) {
-            nodes.remove(nodeId);
-            if (nodes.isEmpty()) {
-                joinedAppsByNode.remove(appId);
-            }
-        }
-    }
-
-
-    private boolean isAppInUse(String appId) {
-        if (isUsingAppLocally(appId)) {
-            return true;
-        }
-        if (appId == null) {
-            appId = "";
-        }
-        Set<String> nodes = joinedAppsByNode.get(appId);
-        return (nodes != null && !nodes.isEmpty());
-    }
-
-    private boolean isUsingAppLocally(String appId) {
-        for (MessageRelayer messageRelayer : messageRelayers) {
-            if (messageRelayer.isUsingApp(appId)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

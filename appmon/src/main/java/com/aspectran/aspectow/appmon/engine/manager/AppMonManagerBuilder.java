@@ -15,10 +15,10 @@
  */
 package com.aspectran.aspectow.appmon.engine.manager;
 
-import com.aspectran.aspectow.appmon.engine.config.AppMonConfig;
-import com.aspectran.aspectow.appmon.engine.config.EventInfo;
 import com.aspectran.aspectow.appmon.engine.config.AppInfo;
 import com.aspectran.aspectow.appmon.engine.config.AppInfoHolder;
+import com.aspectran.aspectow.appmon.engine.config.AppMonConfig;
+import com.aspectran.aspectow.appmon.engine.config.EventInfo;
 import com.aspectran.aspectow.appmon.engine.config.LogInfo;
 import com.aspectran.aspectow.appmon.engine.config.MetricInfo;
 import com.aspectran.aspectow.appmon.engine.config.PollingConfig;
@@ -162,8 +162,7 @@ public abstract class AppMonManagerBuilder {
 
         AppInfoHolder appInfoHolder = new AppInfoHolder(nodeId, appMonConfig.getAppInfoList());
 
-        MessageRelayManager messageRelayManager = new MessageRelayManager(
-                nodeId, appInfoHolder, nodeManager.getRedisMessagePublisher());
+        MessageRelayManager messageRelayManager = new MessageRelayManager(nodeManager.getRedisMessagePublisher());
 
         AppMonManager appMonManager = new AppMonManager(
                 nodeId, pollingConfig, counterPersistInterval,

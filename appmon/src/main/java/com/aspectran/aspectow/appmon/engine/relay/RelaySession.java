@@ -24,6 +24,12 @@ package com.aspectran.aspectow.appmon.engine.relay;
 public interface RelaySession {
 
     /**
+     * Gets the unique identifier of this session.
+     * @return the session ID
+     */
+    String getId();
+
+    /**
      * Gets the names of the apps that this session has joined.
      * @return an array of app names
      */

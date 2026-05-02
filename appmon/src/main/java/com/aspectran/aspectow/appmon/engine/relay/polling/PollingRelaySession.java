@@ -37,7 +37,9 @@ public class PollingRelaySession implements RelaySession {
 
     private final AutoLock autoLock = new AutoLock();
 
-    private final PollingMessageRelayManager relayManager;
+    private final String id;
+
+    private final PollingSessionManager relayManager;
 
     private final SessionExpiryTimer expiryTimer;
 
@@ -56,12 +58,19 @@ public class PollingRelaySession implements RelaySession {
     private String timeZone;
 
     /**
-     * Instantiates a new PollingServiceSession.
+     * Instantiates a new PollingRelaySession.
+     * @param id the unique identifier of this session
      * @param relayManager the session manager that created this session
      */
-    public PollingRelaySession(PollingMessageRelayManager relayManager) {
+    public PollingRelaySession(String id, PollingSessionManager relayManager) {
+        this.id = id;
         this.relayManager = relayManager;
         this.expiryTimer = new SessionExpiryTimer();
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     public int getSessionTimeout() {

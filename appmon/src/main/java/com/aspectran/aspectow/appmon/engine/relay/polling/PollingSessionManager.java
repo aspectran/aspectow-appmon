@@ -21,7 +21,6 @@ import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.AbstractComponent;
 import com.aspectran.core.component.session.SessionIdGenerator;
 import com.aspectran.utils.CopyOnWriteMap;
-import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.scheduling.ScheduledExecutorScheduler;
 import com.aspectran.utils.scheduling.Scheduler;
 import com.aspectran.web.support.util.CookieGenerator;
@@ -31,8 +30,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,15 +38,15 @@ import java.util.Map;
  *
  * <p>Created: 2020. 12. 24.</p>
  */
-public class PollingMessageRelayManager extends AbstractComponent {
+public class PollingSessionManager extends AbstractComponent {
 
-    private static final String SESSION_ID_COOKIE_NAME = PollingMessageRelayManager.class.getName() + ".SESSION_ID";
+    private static final String SESSION_ID_COOKIE_NAME = PollingSessionManager.class.getName() + ".SESSION_ID";
 
     private final CookieGenerator sessionIdCookieGenerator = new CookieGenerator(SESSION_ID_COOKIE_NAME);
 
     private final SessionIdGenerator sessionIdGenerator = new SessionIdGenerator();
 
-    private final Scheduler scheduler = new ScheduledExecutorScheduler("PSSM-Scheduler", false);
+    private final Scheduler scheduler = new ScheduledExecutorScheduler("PSM-Scheduler", false);
 
     private final Map<String, PollingRelaySession> sessions = new CopyOnWriteMap<>();
 
@@ -58,10 +55,10 @@ public class PollingMessageRelayManager extends AbstractComponent {
     private final BufferedMessages bufferedMessages;
 
     /**
-     * Instantiates a new PollingServiceSessionManager.
+     * Instantiates a new PollingSessionManager.
      * @param appMonManager the main application manager
      */
-    public PollingMessageRelayManager(@NonNull AppMonManager appMonManager) {
+    public PollingSessionManager(@NonNull AppMonManager appMonManager) {
         this.appMonManager = appMonManager;
 
         PollingConfig pollingConfig = appMonManager.getPollingConfig();
@@ -91,7 +88,7 @@ public class PollingMessageRelayManager extends AbstractComponent {
             existingSession.setPollingInterval(pollingInterval);
             return existingSession;
         } else {
-            PollingRelaySession newSession = new PollingRelaySession(this);
+            PollingRelaySession newSession = new PollingRelaySession(sessionId, this);
             newSession.setSessionTimeout(sessionTimeout);
             newSession.setPollingInterval(pollingInterval);
             if (appIds != null) {
@@ -185,47 +182,25 @@ public class PollingMessageRelayManager extends AbstractComponent {
         return minLineIndex;
     }
 
-    protected boolean isUsingApp(String appId) {
-        if (StringUtils.hasLength(appId)) {
-            synchronized (sessions) {
-                for (PollingRelaySession serviceSession : sessions.values()) {
-                    if (serviceSession.isValid()) {
-                        String[] appIds = serviceSession.getJoinedApps();
-                        if (appIds != null) {
-                            for (String id : appIds) {
-                                if (appId.equals(id)) {
-                                    return true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     /**
      * Scavenges for and removes expired sessions.
      */
     protected void scavenge() {
-        List<String> expiredSessions = new ArrayList<>();
-        for (Map.Entry<String, PollingRelaySession> entry : sessions.entrySet()) {
-            String id = entry.getKey();
-            PollingRelaySession session = entry.getValue();
-            if (session.isExpired()) {
-                appMonManager.getMessageRelayManager().release(session);
-                session.destroy();
-                expiredSessions.add(id);
+        if (!sessions.isEmpty()) {
+            sessions.entrySet().removeIf(entry -> {
+                PollingRelaySession session = entry.getValue();
+                if (session.isExpired()) {
+                    appMonManager.getMessageRelayManager().release(session);
+                    session.destroy();
+                    return true;
+                }
+                return false;
+            });
+            if (sessions.isEmpty()) {
+                bufferedMessages.clear();
+            } else {
+                shrinkBuffer();
             }
-        }
-        for (String id : expiredSessions) {
-            sessions.remove(id);
-        }
-        if (sessions.isEmpty()) {
-            bufferedMessages.clear();
-        } else {
-            shrinkBuffer();
         }
     }
 

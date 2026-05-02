@@ -188,23 +188,4 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
         }
     }
 
-    @Override
-    public boolean isUsingApp(String appId) {
-        if (StringUtils.hasLength(appId)) {
-            return containsSession(session -> {
-                RelaySession relaySession = new WebsocketRelaySession(session);
-                String[] appIds = relaySession.getJoinedApps();
-                if (appIds != null) {
-                    for (String id : appIds) {
-                        if (appId.equals(id)) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            });
-        }
-        return false;
-    }
-
 }
