@@ -36,6 +36,11 @@ public class RedisMessageRelayHandler implements RedisMessageListener {
     }
 
     @Override
+    public void onControlMessage(String nodeId, String message) {
+        messageRelayManager.handleControlMessage(nodeId, message);
+    }
+
+    @Override
     public void onRelayMessage(String message) {
         messageRelayManager.relay(message);
     }

@@ -21,6 +21,7 @@ import com.aspectran.aspectow.console.scheduler.bridge.redis.SchedulerMessageBri
 import com.aspectran.aspectow.node.manager.NodeManager;
 import com.aspectran.aspectow.node.manager.NodeMessageProtocol;
 import com.aspectran.core.component.bean.ablility.InitializableBean;
+import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.utils.StringUtils;
@@ -50,9 +51,10 @@ public class SchedulerManager implements InitializableBean {
 
     private final SchedulerBroker broker;
 
-    public SchedulerManager(@NonNull NodeManager nodeManager, LocalSchedulerService localSchedulerService) {
+    @Autowired
+    public SchedulerManager(@NonNull NodeManager nodeManager) {
         this.nodeManager = nodeManager;
-        this.localSchedulerService = localSchedulerService;
+        this.localSchedulerService = new LocalSchedulerService();
         this.broker = new SchedulerBroker(nodeManager.getNodeId(), nodeManager.getRedisMessagePublisher());
     }
 

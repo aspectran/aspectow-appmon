@@ -24,9 +24,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -47,15 +48,22 @@ public class MessageRelayManager {
 
     private final List<ExporterManager> exporterManagers = new CopyOnWriteArrayList<>();
 
+    private final String nodeId;
+
     private final AppInfoHolder appInfoHolder;
 
     private final RedisMessagePublisher messagePublisher;
 
+    private final Map<String, Set<String>> joinedAppsByNode = new ConcurrentHashMap<>();
+
     /**
      * Instantiates a new MessageRelayManager.
+     * @param nodeId the unique identifier of the current node
      * @param appInfoHolder the holder for app information
+     * @param messagePublisher the Redis message publisher
      */
-    public MessageRelayManager(AppInfoHolder appInfoHolder, RedisMessagePublisher messagePublisher) {
+    public MessageRelayManager(String nodeId, AppInfoHolder appInfoHolder, RedisMessagePublisher messagePublisher) {
+        this.nodeId = nodeId;
         this.appInfoHolder = appInfoHolder;
         this.messagePublisher = messagePublisher;
     }
@@ -100,6 +108,20 @@ public class MessageRelayManager {
     }
 
     /**
+     * Publishes a management control message for this node.
+     * @param message the control message to publish
+     */
+    public void publishControl(String message) {
+        if (messagePublisher != null) {
+            try {
+                messagePublisher.publishControl(message);
+            } catch (Exception e) {
+                logger.error("Failed to publish control message to Redis", e);
+            }
+        }
+    }
+
+    /**
      * Relays a message to all registered relayers.
      * This method does not publish the message to Redis.
      * @param message the message to relay
@@ -133,9 +155,11 @@ public class MessageRelayManager {
             if (appIds != null && appIds.length > 0) {
                 for (String id : appIds) {
                     startExporters(id);
+                    publishControl("appmon:join:" + id);
                 }
             } else {
                 startExporters(null);
+                publishControl("appmon:join");
             }
             return true;
         } else {
@@ -156,11 +180,29 @@ public class MessageRelayManager {
      * Stops exporters that are no longer being monitored by any client.
      * @param session the client session that is being released
      */
-    public synchronized void release(RelaySession session) {
-        String[] appIds = getUnusedApps(session);
-        if (appIds != null) {
+    public synchronized void release(@NonNull RelaySession session) {
+        String[] appIds = session.getJoinedApps();
+        if (appIds != null && appIds.length > 0) {
             for (String id : appIds) {
-                stopExporters(id);
+                if (messagePublisher != null) {
+                    if (!isUsingAppLocally(id)) {
+                        publishControl("appmon:release:" + id);
+                    }
+                } else {
+                    if (!isUsingAppLocally(id)) {
+                        stopExporters(id);
+                    }
+                }
+            }
+        } else {
+            if (messagePublisher != null) {
+                if (!isUsingAppLocally(null)) {
+                    publishControl("appmon:release");
+                }
+            } else {
+                if (!isUsingAppLocally(null)) {
+                    stopExporters(null);
+                }
             }
         }
         session.removeJoinedApps();
@@ -172,6 +214,66 @@ public class MessageRelayManager {
                 exporterManager.stop();
             }
         }
+    }
+
+    /**
+     * Handles control messages from the cluster.
+     * @param nodeId the ID of the node that sent the message
+     * @param message the control message
+     */
+    public void handleControlMessage(String nodeId, @NonNull String message) {
+        if (message.startsWith("appmon:join")) {
+            String appId = (message.length() > 12 ? message.substring(12) : null);
+            addNodeJoinedApp(nodeId, appId);
+            startExporters(appId);
+        } else if (message.startsWith("appmon:release")) {
+            String appId = (message.length() > 15 ? message.substring(15) : null);
+            removeNodeJoinedApp(nodeId, appId);
+            if (!isAppInUse(appId)) {
+                stopExporters(appId);
+            }
+        }
+    }
+
+    private void addNodeJoinedApp(String nodeId, String appId) {
+        if (appId == null) {
+            appId = "";
+        }
+        joinedAppsByNode.computeIfAbsent(appId, k -> ConcurrentHashMap.newKeySet()).add(nodeId);
+    }
+
+    private void removeNodeJoinedApp(String nodeId, String appId) {
+        if (appId == null) {
+            appId = "";
+        }
+        Set<String> nodes = joinedAppsByNode.get(appId);
+        if (nodes != null) {
+            nodes.remove(nodeId);
+            if (nodes.isEmpty()) {
+                joinedAppsByNode.remove(appId);
+            }
+        }
+    }
+
+
+    private boolean isAppInUse(String appId) {
+        if (isUsingAppLocally(appId)) {
+            return true;
+        }
+        if (appId == null) {
+            appId = "";
+        }
+        Set<String> nodes = joinedAppsByNode.get(appId);
+        return (nodes != null && !nodes.isEmpty());
+    }
+
+    private boolean isUsingAppLocally(String appId) {
+        for (MessageRelayer messageRelayer : messageRelayers) {
+            if (messageRelayer.isUsingApp(appId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -233,49 +335,6 @@ public class MessageRelayManager {
             if (appId == null || exporterManager.getAppId().equals(appId)) {
                 exporterManager.collectNewMessages(messages, commandOptions);
             }
-        }
-    }
-
-    private String @Nullable [] getUnusedApps(RelaySession session) {
-        String[] appIds = getJoinedApps(session);
-        if (appIds == null || appIds.length == 0) {
-            return null;
-        }
-        List<String> unusedApps = new ArrayList<>(appIds.length);
-        for (String id : appIds) {
-            boolean using = false;
-            for (MessageRelayer messageRelayer : messageRelayers) {
-                if (messageRelayer.isUsingApp(id)) {
-                    using = true;
-                    break;
-                }
-            }
-            if (!using) {
-                unusedApps.add(id);
-            }
-        }
-        if (!unusedApps.isEmpty()) {
-            return unusedApps.toArray(new String[0]);
-        } else {
-            return null;
-        }
-    }
-
-    private String @Nullable [] getJoinedApps(@NonNull RelaySession session) {
-        String[] appIds = session.getJoinedApps();
-        if (appIds == null) {
-            return null;
-        }
-        Set<String> validJoinedApps = new HashSet<>();
-        for (String id : appIds) {
-            if (appInfoHolder.containsApp(id)) {
-                validJoinedApps.add(id);
-            }
-        }
-        if (!validJoinedApps.isEmpty()) {
-            return validJoinedApps.toArray(new String[0]);
-        } else {
-            return null;
         }
     }
 

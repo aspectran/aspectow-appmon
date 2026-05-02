@@ -134,6 +134,9 @@ public class ExporterManager {
      * Starts this manager and all its managed exporters.
      */
     public synchronized void start() {
+        if (scheduler != null) {
+            return;
+        }
         scheduler = new ScheduledExecutorScheduler(exporterType + "ExportScheduler", false);
         scheduler.start();
         for (Exporter exporter : exporters.values()) {
@@ -149,6 +152,9 @@ public class ExporterManager {
      * Stops this manager and all its managed exporters.
      */
     public synchronized void stop() {
+        if (scheduler == null) {
+            return;
+        }
         for (Exporter exporter : exporters.values()) {
             try {
                 exporter.stop();
@@ -156,10 +162,8 @@ public class ExporterManager {
                 logger.warn(e.getMessage(), e);
             }
         }
-        if (scheduler != null) {
-            scheduler.stop();
-            scheduler = null;
-        }
+        scheduler.stop();
+        scheduler = null;
     }
 
     /**
