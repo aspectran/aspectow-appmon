@@ -17,7 +17,7 @@
                     <totalSizeCap>1GB</totalSizeCap>
                 </rollingPolicy>
                 <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-                    <charset>UTF-8</charset>
+                    <charset>${aspectran.logCharset:-UTF-8}</charset>
                     <pattern>%msg%n</pattern>
                 </encoder>
             </appender>
