@@ -15,6 +15,7 @@
  */
 package com.aspectran.aspectow.console.scheduler.bridge;
 
+import com.aspectran.aspectow.console.scheduler.manager.SchedulerManager;
 import com.aspectran.aspectow.node.redis.RedisMessagePublisher;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -41,13 +42,16 @@ public class SchedulerBroker {
 
     private final RedisMessagePublisher messagePublisher;
 
+    private final SchedulerManager schedulerManager;
+
     private final Set<SchedulerBridge> bridges = new CopyOnWriteArraySet<>();
 
     private final SubscriptionRegistry subscriptionRegistry = new SubscriptionRegistry();
 
-    public SchedulerBroker(String nodeId, RedisMessagePublisher messagePublisher) {
+    public SchedulerBroker(String nodeId, RedisMessagePublisher messagePublisher, SchedulerManager schedulerManager) {
         this.nodeId = nodeId;
         this.messagePublisher = messagePublisher;
+        this.schedulerManager = schedulerManager;
     }
 
     public String getNodeId() {
@@ -72,13 +76,25 @@ public class SchedulerBroker {
 
     public synchronized void join(@NonNull SchedulerSession session) {
         if (session.isValid()) {
+            boolean alreadyInUse = subscriptionRegistry.isInUse();
             subscriptionRegistry.addLocalSubscription(session.getId());
+            if (!alreadyInUse) {
+                schedulerManager.startExporters();
+            }
             publishControl(CONTROL_JOIN);
+
+            // Send initial log lines to the new session
+            for (String message : schedulerManager.collectLastMessages()) {
+                bridge(session, message);
+            }
         }
     }
 
     public synchronized void release(@NonNull SchedulerSession session) {
         subscriptionRegistry.removeLocalSubscription(session.getId());
+        if (!subscriptionRegistry.isInUse()) {
+            schedulerManager.stopExporters();
+        }
         if (!subscriptionRegistry.isInUseLocally()) {
             publishControl(CONTROL_RELEASE);
         }

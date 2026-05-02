@@ -15,6 +15,7 @@
  */
 package com.aspectran.aspectow.console.commands.bridge;
 
+import com.aspectran.aspectow.console.commands.manager.RemoteCommandManager;
 import com.aspectran.aspectow.node.redis.RedisMessagePublisher;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -41,16 +42,19 @@ public class CommandBroker {
 
     private final RedisMessagePublisher messagePublisher;
 
+    private final RemoteCommandManager commandManager;
+
     private final Set<CommandBridge> bridges = new CopyOnWriteArraySet<>();
 
     private final SubscriptionRegistry subscriptionRegistry = new SubscriptionRegistry();
 
-    public CommandBroker(String nodeId, RedisMessagePublisher messagePublisher) {
+    public CommandBroker(String nodeId, RedisMessagePublisher messagePublisher, RemoteCommandManager commandManager) {
         this.nodeId = nodeId;
         this.messagePublisher = messagePublisher;
+        this.commandManager = commandManager;
     }
 
-    public String getNodeId() {
+    public String nodeId() {
         return nodeId;
     }
 
@@ -72,13 +76,20 @@ public class CommandBroker {
 
     public synchronized void join(@NonNull CommandSession session) {
         if (session.isValid()) {
+            boolean alreadyInUse = subscriptionRegistry.isInUse();
             subscriptionRegistry.addLocalSubscription(session.getId());
+            if (!alreadyInUse) {
+                commandManager.startExporters();
+            }
             publishControl(CONTROL_JOIN);
         }
     }
 
     public synchronized void release(@NonNull CommandSession session) {
         subscriptionRegistry.removeLocalSubscription(session.getId());
+        if (!subscriptionRegistry.isInUse()) {
+            commandManager.stopExporters();
+        }
         if (!subscriptionRegistry.isInUseLocally()) {
             publishControl(CONTROL_RELEASE);
         }

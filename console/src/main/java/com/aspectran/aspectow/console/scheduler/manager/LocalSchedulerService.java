@@ -58,6 +58,7 @@ public class LocalSchedulerService {
                         jsonBuilder.object();
                         jsonBuilder.put("serviceName", schedulerService.getServiceName());
                         jsonBuilder.put("contextName", schedulerService.getActivityContext().getName());
+                        jsonBuilder.put("loggingGroup", schedulerService.getLoggingGroup());
                         jsonBuilder.array("schedules");
                         for (ScheduleRule scheduleRule : registry.getScheduleRules()) {
                             ScheduleParameters params = RulesToParameters.toScheduleParameters(scheduleRule);

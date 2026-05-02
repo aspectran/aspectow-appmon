@@ -44,6 +44,11 @@
         </dependency>
         <dependency>
             <groupId>com.aspectran</groupId>
+            <artifactId>aspectran-logging</artifactId>
+            <version>${aspectran.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.aspectran</groupId>
             <artifactId>aspectran-daemon</artifactId>
             <version>${aspectran.version}</version>
         </dependency>

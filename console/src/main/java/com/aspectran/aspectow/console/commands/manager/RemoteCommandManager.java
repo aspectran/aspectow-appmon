@@ -45,7 +45,7 @@ public class RemoteCommandManager implements InitializableBean {
     public RemoteCommandManager(@NonNull NodeManager nodeManager, LocalCommandService localCommandService) {
         this.nodeManager = nodeManager;
         this.localCommandService = localCommandService;
-        this.broker = new CommandBroker(nodeManager.getNodeId(), nodeManager.getRedisMessagePublisher());
+        this.broker = new CommandBroker(nodeManager.getNodeId(), nodeManager.getRedisMessagePublisher(), this);
     }
 
     @Override
@@ -71,11 +71,11 @@ public class RemoteCommandManager implements InitializableBean {
         }
     }
 
-    private void startExporters() {
+    public synchronized void startExporters() {
         // Future implementation: Start command-related exporters (e.g., log streaming)
     }
 
-    private void stopExporters() {
+    public synchronized void stopExporters() {
         // Future implementation: Stop command-related exporters
     }
 

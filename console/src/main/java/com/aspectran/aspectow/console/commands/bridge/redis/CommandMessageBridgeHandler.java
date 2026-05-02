@@ -18,16 +18,12 @@ package com.aspectran.aspectow.console.commands.bridge.redis;
 import com.aspectran.aspectow.console.commands.bridge.CommandBroker;
 import com.aspectran.aspectow.console.commands.manager.RemoteCommandManager;
 import com.aspectran.aspectow.node.redis.RedisMessageListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * CommandMessageBridgeHandler listens to Redis relay messages and forwards
  * them to the RemoteCommandManager.
  */
 public class CommandMessageBridgeHandler implements RedisMessageListener {
-
-    private static final Logger logger = LoggerFactory.getLogger(CommandMessageBridgeHandler.class);
 
     private final RemoteCommandManager remoteCommandManager;
 

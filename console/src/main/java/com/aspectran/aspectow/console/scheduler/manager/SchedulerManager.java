@@ -19,15 +19,27 @@ import com.aspectran.aspectow.console.scheduler.bridge.SchedulerBroker;
 import com.aspectran.aspectow.console.scheduler.bridge.SchedulerRequestParameters;
 import com.aspectran.aspectow.console.scheduler.bridge.redis.SchedulerMessageBridgeHandler;
 import com.aspectran.aspectow.node.manager.NodeManager;
+import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.core.component.bean.ablility.InitializableBean;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
+import com.aspectran.core.component.bean.aware.ApplicationAdapterAware;
+import com.aspectran.core.scheduler.service.SchedulerService;
+import com.aspectran.core.service.CoreService;
+import com.aspectran.core.service.CoreServiceHolder;
+import com.aspectran.logging.LoggingDefaults;
 import com.aspectran.utils.StringUtils;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * SchedulerManager orchestrates scheduler management across the cluster.
@@ -36,7 +48,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component
 @Bean(id = "schedulerManager")
-public class SchedulerManager implements InitializableBean {
+public class SchedulerManager implements ApplicationAdapterAware, InitializableBean {
 
     private static final Logger logger = LoggerFactory.getLogger(SchedulerManager.class);
 
@@ -44,17 +56,26 @@ public class SchedulerManager implements InitializableBean {
     private static final String OP_ENABLE = "enable";
     private static final String OP_DISABLE = "disable";
 
+    private final Map<String, SchedulerLogExporter> logExporters = new ConcurrentHashMap<>();
+
     private final NodeManager nodeManager;
 
     private final LocalSchedulerService localSchedulerService;
 
     private final SchedulerBroker broker;
 
+    private ApplicationAdapter applicationAdapter;
+
     @Autowired
     public SchedulerManager(@NonNull NodeManager nodeManager) {
         this.nodeManager = nodeManager;
         this.localSchedulerService = new LocalSchedulerService();
-        this.broker = new SchedulerBroker(nodeManager.getNodeId(), nodeManager.getRedisMessagePublisher());
+        this.broker = new SchedulerBroker(nodeManager.getNodeId(), nodeManager.getRedisMessagePublisher(), this);
+    }
+
+    @Override
+    public void setApplicationAdapter(ApplicationAdapter applicationAdapter) {
+        this.applicationAdapter = applicationAdapter;
     }
 
     @Override
@@ -79,12 +100,69 @@ public class SchedulerManager implements InitializableBean {
         }
     }
 
-    private void startExporters() {
-        // Future implementation: Start scheduler log exporter
+    public synchronized void startExporters() {
+        discoverLogFiles();
+        for (SchedulerLogExporter exporter : logExporters.values()) {
+            try {
+                exporter.start();
+            } catch (Exception e) {
+                logger.error("Failed to start scheduler log exporter for context: {}", exporter.getContextName(), e);
+            }
+        }
     }
 
-    private void stopExporters() {
-        // Future implementation: Stop scheduler log exporter
+    /**
+     * Collects the last known log lines from all active exporters.
+     * @return a list of log messages
+     */
+    public List<String> collectLastMessages() {
+        List<String> messages = new ArrayList<>();
+        for (SchedulerLogExporter exporter : logExporters.values()) {
+            if (exporter.isStarted()) {
+                exporter.read(messages);
+            }
+        }
+        return messages;
+    }
+
+    public synchronized void stopExporters() {
+        for (SchedulerLogExporter exporter : logExporters.values()) {
+            try {
+                exporter.stop();
+            } catch (Exception e) {
+                logger.error("Failed to stop scheduler log exporter for context: {}", exporter.getContextName(), e);
+            }
+        }
+    }
+
+    private void discoverLogFiles() {
+        String baseLogDir = System.getProperty(LoggingDefaults.LOGS_DIR_PROPERTY);
+        File logsDir;
+        if (StringUtils.hasText(baseLogDir)) {
+            logsDir = applicationAdapter.getRealPath(baseLogDir).toFile();
+        } else {
+            logsDir = applicationAdapter.getRealPath(LoggingDefaults.DEFAULT_LOGS_DIR).toFile();
+        }
+
+        for (CoreService service : CoreServiceHolder.getAllServices()) {
+            if (service.getServiceLifeCycle().isActive()) {
+                SchedulerService schedulerService = service.getSchedulerService();
+                if (schedulerService != null) {
+                    String loggingGroup = schedulerService.getLoggingGroup();
+                    if (!logExporters.containsKey(loggingGroup)) {
+                        File logFile = new File(logsDir, loggingGroup + "-scheduler.log");
+                        if (logFile.exists()) {
+                            SchedulerLogInfo logInfo = new SchedulerLogInfo();
+                            logInfo.setContextName(loggingGroup);
+                            logInfo.setLogFile(logFile.getAbsolutePath());
+
+                            SchedulerLogExporter exporter = new SchedulerLogExporter(loggingGroup, logFile, broker);
+                            logExporters.put(loggingGroup, exporter);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public SchedulerBroker getBroker() {
