@@ -106,7 +106,7 @@ public class SchedulerManager implements ApplicationAdapterAware, InitializableB
             try {
                 exporter.start();
             } catch (Exception e) {
-                logger.error("Failed to start scheduler log exporter for context: {}", exporter.getContextName(), e);
+                logger.error("Failed to start scheduler log exporter for context: {}", exporter.getLoggingGroup(), e);
             }
         }
     }
@@ -130,7 +130,7 @@ public class SchedulerManager implements ApplicationAdapterAware, InitializableB
             try {
                 exporter.stop();
             } catch (Exception e) {
-                logger.error("Failed to stop scheduler log exporter for context: {}", exporter.getContextName(), e);
+                logger.error("Failed to stop scheduler log exporter for context: {}", exporter.getLoggingGroup(), e);
             }
         }
     }
@@ -144,6 +144,8 @@ public class SchedulerManager implements ApplicationAdapterAware, InitializableB
             logsDir = applicationAdapter.getRealPath(LoggingDefaults.DEFAULT_LOGS_DIR).toFile();
         }
 
+        String logCharset = System.getProperty(LoggingDefaults.LOG_CHARSET_PROPERTY);
+
         for (CoreService service : CoreServiceHolder.getAllServices()) {
             if (service.getServiceLifeCycle().isActive()) {
                 SchedulerService schedulerService = service.getSchedulerService();
@@ -152,11 +154,8 @@ public class SchedulerManager implements ApplicationAdapterAware, InitializableB
                     if (!logExporters.containsKey(loggingGroup)) {
                         File logFile = new File(logsDir, loggingGroup + "-scheduler.log");
                         if (logFile.exists()) {
-                            SchedulerLogInfo logInfo = new SchedulerLogInfo();
-                            logInfo.setContextName(loggingGroup);
-                            logInfo.setLogFile(logFile.getAbsolutePath());
-
-                            SchedulerLogExporter exporter = new SchedulerLogExporter(loggingGroup, logFile, broker);
+                            SchedulerLogExporter exporter = new SchedulerLogExporter(
+                                    loggingGroup, logFile, broker, logCharset);
                             logExporters.put(loggingGroup, exporter);
                         }
                     }

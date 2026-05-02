@@ -50,7 +50,7 @@ public class LogExporter extends AbstractExporter {
 
     private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
 
-    private static final int DEFAULT_SAMPLE_INTERVAL = 1000;
+    private static final long DEFAULT_SAMPLE_INTERVAL = 1000L;
 
     private final ExporterManager exporterManager;
 
@@ -64,7 +64,7 @@ public class LogExporter extends AbstractExporter {
     private final Charset charset;
 
     /** how frequently to check for file changes; defaults to 1 second */
-    private final int sampleInterval;
+    private final long sampleInterval;
 
     private final int lastLines;
 

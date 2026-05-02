@@ -42,7 +42,7 @@ public class LogInfo extends DefaultParameters {
         file = new ParameterKey("file", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
         charset = new ParameterKey("charset", ValueType.STRING);
-        sampleInterval = new ParameterKey("sampleInterval", ValueType.INT);
+        sampleInterval = new ParameterKey("sampleInterval", ValueType.LONG);
         lastLines = new ParameterKey("lastLines", ValueType.INT);
         archivedDir = new ParameterKey("archivedDir", ValueType.STRING);
 
@@ -184,15 +184,15 @@ public class LogInfo extends DefaultParameters {
      * Returns the interval (in milliseconds) at which the log file should be sampled for new entries.
      * @return the sample interval
      */
-    public int getSampleInterval() {
-        return getInt(sampleInterval, 0);
+    public long getSampleInterval() {
+        return getLong(sampleInterval, 0L);
     }
 
     /**
      * Sets the interval (in milliseconds) at which the log file should be sampled for new entries.
      * @param sampleInterval the sample interval
      */
-    public void setSampleInterval(int sampleInterval) {
+    public void setSampleInterval(long sampleInterval) {
         putValue(LogInfo.sampleInterval, sampleInterval);
     }
 

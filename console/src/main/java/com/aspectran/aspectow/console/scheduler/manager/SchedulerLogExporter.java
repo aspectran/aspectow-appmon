@@ -41,7 +41,7 @@ public class SchedulerLogExporter extends AbstractLifeCycle {
 
     private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
 
-    private final String contextName;
+    private final String loggingGroup;
 
     private final File logFile;
 
@@ -57,22 +57,28 @@ public class SchedulerLogExporter extends AbstractLifeCycle {
 
     private Tailer tailer;
 
-    public SchedulerLogExporter(String contextName, File logFile, SchedulerBroker broker) {
-        this(contextName, logFile, broker, 1000L, 100);
+    public SchedulerLogExporter(String loggingGroup, File logFile, SchedulerBroker broker) {
+        this(loggingGroup, logFile, broker, DEFAULT_CHARSET.name());
     }
 
-    public SchedulerLogExporter(String contextName, File logFile, SchedulerBroker broker, long sampleInterval, int lastLines) {
-        this.contextName = contextName;
+    public SchedulerLogExporter(String loggingGroup, File logFile, SchedulerBroker broker, String charsetName) {
+        this(loggingGroup, logFile, broker, charsetName, 1000L, 1000);
+    }
+
+    public SchedulerLogExporter(
+            String loggingGroup, File logFile, SchedulerBroker broker,
+            String charsetName, long sampleInterval, int lastLines) {
+        this.loggingGroup = loggingGroup;
         this.logFile = logFile;
         this.broker = broker;
-        this.prefix = "scheduler:log:" + contextName + ":";
-        this.charset = DEFAULT_CHARSET;
+        this.prefix = "scheduler:log:" + loggingGroup + ":";
+        this.charset = (charsetName != null ? Charset.forName(charsetName) : DEFAULT_CHARSET);
         this.sampleInterval = sampleInterval;
         this.lastLines = lastLines;
     }
 
-    public String getContextName() {
-        return contextName;
+    public String getLoggingGroup() {
+        return loggingGroup;
     }
 
     public File getLogFile() {
