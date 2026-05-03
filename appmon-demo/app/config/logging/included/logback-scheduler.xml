@@ -8,15 +8,15 @@
         </discriminator>
         <sift>
             <appender name="FILE-SCHEDULER-${LOGGING_GROUP}" class="ch.qos.logback.core.rolling.RollingFileAppender">
-                <file>${aspectran.basePath:-app}/logs/${LOGGING_GROUP}-scheduler.log</file>
+                <file>${aspectran.logsDir:-${aspectran.basePath:-app}/logs}/${LOGGING_GROUP}-scheduler.log</file>
                 <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-                    <fileNamePattern>${aspectran.basePath:-app}/logs/archived/${LOGGING_GROUP}-scheduler.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                    <fileNamePattern>${aspectran.archivedLogsDir:-${aspectran.logsDir:-${aspectran.basePath:-app}/logs}/archived}/${LOGGING_GROUP}-scheduler.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
                     <maxFileSize>10MB</maxFileSize>
                     <maxHistory>30</maxHistory>
                     <totalSizeCap>1GB</totalSizeCap>
                 </rollingPolicy>
                 <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-                    <charset>UTF-8</charset>
+                    <charset>${aspectran.logCharset:-UTF-8}</charset>
                     <pattern>%-5level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %msg%n</pattern>
                 </encoder>
             </appender>

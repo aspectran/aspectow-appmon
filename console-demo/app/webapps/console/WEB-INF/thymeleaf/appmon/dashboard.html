@@ -17,15 +17,15 @@
         <script th:inline="javascript">
             if (typeof DashboardBuilder === "undefined") {
                 const version = [[${#{appmonAssets}.cacheBustingVersion}]];
-                document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.3/css/appmon.css?v=' + version + '">');
-                document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.3/css/appmon-dark.css?v=' + version + '">');
-                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.3/js/dashboard-builder.js?v=' + version + '">\x3C/script>');
-                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.3/js/dashboard-viewer.js?v=' + version + '">\x3C/script>');
-                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.3/js/dashboard-chart.js?v=' + version + '">\x3C/script>');
-                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.3/js/traffic-painter.js?v=' + version + '">\x3C/script>');
-                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.3/js/base-client.js?v=' + version + '">\x3C/script>');
-                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.3/js/websocket-client.js?v=' + version + '">\x3C/script>');
-                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow-appmon@main/assets/appmon@3.3/js/polling-client.js?v=' + version + '">\x3C/script>');
+                document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/css/appmon.css?v=' + version + '">');
+                document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/css/appmon-dark.css?v=' + version + '">');
+                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/js/dashboard-builder.js?v=' + version + '">\x3C/script>');
+                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/js/dashboard-viewer.js?v=' + version + '">\x3C/script>');
+                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/js/dashboard-chart.js?v=' + version + '">\x3C/script>');
+                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/js/traffic-painter.js?v=' + version + '">\x3C/script>');
+                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/js/base-client.js?v=' + version + '">\x3C/script>');
+                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/js/websocket-client.js?v=' + version + '">\x3C/script>');
+                document.write('<script src="https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/js/polling-client.js?v=' + version + '">\x3C/script>');
             }
         </script>
     </th:block>
