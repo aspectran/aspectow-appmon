@@ -465,6 +465,13 @@
 
                 $('#scheduler-container').html(html);
                 updateStats(totalActiveSchedules, totalActiveJobs, totalIsolated, currentNodeId);
+
+                // Auto-fetch recent logs after rendering the list
+                services.forEach(service => {
+                    if (service.loggingGroup) {
+                        fetchPreviousLogs(service.loggingGroup);
+                    }
+                });
             }
 
             function appendLogLine(rawMessage) {
@@ -548,9 +555,11 @@
             function fetchPreviousLogs(loggingGroup) {
                 const $container = $(`#log-viewer-${loggingGroup}`);
                 const loadedCount = $container.children('.log-line').length;
-                if (loadedCount === 0) return;
 
                 $container.data('loading', true);
+                if ($container.find('.text-muted').length > 0) {
+                    $container.empty();
+                }
                 $container.prepend('<div class="loading-logs text-info small italic py-2"><i class="bi bi-arrow-up-circle me-2"></i>Loading previous logs...</div>');
 
                 const message = {
