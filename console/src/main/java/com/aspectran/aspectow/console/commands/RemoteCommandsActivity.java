@@ -27,6 +27,9 @@ import com.aspectran.core.component.bean.annotation.Dispatch;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.RequestToPost;
 import com.aspectran.utils.StringUtils;
+import com.aspectran.web.activity.response.RestResponse;
+import com.aspectran.web.support.rest.response.FailureResponse;
+import com.aspectran.web.support.rest.response.SuccessResponse;
 import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
@@ -92,8 +95,13 @@ public class RemoteCommandsActivity {
      * @return a list of node information maps
      */
     @Request("/list")
-    public List<Map<String, Object>> listCommands() {
-        return nodeConsoleHelper.getNodes(true);
+    public RestResponse listCommands() {
+        try {
+            List<Map<String, Object>> nodes = nodeConsoleHelper.getNodes(true);
+            return new SuccessResponse(nodes).ok();
+        } catch (Exception e) {
+            return new FailureResponse().setError("error", e.getMessage());
+        }
     }
 
     /**
@@ -101,22 +109,23 @@ public class RemoteCommandsActivity {
      * @return a success message
      */
     @RequestToPost("/execute")
-    public Map<String, String> executeCommand(@NonNull Translet translet) throws Exception {
+    public RestResponse executeCommand(@NonNull Translet translet) {
         String targetNodeId = translet.getParameter("nodeId");
         String command = translet.getParameter("command");
 
         if (StringUtils.isEmpty(command)) {
-            throw new IllegalArgumentException("Command is required");
+            return new FailureResponse().setError("required", "Command is required");
         }
         if (StringUtils.isEmpty(targetNodeId)) {
             targetNodeId = nodeManager.getNodeId();
         }
 
-        remoteCommandManager.dispatch(targetNodeId, command);
-
-        Map<String, String> result = new HashMap<>();
-        result.put("message", "Command initiated successfully for node: " + targetNodeId);
-        return result;
+        try {
+            remoteCommandManager.dispatch(targetNodeId, command);
+            return new SuccessResponse("Command initiated successfully for node: " + targetNodeId).ok();
+        } catch (Exception e) {
+            return new FailureResponse().setError("error", e.getMessage());
+        }
     }
 
 }

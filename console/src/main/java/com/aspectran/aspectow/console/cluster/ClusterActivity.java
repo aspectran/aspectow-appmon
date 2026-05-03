@@ -23,8 +23,8 @@ import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
 import com.aspectran.core.component.bean.annotation.Request;
-import com.aspectran.core.component.bean.annotation.Transform;
-import com.aspectran.core.context.rule.type.FormatType;
+import com.aspectran.web.activity.response.RestResponse;
+import com.aspectran.web.support.rest.response.SuccessResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -76,9 +76,8 @@ public class ClusterActivity {
      * @return the issued token
      */
     @Request("/token")
-    @Transform(format = FormatType.TEXT)
-    public String refreshToken() {
-        return AppMonTokenIssuer.issueToken(30);
+    public RestResponse refreshToken() {
+        return new SuccessResponse(AppMonTokenIssuer.issueToken(30)).ok();
     }
 
 }

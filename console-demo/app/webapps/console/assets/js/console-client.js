@@ -200,16 +200,24 @@ class ConsoleClient {
         }
 
         const joinUrl = path + "/join?nodeId=" + this.node.id;
-        fetch(joinUrl)
-            .then(res => res.text())
-            .then(sessionId => {
-                this.sessionId = sessionId;
-                this.established = true;
-                this.options.viewer.printMessage("Joined via HTTP Polling");
-                if (this.options.onEstablished) {
-                    this.options.onEstablished(this.node);
+        fetch(joinUrl, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    this.sessionId = res.data;
+                    this.established = true;
+                    this.options.viewer.printMessage("Joined via HTTP Polling");
+                    if (this.options.onEstablished) {
+                        this.options.onEstablished(this.node);
+                    }
+                    this.poll();
+                } else {
+                    throw new Error(res.error ? res.error.message : "Failed to join polling session");
                 }
-                this.poll();
             })
             .catch(err => {
                 console.error(this.node.id, "failed to join polling session:", err);
@@ -230,21 +238,30 @@ class ConsoleClient {
         }
 
         const pullUrl = path + "/pull?sessionId=" + this.sessionId;
-        fetch(pullUrl)
+        fetch(pullUrl, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
             .then(res => res.json())
-            .then(messages => {
-                if (messages && messages.length > 0) {
-                    messages.forEach(msg => {
-                        try {
-                            const message = JSON.parse(msg);
-                            this.handleMessage(message);
-                        } catch (e) {
-                            // Raw string result
-                            this.handleMessage({ header: "result", result: msg });
-                        }
-                    });
+            .then(res => {
+                if (res.success) {
+                    const messages = res.data;
+                    if (messages && messages.length > 0) {
+                        messages.forEach(msg => {
+                            try {
+                                const message = JSON.parse(msg);
+                                this.handleMessage(message);
+                            } catch (e) {
+                                // Raw string result
+                                this.handleMessage({ header: "result", result: msg });
+                            }
+                        });
+                    }
+                    this.pollingTimer = setTimeout(() => this.poll(), this.options.pollingInterval);
+                } else {
+                    throw new Error(res.error ? res.error.message : "Polling failed");
                 }
-                this.pollingTimer = setTimeout(() => this.poll(), this.options.pollingInterval);
             })
             .catch(err => {
                 console.error(this.node.id, "polling error:", err);
@@ -376,9 +393,18 @@ class ConsoleClient {
 
         fetch(executeUrl, {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
         }).then(res => res.json())
-        .then(result => console.log(this.node.id, "polling command executed:", result))
+        .then(res => {
+            if (res.success) {
+                console.log(this.node.id, "polling command executed:", res.data);
+            } else {
+                console.error(this.node.id, "polling command failed:", res.error.message);
+            }
+        })
         .catch(err => console.error(this.node.id, "polling command failed:", err));
     }
 

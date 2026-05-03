@@ -134,12 +134,16 @@
                         };
                         const client = new ConsoleClient(node, {
                             onBeforeConnect: () => {
-                                return fetch(BASE_PATH + "/nodes/token")
-                                    .then(response => response.text())
+                                return fetch(BASE_PATH + "/nodes/token", {
+                                    headers: { 'Accept': 'application/json' }
+                                })
+                                    .then(response => response.json())
+                                    .then(res => res.success ? res.data : null)
                                     .catch(err => {
                                         console.error("Failed to fetch new token:", err);
                                         return null;
                                     });
+                            },
                             },
                             onMessage: (msg) => {
                                 try {
@@ -163,12 +167,16 @@
                     node.endpoint.path = BASE_PATH + "/nodes/" + node.id;
                     const client = new ConsoleClient(node, {
                         onBeforeConnect: () => {
-                            return fetch(BASE_PATH + "/nodes/token")
-                                .then(response => response.text())
+                            return fetch(BASE_PATH + "/nodes/token", {
+                                headers: { 'Accept': 'application/json' }
+                            })
+                                .then(response => response.json())
+                                .then(res => res.success ? res.data : null)
                                 .catch(err => {
                                     console.error("Failed to fetch new token:", err);
                                     return null;
                                 });
+                        },
                         },
                         onMessage: (msg) => {
                             if (isUnloading) return;

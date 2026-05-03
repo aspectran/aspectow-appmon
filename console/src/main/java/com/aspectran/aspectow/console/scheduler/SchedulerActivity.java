@@ -30,13 +30,13 @@ import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.RequestToPost;
-import com.aspectran.core.component.bean.annotation.Transform;
-import com.aspectran.core.context.rule.type.FormatType;
 import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.utils.StringUtils;
+import com.aspectran.web.activity.response.RestResponse;
+import com.aspectran.web.support.rest.response.FailureResponse;
+import com.aspectran.web.support.rest.response.SuccessResponse;
 import org.jspecify.annotations.NonNull;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -101,8 +101,13 @@ public class SchedulerActivity {
      * @return a list of node information maps
      */
     @Request("/list")
-    public List<Map<String, Object>> listNodes() {
-        return nodeConsoleHelper.getNodes(true);
+    public RestResponse listNodes() {
+        try {
+            List<Map<String, Object>> nodes = nodeConsoleHelper.getNodes(true);
+            return new SuccessResponse(nodes).ok();
+        } catch (Exception e) {
+            return new FailureResponse().setError("error", e.getMessage());
+        }
     }
 
     /**
@@ -111,13 +116,16 @@ public class SchedulerActivity {
      * @return the node ID
      */
     @Request("/join")
-    @Transform(format = FormatType.TEXT)
-    public String join(String nodeId) {
+    public RestResponse join(String nodeId) {
         if (StringUtils.isEmpty(nodeId)) {
             nodeId = nodeManager.getNodeId();
         }
-        PollingSchedulerSession session = pollingSchedulerBridge.createSession(nodeId);
-        return session.getNodeId();
+        try {
+            PollingSchedulerSession session = pollingSchedulerBridge.createSession(nodeId);
+            return new SuccessResponse(session.getNodeId()).ok();
+        } catch (Exception e) {
+            return new FailureResponse().setError("error", e.getMessage());
+        }
     }
 
     /**
@@ -126,17 +134,21 @@ public class SchedulerActivity {
      * @return an array of messages
      */
     @Request("/pull")
-    @Transform(format = FormatType.JSON)
-    public String[] pull(@NonNull Translet translet) {
+    public RestResponse pull(@NonNull Translet translet) {
         String sessionId = translet.getParameter("sessionId");
         if (sessionId == null) {
             sessionId = translet.getParameter("nodeId");
         }
-        PollingSchedulerSession session = pollingSchedulerBridge.getSession(sessionId);
-        if (session != null) {
-            return pollingSchedulerBridge.pull(session);
-        } else {
-            return null;
+        try {
+            PollingSchedulerSession session = pollingSchedulerBridge.getSession(sessionId);
+            if (session != null) {
+                String[] messages = pollingSchedulerBridge.pull(session);
+                return new SuccessResponse(messages).ok();
+            } else {
+                return new FailureResponse().setError("not_found", "Session not found");
+            }
+        } catch (Exception e) {
+            return new FailureResponse().setError("error", e.getMessage());
         }
     }
 
@@ -146,7 +158,7 @@ public class SchedulerActivity {
      * @return a success message
      */
     @RequestToPost("/execute")
-    public Map<String, String> execute(@NonNull Translet translet) {
+    public RestResponse execute(@NonNull Translet translet) {
         String targetNodeId = translet.getParameter("nodeId");
         String command = translet.getParameter("command");
         String serviceName = translet.getParameter("serviceName");
@@ -156,27 +168,28 @@ public class SchedulerActivity {
         String loadedLines = translet.getParameter("loadedLines");
 
         if (StringUtils.isEmpty(command)) {
-            throw new IllegalArgumentException("Command is required");
+            return new FailureResponse().setError("required", "Command is required");
         }
         if (StringUtils.isEmpty(targetNodeId)) {
             targetNodeId = nodeManager.getNodeId();
         }
 
-        SchedulerRequestParameters parameters = new SchedulerRequestParameters();
-        parameters.setCommand(command);
-        parameters.setServiceName(serviceName);
-        parameters.setScheduleId(scheduleId);
-        parameters.setJobName(jobName);
-        parameters.setLoggingGroup(loggingGroup);
-        if (StringUtils.hasText(loadedLines)) {
-            parameters.setLoadedLines(Integer.parseInt(loadedLines));
+        try {
+            SchedulerRequestParameters parameters = new SchedulerRequestParameters();
+            parameters.setCommand(command);
+            parameters.setServiceName(serviceName);
+            parameters.setScheduleId(scheduleId);
+            parameters.setJobName(jobName);
+            parameters.setLoggingGroup(loggingGroup);
+            if (StringUtils.hasText(loadedLines)) {
+                parameters.setLoadedLines(Integer.parseInt(loadedLines));
+            }
+
+            schedulerManager.dispatch(targetNodeId, parameters);
+            return new SuccessResponse("Scheduler command initiated successfully").ok();
+        } catch (Exception e) {
+            return new FailureResponse().setError("error", e.getMessage());
         }
-
-        schedulerManager.dispatch(targetNodeId, parameters);
-
-        Map<String, String> result = new HashMap<>();
-        result.put("message", "Scheduler command initiated successfully");
-        return result;
     }
 
 }

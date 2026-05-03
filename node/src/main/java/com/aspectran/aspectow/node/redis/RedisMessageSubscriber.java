@@ -73,6 +73,11 @@ public class RedisMessageSubscriber extends RedisPubSubAdapter<String, String> {
     }
 
     @Override
+    public void message(String pattern, String channel, String message) {
+        message(channel, message);
+    }
+
+    @Override
     public void message(@NonNull String channel, String message) {
         // Expected patterns:
         // aspectow:cluster:control:<clusterId>:<nodeId>

@@ -21,9 +21,7 @@ import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
 import com.aspectran.core.component.bean.annotation.Request;
-import com.aspectran.core.component.bean.annotation.Transform;
 import com.aspectran.core.context.ActivityContext;
-import com.aspectran.core.context.rule.type.FormatType;
 import com.aspectran.core.service.CoreService;
 import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.utils.StringUtils;
@@ -84,7 +82,6 @@ public class AnatomyActivity {
      * @return a map containing the anatomy data, identified by "anatomyData"
      */
     @Request("/${contextName}/data")
-    @Transform(format = FormatType.JSON)
     public RestResponse data(String contextName) {
         Map<String, ActivityContext> contexts = prepareContextMap();
         ActivityContext context = contexts.get(contextName);

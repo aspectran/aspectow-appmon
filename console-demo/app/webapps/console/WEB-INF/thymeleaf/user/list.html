@@ -140,12 +140,16 @@
                     url: $userForm.attr('action'),
                     type: 'POST',
                     data: $userForm.serialize(),
-                    success: function() {
-                        userModal.hide();
-                        location.reload();
+                    success: function(res) {
+                        if (res.success) {
+                            userModal.hide();
+                            location.reload();
+                        } else {
+                            alert('Error saving user: ' + res.error.message);
+                        }
                     },
                     error: function(xhr) {
-                        alert('Error saving user: ' + (xhr.responseJSON?.message || xhr.statusText));
+                        alert('System error occurred while saving user');
                     }
                 });
             });
@@ -184,11 +188,15 @@
                     url: /*[[@{/user/delete}]]*/ '/user/delete',
                     type: 'POST',
                     data: { userId: id },
-                    success: function() {
-                        location.reload();
+                    success: function(res) {
+                        if (res.success) {
+                            location.reload();
+                        } else {
+                            alert('Error deleting user: ' + res.error.message);
+                        }
                     },
                     error: function(xhr) {
-                        alert('Error deleting user: ' + (xhr.responseJSON?.message || xhr.statusText));
+                        alert('System error occurred while deleting user');
                     }
                 });
             }

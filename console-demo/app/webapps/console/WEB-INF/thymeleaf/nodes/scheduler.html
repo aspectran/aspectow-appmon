@@ -163,12 +163,18 @@
             let currentNodeId = [[${page.node.id}]];
 
             function refreshNodeList() {
-                return fetch(BASE_PATH + "/nodes/scheduler/list")
+                return fetch(BASE_PATH + "/nodes/scheduler/list", {
+                    headers: { 'Accept': 'application/json' }
+                })
                     .then(res => res.json())
-                    .then(data => {
-                        nodes = data;
-                        renderNodeSelector();
-                        return data;
+                    .then(res => {
+                        if (res.success) {
+                            nodes = res.data;
+                            renderNodeSelector();
+                            return res.data;
+                        } else {
+                            throw new Error(res.error ? res.error.message : "Failed to refresh node list");
+                        }
                     });
             }
 
@@ -230,8 +236,11 @@
 
                 consoleClient = new ConsoleClient(node, {
                     onBeforeConnect: () => {
-                        return fetch(BASE_PATH + "/nodes/token")
-                            .then(response => response.text())
+                        return fetch(BASE_PATH + "/nodes/token", {
+                            headers: { 'Accept': 'application/json' }
+                        })
+                            .then(response => response.json())
+                            .then(res => res.success ? res.data : null)
                             .catch(err => {
                                 console.error("Failed to fetch new token:", err);
                                 return null;
