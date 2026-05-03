@@ -133,10 +133,11 @@ class DashboardBuilder {
 
         console.log("establishing", nodeIndex);
         let client;
+        const isGatewayMode = (this.settings.clusterMode === "gateway");
         if (node.endpoint.mode === "polling") {
             client = new PollingClient(node, viewer, onJoined, onEstablished, onClosed, onFailed);
         } else {
-            client = new WebsocketClient(node, viewer, onJoined, onEstablished, onClosed, onFailed);
+            client = new WebsocketClient(node, viewer, onJoined, onEstablished, onClosed, onFailed, isGatewayMode);
         }
         viewer.setClient(client);
         this.clients[nodeIndex] = client;
@@ -235,6 +236,11 @@ class DashboardBuilder {
                 this.showNodeInstance(appId);
                 $tabTitle.addClass("active");
                 exists = true;
+
+                // Inform the backend about the current UI focus to filter logs
+                this.clients.forEach(client => {
+                    if (client && client.focus) client.focus(appId);
+                });
             } else {
                 app.active = false;
                 $tabTitle.removeClass("active");

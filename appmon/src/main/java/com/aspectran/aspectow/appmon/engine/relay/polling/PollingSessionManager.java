@@ -65,6 +65,10 @@ public class PollingSessionManager extends AbstractComponent {
         this.bufferedMessages = new BufferedMessages(pollingConfig.getInitialBufferSize());
     }
 
+    public PollingRelaySession getSession(String sessionId) {
+        return sessions.get(sessionId);
+    }
+
     /**
      * Creates a new polling session or retrieves an existing one.
      * @param translet the current translet

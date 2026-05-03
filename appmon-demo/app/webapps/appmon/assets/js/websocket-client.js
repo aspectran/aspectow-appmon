@@ -4,10 +4,157 @@
  */
 
 /**
+ * A bridge that multiplexes multiple virtual sockets over a single physical WebSocket connection.
+ */
+class GatewaySocketBridge {
+    constructor(url) {
+        this.url = url;
+        this.socket = null;
+        this.virtualSockets = {};
+        this.connectionPromise = null;
+        this.isConnected = false;
+    }
+
+    connect() {
+        if (this.connectionPromise) {
+            return this.connectionPromise;
+        }
+
+        this.connectionPromise = new Promise((resolve, reject) => {
+            console.log("Gateway bridge connecting to:", this.url);
+            this.socket = new WebSocket(this.url);
+
+            this.socket.onopen = () => {
+                this.isConnected = true;
+                resolve();
+                Object.values(this.virtualSockets).forEach(vs => {
+                    if (vs.onopen) vs.onopen();
+                });
+            };
+
+            this.socket.onmessage = (event) => {
+                if (typeof event.data === "string") {
+                    const idx = event.data.indexOf('\n');
+                    if (idx !== -1) {
+                        const nodeId = event.data.substring(0, idx);
+                        const message = event.data.substring(idx + 1);
+                        const vs = this.virtualSockets[nodeId];
+                        if (vs && vs.onmessage) {
+                            vs.onmessage({ data: message });
+                        }
+                    } else {
+                        // Broadcast to all if no nodeId prefix is found (e.g. pong)
+                        Object.values(this.virtualSockets).forEach(vs => {
+                            if (vs.onmessage) vs.onmessage(event);
+                        });
+                    }
+                }
+            };
+
+            this.socket.onclose = (event) => {
+                this.isConnected = false;
+                this.connectionPromise = null;
+                Object.values(this.virtualSockets).forEach(vs => {
+                    if (vs.onclose) vs.onclose(event);
+                });
+            };
+
+            this.socket.onerror = (event) => {
+                this.connectionPromise = null;
+                if (reject) reject(event);
+                Object.values(this.virtualSockets).forEach(vs => {
+                    if (vs.onerror) vs.onerror(event);
+                });
+            };
+        });
+
+        return this.connectionPromise;
+    }
+
+    createVirtualSocket(nodeId) {
+        const vs = new VirtualSocket(this, nodeId);
+        this.virtualSockets[nodeId] = vs;
+        if (this.isConnected && vs.onopen) {
+            setTimeout(() => vs.onopen(), 0);
+        }
+        return vs;
+    }
+
+    send(nodeId, data) {
+        if (this.isConnected && this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(nodeId + "\n" + data);
+        }
+    }
+
+    close(nodeId) {
+        delete this.virtualSockets[nodeId];
+        if (Object.keys(this.virtualSockets).length === 0 && this.socket) {
+            this.socket.close();
+            this.socket = null;
+            this.isConnected = false;
+            this.connectionPromise = null;
+        }
+    }
+}
+
+class VirtualSocket {
+    constructor(bridge, nodeId) {
+        this.bridge = bridge;
+        this.nodeId = nodeId;
+        this.readyState = WebSocket.CONNECTING;
+        
+        // Define constants to mimic real WebSocket
+        this.CONNECTING = WebSocket.CONNECTING;
+        this.OPEN = WebSocket.OPEN;
+        this.CLOSING = WebSocket.CLOSING;
+        this.CLOSED = WebSocket.CLOSED;
+        
+        this._onopen = null;
+        this._onmessage = null;
+        this._onclose = null;
+        this._onerror = null;
+    }
+
+    get onopen() { return this._onopen; }
+    set onopen(fn) {
+        this._onopen = () => {
+            this.readyState = WebSocket.OPEN;
+            if (fn) fn();
+        };
+    }
+
+    get onmessage() { return this._onmessage; }
+    set onmessage(fn) { this._onmessage = fn; }
+
+    get onclose() { return this._onclose; }
+    set onclose(fn) {
+        this._onclose = (event) => {
+            this.readyState = WebSocket.CLOSED;
+            if (fn) fn(event);
+        };
+    }
+
+    get onerror() { return this._onerror; }
+    set onerror(fn) { this._onerror = fn; }
+
+    send(data) {
+        this.bridge.send(this.nodeId, data);
+    }
+
+    close() {
+        this.readyState = WebSocket.CLOSED;
+        this.bridge.close(this.nodeId);
+    }
+}
+
+// Global instance for the gateway bridge
+window.gatewaySocketBridge = null;
+
+/**
  * WebSocket implementation of the AppMon client.
  */
 class WebsocketClient extends BaseClient {
-    constructor(node, viewer, onJoined, onEstablished, onClosed, onFailed) {
+    constructor(node, viewer, onJoined, onEstablished, onClosed, onFailed, isGatewayMode = false) {
         super(node, viewer, onJoined, onEstablished, onClosed, onFailed);
         this.endpointMode = "websocket";
         this.heartbeatInterval = 5000;
@@ -15,6 +162,7 @@ class WebsocketClient extends BaseClient {
         this.heartbeatTimer = null;
         this.pendingMessages = [];
         this.established = false;
+        this.isGatewayMode = isGatewayMode;
     }
 
     start(appsToJoin) {
@@ -33,6 +181,10 @@ class WebsocketClient extends BaseClient {
         this.sendCommand(cmdOptions);
     }
 
+    focus(appId) {
+        this.sendCommand(["command:focus", "appId:" + appId]);
+    }
+
     sendCommand(options) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(options ? options.join(";") : "");
@@ -44,7 +196,20 @@ class WebsocketClient extends BaseClient {
         const url = new URL(this.node.endpoint.path + "/appmon/websocket/" + this.node.endpoint.token, location.href);
         url.protocol = url.protocol.replace("https:", "wss:").replace("http:", "ws:");
 
-        this.socket = new WebSocket(url.href);
+        if (this.isGatewayMode) {
+            const gatewayUrl = new URL(location.href);
+            // Use common path for gateway
+            gatewayUrl.pathname = (typeof contextPath !== 'undefined' && contextPath !== '/' ? contextPath : '') + "/nodes/appmon/websocket/" + this.node.endpoint.token;
+            gatewayUrl.protocol = gatewayUrl.protocol.replace("https:", "wss:").replace("http:", "ws:");
+            
+            if (!window.gatewaySocketBridge) {
+                window.gatewaySocketBridge = new GatewaySocketBridge(gatewayUrl.href);
+            }
+            window.gatewaySocketBridge.connect();
+            this.socket = window.gatewaySocketBridge.createVirtualSocket(this.node.id);
+        } else {
+            this.socket = new WebSocket(url.href);
+        }
 
         this.socket.onopen = () => {
             console.log(this.node.id, "socket connected:", this.node.endpoint.path);
@@ -85,16 +250,16 @@ class WebsocketClient extends BaseClient {
                 if (this.onClosed) {
                     this.onClosed(this.node);
                 }
-                if (event.code === 1003) {
+                if (event && event.code === 1003) {
                     console.log(this.node.id, "socket connection refused: ", event.code);
                     this.viewer.printErrorMessage("Socket connection refused by server.");
                     return;
                 }
-                if (event.code === 1000 || this.retryCount === 0) {
-                    console.log(this.node.id, "socket connection closed: ", event.code);
+                if ((event && event.code === 1000) || this.retryCount === 0) {
+                    console.log(this.node.id, "socket connection closed: ", event ? event.code : 'unknown');
                     this.viewer.printMessage("Socket connection closed.");
                 }
-                if (event.code !== 1000) {
+                if (!event || event.code !== 1000) {
                     this.rejoin(appsToJoin);
                 }
             }

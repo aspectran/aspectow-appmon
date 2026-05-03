@@ -53,6 +53,18 @@ public interface RelaySession {
     String getTimeZone();
 
     /**
+     * Gets the ID of the app that this session is currently focusing on.
+     * @return the focused app ID
+     */
+    String getFocusedAppId();
+
+    /**
+     * Sets the ID of the app that this session is currently focusing on.
+     * @param appId the focused app ID
+     */
+    void setFocusedAppId(String appId);
+
+    /**
      * Checks if the session is still valid (e.g., open and not expired).
      * @return {@code true} if the session is valid, {@code false} otherwise
      */

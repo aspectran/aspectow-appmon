@@ -36,6 +36,9 @@ public class CommandOptions extends DefaultParameters {
     /** Command to load previous data records */
     public static final String COMMAND_LOAD_PREVIOUS = "loadPrevious";
 
+    /** Command to focus on a specific app */
+    public static final String COMMAND_FOCUS = "focus";
+
     private static final ParameterKey command;
     private static final ParameterKey appsToJoin;
     private static final ParameterKey app;

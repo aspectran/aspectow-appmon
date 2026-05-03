@@ -57,6 +57,8 @@ public class PollingRelaySession implements RelaySession {
 
     private String timeZone;
 
+    private String focusedAppId;
+
     /**
      * Instantiates a new PollingRelaySession.
      * @param id the unique identifier of this session
@@ -111,6 +113,16 @@ public class PollingRelaySession implements RelaySession {
 
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
+    }
+
+    @Override
+    public String getFocusedAppId() {
+        return focusedAppId;
+    }
+
+    @Override
+    public void setFocusedAppId(String focusedAppId) {
+        this.focusedAppId = focusedAppId;
     }
 
     /**

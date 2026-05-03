@@ -41,8 +41,12 @@ public class RedisMessageRelayHandler implements RedisMessageListener {
     }
 
     @Override
-    public void onRelayMessage(String message) {
-        messageRelayManager.relay(message);
+    public void onRelayMessage(String nodeId, String message) {
+        if (messageRelayManager.isGatewayMode()) {
+            messageRelayManager.relay(nodeId + "/" + message);
+        } else {
+            messageRelayManager.relay(message);
+        }
     }
 
 }

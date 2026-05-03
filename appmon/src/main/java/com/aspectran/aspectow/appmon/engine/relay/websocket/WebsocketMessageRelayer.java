@@ -125,6 +125,10 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
             case COMMAND_REFRESH:
             case COMMAND_LOAD_PREVIOUS:
                 refreshData(session, commandOptions);
+                break;
+            case CommandOptions.COMMAND_FOCUS:
+                focus(session, commandOptions);
+                break;
         }
     }
 
@@ -165,6 +169,11 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
         }
     }
 
+    private void focus(@NonNull Session session, @NonNull CommandOptions commandOptions) {
+        RelaySession relaySession = new WebsocketRelaySession(session);
+        relaySession.setFocusedAppId(commandOptions.getApp());
+    }
+
     private void refreshData(@NonNull Session session, @NonNull CommandOptions commandOptions) {
         RelaySession relaySession = new WebsocketRelaySession(session);
         if (!commandOptions.hasTimeZone()) {
@@ -186,6 +195,12 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
         if (serviceSession instanceof WebsocketRelaySession session) {
             sendText(session.getSession(), message);
         }
+    }
+
+    @Override
+    public RelaySession getSession(String sessionId) {
+        Session session = findSession(sessionId);
+        return (session != null ? new WebsocketRelaySession(session) : null);
     }
 
 }

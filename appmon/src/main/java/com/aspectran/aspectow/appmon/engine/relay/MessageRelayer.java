@@ -36,4 +36,11 @@ public interface MessageRelayer {
      */
     void relay(RelaySession relaySession, String message);
 
+    /**
+     * Returns the session with the given ID.
+     * @param sessionId the session ID
+     * @return the relay session, or {@code null} if not found
+     */
+    RelaySession getSession(String sessionId);
+
 }

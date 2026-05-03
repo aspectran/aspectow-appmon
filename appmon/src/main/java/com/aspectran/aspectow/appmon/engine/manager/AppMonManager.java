@@ -50,6 +50,8 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final AppInfoHolder appInfoHolder;
 
+    private final String clusterMode;
+
     private final MessageRelayManager messageRelayManager;
 
     private final PersistManager persistManager;
@@ -57,6 +59,7 @@ public class AppMonManager extends InstantActivitySupport {
     /**
      * Instantiates a new AppMonManager.
      * @param nodeId the name of the current domain
+     * @param clusterMode the cluster mode
      * @param pollingConfig the polling configuration
      * @param counterPersistInterval the counter persistence interval in minutes
      * @param nodeInfoHolder the holder for domain information
@@ -64,18 +67,36 @@ public class AppMonManager extends InstantActivitySupport {
      */
     public AppMonManager(
             String nodeId,
+            String clusterMode,
             PollingConfig pollingConfig,
             int counterPersistInterval,
             NodeInfoHolder nodeInfoHolder,
             AppInfoHolder appInfoHolder,
             MessageRelayManager messageRelayManager) {
         this.nodeId = nodeId;
+        this.clusterMode = clusterMode;
         this.pollingConfig = pollingConfig;
         this.counterPersistInterval = counterPersistInterval;
         this.nodeInfoHolder = nodeInfoHolder;
         this.appInfoHolder = appInfoHolder;
         this.messageRelayManager = messageRelayManager;
         this.persistManager = new PersistManager();
+    }
+
+    /**
+     * Gets the cluster mode.
+     * @return the cluster mode
+     */
+    public String getClusterMode() {
+        return clusterMode;
+    }
+
+    /**
+     * Checks if the cluster is in gateway mode.
+     * @return {@code true} if in gateway mode, {@code false} otherwise
+     */
+    public boolean isGatewayMode() {
+        return "gateway".equals(clusterMode);
     }
 
     @Override

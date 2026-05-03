@@ -112,6 +112,18 @@ public class SubscriptionRegistry {
         return (sessions != null && !sessions.isEmpty());
     }
 
+    public Set<String> getSessionsSubscribedToApp(String appId) {
+        if (appId == null) {
+            appId = "";
+        }
+        Set<String> sessions = localSubscriptions.get(appId);
+        return (sessions != null ? sessions : Set.of());
+    }
+
+    public Set<String> getAllSessionIds() {
+        return sessionToApps.keySet();
+    }
+
     public void clear() {
         localSubscriptions.clear();
         remoteSubscriptions.clear();

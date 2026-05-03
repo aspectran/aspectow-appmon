@@ -98,7 +98,8 @@ public class AppMonActivity {
     @RequestToGet("/config/data")
     public RestResponse getConfigData(String apps) {
         Map<String, Object> settings = Map.of(
-                "counterPersistInterval", appMonManager.getCounterPersistInterval()
+                "counterPersistInterval", appMonManager.getCounterPersistInterval(),
+                "clusterMode", appMonManager.getClusterMode()
         );
 
         List<NodeInfo> nodeInfoList = appMonManager.getNodeInfoList();
@@ -109,6 +110,7 @@ public class AppMonActivity {
 
         Map<String, Object> data = Map.of(
                 "token", AppMonTokenIssuer.issueToken(30),
+                "myNodeId", appMonManager.getNodeId(),
                 "settings", settings,
                 "nodes", nodeInfoList,
                 "apps", appInfoList

@@ -188,4 +188,9 @@ public class PollingMessageRelayer implements MessageRelayer {
         // Not applicable for polling service
     }
 
+    @Override
+    public RelaySession getSession(String sessionId) {
+        return pollingSessionManager.getSession(sessionId);
+    }
+
 }
