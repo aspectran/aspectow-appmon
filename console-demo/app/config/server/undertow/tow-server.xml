@@ -8,8 +8,9 @@
     </description>
 
     <environment>
-        <property name="tow.server.listener.http.port" valueType="int">8082</property>
+        <property name="tow.server.listener.http.port" valueType="int">%{system:tow.server.listener.http.port:8082}</property>
         <property name="tow.server.listener.http.host">0.0.0.0</property>
+        <property name="tow.server.work.path">%{system:aspectran.workPath:/work}</property>
     </environment>
 
     <bean id="tow.server" class="com.aspectran.undertow.server.DefaultTowServer">

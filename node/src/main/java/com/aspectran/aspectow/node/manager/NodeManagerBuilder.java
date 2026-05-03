@@ -47,7 +47,7 @@ public abstract class NodeManagerBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(NodeManagerBuilder.class);
 
-    private static final String MY_NODE_ID_PROPERTY_NAME = "aspectow.node.id";
+    private static final String MY_NODE_ID_PROPERTY = "aspectow.node.id";
 
     private static final String DEFAULT_CLUSTER_ID = "cluster";
 
@@ -170,7 +170,7 @@ public abstract class NodeManagerBuilder {
     }
 
     private static String resolveMyNodeId() {
-        return SystemUtils.getProperty(MY_NODE_ID_PROPERTY_NAME, DEFAULT_NODE_ID);
+        return SystemUtils.getProperty(MY_NODE_ID_PROPERTY, DEFAULT_NODE_ID);
     }
 
     private static void validateSecretConfig(SecretConfig secretConfig) {
