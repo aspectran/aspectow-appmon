@@ -123,8 +123,7 @@ public class RemoteCommandManager implements InitializableBean {
         // For RemoteCommandManager, we assume if it's not a known result format, it's a command.
         // But for consistency with SchedulerManager, we can use a prefix or check the content.
         if (message.startsWith("command:")) {
-            String commandData = message.substring(8);
-            String response = localCommandService.execute(commandData);
+            String response = localCommandService.execute(message);
             if (response != null && nodeManager.getRedisMessagePublisher() != null) {
                 try {
                     nodeManager.getRedisMessagePublisher().publishRelay(CommandBroker.CATEGORY_COMMANDS, response);
