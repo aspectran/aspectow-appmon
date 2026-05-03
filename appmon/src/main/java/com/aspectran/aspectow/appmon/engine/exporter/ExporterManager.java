@@ -171,7 +171,7 @@ public class ExporterManager {
      * @param message the message to broadcast
      */
     public void broadcast(String message) {
-        appMonManager.getMessageRelayManager().publish(message);
+        appMonManager.getMessageRelayManager().broadcast(message);
     }
 
     /**

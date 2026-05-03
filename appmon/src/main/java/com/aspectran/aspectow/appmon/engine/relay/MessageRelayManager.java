@@ -92,14 +92,14 @@ public class MessageRelayManager {
      * Publishes a local message to Redis and relays it to all registered relayers.
      * @param message the message to publish
      */
-    public void publish(String message) {
-        if (messagePublisher != null) {
-            try {
-                messagePublisher.publishRelay(CATEGORY_APPMON, message);
-            } catch (Exception e) {
-                logger.error("Failed to publish relay message to Redis", e);
-            }
-        }
+    public void broadcast(String message) {
+//        if (messagePublisher != null) {
+//            try {
+//                messagePublisher.publishRelay(CATEGORY_APPMON, message);
+//            } catch (Exception e) {
+//                logger.error("Failed to publish relay message to Redis", e);
+//            }
+//        }
         relay(message);
     }
 

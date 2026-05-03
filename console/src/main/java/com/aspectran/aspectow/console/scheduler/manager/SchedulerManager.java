@@ -258,6 +258,7 @@ public class SchedulerManager implements ApplicationAdapterAware, InitializableB
         return null;
     }
 
+    @Nullable
     private String readPreviousLines(@NonNull SchedulerRequestParameters request) {
         String loggingGroup = request.getLoggingGroup();
         int loadedLines = request.getLoadedLines();
