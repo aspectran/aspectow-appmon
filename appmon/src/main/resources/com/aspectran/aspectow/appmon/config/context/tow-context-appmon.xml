@@ -22,7 +22,7 @@
                 <property name="base">/webapps/%{tow.context.appmon.name}</property>
             </bean>
         </property>
-        <property name="scratchDir">/work/_webapps/%{tow.context.appmon.name}</property>
+        <property name="scratchDir">%{system:aspectran.workPath:/work}/_webapps/%{tow.context.appmon.name}</property>
         <property name="initParams" type="map">
             <entry name="aspectran:config">%{tow.context.appmon.config}</entry>
         </property>

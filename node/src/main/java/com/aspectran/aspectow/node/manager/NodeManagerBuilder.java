@@ -47,7 +47,7 @@ public abstract class NodeManagerBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(NodeManagerBuilder.class);
 
-    private static final String MY_NODE_ID_PROPERTY = "aspectow.node.id";
+    public static final String MY_NODE_ID_PROPERTY = "aspectow.node.id";
 
     private static final String DEFAULT_CLUSTER_ID = "cluster";
 

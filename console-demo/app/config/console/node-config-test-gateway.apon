@@ -19,7 +19,7 @@ node: {
     id: node2
     group: group1
     title: Node-2
-    port: 8082
+    port: 8092
     endpoint: {
         mode: auto
     }

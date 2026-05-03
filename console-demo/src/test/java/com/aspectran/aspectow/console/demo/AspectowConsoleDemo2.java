@@ -21,7 +21,9 @@ import com.aspectran.utils.ResourceUtils;
 import java.io.File;
 import java.io.IOException;
 
+import static com.aspectran.aspectow.node.manager.NodeManagerBuilder.MY_NODE_ID_PROPERTY;
 import static com.aspectran.core.context.config.AspectranConfig.BASE_PATH_PROPERTY;
+import static com.aspectran.core.context.config.AspectranConfig.COMMANDS_PATH_PROPERTY;
 import static com.aspectran.core.context.config.AspectranConfig.TEMP_PATH_PROPERTY;
 import static com.aspectran.core.context.config.AspectranConfig.WORK_PATH_PROPERTY;
 import static com.aspectran.logging.LoggingDefaults.LOGS_DIR_PROPERTY;
@@ -34,15 +36,22 @@ public class AspectowConsoleDemo2 {
     public static void main(String[] args) {
         try {
             File root = new File(ResourceUtils.getResourceAsFile(""), "../../app");
+            File logsDir = new File(root, "logs2");
             File tempDir = new File(root, "temp2");
             File workDir = new File(root, "work2");
-            File logsDir = new File(root, "logs2");
+            File cmdDir = new File(root, "cmd2");
+
+            System.setProperty(MY_NODE_ID_PROPERTY, "node2");
             System.setProperty(BASE_PATH_PROPERTY, root.getCanonicalPath()); // for logging configuration
             System.setProperty(LOGS_DIR_PROPERTY, logsDir.getCanonicalPath()); // for logging configuration
-            System.setProperty(TEMP_PATH_PROPERTY, tempDir.getCanonicalPath());
             System.setProperty(WORK_PATH_PROPERTY, workDir.getCanonicalPath());
+            System.setProperty(TEMP_PATH_PROPERTY, tempDir.getCanonicalPath());
+            System.setProperty(COMMANDS_PATH_PROPERTY, cmdDir.getCanonicalPath());
             System.setProperty("tow.server.listener.http.port", "8092");
-            System.setProperty("aspectow.console.config.db.h2.path", "~/aspectow-console2");
+            System.setProperty("tow.context.console.session.cookieName", "JSESSIONID2");
+            System.setProperty("aspectow.console.config.db.h2.path_explicit", "~/aspectow-console-demo2");
+            System.setProperty("aspectow.appmon.config.db.h2.path_explicit", "~/aspectow-console-demo-appmon2");
+
             JLineAspectranShell.main(new String[] { root.getCanonicalPath(), "config/aspectran-config.apon" });
         } catch (IOException e) {
             e.printStackTrace(System.err);

@@ -22,13 +22,14 @@
                 <property name="base">/webapps/%{tow.context.console.name}</property>
             </bean>
         </property>
-        <property name="scratchDir">/work/_webapps/%{tow.context.console.name}</property>
+        <property name="scratchDir">%{system:aspectran.workPath:/work}/_webapps/%{tow.context.console.name}</property>
         <property name="sessionManager">#{tow.context.console.sessionManager}</property>
         <property name="servletSessionConfig">
             <bean class="io.undertow.servlet.api.ServletSessionConfig">
                 <property name="sessionTrackingModes" type="set">
                     <value>#{class:jakarta.servlet.SessionTrackingMode^COOKIE}</value>
                 </property>
+                <property name="name" value="%{system:tow.context.console.session.cookieName:JSESSIONID}"/>
                 <property name="path" value="/%{tow.context.console.name}"/>
             </bean>
         </property>
@@ -71,7 +72,7 @@
             </item>
             <item name="sessionStore">
                 <bean class="com.aspectran.core.component.session.FileSessionStoreFactoryBean">
-                    <property name="storeDir">/work/_sessions/%{tow.context.console.name}</property>
+                    <property name="storeDir">%{system:aspectran.workPath:/work}/_sessions/%{tow.context.console.name}</property>
                 </bean>
             </item>
         </properties>
