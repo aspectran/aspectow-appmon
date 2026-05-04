@@ -71,7 +71,7 @@ public class SchedulerManager implements ApplicationAdapterAware, InitializableB
     public SchedulerManager(@NonNull NodeManager nodeManager) {
         this.nodeManager = nodeManager;
         this.localSchedulerService = new LocalSchedulerService();
-        this.broker = new SchedulerBroker(nodeManager.getNodeId(), nodeManager.getRedisMessagePublisher(), this);
+        this.broker = new SchedulerBroker(nodeManager.getRedisMessagePublisher(), this);
     }
 
     @Override
@@ -81,12 +81,16 @@ public class SchedulerManager implements ApplicationAdapterAware, InitializableB
 
     @Override
     public void initialize() throws Exception {
-        logger.info("Initializing SchedulerManager for node: {}", nodeManager.getNodeId());
+        logger.info("Initializing SchedulerManager for node: {}", getNodeId());
 
         if (nodeManager.getRedisMessageSubscriber() != null) {
             SchedulerMessageBridgeHandler bridgeHandler = new SchedulerMessageBridgeHandler(this);
             nodeManager.getRedisMessageSubscriber().addListener(bridgeHandler);
         }
+    }
+    
+    public String getNodeId() {
+        return nodeManager.getNodeId();
     }
 
     public void handleControlMessage(String nodeId, @NonNull String message) {
@@ -176,7 +180,7 @@ public class SchedulerManager implements ApplicationAdapterAware, InitializableB
      * @param request the structured request parameters
      */
     public void dispatch(String targetNodeId, SchedulerRequestParameters request) {
-        if (nodeManager.getNodeId().equals(targetNodeId)) {
+        if (getNodeId().equals(targetNodeId)) {
             logger.debug("Executing local scheduler request: {}", request.getCommand());
             String response = execute(request);
             if (response != null) {
@@ -219,7 +223,7 @@ public class SchedulerManager implements ApplicationAdapterAware, InitializableB
             requestData = payload;
         }
 
-        if (targetNodeId == null || targetNodeId.equals(nodeManager.getNodeId())) {
+        if (targetNodeId == null || targetNodeId.equals(getNodeId())) {
             try {
                 SchedulerRequestParameters request = new SchedulerRequestParameters();
                 request.readFrom(requestData);

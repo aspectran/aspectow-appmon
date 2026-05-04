@@ -43,6 +43,14 @@ class BaseClient {
         throw new Error("Method 'refresh()' must be implemented.");
     }
 
+    focus(appId) {
+        throw new Error("Method 'focus()' must be implemented.");
+    }
+
+    loadPrevious(appId, logId, loadedLines) {
+        throw new Error("Method 'loadPrevious()' must be implemented.");
+    }
+
     /**
      * Sends a command with the specified options.
      * @param {string[]} [options] - Command options.

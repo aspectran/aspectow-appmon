@@ -36,6 +36,14 @@ public class RedisMessagePublisher {
         this.connectionPool = connectionPool;
     }
 
+    public String getClusterId() {
+        return clusterId;
+    }
+
+    public String getNodeId() {
+        return nodeId;
+    }
+
     /**
      * Publishes a management control message for this node.
      * This method waits for the publication to complete.
@@ -43,7 +51,7 @@ public class RedisMessagePublisher {
      * @throws Exception if an error occurs during publication
      */
     public void publishControl(String message) throws Exception {
-        publishControl(this.nodeId, message);
+        publishControl(nodeId, message);
     }
 
     /**

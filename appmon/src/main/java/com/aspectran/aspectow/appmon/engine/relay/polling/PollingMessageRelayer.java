@@ -90,6 +90,11 @@ public class PollingMessageRelayer implements MessageRelayer {
     public Map<String, Object> join(@NonNull Translet translet) throws IOException {
         PollingConfig pollingConfig = appMonManager.getPollingConfig();
 
+        String nodeId = translet.getParameter("nodeId");
+        if (!StringUtils.hasText(nodeId)) {
+            nodeId = null;
+        }
+
         String appsToJoin = translet.getParameter("appsToJoin");
         String[] appIds = StringUtils.splitWithComma(appsToJoin);
         appIds = appMonManager.getVerifiedAppIds(appIds);
@@ -97,13 +102,13 @@ public class PollingMessageRelayer implements MessageRelayer {
             return null;
         }
 
-        PollingRelaySession relaySession = pollingSessionManager.createSession(translet, pollingConfig, appIds);
+        PollingRelaySession relaySession = pollingSessionManager.createSession(translet, pollingConfig, nodeId, appIds);
         String timeZone = translet.getParameter("timeZone");
         if (StringUtils.hasText(timeZone)) {
             relaySession.setTimeZone(timeZone);
         }
 
-        if (!appMonManager.getMessageRelayManager().join(relaySession)) {
+        if (!appMonManager.getMessageRelayManager().subscribe(relaySession)) {
             return null;
         }
 
@@ -185,11 +190,11 @@ public class PollingMessageRelayer implements MessageRelayer {
 
     @Override
     public void relay(RelaySession relaySession, String message) {
-        // Not applicable for polling service
+        // Not applicable for polling relayer
     }
 
     @Override
-    public RelaySession getSession(String sessionId) {
+    public RelaySession getLocalRelaySession(String sessionId) {
         return pollingSessionManager.getSession(sessionId);
     }
 

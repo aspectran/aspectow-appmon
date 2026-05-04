@@ -37,8 +37,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_FOCUS;
 import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_LOAD_PREVIOUS;
 import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_REFRESH;
+import static com.aspectran.aspectow.node.manager.NodeMessageProtocol.NODES_BASE_PATH;
 
 /**
  * An {@link MessageRelayer} implementation based on the WebSocket protocol (JSR-356).
@@ -48,7 +50,7 @@ import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_
  */
 @Component
 @ServerEndpoint(
-        value = "/nodes/{nodeId}/appmon/websocket/{token}",
+        value = NODES_BASE_PATH + "/{nodeId}/appmon/websocket/{token}",
         configurator = AspectranConfigurator.class
 )
 public class WebsocketMessageRelayer extends SimplifiedEndpoint implements MessageRelayer {
@@ -126,7 +128,7 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
             case COMMAND_LOAD_PREVIOUS:
                 refreshData(session, commandOptions);
                 break;
-            case CommandOptions.COMMAND_FOCUS:
+            case COMMAND_FOCUS:
                 focus(session, commandOptions);
                 break;
         }
@@ -135,7 +137,7 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
     @Override
     protected void onSessionRemoved(Session session) {
         RelaySession relaySession = new WebsocketRelaySession(session);
-        appMonManager.getMessageRelayManager().release(relaySession);
+        appMonManager.getMessageRelayManager().unsubscribe(relaySession);
     }
 
     private void pong(Session session) {
@@ -162,7 +164,7 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
 
     private void joinComplete(@NonNull Session session) {
         RelaySession relaySession = new WebsocketRelaySession(session);
-        appMonManager.getMessageRelayManager().join(relaySession);
+        appMonManager.getMessageRelayManager().subscribe(relaySession);
         List<String> messages = appMonManager.getMessageRelayManager().getLastMessages(relaySession);
         for (String message : messages) {
             sendText(session, message);
@@ -171,7 +173,7 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
 
     private void focus(@NonNull Session session, @NonNull CommandOptions commandOptions) {
         RelaySession relaySession = new WebsocketRelaySession(session);
-        relaySession.setFocusedAppId(commandOptions.getApp());
+        relaySession.setFocusedAppId(commandOptions.getAppId());
     }
 
     private void refreshData(@NonNull Session session, @NonNull CommandOptions commandOptions) {
@@ -198,7 +200,7 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
     }
 
     @Override
-    public RelaySession getSession(String sessionId) {
+    public RelaySession getLocalRelaySession(String sessionId) {
         Session session = findSession(sessionId);
         return (session != null ? new WebsocketRelaySession(session) : null);
     }

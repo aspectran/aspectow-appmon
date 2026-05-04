@@ -41,34 +41,37 @@ public class CommandOptions extends DefaultParameters {
 
     private static final ParameterKey command;
     private static final ParameterKey appsToJoin;
-    private static final ParameterKey app;
-    private static final ParameterKey logName;
-    private static final ParameterKey loadedLines;
+    private static final ParameterKey appId;
     private static final ParameterKey timeZone;
     private static final ParameterKey dateUnit;
     private static final ParameterKey dateOffset;
+    private static final ParameterKey logId;
+    private static final ParameterKey loadedLines;
+    private static final ParameterKey sessionId;
 
     private static final ParameterKey[] parameterKeys;
 
     static {
         command = new ParameterKey("command", ValueType.STRING);
         appsToJoin = new ParameterKey("appsToJoin", ValueType.STRING);
-        app = new ParameterKey("app", ValueType.STRING);
+        appId = new ParameterKey("appId", ValueType.STRING);
         timeZone = new ParameterKey("timeZone", ValueType.STRING);
         dateUnit = new ParameterKey("dateUnit", ValueType.STRING);
         dateOffset = new ParameterKey("dateOffset", ValueType.STRING);
-        logName = new ParameterKey("logName", ValueType.STRING);
+        logId = new ParameterKey("logId", ValueType.STRING);
         loadedLines = new ParameterKey("loadedLines", ValueType.INT);
+        sessionId = new ParameterKey("sessionId", ValueType.STRING);
 
         parameterKeys = new ParameterKey[] {
                 command,
                 appsToJoin,
-                app,
+                appId,
                 timeZone,
                 dateUnit,
                 dateOffset,
-                logName,
-                loadedLines
+                logId,
+                loadedLines,
+                sessionId
         };
     }
 
@@ -146,16 +149,16 @@ public class CommandOptions extends DefaultParameters {
      * Returns the specific instance name.
      * @return the instance name
      */
-    public String getApp() {
-        return getString(app);
+    public String getAppId() {
+        return getString(appId);
     }
 
     /**
      * Sets the specific instance name.
-     * @param app the instance name
+     * @param appId the instance name
      */
-    public void setApp(String app) {
-        putValue(CommandOptions.app, app);
+    public void setAppId(String appId) {
+        putValue(CommandOptions.appId, appId);
     }
 
     /**
@@ -218,16 +221,16 @@ public class CommandOptions extends DefaultParameters {
      * Returns the log file name.
      * @return the log name
      */
-    public String getLogName() {
-        return getString(logName);
+    public String getLogId() {
+        return getString(logId);
     }
 
     /**
      * Sets the log file name.
      * @param logName the log name
      */
-    public void setLogName(String logName) {
-        putValue(CommandOptions.logName, logName);
+    public void setLogId(String logName) {
+        putValue(CommandOptions.logId, logName);
     }
 
     /**
@@ -244,6 +247,14 @@ public class CommandOptions extends DefaultParameters {
      */
     public void setLoadedLines(int loadedLines) {
         putValue(CommandOptions.loadedLines, loadedLines);
+    }
+
+    public String getSessionid() {
+        return getString(sessionId);
+    }
+
+    public void setSessionId(String sessionId) {
+        putValue(CommandOptions.sessionId, sessionId);
     }
 
 }

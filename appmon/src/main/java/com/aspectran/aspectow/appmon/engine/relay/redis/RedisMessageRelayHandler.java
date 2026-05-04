@@ -24,10 +24,10 @@ import com.aspectran.aspectow.node.redis.RedisMessageListener;
  */
 public class RedisMessageRelayHandler implements RedisMessageListener {
 
-    private final MessageRelayManager messageRelayManager;
+    private final RemoteMessageRelayer remoteMessageRelayer;
 
-    public RedisMessageRelayHandler(MessageRelayManager messageRelayManager) {
-        this.messageRelayManager = messageRelayManager;
+    public RedisMessageRelayHandler(RemoteMessageRelayer remoteMessageRelayer) {
+        this.remoteMessageRelayer = remoteMessageRelayer;
     }
 
     @Override
@@ -37,16 +37,12 @@ public class RedisMessageRelayHandler implements RedisMessageListener {
 
     @Override
     public void onControlMessage(String nodeId, String message) {
-        messageRelayManager.handleControlMessage(nodeId, message);
+        remoteMessageRelayer.handleControlMessage(nodeId, message);
     }
 
     @Override
     public void onRelayMessage(String nodeId, String message) {
-        if (messageRelayManager.isGatewayMode()) {
-            messageRelayManager.relay(nodeId + "/" + message);
-        } else {
-            messageRelayManager.relay(message);
-        }
+        remoteMessageRelayer.relay(message);
     }
 
 }

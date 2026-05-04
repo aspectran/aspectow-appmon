@@ -65,6 +65,10 @@ public class PollingSessionManager extends AbstractComponent {
         this.bufferedMessages = new BufferedMessages(pollingConfig.getInitialBufferSize());
     }
 
+    public String getNodeId() {
+        return appMonManager.getNodeId();
+    }
+
     public PollingRelaySession getSession(String sessionId) {
         return sessions.get(sessionId);
     }
@@ -73,11 +77,12 @@ public class PollingSessionManager extends AbstractComponent {
      * Creates a new polling session or retrieves an existing one.
      * @param translet the current translet
      * @param pollingConfig the polling configuration
+     * @param nodeId the ID of the node
      * @param appIds the IDs of the apps to join
      * @return a new or existing {@link PollingRelaySession}
      */
     public PollingRelaySession createSession(
-            @NonNull Translet translet, @NonNull PollingConfig pollingConfig, String[] appIds) {
+            @NonNull Translet translet, @NonNull PollingConfig pollingConfig, String nodeId, String[] appIds) {
         int pollingInterval = pollingConfig.getPollingInterval();
         int sessionTimeout = pollingConfig.getSessionTimeout();
         if (pollingInterval > 0 && sessionTimeout <= 0) {
@@ -194,7 +199,7 @@ public class PollingSessionManager extends AbstractComponent {
             sessions.entrySet().removeIf(entry -> {
                 PollingRelaySession session = entry.getValue();
                 if (session.isExpired()) {
-                    appMonManager.getMessageRelayManager().release(session);
+                    appMonManager.getMessageRelayManager().unsubscribe(session);
                     session.destroy();
                     return true;
                 }

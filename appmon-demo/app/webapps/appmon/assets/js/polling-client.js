@@ -40,6 +40,10 @@ class PollingClient extends BaseClient {
         this.sendCommand(cmdOptions);
     }
 
+    loadPrevious(appId, logId, loadedLines) {
+        this.sendCommand(["command:loadPrevious", "appId:" + appId, "logId:" + logId, "loadedLines:" + loadedLines]);
+    }
+
     sendCommand(options) {
         if (options) {
             options.forEach(option => this.withCommand(option));

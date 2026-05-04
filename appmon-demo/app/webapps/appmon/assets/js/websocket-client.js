@@ -185,6 +185,10 @@ class WebsocketClient extends BaseClient {
         this.sendCommand(["command:focus", "appId:" + appId]);
     }
 
+    loadPrevious(appId, logId, loadedLines) {
+        this.sendCommand(["command:loadPrevious", "appId:" + appId, "logId:" + logId, "loadedLines:" + loadedLines]);
+    }
+
     sendCommand(options) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(options ? options.join(";") : "");
@@ -197,13 +201,8 @@ class WebsocketClient extends BaseClient {
         url.protocol = url.protocol.replace("https:", "wss:").replace("http:", "ws:");
 
         if (this.isGatewayMode) {
-            const gatewayUrl = new URL(location.href);
-            // Use common path for gateway
-            gatewayUrl.pathname = (typeof contextPath !== 'undefined' && contextPath !== '/' ? contextPath : '') + "/nodes/appmon/websocket/" + this.node.endpoint.token;
-            gatewayUrl.protocol = gatewayUrl.protocol.replace("https:", "wss:").replace("http:", "ws:");
-            
             if (!window.gatewaySocketBridge) {
-                window.gatewaySocketBridge = new GatewaySocketBridge(gatewayUrl.href);
+                window.gatewaySocketBridge = new GatewaySocketBridge(url.href);
             }
             window.gatewaySocketBridge.connect();
             this.socket = window.gatewaySocketBridge.createVirtualSocket(this.node.id);

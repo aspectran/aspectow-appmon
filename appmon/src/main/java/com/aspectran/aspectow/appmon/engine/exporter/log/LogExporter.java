@@ -135,7 +135,7 @@ public class LogExporter extends AbstractExporter {
     @Override
     public void readIfChanged(@NonNull List<String> messages, @NonNull CommandOptions commandOptions) {
         if (commandOptions.hasCommand(CommandOptions.COMMAND_LOAD_PREVIOUS)) {
-            if (getName().equals(commandOptions.getLogName())) {
+            if (getName().equals(commandOptions.getLogId())) {
                 try {
                     int loadedLines = commandOptions.getLoadedLines();
                     List<String> lines = readPreviousLines(loadedLines, lastLines);

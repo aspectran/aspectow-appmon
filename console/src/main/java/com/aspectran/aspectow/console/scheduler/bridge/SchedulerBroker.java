@@ -41,8 +41,6 @@ public class SchedulerBroker {
 
     public static final String CONTROL_RELEASE = "scheduler:release";
 
-    private final String nodeId;
-
     private final RedisMessagePublisher messagePublisher;
 
     private final SchedulerManager schedulerManager;
@@ -51,14 +49,9 @@ public class SchedulerBroker {
 
     private final SubscriptionRegistry subscriptionRegistry = new SubscriptionRegistry();
 
-    public SchedulerBroker(String nodeId, RedisMessagePublisher messagePublisher, SchedulerManager schedulerManager) {
-        this.nodeId = nodeId;
+    public SchedulerBroker(RedisMessagePublisher messagePublisher, SchedulerManager schedulerManager) {
         this.messagePublisher = messagePublisher;
         this.schedulerManager = schedulerManager;
-    }
-
-    public String getNodeId() {
-        return nodeId;
     }
 
     public RedisMessagePublisher getMessagePublisher() {

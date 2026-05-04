@@ -74,7 +74,7 @@ class DashboardBuilder {
             error: (xhr) => {
                 if (xhr.status === 403) {
                     alert("Authentication has expired. You will be redirected to the main page.");
-                    location.href = (typeof contextPath !== 'undefined' && contextPath ? contextPath : "/");
+                    //location.href = (typeof contextPath !== 'undefined' && contextPath ? contextPath : "/");
                 }
             }
         });
@@ -226,14 +226,14 @@ class DashboardBuilder {
         }
     }
 
-    changeInstance(appId) {
+    changeApp(appId) {
         let exists = false;
         this.apps.forEach(app => {
             if (!appId) appId = app.id;
             const $tabTitle = $(".app.tabs .tabs-title[data-app-id=" + app.id + "]");
             if (app.id === appId) {
                 app.active = true;
-                this.showNodeInstance(appId);
+                this.showNodeApp(appId);
                 $tabTitle.addClass("active");
                 exists = true;
 
@@ -246,11 +246,11 @@ class DashboardBuilder {
                 $tabTitle.removeClass("active");
             }
         });
-        if (!exists && appId) return this.changeInstance();
+        if (!exists && appId) return this.changeApp();
         return appId;
     }
 
-    showNodeInstance(appId) {
+    showNodeApp(appId) {
         $(".control-bar[data-app-id!=" + appId + "]").hide();
         $(".control-bar[data-app-id=" + appId + "]").show();
         this.nodes.forEach(node => {
@@ -281,7 +281,7 @@ class DashboardBuilder {
         });
         $(".app.tabs .tabs-title.available a").off("click").on("click", (e) => {
             const appId = $(e.currentTarget).closest(".tabs-title").data("app-id");
-            this.changeInstance(appId);
+            this.changeApp(appId);
         });
         $(".layout-options .btn").off().on("click", (e) => {
             const $btn = $(e.currentTarget);
@@ -442,13 +442,7 @@ class DashboardBuilder {
                 $tailingSwitch.attr("title", $tailingSwitch.data("title-off"));
             }
 
-            const options = [
-                "command:loadPrevious",
-                "appId:" + appId,
-                "logId:" + logId,
-                "loadedLines:" + loadedLines
-            ];
-            this.clients[nodeIndex].sendCommand(options);
+            this.clients[nodeIndex].loadPrevious(appId, logId, loadedLines);
         });
         $(window).off("resize").on("resize", () => {
             this.viewers.forEach(v => v.updateCanvasWidth());
@@ -578,10 +572,10 @@ class DashboardBuilder {
                 });
             });
         });
-        let appId = this.changeInstance();
+        let appId = this.changeApp();
         if (appId && location.hash) {
             const appId2 = location.hash.substring(1);
-            if (appId !== appId2) this.changeInstance(appId2);
+            if (appId !== appId2) this.changeApp(appId2);
         }
     }
 

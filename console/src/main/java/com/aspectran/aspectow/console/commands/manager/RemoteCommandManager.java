@@ -45,18 +45,22 @@ public class RemoteCommandManager implements InitializableBean {
     public RemoteCommandManager(@NonNull NodeManager nodeManager, LocalCommandService localCommandService) {
         this.nodeManager = nodeManager;
         this.localCommandService = localCommandService;
-        this.broker = new CommandBroker(nodeManager.getNodeId(), nodeManager.getRedisMessagePublisher(), this);
+        this.broker = new CommandBroker(getNodeId(), nodeManager.getRedisMessagePublisher(), this);
     }
 
     @Override
     public void initialize() throws Exception {
-        logger.info("Initializing RemoteCommandManager for node: {}", nodeManager.getNodeId());
-
+        logger.info("Initializing RemoteCommandManager for node: {}", getNodeId());
+        
         // Register a listener for command relay messages (commands and results) from Redis
         if (nodeManager.getRedisMessageSubscriber() != null) {
             CommandMessageBridgeHandler bridgeHandler = new CommandMessageBridgeHandler(this);
             nodeManager.getRedisMessageSubscriber().addListener(bridgeHandler);
         }
+    }
+    
+    public String getNodeId() {
+        return nodeManager.getNodeId();
     }
 
     public void handleControlMessage(String nodeId, @NonNull String message) {
@@ -89,7 +93,7 @@ public class RemoteCommandManager implements InitializableBean {
      * @param commandData the command payload in APON/JSON format
      */
     public void dispatch(String targetNodeId, String commandData) {
-        if (nodeManager.getNodeId().equals(targetNodeId)) {
+        if (getNodeId().equals(targetNodeId)) {
             // Case 1: Target is local node, execute directly and broadcast result to local clients
             logger.debug("Executing local daemon command: {}", commandData);
             String response = localCommandService.execute(commandData);

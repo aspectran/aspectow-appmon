@@ -39,7 +39,7 @@ public class PollingRelaySession implements RelaySession {
 
     private final String id;
 
-    private final PollingSessionManager relayManager;
+    private final PollingSessionManager sessionManager;
 
     private final SessionExpiryTimer expiryTimer;
 
@@ -62,11 +62,11 @@ public class PollingRelaySession implements RelaySession {
     /**
      * Instantiates a new PollingRelaySession.
      * @param id the unique identifier of this session
-     * @param relayManager the session manager that created this session
+     * @param sessionManager the session manager that created this session
      */
-    public PollingRelaySession(String id, PollingSessionManager relayManager) {
+    public PollingRelaySession(String id, PollingSessionManager sessionManager) {
         this.id = id;
-        this.relayManager = relayManager;
+        this.sessionManager = sessionManager;
         this.expiryTimer = new SessionExpiryTimer();
     }
 
@@ -208,7 +208,7 @@ public class PollingRelaySession implements RelaySession {
         try (AutoLock ignored = lock()) {
             if (!expired) {
                 expired = true;
-                relayManager.scavenge();
+                sessionManager.scavenge();
             }
         }
     }
@@ -221,7 +221,7 @@ public class PollingRelaySession implements RelaySession {
         private final CyclicTimeout timer;
 
         SessionExpiryTimer() {
-            timer = new CyclicTimeout(relayManager.getScheduler()) {
+            timer = new CyclicTimeout(sessionManager.getScheduler()) {
                 @Override
                 public void onTimeoutExpired() {
                     doExpiry();
