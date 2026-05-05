@@ -15,6 +15,7 @@
  */
 package com.aspectran.aspectow.appmon.engine.relay;
 
+import com.aspectran.utils.StringUtils;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
@@ -73,10 +74,8 @@ public class SubscriptionRegistry {
     }
 
     public void addRemoteSubscription(String nodeId, String appId) {
-        if (appId == null) {
-            appId = "";
-        }
-        remoteSubscriptions.computeIfAbsent(appId, k -> ConcurrentHashMap.newKeySet()).add(nodeId);
+        remoteSubscriptions.computeIfAbsent(StringUtils.nullToEmpty(appId),
+                k -> ConcurrentHashMap.newKeySet()).add(nodeId);
     }
 
     public void removeRemoteSubscription(String nodeId, String appId) {
@@ -92,6 +91,10 @@ public class SubscriptionRegistry {
         }
     }
 
+    public Set<String> getNodeIdsRemotelySubscribedToApp(String appId) {
+        return remoteSubscriptions.get(StringUtils.nullToEmpty(appId));
+    }
+
     public boolean isAppInUse(String appId) {
         if (appId == null) {
             appId = "";
@@ -105,18 +108,12 @@ public class SubscriptionRegistry {
     }
 
     public boolean isAppInUseLocally(String appId) {
-        if (appId == null) {
-            appId = "";
-        }
-        Set<String> sessions = localSubscriptions.get(appId);
+        Set<String> sessions = localSubscriptions.get(StringUtils.nullToEmpty(appId));
         return (sessions != null && !sessions.isEmpty());
     }
 
     public Set<String> getSessionsSubscribedToApp(String appId) {
-        if (appId == null) {
-            appId = "";
-        }
-        Set<String> sessions = localSubscriptions.get(appId);
+        Set<String> sessions = localSubscriptions.get(StringUtils.nullToEmpty(appId));
         return (sessions != null ? sessions : Set.of());
     }
 

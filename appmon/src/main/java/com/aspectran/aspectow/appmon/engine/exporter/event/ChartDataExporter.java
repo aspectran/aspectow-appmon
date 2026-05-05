@@ -69,7 +69,7 @@ public class ChartDataExporter extends AbstractExporter implements EventCountRol
         super(TYPE);
         this.exporterManager = exporterManager;
         this.eventInfo = eventInfo;
-        this.prefix = eventInfo.getAppId() + ":" + TYPE + "/chart:" + eventInfo.getEventId() + ":";
+        this.prefix = exporterManager.getNodeId() + ":" + eventInfo.getAppId() + ":" + TYPE + "/chart:" + eventInfo.getEventId() + ":";
     }
 
     @Override

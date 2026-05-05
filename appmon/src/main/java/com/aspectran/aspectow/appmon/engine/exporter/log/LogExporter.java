@@ -86,7 +86,7 @@ public class LogExporter extends AbstractExporter {
         super(TYPE);
         this.exporterManager = exporterManager;
         this.logInfo = logInfo;
-        this.prefix = logInfo.getAppId() + ":" + TYPE + ":" + logInfo.getLogId() + ":";
+        this.prefix = exporterManager.getNodeId() + ":" + logInfo.getAppId() + ":" + TYPE + ":" + logInfo.getLogId() + ":";
         this.plogPrefix = logInfo.getAppId() + ":" + TYPE + "/p:" + logInfo.getLogId() + ":";
         this.charset = (logInfo.getCharset() != null ? Charset.forName(logInfo.getCharset()): DEFAULT_CHARSET);
         this.sampleInterval = (logInfo.getSampleInterval() > 0 ? logInfo.getSampleInterval() : DEFAULT_SAMPLE_INTERVAL);

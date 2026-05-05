@@ -108,13 +108,14 @@ public class PollingMessageRelayer implements MessageRelayer {
             relaySession.setTimeZone(timeZone);
         }
 
-        if (!appMonManager.getMessageRelayManager().subscribe(relaySession)) {
+        if (!appMonManager.getMessageRelayManager().subscribe(relaySession, nodeId)) {
             return null;
         }
 
         List<AppInfo> appInfoList = appMonManager.getAppInfoList(relaySession.getJoinedApps());
         List<String> messages = appMonManager.getMessageRelayManager().getLastMessages(relaySession);
         return Map.of(
+                "sessionId", relaySession.getId(),
                 "apps", appInfoList,
                 "pollingInterval", relaySession.getPollingInterval(),
                 "messages", messages

@@ -18,6 +18,7 @@ class BaseClient {
         this.retryCount = 0;
         this.maxRetries = 10;
         this.retryInterval = 5000;
+        this.sessionId = null;
     }
 
     /**
@@ -40,15 +41,49 @@ class BaseClient {
      * @param {string[]} [options] - Refresh options.
      */
     refresh(options) {
-        throw new Error("Method 'refresh()' must be implemented.");
+        this.checkSessionId();
+        let cmdOptions = [
+            "command:refresh",
+            "sessionId:" + this.sessionId
+        ];
+        if (options) {
+            cmdOptions.push(...options);
+        }
+        this.sendCommand(cmdOptions);
     }
 
     focus(appId) {
-        throw new Error("Method 'focus()' must be implemented.");
+        this.checkSessionId();
+        this.sendCommand([
+            "command:focus",
+            "sessionId:" + this.sessionId,
+            "appId:" + appId
+        ]);
     }
 
     loadPrevious(appId, logId, loadedLines) {
-        throw new Error("Method 'loadPrevious()' must be implemented.");
+        this.checkSessionId();
+        this.sendCommand([
+            "command:loadPrevious",
+            "sessionId:" + this.sessionId,
+            "appId:" + appId,
+            "logId:" + logId,
+            "loadedLines:" + loadedLines
+        ]);
+    }
+
+    checkSessionId() {
+        if (!this.sessionId) {
+            throw new Error("Session ID is not set. Cannot perform operation.");
+        }
+    }
+
+    setSessionId(sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    clearSessionId() {
+        this.sessionId = null;
     }
 
     /**

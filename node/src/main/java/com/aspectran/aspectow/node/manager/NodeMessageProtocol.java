@@ -60,7 +60,12 @@ public abstract class NodeMessageProtocol {
      */
     @NonNull
     public static String getControlChannel(String clusterId, String nodeId) {
-        return KEY_PREFIX + "control:" + clusterId + ":" + nodeId;
+        return KEY_PREFIX + "control::" + clusterId + ":" + nodeId;
+    }
+
+    @NonNull
+    public static String getControlChannel(String clusterId, String nodeId, String category) {
+        return KEY_PREFIX + "control:" + category + ":" + clusterId + ":" + nodeId;
     }
 
     /**
@@ -84,7 +89,7 @@ public abstract class NodeMessageProtocol {
      */
     @NonNull
     public static String getClusterSubscriptionPattern(String clusterId) {
-        return KEY_PREFIX + "*:" + clusterId + ":*";
+        return KEY_PREFIX + "*:*:" + clusterId + ":*";
     }
 
     /**
@@ -96,7 +101,7 @@ public abstract class NodeMessageProtocol {
      */
     @NonNull
     public static String getClusterSubscriptionPattern(String clusterId, String nodeId) {
-        return KEY_PREFIX + "*:" + clusterId + ":" + nodeId;
+        return KEY_PREFIX + "*:*:" + clusterId + ":" + nodeId;
     }
 
     /**

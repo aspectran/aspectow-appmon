@@ -61,8 +61,8 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
     private static final String COMMAND_JOIN = "join";
     private static final String COMMAND_ESTABLISHED = "established";
 
-    private static final String MESSAGE_PONG = "pong:";
-    private static final String MESSAGE_JOINED = "joined:";
+    private static final String RESPONSE_PONG = "pong:";
+    private static final String RESPONSE_JOINED = "joined:";
 
     private final AppMonManager appMonManager;
 
@@ -122,7 +122,7 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
                 join(session, commandOptions);
                 break;
             case COMMAND_ESTABLISHED:
-                joinComplete(session);
+                joinComplete(session, commandOptions);
                 break;
             case COMMAND_REFRESH:
             case COMMAND_LOAD_PREVIOUS:
@@ -142,7 +142,7 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
 
     private void pong(Session session) {
         String newToken = AppMonTokenIssuer.issueToken(1800); // 30 min.
-        sendText(session, MESSAGE_PONG + newToken);
+        sendText(session, RESPONSE_PONG + newToken);
     }
 
     private void join(Session session, @NonNull CommandOptions commandOptions) {
@@ -158,32 +158,38 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
             relaySession.setJoinedApps(appIds);
         }
         if (addSession(session)) {
-            relay(relaySession, MESSAGE_JOINED);
+            if (appMonManager.isGatewayMode()) {
+                relay(relaySession, appMonManager.getNodeId() + ":" + RESPONSE_JOINED + session.getId());
+            } else {
+                relay(relaySession, RESPONSE_JOINED);
+            }
         }
     }
 
-    private void joinComplete(@NonNull Session session) {
+    private void joinComplete(@NonNull Session session, @NonNull CommandOptions commandOptions) {
+        String targetNodeId = commandOptions.getNodeId();
         RelaySession relaySession = new WebsocketRelaySession(session);
-        appMonManager.getMessageRelayManager().subscribe(relaySession);
-        List<String> messages = appMonManager.getMessageRelayManager().getLastMessages(relaySession);
-        for (String message : messages) {
-            sendText(session, message);
+        appMonManager.getMessageRelayManager().subscribe(relaySession, targetNodeId);
+        if (appMonManager.getNodeId().equals(targetNodeId)) {
+            List<String> messages = appMonManager.getMessageRelayManager().getLastMessages(relaySession);
+            for (String message : messages) {
+                sendText(session, message);
+            }
         }
     }
 
     private void focus(@NonNull Session session, @NonNull CommandOptions commandOptions) {
         RelaySession relaySession = new WebsocketRelaySession(session);
-        relaySession.setFocusedAppId(commandOptions.getAppId());
+        appMonManager.getMessageRelayManager().focus(relaySession, commandOptions);
     }
 
     private void refreshData(@NonNull Session session, @NonNull CommandOptions commandOptions) {
         RelaySession relaySession = new WebsocketRelaySession(session);
-        if (!commandOptions.hasTimeZone()) {
-            commandOptions.setTimeZone(relaySession.getTimeZone());
-        }
-        List<String> messages = appMonManager.getMessageRelayManager().getNewMessages(relaySession, commandOptions);
-        for (String message : messages) {
-            sendText(session, message);
+        List<String> messages = appMonManager.getMessageRelayManager().refreshData(relaySession, commandOptions);
+        if (messages != null) {
+            for (String message : messages) {
+                sendText(session, message);
+            }
         }
     }
 

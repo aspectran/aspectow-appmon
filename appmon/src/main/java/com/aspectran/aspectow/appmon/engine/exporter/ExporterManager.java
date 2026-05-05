@@ -68,6 +68,10 @@ public class ExporterManager {
         return appMonManager;
     }
 
+    public String getNodeId() {
+        return appMonManager.getNodeId();
+    }
+
     /**
      * Gets the name of the instance this manager belongs to.
      * @return the instance name

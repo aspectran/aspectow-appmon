@@ -21,6 +21,7 @@ class PollingClient extends BaseClient {
     }
 
     stop() {
+        this.clearSessionId();
         this.stopped = true;
         if (this.pollingTimer) {
             clearTimeout(this.pollingTimer);
@@ -30,18 +31,6 @@ class PollingClient extends BaseClient {
 
     speed(speed) {
         this.changePollingInterval(speed);
-    }
-
-    refresh(options) {
-        let cmdOptions = ["command:refresh"];
-        if (options) {
-            cmdOptions.push(...options);
-        }
-        this.sendCommand(cmdOptions);
-    }
-
-    loadPrevious(appId, logId, loadedLines) {
-        this.sendCommand(["command:loadPrevious", "appId:" + appId, "logId:" + logId, "loadedLines:" + loadedLines]);
     }
 
     sendCommand(options) {
@@ -57,6 +46,7 @@ class PollingClient extends BaseClient {
     }
 
     join(appsToJoin) {
+        this.clearSessionId();
         $.ajax({
             url: this.node.endpoint.path + "/appmon/polling/join",
             type: "post",
@@ -70,6 +60,9 @@ class PollingClient extends BaseClient {
                     this.retryCount = 0;
                     this.node.endpoint['mode'] = this.endpointMode;
                     this.node.endpoint['pollingInterval'] = data.pollingInterval;
+                    if (data.sessionId) {
+                        this.sessionId = data.sessionId;
+                    }
                     if (this.onJoined) {
                         this.onJoined(this.node, data);
                     }

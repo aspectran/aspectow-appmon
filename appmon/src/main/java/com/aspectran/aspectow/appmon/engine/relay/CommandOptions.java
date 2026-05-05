@@ -15,9 +15,11 @@
  */
 package com.aspectran.aspectow.appmon.engine.relay;
 
+import com.aspectran.utils.Assert;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.apon.AponFormat;
 import com.aspectran.utils.apon.AponParseException;
+import com.aspectran.utils.apon.AponRenderStyle;
 import com.aspectran.utils.apon.DefaultParameters;
 import com.aspectran.utils.apon.ParameterKey;
 import com.aspectran.utils.apon.ValueType;
@@ -30,6 +32,10 @@ import com.aspectran.utils.apon.ValueType;
  */
 public class CommandOptions extends DefaultParameters {
 
+    public static final String COMMAND_JOIN = "join";
+
+    public static final String COMMAND_RELEASE = "release";
+
     /** Command to refresh the current view or data */
     public static final String COMMAND_REFRESH = "refresh";
 
@@ -40,8 +46,9 @@ public class CommandOptions extends DefaultParameters {
     public static final String COMMAND_FOCUS = "focus";
 
     private static final ParameterKey command;
-    private static final ParameterKey appsToJoin;
+    private static final ParameterKey nodeId;
     private static final ParameterKey appId;
+    private static final ParameterKey appsToJoin;
     private static final ParameterKey timeZone;
     private static final ParameterKey dateUnit;
     private static final ParameterKey dateOffset;
@@ -53,8 +60,9 @@ public class CommandOptions extends DefaultParameters {
 
     static {
         command = new ParameterKey("command", ValueType.STRING);
-        appsToJoin = new ParameterKey("appsToJoin", ValueType.STRING);
+        nodeId = new ParameterKey("nodeId", ValueType.STRING);
         appId = new ParameterKey("appId", ValueType.STRING);
+        appsToJoin = new ParameterKey("appsToJoin", ValueType.STRING);
         timeZone = new ParameterKey("timeZone", ValueType.STRING);
         dateUnit = new ParameterKey("dateUnit", ValueType.STRING);
         dateOffset = new ParameterKey("dateOffset", ValueType.STRING);
@@ -64,8 +72,9 @@ public class CommandOptions extends DefaultParameters {
 
         parameterKeys = new ParameterKey[] {
                 command,
-                appsToJoin,
+                nodeId,
                 appId,
+                appsToJoin,
                 timeZone,
                 dateUnit,
                 dateOffset,
@@ -80,6 +89,7 @@ public class CommandOptions extends DefaultParameters {
      */
     public CommandOptions() {
         super(parameterKeys);
+        setRenderStyle(AponRenderStyle.COMPACT);
     }
 
     /**
@@ -87,7 +97,13 @@ public class CommandOptions extends DefaultParameters {
      * @param text the semicolon-delimited command string
      */
     public CommandOptions(String text) {
-        this(StringUtils.split(text, ";"));
+        super(parameterKeys);
+        setRenderStyle(AponRenderStyle.COMPACT);
+        try {
+            readFrom(parseAsApon(text));
+        } catch (AponParseException e) {
+            throw new RuntimeException("Failed to parse command: " + text, e);
+        }
     }
 
     /**
@@ -97,11 +113,39 @@ public class CommandOptions extends DefaultParameters {
      */
     public CommandOptions(String[] lines) {
         super(parameterKeys);
+        setRenderStyle(AponRenderStyle.COMPACT);
         try {
             readFrom(StringUtils.join(lines, AponFormat.NEW_LINE));
         } catch (AponParseException e) {
             throw new RuntimeException("Failed to parse command: " + StringUtils.join(lines, ";"), e);
         }
+    }
+
+    private String parseAsApon(String text) {
+        Assert.hasText(text, "text must not be null or empty");
+        if (text.startsWith("[")) {
+            int idx = text.indexOf("]");
+            if (idx == -1) {
+                throw new IllegalArgumentException("Invalid command format: " + text);
+            }
+            String nodeId = text.substring(1, idx);
+            String[] options = StringUtils.split(text.substring(idx + 1), ";");
+            String[] lines = new String[options.length + 1];
+            lines[0] = CommandOptions.nodeId.getName() + ":" + nodeId;
+            System.arraycopy(options, 0, lines, 1, options.length);
+            return StringUtils.join(lines, AponFormat.NEW_LINE);
+        } else {
+            String[] lines = StringUtils.split(text, ";");
+            return StringUtils.join(lines, AponFormat.NEW_LINE);
+        }
+    }
+
+    public String getNodeId() {
+        return getString(nodeId);
+    }
+
+    public void setNodeId(String nodeId) {
+        putValue(CommandOptions.nodeId, nodeId);
     }
 
     /**

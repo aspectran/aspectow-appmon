@@ -35,8 +35,7 @@ import com.aspectran.aspectow.appmon.engine.exporter.metric.MetricExporterBuilde
 import com.aspectran.aspectow.appmon.engine.persist.counter.EventCounter;
 import com.aspectran.aspectow.appmon.engine.persist.counter.EventCounterBuilder;
 import com.aspectran.aspectow.appmon.engine.relay.MessageRelayManager;
-import com.aspectran.aspectow.appmon.engine.relay.redis.RedisMessageRelayHandler;
-import com.aspectran.aspectow.appmon.engine.relay.redis.RemoteMessageRelayer;
+import com.aspectran.aspectow.appmon.engine.relay.remote.RedisMessageRelayHandler;
 import com.aspectran.aspectow.node.config.NodeInfoHolder;
 import com.aspectran.aspectow.node.manager.NodeManager;
 import com.aspectran.core.context.ActivityContext;
@@ -92,8 +91,7 @@ public abstract class AppMonManagerBuilder {
     }
 
     private static void buildEventExporters(
-            AppMonManager appMonManager,
-            String appId,
+            AppMonManager appMonManager, String appId,
             @NonNull List<EventInfo> eventInfoList) throws Exception {
         ExporterManager eventExporterManager = new ExporterManager(ExporterType.EVENT, appMonManager, appId);
         ExporterManager dataExporterManager = new ExporterManager(ExporterType.DATA, appMonManager, appId);
@@ -120,8 +118,7 @@ public abstract class AppMonManagerBuilder {
     }
 
     private static void buildMetricExporters(
-            AppMonManager appMonManager,
-            String appId,
+            AppMonManager appMonManager, String appId,
             @NonNull List<MetricInfo> metricInfoList) throws Exception {
         ExporterManager metricExporterManager = new ExporterManager(ExporterType.METRIC, appMonManager, appId);
         for (MetricInfo metricInfo : metricInfoList) {
@@ -134,8 +131,7 @@ public abstract class AppMonManagerBuilder {
     }
 
     private static void buildLogExporters(
-            AppMonManager appMonManager,
-            String appId,
+            AppMonManager appMonManager, String appId,
             @NonNull List<LogInfo> logInfoList) throws Exception {
         ExporterManager logExporterManager = new ExporterManager(ExporterType.LOG, appMonManager, appId);
         for (LogInfo logInfo : logInfoList) {
@@ -163,7 +159,7 @@ public abstract class AppMonManagerBuilder {
 
         AppInfoHolder appInfoHolder = new AppInfoHolder(nodeId, appMonConfig.getAppInfoList());
 
-        MessageRelayManager messageRelayManager = new MessageRelayManager(nodeManager.getRedisMessagePublisher());
+        MessageRelayManager messageRelayManager = new MessageRelayManager(nodeId, nodeManager.getRedisMessagePublisher());
 
         AppMonManager appMonManager = new AppMonManager(
                 nodeId, nodeManager.getClusterConfig().getMode(), pollingConfig, counterPersistInterval,
@@ -171,10 +167,7 @@ public abstract class AppMonManagerBuilder {
         appMonManager.setActivityContext(context);
 
         if (nodeManager.getRedisMessageSubscriber() != null) {
-            RemoteMessageRelayer remoteMessageRelayer = new RemoteMessageRelayer(messageRelayManager);
-            messageRelayManager.addRelayer(remoteMessageRelayer);
-
-            RedisMessageRelayHandler redisMessageRelayHandler = new RedisMessageRelayHandler(remoteMessageRelayer);
+            RedisMessageRelayHandler redisMessageRelayHandler = new RedisMessageRelayHandler(messageRelayManager);
             nodeManager.getRedisMessageSubscriber().addListener(redisMessageRelayHandler);
         }
 

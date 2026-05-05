@@ -67,6 +67,18 @@ public class RedisMessagePublisher {
     }
 
     /**
+     * Publishes a management control message to a specific node.
+     * This method waits for the publication to complete.
+     * @param targetNodeId the ID of the node to receive the message
+     * @param message the message to publish
+     * @throws Exception if an error occurs during publication
+     */
+    public void publishControl(String category, String targetNodeId, String message) throws Exception {
+        String channel = NodeMessageProtocol.getControlChannel(clusterId, targetNodeId, category);
+        syncPublish(channel, message);
+    }
+
+    /**
      * Publishes a transparent application message to be relayed from this node.
      * This method sends the message asynchronously and does not wait for completion.
      * @param category the category of the relay message
@@ -75,6 +87,11 @@ public class RedisMessagePublisher {
      */
     public void publishRelay(String category, String message) throws Exception {
         String channel = NodeMessageProtocol.getRelayChannel(clusterId, nodeId, category);
+        asyncPublish(channel, message);
+    }
+
+    public void publishRelay(String category, String targetNodeId, String message) throws Exception {
+        String channel = NodeMessageProtocol.getRelayChannel(clusterId, targetNodeId, category);
         asyncPublish(channel, message);
     }
 

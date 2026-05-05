@@ -34,13 +34,14 @@ class GatewaySocketBridge {
 
             this.socket.onmessage = (event) => {
                 if (typeof event.data === "string") {
-                    const idx = event.data.indexOf('\n');
+                    const msg = event.data;
+                    const idx = msg.indexOf(':');
                     if (idx !== -1) {
-                        const nodeId = event.data.substring(0, idx);
-                        const message = event.data.substring(idx + 1);
+                        const nodeId = msg.substring(0, idx);
+                        const payload = msg.substring(idx + 1);
                         const vs = this.virtualSockets[nodeId];
                         if (vs && vs.onmessage) {
-                            vs.onmessage({ data: message });
+                            vs.onmessage({ data: payload });
                         }
                     } else {
                         // Broadcast to all if no nodeId prefix is found (e.g. pong)
@@ -82,7 +83,7 @@ class GatewaySocketBridge {
 
     send(nodeId, data) {
         if (this.isConnected && this.socket.readyState === WebSocket.OPEN) {
-            this.socket.send(nodeId + "\n" + data);
+            this.socket.send("[" + nodeId + "]" + data);
         }
     }
 
@@ -173,22 +174,6 @@ class WebsocketClient extends BaseClient {
         this.closeSocket();
     }
 
-    refresh(options) {
-        let cmdOptions = ["command:refresh"];
-        if (options) {
-            cmdOptions.push(...options);
-        }
-        this.sendCommand(cmdOptions);
-    }
-
-    focus(appId) {
-        this.sendCommand(["command:focus", "appId:" + appId]);
-    }
-
-    loadPrevious(appId, logId, loadedLines) {
-        this.sendCommand(["command:loadPrevious", "appId:" + appId, "logId:" + logId, "loadedLines:" + loadedLines]);
-    }
-
     sendCommand(options) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(options ? options.join(";") : "");
@@ -237,7 +222,7 @@ class WebsocketClient extends BaseClient {
                     }
                 } else if (msg.startsWith("joined:")) {
                     console.log(this.node.id, msg, this.node.endpoint.token);
-                    const payload = (msg.length > 7 ? JSON.parse(msg.substring(7)) : null);
+                    const payload = msg.substring(7);
                     this.establish(payload);
                 }
             }
@@ -276,6 +261,7 @@ class WebsocketClient extends BaseClient {
     }
 
     closeSocket(afterClosing) {
+        this.clearSessionId();
         if (this.socket) {
             this.established = false;
             if (!afterClosing) {
@@ -292,6 +278,7 @@ class WebsocketClient extends BaseClient {
     establish(payload) {
         this.node.endpoint['mode'] = this.endpointMode;
         if (this.onJoined) {
+            this.setSessionId(payload);
             this.onJoined(this.node, payload);
         }
         while (this.pendingMessages.length) {
@@ -313,7 +300,7 @@ class WebsocketClient extends BaseClient {
         }
         this.heartbeatTimer = setTimeout(() => {
             if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-                this.socket.send("command:ping");
+                //this.socket.send("command:ping");
             }
         }, this.heartbeatInterval);
     }

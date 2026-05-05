@@ -90,9 +90,9 @@ class DashboardBuilder {
 
         const onJoined = (node, payload) => {
             this.clearConsole(node.index);
-            if (payload && payload.messages) {
-                payload.messages.forEach(msg => viewer.processMessage(msg));
-            }
+            // if (payload && payload.messages) {
+            //     payload.messages.forEach(msg => viewer.processMessage(msg));
+            // }
         };
 
         const onEstablished = (node) => {
@@ -133,10 +133,10 @@ class DashboardBuilder {
 
         console.log("establishing", nodeIndex);
         let client;
-        const isGatewayMode = (this.settings.clusterMode === "gateway");
         if (node.endpoint.mode === "polling") {
             client = new PollingClient(node, viewer, onJoined, onEstablished, onClosed, onFailed);
         } else {
+            const isGatewayMode = (this.settings.clusterMode === "gateway");
             client = new WebsocketClient(node, viewer, onJoined, onEstablished, onClosed, onFailed, isGatewayMode);
         }
         viewer.setClient(client);
@@ -471,8 +471,9 @@ class DashboardBuilder {
                 const startDate = v.getMaxStartDatetime(appId);
                 if (startDate > maxStartDate) maxStartDate = startDate;
             });
-            if (maxStartDate) options.push("dateOffset:" + maxStartDate);
-            else {
+            if (maxStartDate) {
+                options.push("dateOffset:" + maxStartDate);
+            } else {
                 $(".control-bar[data-app-id=" + appId + "] .date-offset-options .btn.previous").removeClass("on");
                 return;
             }

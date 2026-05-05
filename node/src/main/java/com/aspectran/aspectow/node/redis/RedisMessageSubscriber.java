@@ -80,7 +80,7 @@ public class RedisMessageSubscriber extends RedisPubSubAdapter<String, String> {
     @Override
     public void message(@NonNull String channel, String message) {
         // Expected patterns:
-        // aspectow:cluster:control:<clusterId>:<nodeId>
+        // aspectow:cluster:control:<category>:<clusterId>:<nodeId>
         // aspectow:cluster:relay:<category>:<clusterId>:<nodeId>
 
         String[] parts = channel.split(":");
@@ -89,14 +89,17 @@ public class RedisMessageSubscriber extends RedisPubSubAdapter<String, String> {
         }
 
         String type = parts[2]; // control or relay
+        String category = parts[3]; // appmon, commands, etc.
+        String nodeId = parts[5];   // node ID
+
         if ("control".equals(type)) {
-            String nodeId = parts[4];
             for (RedisMessageListener listener : listeners) {
-                listener.onControlMessage(nodeId, message);
+                String listenerCategory = listener.getCategory();
+                if (listenerCategory == null || listenerCategory.equals(category)) {
+                    listener.onControlMessage(nodeId, message);
+                }
             }
-        } else if ("relay".equals(type) && parts.length >= 6) {
-            String category = parts[3]; // appmon, commands, etc.
-            String nodeId = parts[5];   // node ID
+        } else if ("relay".equals(type)) {
             for (RedisMessageListener listener : listeners) {
                 String listenerCategory = listener.getCategory();
                 if (listenerCategory == null || listenerCategory.equals(category)) {
