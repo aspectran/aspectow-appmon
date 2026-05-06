@@ -170,7 +170,7 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
         String targetNodeId = commandOptions.getNodeId();
         RelaySession relaySession = new WebsocketRelaySession(session);
         appMonManager.getMessageRelayManager().subscribe(relaySession, targetNodeId);
-        if (appMonManager.getNodeId().equals(targetNodeId)) {
+        if (targetNodeId == null || appMonManager.getNodeId().equals(targetNodeId)) {
             List<String> messages = appMonManager.getMessageRelayManager().getLastMessages(relaySession);
             for (String message : messages) {
                 sendText(session, message);

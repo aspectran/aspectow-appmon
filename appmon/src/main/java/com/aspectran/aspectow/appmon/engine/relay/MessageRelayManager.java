@@ -277,9 +277,14 @@ public class MessageRelayManager {
         }
     }
 
-    public void subscribe(String nodeId, String appId) {
+    public void subscribeRemotely(String nodeId, @NonNull CommandOptions commandOptions) {
+        String appId = commandOptions.getAppId();
         subscriptionRegistry.addRemoteSubscription(nodeId, appId);
         startExporters(appId);
+        List<String> messages = getLastMessages(commandOptions);
+        for (String message : messages) {
+            publishRelay(nodeId, message);
+        }
     }
 
     /**
@@ -323,7 +328,7 @@ public class MessageRelayManager {
         session.removeJoinedApps();
     }
 
-    public void unsubscribe(String nodeId, String appId) {
+    public void unsubscribeRemotely(String nodeId, String appId) {
         subscriptionRegistry.removeRemoteSubscription(nodeId, appId);
         if (!subscriptionRegistry.isAppInUse(appId)) {
             stopExporters(appId);
@@ -331,7 +336,7 @@ public class MessageRelayManager {
     }
 
     public void focus(@NonNull CommandOptions commandOptions) {
-        String sessionId = commandOptions.getSessionid();
+        String sessionId = commandOptions.getSessionId();
         RelaySession session = findRelaySession(sessionId);
         if (session != null) {
             focus(session, commandOptions);
@@ -349,7 +354,7 @@ public class MessageRelayManager {
     }
 
     public void refreshData(@NonNull CommandOptions commandOptions) {
-        String sessionId = commandOptions.getSessionid();
+        String sessionId = commandOptions.getSessionId();
         RelaySession session = findRelaySession(sessionId);
         if (session != null) {
             refreshData(session, commandOptions);
@@ -379,23 +384,32 @@ public class MessageRelayManager {
      * @return a list of messages
      */
     public List<String> getLastMessages(@NonNull RelaySession session) {
-        CommandOptions commandOptions = new CommandOptions();
-        commandOptions.setTimeZone(session.getTimeZone());
         List<String> messages = new ArrayList<>();
         if (session.isValid()) {
+            CommandOptions commandOptions = new CommandOptions();
+            commandOptions.setTimeZone(session.getTimeZone());
             String[] appIds = session.getJoinedApps();
             if (appIds != null && appIds.length > 0) {
                 for (String id : appIds) {
-                    collectLastMessages(id, messages, commandOptions);
+                    commandOptions.setAppId(id);
+                    collectLastMessages(messages, commandOptions);
                 }
             } else {
-                collectLastMessages(null, messages, commandOptions);
+                collectLastMessages(messages, commandOptions);
             }
         }
         return messages;
     }
 
-    private void collectLastMessages(String appId, List<String> messages, CommandOptions commandOptions) {
+    public List<String> getLastMessages(@NonNull CommandOptions commandOptions) {
+        List<String> messages = new ArrayList<>();
+        String appId = commandOptions.getAppId();
+        collectLastMessages(messages, commandOptions);
+        return messages;
+    }
+
+    private void collectLastMessages(List<String> messages, CommandOptions commandOptions) {
+        String appId = commandOptions.getAppId();
         for (ExporterManager exporterManager : exporterManagers) {
             if (appId == null || exporterManager.getAppId().equals(appId)) {
                 exporterManager.collectMessages(messages, commandOptions);

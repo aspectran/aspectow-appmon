@@ -293,7 +293,7 @@ public class CommandOptions extends DefaultParameters {
         putValue(CommandOptions.loadedLines, loadedLines);
     }
 
-    public String getSessionid() {
+    public String getSessionId() {
         return getString(sessionId);
     }
 

@@ -64,10 +64,10 @@ public class RedisMessageRelayHandler implements RedisMessageListener {
         CommandOptions options = new CommandOptions(message);
         switch (options.getCommand()) {
             case COMMAND_JOIN:
-                messageRelayManager.subscribe(nodeId, options.getAppId());
+                messageRelayManager.subscribeRemotely(nodeId, options);
                 break;
             case COMMAND_RELEASE:
-                messageRelayManager.unsubscribe(nodeId, options.getAppId());
+                messageRelayManager.unsubscribeRemotely(nodeId, options.getAppId());
                 break;
             case COMMAND_REFRESH:
             case COMMAND_LOAD_PREVIOUS:
