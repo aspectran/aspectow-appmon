@@ -159,7 +159,8 @@ public abstract class AppMonManagerBuilder {
 
         AppInfoHolder appInfoHolder = new AppInfoHolder(nodeId, appMonConfig.getAppInfoList());
 
-        MessageRelayManager messageRelayManager = new MessageRelayManager(nodeId, nodeManager.getRedisMessagePublisher());
+        MessageRelayManager messageRelayManager = new MessageRelayManager(
+                nodeId, nodeManager.getNodeRegistry(), nodeManager.getRedisMessagePublisher());
 
         AppMonManager appMonManager = new AppMonManager(
                 nodeId, nodeManager.getClusterConfig().getMode(), pollingConfig, counterPersistInterval,

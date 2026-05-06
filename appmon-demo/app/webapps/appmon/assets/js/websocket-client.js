@@ -214,6 +214,7 @@ class WebsocketClient extends BaseClient {
             if (typeof event.data === "string") {
                 const msg = event.data;
                 if (this.established) {
+                    console.log(msg);
                     if (msg.startsWith("pong:")) {
                         this.node.endpoint.token = msg.substring(5);
                         this.heartbeatPing();

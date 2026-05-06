@@ -462,7 +462,7 @@ class DashboardBuilder {
     }
 
     refreshData(appId, dateOffset) {
-        const options = ["app:" + appId];
+        const options = ["appId:" + appId];
         const dateUnit = $(".control-bar[data-app-id=" + appId + "] .date-unit-options").data("unit");
         if (dateUnit) options.push("dateUnit:" + dateUnit);
         if (dateOffset === "previous") {

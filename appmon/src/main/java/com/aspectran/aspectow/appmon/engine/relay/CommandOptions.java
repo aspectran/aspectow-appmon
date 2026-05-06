@@ -32,9 +32,17 @@ import com.aspectran.utils.apon.ValueType;
  */
 public class CommandOptions extends DefaultParameters {
 
+    public static final String COMMAND_PING = "ping";
+
     public static final String COMMAND_JOIN = "join";
 
+    public static final String COMMAND_ESTABLISHED = "established";
+
     public static final String COMMAND_RELEASE = "release";
+
+    public static final String COMMAND_SUBSCRIBE = "subscribe";
+
+    public static final String COMMAND_UNSUBSCRIBE = "unsubscribe";
 
     /** Command to refresh the current view or data */
     public static final String COMMAND_REFRESH = "refresh";

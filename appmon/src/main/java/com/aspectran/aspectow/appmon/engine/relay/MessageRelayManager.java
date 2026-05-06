@@ -16,6 +16,8 @@
 package com.aspectran.aspectow.appmon.engine.relay;
 
 import com.aspectran.aspectow.appmon.engine.exporter.ExporterManager;
+import com.aspectran.aspectow.node.config.NodeInfo;
+import com.aspectran.aspectow.node.manager.NodeRegistry;
 import com.aspectran.aspectow.node.redis.RedisMessagePublisher;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -27,6 +29,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
+
+import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_REFRESH;
+import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_SUBSCRIBE;
+import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_UNSUBSCRIBE;
 
 /**
  * Manages all {@link MessageRelayer} and {@link ExporterManager} apps.
@@ -49,14 +55,17 @@ public class MessageRelayManager {
 
     private final String nodeId;
 
+    private final NodeRegistry nodeRegistry;
+
     private final RedisMessagePublisher messagePublisher;
 
     /**
      * Instantiates a new MessageRelayManager.
      * @param messagePublisher the Redis message publisher
      */
-    public MessageRelayManager(String nodeId, RedisMessagePublisher messagePublisher) {
+    public MessageRelayManager(String nodeId, NodeRegistry nodeRegistry, RedisMessagePublisher messagePublisher) {
         this.nodeId = nodeId;
+        this.nodeRegistry = nodeRegistry;
         this.messagePublisher = messagePublisher;
     }
 
@@ -132,7 +141,7 @@ public class MessageRelayManager {
                 logger.error("Failed to publish relay message to Redis", e);
             }
         } else {
-            relayMessage(nodeId, message);
+            relayLocally(message);
         }
     }
 
@@ -181,7 +190,7 @@ public class MessageRelayManager {
      * This method does not publish the message to Redis.
      * @param message the message to relay
      */
-    public void relayMessage(String nodeId, @NonNull String message) {
+    public void relayLocally(@NonNull String message) {
         String appId = null;
         boolean isLog = false;
 
@@ -203,9 +212,10 @@ public class MessageRelayManager {
             for (MessageRelayer relayer : messageRelayers) {
                 for (String sessionId : allSessionIds) {
                     RelaySession session = relayer.getLocalRelaySession(sessionId);
-                    if (session != null) {
+                    if (session != null && session.isValid()) {
                         if (isLog) {
-                            String targetFocus = nodeId + "/" + appId;
+                            //String targetFocus = nodeId + "/" + appId;
+                            String targetFocus = appId;
                             if (targetFocus.equals(session.getFocusedAppId())) {
                                 relayer.relay(session, message);
                             }
@@ -258,20 +268,29 @@ public class MessageRelayManager {
                 for (String appId : appIds) {
                     if (targetNodeId == null || isSameNode(targetNodeId)) {
                         startExporters(appId);
-                    } else {
-                        CommandOptions options = new CommandOptions();
-                        options.setCommand("subscribe");
-                        options.setAppId(appId);
-                        options.setTimeZone(session.getTimeZone());
-                        publishControl(targetNodeId, options.toString(false));
+                    }
+                    CommandOptions options = new CommandOptions();
+                    options.setCommand(COMMAND_SUBSCRIBE);
+                    options.setNodeId(targetNodeId);
+                    options.setAppId(appId);
+                    options.setTimeZone(session.getTimeZone());
+                    for (NodeInfo nodeInfo : nodeRegistry.getNodes()) {
+                        if (!isSameNode(nodeInfo.getNodeId())) {
+                            publishControl(nodeInfo.getNodeId(), options);
+                        }
                     }
                 }
             } else {
                 startExporters(null);
                 CommandOptions options = new CommandOptions();
-                options.setCommand("subscribe");
+                options.setCommand(COMMAND_SUBSCRIBE);
+                options.setNodeId(targetNodeId);
                 options.setTimeZone(session.getTimeZone());
-                publishControl(targetNodeId, options.toString(false));
+                for (NodeInfo nodeInfo : nodeRegistry.getNodes()) {
+                    if (!isSameNode(nodeInfo.getNodeId())) {
+                        publishControl(nodeInfo.getNodeId(), options);
+                    }
+                }
             }
             return true;
         } else {
@@ -304,12 +323,14 @@ public class MessageRelayManager {
                 }
                 if (isGatewayMode()) {
                     CommandOptions options = new CommandOptions();
-                    options.setCommand("unsubscribe");
+                    options.setCommand(COMMAND_UNSUBSCRIBE);
                     options.setAppId(appId);
                     String message = options.toString(false);
                     Set<String> remoteNodeIds = subscriptionRegistry.getNodeIdsRemotelySubscribedToApp(appId);
-                    for (String remoteNodeId : remoteNodeIds) {
-                        publishControl(remoteNodeId, message);
+                    if (remoteNodeIds != null) {
+                        for (String remoteNodeId : remoteNodeIds) {
+                            publishControl(remoteNodeId, message);
+                        }
                     }
                 }
             }
@@ -319,11 +340,13 @@ public class MessageRelayManager {
             }
             if (isGatewayMode()) {
                 CommandOptions options = new CommandOptions();
-                options.setCommand("unsubscribe");
+                options.setCommand(COMMAND_UNSUBSCRIBE);
                 String message = options.toString(false);
                 Set<String> remoteNodeIds = subscriptionRegistry.getNodeIdsRemotelySubscribedToApp(null);
-                for (String remoteNodeId : remoteNodeIds) {
-                    publishControl(remoteNodeId, message);
+                if (remoteNodeIds != null) {
+                    for (String remoteNodeId : remoteNodeIds) {
+                        publishControl(remoteNodeId, message);
+                    }
                 }
             }
         }
@@ -337,29 +360,14 @@ public class MessageRelayManager {
         }
     }
 
-    public void focus(@NonNull CommandOptions commandOptions) {
-        String sessionId = commandOptions.getSessionId();
-        RelaySession session = findRelaySession(sessionId);
-        if (session != null) {
-            focus(session, commandOptions);
-        }
-    }
-
-    public void focus(@NonNull RelaySession session, @NonNull CommandOptions commandOptions) {
-        String targetNodeId = commandOptions.getNodeId();
-        String focusedAppId = commandOptions.getAppId();
-        if (targetNodeId == null || isSameNode(targetNodeId)) {
-            session.setFocusedAppId(focusedAppId);
-        } else {
-            publishControl(targetNodeId, commandOptions);
-        }
-    }
-
-    public void refreshData(@NonNull CommandOptions commandOptions) {
-        String sessionId = commandOptions.getSessionId();
-        RelaySession session = findRelaySession(sessionId);
-        if (session != null) {
-            refreshData(session, commandOptions);
+    public void refreshDataRemotely(String nodeId, @NonNull CommandOptions commandOptions) {
+        if (messagePublisher != null) {
+            String appId = commandOptions.getAppId();
+            List<String> messages = new ArrayList<>();
+            collectNewMessages(appId, messages, commandOptions);
+            for (String message : messages) {
+                publishRelay(nodeId, message);
+            }
         }
     }
 
@@ -368,14 +376,13 @@ public class MessageRelayManager {
         if (!commandOptions.hasTimeZone()) {
             commandOptions.setTimeZone(session.getTimeZone());
         }
-        List<String> messages = getNewMessages(session, commandOptions);
         String targetNodeId = commandOptions.getNodeId();
         if (targetNodeId == null || isSameNode(targetNodeId)) {
-            return messages;
-        } else if (messagePublisher != null) {
-            for (String message : messages) {
-                publishRelay(targetNodeId, message);
-            }
+            return getNewMessages(session, commandOptions);
+        }
+        if (messagePublisher != null) {
+            commandOptions.setCommand(COMMAND_REFRESH);
+            publishControl(targetNodeId, commandOptions);
         }
         return null;
     }
@@ -386,8 +393,8 @@ public class MessageRelayManager {
      * @return a list of messages
      */
     public List<String> getLastMessages(@NonNull RelaySession session) {
-        List<String> messages = new ArrayList<>();
         if (session.isValid()) {
+            List<String> messages = new ArrayList<>();
             CommandOptions commandOptions = new CommandOptions();
             commandOptions.setTimeZone(session.getTimeZone());
             String[] appIds = session.getJoinedApps();
@@ -400,7 +407,7 @@ public class MessageRelayManager {
                 collectLastMessages(messages, commandOptions);
             }
         }
-        return messages;
+        return List.of();
     }
 
     public List<String> getLastMessages(@NonNull CommandOptions commandOptions) {
@@ -424,31 +431,13 @@ public class MessageRelayManager {
      * @param commandOptions the command options specifying what to refresh
      * @return a list of new messages
      */
-    public List<String> getNewMessages(@NonNull RelaySession session, @NonNull CommandOptions commandOptions) {
-        String id = commandOptions.getAppId();
-        if (id != null && id.contains("/")) {
-            int idx = id.indexOf("/");
-            String targetNodeId = id.substring(0, idx);
-            String appId = id.substring(idx + 1);
-            if (targetNodeId.equals(nodeId)) {
-                commandOptions.setAppId(appId);
-                return collectNewMessages(session, commandOptions);
-            } else {
-                dispatchCommand(targetNodeId, session.getId(), commandOptions);
-                return List.of();
-            }
-        } else {
-            return collectNewMessages(session, commandOptions);
-        }
-    }
-
     @NonNull
-    private List<String> collectNewMessages(RelaySession session, @NonNull CommandOptions commandOptions) {
+    public List<String> getNewMessages(RelaySession session, @NonNull CommandOptions commandOptions) {
         String appId = commandOptions.getAppId();
         List<String> messages = new ArrayList<>();
         if (session == null || session.isValid()) {
             String[] appIds = (session != null ? session.getJoinedApps() : null);
-            if (appIds != null && appIds.length > 0) {
+            if (appIds != null) {
                 for (String id : appIds) {
                     if (appId == null || id.equals(appId)) {
                         collectNewMessages(id, messages, commandOptions);
@@ -465,17 +454,6 @@ public class MessageRelayManager {
         for (ExporterManager exporterManager : exporterManagers) {
             if (appId == null || exporterManager.getAppId().equals(appId)) {
                 exporterManager.collectNewMessages(messages, commandOptions);
-            }
-        }
-    }
-
-    private void dispatchCommand(String targetNodeId, String sessionId, CommandOptions commandOptions) {
-        if (messagePublisher != null) {
-            try {
-                String message = "command:" + sessionId + ":" + commandOptions.toString();
-                messagePublisher.publishControl(targetNodeId, message);
-            } catch (Exception e) {
-                logger.error("Failed to dispatch command to node {}", targetNodeId, e);
             }
         }
     }

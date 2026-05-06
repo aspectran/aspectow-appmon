@@ -20,11 +20,10 @@ import com.aspectran.aspectow.appmon.engine.relay.MessageRelayManager;
 import com.aspectran.aspectow.node.redis.RedisMessageListener;
 import org.jspecify.annotations.NonNull;
 
-import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_FOCUS;
-import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_JOIN;
 import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_LOAD_PREVIOUS;
 import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_REFRESH;
-import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_RELEASE;
+import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_SUBSCRIBE;
+import static com.aspectran.aspectow.appmon.engine.relay.CommandOptions.COMMAND_UNSUBSCRIBE;
 
 /**
  * RedisMessageRelayHandler listens to relay messages from other nodes via Redis
@@ -52,7 +51,7 @@ public class RedisMessageRelayHandler implements RedisMessageListener {
 
     @Override
     public void onRelayMessage(String nodeId, String message) {
-        messageRelayManager.relayMessage(nodeId, message);
+        messageRelayManager.relayLocally(message);
     }
 
     /**
@@ -63,18 +62,15 @@ public class RedisMessageRelayHandler implements RedisMessageListener {
     private void handleControlMessage(String nodeId, @NonNull String message) {
         CommandOptions options = new CommandOptions(message);
         switch (options.getCommand()) {
-            case COMMAND_JOIN:
+            case COMMAND_SUBSCRIBE:
                 messageRelayManager.subscribeRemotely(nodeId, options);
                 break;
-            case COMMAND_RELEASE:
+            case COMMAND_UNSUBSCRIBE:
                 messageRelayManager.unsubscribeRemotely(nodeId, options.getAppId());
                 break;
             case COMMAND_REFRESH:
             case COMMAND_LOAD_PREVIOUS:
-                messageRelayManager.refreshData(options);
-                break;
-            case COMMAND_FOCUS:
-                messageRelayManager.focus(options);
+                messageRelayManager.refreshDataRemotely(nodeId, options);
                 break;
         }
     }
