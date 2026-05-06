@@ -262,6 +262,7 @@ public class MessageRelayManager {
                         CommandOptions options = new CommandOptions();
                         options.setCommand("subscribe");
                         options.setAppId(appId);
+                        options.setTimeZone(session.getTimeZone());
                         publishControl(targetNodeId, options.toString(false));
                     }
                 }
@@ -269,6 +270,7 @@ public class MessageRelayManager {
                 startExporters(null);
                 CommandOptions options = new CommandOptions();
                 options.setCommand("subscribe");
+                options.setTimeZone(session.getTimeZone());
                 publishControl(targetNodeId, options.toString(false));
             }
             return true;
@@ -403,12 +405,11 @@ public class MessageRelayManager {
 
     public List<String> getLastMessages(@NonNull CommandOptions commandOptions) {
         List<String> messages = new ArrayList<>();
-        String appId = commandOptions.getAppId();
         collectLastMessages(messages, commandOptions);
         return messages;
     }
 
-    private void collectLastMessages(List<String> messages, CommandOptions commandOptions) {
+    private void collectLastMessages(List<String> messages, @NonNull CommandOptions commandOptions) {
         String appId = commandOptions.getAppId();
         for (ExporterManager exporterManager : exporterManagers) {
             if (appId == null || exporterManager.getAppId().equals(appId)) {
