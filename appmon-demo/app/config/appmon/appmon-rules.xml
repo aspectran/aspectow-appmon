@@ -3,6 +3,15 @@
         "https://aspectran.com/dtd/aspectran-9.dtd">
 <aspectran>
 
+    <bean class="com.aspectran.aspectow.appmon.engine.config.AppMonConfigResolver">
+        <properties profile="!prod">
+            <item name="configLocation">/config/appmon/appmon-config.apon</item>
+        </properties>
+        <properties profile="prod">
+            <item name="configLocation">/config/appmon/appmon-config-prod.apon</item>
+        </properties>
+    </bean>
+
     <append file="/config/appmon/node-rules.xml" profile="!gateway"/>
     <append file="/config/appmon/node-rules-gateway.xml" profile="gateway"/>
 
