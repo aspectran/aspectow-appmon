@@ -231,6 +231,7 @@
         <script th:inline="javascript">
             const basePath = [[@{/}]].replace(/\/$/, '');
             const clusterMode = [[${page.clusterMode}]];
+            const isDirectMode = (clusterMode === 'direct');
             const nodes = [[${page.nodes}]];
             const node = [[${page.node}]];
 
@@ -510,7 +511,7 @@
                     });
                 }
 
-                if (clusterMode === 'direct') {
+                if (isDirectMode) {
                     nodes.forEach(n => {
                         const node = {
                             id: n.id,

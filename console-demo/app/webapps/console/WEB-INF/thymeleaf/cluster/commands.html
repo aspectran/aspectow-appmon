@@ -217,6 +217,8 @@ arguments: {
         <script th:inline="javascript">
             const basePath = [[@{/}]].replace(/\/$/, '');
             const clusterMode = [[${page.clusterMode}]];
+            const isGatewayMode = (clusterMode === 'gateway');
+            const isDirectMode = (clusterMode === 'direct');
             const isDemoUser = /*[[${session.USER_INFO.hasRole('DEMO')}]]*/ false;
             const myNodeId = [[${page.myNodeId}]];
             const targetNodeId = [[${page.targetNodeId}]];
@@ -287,7 +289,7 @@ arguments: {
                 } else {
                     const prevValue = $select.val();
                     $container.show();
-                    if (clusterMode === 'gateway') {
+                    if (isGatewayMode) {
                         const groups = [...new Set(nodes.map(n => n.group).filter(g => g))];
                         groups.forEach(group => {
                             const groupNodes = nodes.filter(n => n.group === group);
@@ -344,7 +346,7 @@ arguments: {
                         checkSelectedNodeStatus(currentNodeId);
                     }
                 }
-                if (clusterMode === 'direct') {
+                if (isDirectMode) {
                     updateConnectionIndicatorForDirectMode();
                 }
             }
@@ -369,7 +371,7 @@ arguments: {
                     return false;
                 }
 
-                if (clusterMode === 'gateway') {
+                if (isGatewayMode) {
                     if (isDead) {
                         renderUnreachableError(nodeId);
                         return false;
@@ -528,7 +530,7 @@ arguments: {
                 if (targetType === 'group') message.targetGroup = targetValue;
                 if (targetType === 'all') message.targetAll = true;
 
-                if (clusterMode === 'gateway') {
+                if (isGatewayMode) {
                     if (consoleClient) {
                         consoleClient.sendMessage(message);
                     }
@@ -684,7 +686,7 @@ arguments: {
                 }
                 consoleClients = {};
 
-                if (clusterMode === 'gateway') {
+                if (isGatewayMode) {
                     const targetNode = nodes.find(n => n.id === (targetNodeId || myNodeId));
                     const nodeInfo = {
                         id: targetNodeId || myNodeId,
@@ -734,7 +736,7 @@ arguments: {
                             targetNode.status = 'LIVE';
                         }
 
-                        if (clusterMode === 'gateway') {
+                        if (isGatewayMode) {
                             $('#connection-indicator').text("CONNECTED").removeClass("bg-secondary bg-danger bg-warning").addClass("bg-success");
                             const type = $('#target-type').val();
                             const val = $('#target-value').val();
@@ -747,7 +749,7 @@ arguments: {
                         }
                     },
                     onRetry: (count, max) => {
-                        if (clusterMode === 'gateway') {
+                        if (isGatewayMode) {
                             $('#connection-indicator').text(`RECONNECTING (${count}/${max})...`).removeClass("bg-success bg-danger").addClass("bg-warning");
                         } else {
                             updateConnectionIndicatorForDirectMode();
@@ -756,12 +758,12 @@ arguments: {
                     onClose: (event) => {
                         const targetNode = nodes.find(n => n.id === nodeInfo.id);
                         if (targetNode) {
-                            if (clusterMode === 'direct') {
+                            if (isDirectMode) {
                                 targetNode.status = 'DEAD';
                             }
                         }
 
-                        if (clusterMode === 'gateway') {
+                        if (isGatewayMode) {
                             if (event.code === 1003) {
                                 $('#connection-indicator').text("SESSION EXPIRED").removeClass("bg-success bg-warning").addClass("bg-danger");
                             } else {
@@ -802,7 +804,7 @@ arguments: {
                             targetNode.status = 'DEAD';
                         }
 
-                        if (clusterMode === 'gateway') {
+                        if (isGatewayMode) {
                             renderUnreachableError(nodeInfo.id);
                         } else {
                             updateConnectionIndicatorForDirectMode();
@@ -940,7 +942,7 @@ arguments: {
                         updateUrl(nodeId);
                         checkSelectedNodeStatus(nodeId);
                     }
-                    if (clusterMode === 'direct') {
+                    if (isDirectMode) {
                         updateConnectionIndicatorForDirectMode();
                     }
                 });

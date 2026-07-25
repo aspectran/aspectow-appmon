@@ -328,12 +328,20 @@
         <script th:if="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:src="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/console@4.0/js/console-client.js|"></script>
         <script th:unless="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:src="@{/assets/js/console-client.js}"></script>
         <script th:inline="javascript">
+            const VIEW_MODE_DASHBOARD = 'dashboard';
+            const VIEW_MODE_DETAIL = 'detail';
             const basePath = [[@{/}]].replace(/\/$/, '');
             const clusterMode = [[${page.clusterMode}]];
+            const isGatewayMode = (clusterMode === 'gateway');
+            const isDirectMode = (clusterMode === 'direct');
             const myNodeId = [[${page.myNodeId}]];
             let nodes = [[${page.nodes}]];
             let consoleClient = null;
+            let consoleClients = {};
             let currentNodeId = [[${page.node.id}]];
+            let currentViewMode = VIEW_MODE_DASHBOARD;
+            const isDashboardView = () => (currentViewMode === VIEW_MODE_DASHBOARD);
+            const isDetailView = () => (currentViewMode === VIEW_MODE_DETAIL);
 
             function refreshNodeList() {
                 return fetch(basePath + "/cluster/scheduler/nodes", {
@@ -343,16 +351,8 @@
                     .then(res => {
                         if (res.success) {
                             nodes = res.data;
-                            if (consoleClient && consoleClient.established) {
-                                const current = nodes.find(n => n.id === currentNodeId);
-                                if (current) {
-                                    current.status = 'LIVE';
-                                }
-                            }
                             renderNodeSelector();
-                            if (clusterMode === 'direct') {
-                                checkDirectNodesHealth();
-                            }
+                            updateConnectionIndicator();
                             return res.data;
                         } else {
                             throw new Error(res.error ? res.error.message : "Failed to refresh node list");
@@ -360,10 +360,56 @@
                     });
             }
 
+            function updateConnectionIndicator() {
+                const $indicator = $('#connection-indicator');
+                if (isDetailView()) {
+                    const client = getConsoleClient(currentNodeId);
+                    const targetNode = nodes.find(n => n.id === currentNodeId);
+                    const isDead = targetNode && targetNode.status && targetNode.status.toUpperCase() === 'DEAD';
+                    if (isDead) {
+                        $indicator.text("NODE DEAD").removeClass("bg-success bg-warning bg-secondary").addClass("bg-danger");
+                    } else if (client && client.established) {
+                        $indicator.text("CONNECTED").removeClass("bg-secondary bg-danger bg-warning").addClass("bg-success");
+                    } else if (client && client.retryCount > 0) {
+                        $indicator.text(`RECONNECTING (${client.retryCount}/${client.options.maxRetries})...`).removeClass("bg-success bg-danger").addClass("bg-warning");
+                    } else {
+                        $indicator.text("CONNECTING...").removeClass("bg-success bg-danger bg-warning").addClass("bg-secondary");
+                    }
+                } else {
+                    if (isGatewayMode) {
+                        if (consoleClient && consoleClient.established) {
+                            $indicator.text("CONNECTED").removeClass("bg-secondary bg-danger bg-warning").addClass("bg-success");
+                        } else if (consoleClient && consoleClient.retryCount > 0) {
+                            $indicator.text(`RECONNECTING (${consoleClient.retryCount}/${consoleClient.options.maxRetries})...`).removeClass("bg-success bg-danger").addClass("bg-warning");
+                        } else {
+                            $indicator.text("CONNECTING...").removeClass("bg-success bg-danger bg-warning").addClass("bg-secondary");
+                        }
+                    } else {
+                        let connectedCount = 0;
+                        let connectingCount = 0;
+                        let totalNodes = nodes.length;
+                        nodes.forEach(n => {
+                            const c = consoleClients[n.id];
+                            if (c && c.established) connectedCount++;
+                            else if (c && c.retryCount > 0) connectingCount++;
+                        });
+                        if (connectedCount === totalNodes && totalNodes > 0) {
+                            $indicator.text("CONNECTED").removeClass("bg-secondary bg-danger bg-warning").addClass("bg-success");
+                        } else if (connectedCount > 0) {
+                            $indicator.text(`PARTIALLY CONNECTED (${connectedCount}/${totalNodes})`).removeClass("bg-success bg-danger bg-secondary").addClass("bg-warning");
+                        } else if (connectingCount > 0) {
+                            $indicator.text("CONNECTING...").removeClass("bg-success bg-danger bg-secondary").addClass("bg-warning");
+                        } else {
+                            $indicator.text("DISCONNECTED").removeClass("bg-success bg-warning bg-secondary").addClass("bg-danger");
+                        }
+                    }
+                }
+            }
+
             function renderNodeSelector() {
                 const $select = $('#node-selector');
                 $select.empty();
-                if (clusterMode === 'gateway') {
+                if (isGatewayMode) {
                     const groups = [...new Set(nodes.map(n => n.group).filter(g => g))];
                     groups.forEach(group => {
                         const $optgroup = $('<optgroup>').attr('label', group);
@@ -400,8 +446,7 @@
                     nodes.forEach(n => {
                         const title = (n.title && n.title !== n.id) ? (n.title + ' (' + n.id + ')') : n.id;
                         const option = new Option(title, n.id);
-                        const isMainNode = (n.id === currentNodeId);
-                        if (n.status && n.status.toUpperCase() === 'DEAD' && (isMainNode || n.healthChecked)) {
+                        if (n.status && n.status.toUpperCase() === 'DEAD') {
                             $(option).addClass('text-danger');
                             option.text += ' [DEAD]';
                         } else if (n.hasSchedulerManager === false) {
@@ -422,8 +467,6 @@
                 }
             }
 
-            let currentViewMode = 'dashboard';
-
             let detailNodeTimer = null;
 
             function requestDetailNodeServices(nodeId) {
@@ -436,7 +479,8 @@
                     showDetailViewUnsupportedError(nodeId);
                     return;
                 }
-                if (!consoleClient || !consoleClient.established) return;
+                const client = getConsoleClient(nodeId);
+                if (!client || !client.established) return;
 
                 $('#scheduler-container').html('<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="mt-2 text-muted">Fetching data from ' + nodeId + '...</p></div>');
 
@@ -445,7 +489,7 @@
                     targetNodeId: nodeId,
                     command: "services"
                 };
-                consoleClient.sendMessage(request);
+                client.sendMessage(request);
 
                 detailNodeTimer = setTimeout(() => {
                     showDetailViewUnsupportedError(nodeId);
@@ -456,6 +500,11 @@
                 if (detailNodeTimer) {
                     clearTimeout(detailNodeTimer);
                     detailNodeTimer = null;
+                }
+                const targetNode = nodes.find(n => n.id === nodeId);
+                if (targetNode) {
+                    targetNode.hasSchedulerManager = false;
+                    renderNodeSelector();
                 }
                 $('#scheduler-container').html(`
                     <div class="text-center py-5">
@@ -474,35 +523,83 @@
                 currentNodeId = nodeId;
                 updateStats('-', '-', '-', nodeId);
 
-                const nodeInfo = nodes.find(n => n.id === nodeId);
-                if (clusterMode === 'gateway' && nodeInfo && nodeInfo.status && nodeInfo.status.toUpperCase() === 'DEAD') {
+                const targetNode = nodes.find(n => n.id === nodeId);
+                if (targetNode && targetNode.status && targetNode.status.toUpperCase() === 'DEAD') {
                     showDeadNodeError(nodeId);
                     return;
                 }
 
-                if (consoleClient && consoleClient.established) {
-                    const request = {
-                        header: "subscribe",
-                        targetNodeId: nodeId
-                    };
-                    consoleClient.sendMessage(request);
-                    return;
+                updateConnectionIndicator();
+
+                const client = getConsoleClient(nodeId);
+                if (client && client.established) {
+                    if (isGatewayMode) {
+                        const request = {
+                            header: "subscribe",
+                            targetNodeId: nodeId
+                        };
+                        client.sendMessage(request);
+                    }
+                    if (isDetailView()) {
+                        requestDetailNodeServices(nodeId);
+                    }
+                } else {
+                    if (isDirectMode && client) {
+                        client.openSocket();
+                    } else if (isGatewayMode) {
+                        initConsoleClients(null);
+                    }
+                }
+            }
+
+            function initConsoleClients(token) {
+                if (consoleClient) {
+                    consoleClient.stop();
+                    consoleClient = null;
+                }
+                for (let id in consoleClients) {
+                    consoleClients[id].stop();
+                }
+                consoleClients = {};
+
+                if (isDashboardView()) {
+                    renderDashboard();
                 }
 
-                $('#connection-indicator').text("CONNECTING...").removeClass("bg-success bg-danger bg-warning").addClass("bg-secondary");
+                if (isGatewayMode) {
+                    const targetNode = nodes.find(n => n.id === currentNodeId) || nodes.find(n => n.id === myNodeId);
+                    const nodeId = targetNode ? targetNode.id : (currentNodeId || myNodeId);
+                    const nodeInfo = {
+                        id: nodeId,
+                        port: null,
+                        endpoint: {
+                            path: basePath + "/nodes/" + nodeId,
+                            mode: (targetNode && targetNode.endpoint ? targetNode.endpoint.mode : null)
+                        }
+                    };
+                    consoleClient = createConsoleClient(nodeInfo, token);
+                    consoleClient.start('scheduler');
+                } else {
+                    nodes.forEach(n => {
+                        const nodeInfo = {
+                            id: n.id,
+                            port: n.port,
+                            endpoint: {
+                                path: basePath + "/nodes/" + n.id,
+                                mode: (n.endpoint ? n.endpoint.mode : null)
+                            }
+                        };
+                        const client = createConsoleClient(nodeInfo, token);
+                        client.start('scheduler');
+                        consoleClients[n.id] = client;
+                    });
+                    updateConnectionIndicator();
+                }
+            }
 
-                const targetNode = nodes.find(n => n.id === nodeId);
-                const isDirect = (clusterMode === 'direct');
-                const node = {
-                    id: nodeId,
-                    port: isDirect && targetNode ? targetNode.port : null,
-                    endpoint: {
-                        path: (isDirect && targetNode && targetNode.port && targetNode.endpoint && targetNode.endpoint.path ? targetNode.endpoint.path : basePath) + "/nodes/" + nodeId,
-                        mode: (targetNode && targetNode.endpoint ? targetNode.endpoint.mode : null)
-                    }
-                };
-
-                consoleClient = new ConsoleClient(node, {
+            function createConsoleClient(nodeInfo, token) {
+                return new ConsoleClient(nodeInfo, {
+                    token: token,
                     onBeforeConnect: () => {
                         return fetch(basePath + "/cluster/token", {
                                 headers: { 'Accept': 'application/json' }
@@ -514,51 +611,82 @@
                                 return null;
                             });
                     },
+                    onEstablished: () => {
+                        const targetNode = nodes.find(n => n.id === nodeInfo.id);
+                        if (targetNode) {
+                            targetNode.status = 'LIVE';
+                            renderNodeSelector();
+                        }
+                        updateConnectionIndicator();
+
+                        if (isDetailView()) {
+                            if (nodeInfo.id === currentNodeId) {
+                                requestDetailNodeServices(currentNodeId);
+                            }
+                        } else {
+                            if ($('#dashboard-view-container').length === 0) {
+                                renderDashboard();
+                            } else {
+                                nodes.forEach(n => {
+                                    const isDead = (n.status && n.status.toUpperCase() === 'DEAD');
+                                    if (!isDead) {
+                                        requestDashboardNodeServices(n.id);
+                                    }
+                                });
+                            }
+                        }
+                    },
+                    onRetry: (count, max) => {
+                        updateConnectionIndicator();
+                    },
+                    onClose: (event) => {
+                        const targetNode = nodes.find(n => n.id === nodeInfo.id);
+                        if (targetNode) {
+                            targetNode.status = 'DEAD';
+                            renderNodeSelector();
+                            if (isDashboardView()) {
+                                markDashboardNodeDead(nodeInfo.id);
+                            }
+                        }
+                        updateConnectionIndicator();
+                    },
+                    onFailed: () => {
+                        const targetNode = nodes.find(n => n.id === nodeInfo.id);
+                        if (targetNode) {
+                            targetNode.status = 'DEAD';
+                            renderNodeSelector();
+                            if (isDashboardView()) {
+                                markDashboardNodeDead(nodeInfo.id);
+                            }
+                        }
+                        updateConnectionIndicator();
+                        if (isDetailView() && nodeInfo.id === currentNodeId) {
+                            showDeadNodeError(currentNodeId);
+                        }
+                    },
                     onMessage: (response) => {
                         if (response.error) {
                             console.error("Received error message:", response.error);
                             return;
                         }
+                        if (!response.nodeId) {
+                            response.nodeId = nodeInfo.id;
+                        }
                         handleMessage(response);
-                    },
-                    onEstablished: () => {
-                        const current = nodes.find(n => n.id === currentNodeId);
-                        if (current) {
-                            current.status = 'LIVE';
-                            renderNodeSelector();
-                        }
-                        $('#connection-indicator').text("CONNECTED").removeClass("bg-secondary bg-danger bg-warning").addClass("bg-success");
-                        
-                        if (currentViewMode === 'detail') {
-                            requestDetailNodeServices(currentNodeId);
-                        } else {
-                            renderDashboard();
-                        }
-                    },
-                    onRetry: (count, max) => {
-                        $('#connection-indicator').text(`RECONNECTING (${count}/${max})...`).removeClass("bg-success bg-danger").addClass("bg-warning");
-                    },
-                    onClose: (event) => {
-                        if (clusterMode === 'direct' && nodeInfo) {
-                            nodeInfo.status = 'DEAD';
-                            renderNodeSelector();
-                        }
-                        $('#connection-indicator').text(event.code === 1003 ? "SESSION EXPIRED" : "DISCONNECTED")
-                            .removeClass("bg-success bg-warning").addClass("bg-danger");
-                    },
-                    onFailed: () => {
-                        if (nodeInfo) {
-                            nodeInfo.status = 'DEAD';
-                            renderNodeSelector();
-                        }
-                        showDeadNodeError(nodeId);
                     }
                 });
-                consoleClient.start('scheduler');
+            }
+
+            function getConsoleClient(nodeId) {
+                if (isGatewayMode) {
+                    return consoleClient;
+                } else {
+                    return consoleClients[nodeId || currentNodeId];
+                }
             }
 
             function showDeadNodeError(nodeId) {
-                $('#connection-indicator').text("NODE DEAD").removeClass("bg-success bg-warning bg-secondary").addClass("bg-danger");
+                updateConnectionIndicator();
                 $('#scheduler-container').html(`
                     <div class="text-center py-5">
                         <i class="bi bi-exclamation-triangle fs-1 text-danger mb-3"></i>
@@ -574,7 +702,12 @@
             function handleMessage(response) {
                 const respNodeId = response.nodeId;
                 if (response.header === 'services') {
-                    if (currentViewMode === 'detail') {
+                    const targetNode = nodes.find(n => n.id === respNodeId);
+                    if (targetNode && targetNode.hasSchedulerManager !== true) {
+                        targetNode.hasSchedulerManager = true;
+                        renderNodeSelector();
+                    }
+                    if (isDetailView()) {
                         if (respNodeId === currentNodeId) {
                             renderSchedulerList(response.data);
                         }
@@ -582,13 +715,13 @@
                         updateDashboardNodeCard(respNodeId, response.data);
                     }
                 } else if (response.header === 'log') {
-                    if (currentViewMode === 'dashboard') {
+                    if (isDashboardView()) {
                         appendClusterDashboardLogLine(response.nodeId, response.owner, response.data);
-                    } else if (currentViewMode === 'detail' && respNodeId === currentNodeId) {
+                    } else if (isDetailView() && respNodeId === currentNodeId) {
                         appendLogLine(response.owner, response.data);
                     }
                 } else if (response.header === 'previousLogs') {
-                    if (currentViewMode === 'detail' && respNodeId === currentNodeId) {
+                    if (isDetailView() && respNodeId === currentNodeId) {
                         prependLogLines(response.owner, response.data);
                     }
                 } else if (response.header === 'stateUpdated' && response.data) {
@@ -603,15 +736,18 @@
                     if (stateData && !stateData.success) {
                         alert(stateData.message || "Failed to update state");
                     }
-                    if (currentViewMode === 'detail' && respNodeId === currentNodeId) {
+                    if (isDetailView() && respNodeId === currentNodeId) {
                         applyStateUpdate(stateData);
-                    } else if (currentViewMode === 'dashboard') {
+                    } else if (isDashboardView()) {
                         const request = {
                             header: "execute",
                             targetNodeId: respNodeId,
                             command: "services"
                         };
-                        consoleClient.sendMessage(request);
+                        const client = getConsoleClient(respNodeId);
+                        if (client && client.established) {
+                            client.sendMessage(request);
+                        }
                     }
                 } else if (response.header === 'nodeJoined') {
                     if (response.nodeId === currentNodeId && currentNodeId !== myNodeId) {
@@ -627,7 +763,7 @@
                             joinedNode.status = 'active';
                             renderNodeSelector();
                         }
-                        if (currentViewMode === 'dashboard') {
+                        if (isDashboardView()) {
                             renderDashboard();
                             setTimeout(() => {
                                 if ($(`#status-text-${joinedNodeId}`).text() === 'CONNECTING...') {
@@ -641,9 +777,14 @@
                         }
                     });
                 } else if (response.header === 'nodeLeft') {
+                    const leftNodeId = response.nodeId;
                     refreshNodeList().then(() => {
-                        if (currentViewMode === 'dashboard') {
-                            renderDashboard();
+                        if (isDashboardView()) {
+                            if (leftNodeId) {
+                                markDashboardNodeDead(leftNodeId);
+                            } else {
+                                renderDashboard();
+                            }
                         }
                     });
                 }
@@ -655,14 +796,15 @@
                 if (dashboardNodeTimers[nodeId]) {
                     clearTimeout(dashboardNodeTimers[nodeId]);
                 }
-                if (!consoleClient || !consoleClient.established) return;
+                const client = getConsoleClient(nodeId);
+                if (!client || !client.established) return;
 
                 const request = {
                     header: "execute",
                     targetNodeId: nodeId,
                     command: "services"
                 };
-                consoleClient.sendMessage(request);
+                client.sendMessage(request);
 
                 dashboardNodeTimers[nodeId] = setTimeout(() => {
                     markDashboardNodeUnsupported(nodeId);
@@ -671,6 +813,11 @@
 
             function markDashboardNodeUnsupported(nodeId) {
                 delete dashboardNodeTimers[nodeId];
+                const targetNode = nodes.find(n => n.id === nodeId);
+                if (targetNode) {
+                    targetNode.hasSchedulerManager = false;
+                    renderNodeSelector();
+                }
                 const $led = $(`#led-${nodeId}`);
                 const $statusText = $(`#status-text-${nodeId}`);
                 const $info = $(`#info-${nodeId}`);
@@ -678,6 +825,26 @@
                 $led.removeClass('connecting live dead').addClass('bg-secondary');
                 $statusText.text('N/A').removeClass('text-muted text-success text-danger').addClass('text-secondary');
                 $info.html('<p class="text-muted small mb-0 py-1" style="font-size:0.75rem;"><i class="bi bi-dash-circle me-1"></i> Scheduler Not Active</p>');
+                recalculateStats();
+            }
+
+            function markDashboardNodeDead(nodeId) {
+                if (dashboardNodeTimers[nodeId]) {
+                    clearTimeout(dashboardNodeTimers[nodeId]);
+                    delete dashboardNodeTimers[nodeId];
+                }
+                const targetNode = nodes.find(n => n.id === nodeId);
+                if (targetNode) {
+                    targetNode.status = 'DEAD';
+                    renderNodeSelector();
+                }
+                const $led = $(`#led-${nodeId}`);
+                const $statusText = $(`#status-text-${nodeId}`);
+                const $info = $(`#info-${nodeId}`);
+
+                $led.removeClass('connecting live bg-secondary').addClass('dead');
+                $statusText.text('DEAD').removeClass('text-muted text-success text-secondary').addClass('text-danger');
+                $info.html('<p class="text-danger small mb-0"><i class="bi bi-x-circle me-1"></i> Node Offline</p>');
                 recalculateStats();
             }
 
@@ -763,7 +930,7 @@
 
                     if (n.hasSchedulerManager === false) {
                         markDashboardNodeUnsupported(n.id);
-                    } else if (consoleClient && consoleClient.established) {
+                    } else {
                         requestDashboardNodeServices(n.id);
                     }
                 });
@@ -873,7 +1040,7 @@
             }
 
             function switchToDetailView(nodeId) {
-                currentViewMode = 'detail';
+                currentViewMode = VIEW_MODE_DETAIL;
                 $('#btn-view-detail').addClass('active');
                 $('#btn-view-dashboard').removeClass('active');
                 $('.node-search').hide();
@@ -1012,7 +1179,7 @@
             }
 
             function recalculateStats() {
-                if (currentViewMode === 'dashboard') {
+                if (isDashboardView()) {
                     let totalActiveSchedules = 0;
                     let totalActiveJobs = 0;
                     let totalIsolated = 0;
@@ -1325,7 +1492,10 @@
                     loggingGroup: loggingGroup,
                     loadedLines: loadedCount
                 };
-                consoleClient.sendMessage(request);
+                const client = getConsoleClient(currentNodeId);
+                if (client && client.established) {
+                    client.sendMessage(request);
+                }
             }
 
             function clearLog(loggingGroup) {
@@ -1375,41 +1545,26 @@
                 };
                 if (type === 'schedule') request.scheduleId = id;
                 if (type === 'job') request.jobName = id;
-                consoleClient.sendMessage(request);
-            }
-
-            function checkDirectNodesHealth() {
-                if (clusterMode !== 'direct') return;
-
-                nodes.forEach(n => {
-                    if (n.id === currentNodeId) return;
-
-                    let path = basePath + "/nodes/" + n.id + "/scheduler/ping";
-                    if (n.port && (location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
-                        const url = new URL(path, location.href);
-                        url.port = n.port;
-                        path = url.origin + url.pathname;
-                    }
-
-                    fetch(path, { method: 'GET' })
-                        .then(res => {
-                            n.status = 'LIVE';
-                            n.healthChecked = true;
-                            renderNodeSelector();
-                        })
-                        .catch(err => {
-                            console.warn("Health check failed for node:", n.id, err);
-                            n.status = 'DEAD';
-                            n.healthChecked = true;
-                            renderNodeSelector();
-                        });
-                });
+                const client = getConsoleClient(currentNodeId);
+                if (client && client.established) {
+                    client.sendMessage(request);
+                }
             }
 
             $(function() {
                 renderNodeSelector();
-                connectToNode(currentNodeId);
-                checkDirectNodesHealth();
+                fetch(basePath + "/cluster/token", {
+                        headers: { 'Accept': 'application/json' }
+                    })
+                    .then(response => response.json())
+                    .then(res => {
+                        const token = res.success ? res.data : null;
+                        initConsoleClients(token);
+                    })
+                    .catch(err => {
+                        console.error("Failed to fetch initial token:", err);
+                        initConsoleClients(null);
+                    });
 
                 $(document).on('keydown', function(e) {
                     if (e.key === 'Escape') {
@@ -1426,7 +1581,7 @@
                 });
 
                 $('#btn-view-dashboard').on('click', function() {
-                    currentViewMode = 'dashboard';
+                    currentViewMode = VIEW_MODE_DASHBOARD;
                     $(this).addClass('active');
                     $('#btn-view-detail').removeClass('active');
                     $('.selector-item').hide();
@@ -1439,7 +1594,7 @@
                 });
 
                 $('#node-search').on('input', function() {
-                    if (currentViewMode === 'dashboard') {
+                    if (isDashboardView()) {
                         filterDashboardNodes();
                     } else {
                         const query = $(this).val().toLowerCase();
@@ -1544,6 +1699,7 @@
                     const targetType = $('input[name="bulkTargetType"]:checked').val();
                     const targetId = $('#bulk-target-id').val();
                     const action = $('input[name="bulkAction"]:checked').val();
+                    const command = (action === 'bulkEnable' ? 'enable' : (action === 'bulkDisable' ? 'disable' : action));
 
                     if (!targetId) {
                         alert('Please specify the Schedule ID or Job Name.');
@@ -1552,7 +1708,7 @@
 
                     const request = {
                         header: "execute",
-                        command: action,
+                        command: command,
                         targetNodeIds: selectedNodes
                     };
 
@@ -1566,18 +1722,29 @@
                         request.jobName = targetId;
                     }
 
-                    if (consoleClient && consoleClient.established) {
-                        consoleClient.sendMessage(request);
-                        bootstrap.Modal.getInstance(document.getElementById('bulkControlModal')).hide();
-                        
-                        setTimeout(() => {
-                            if (currentViewMode === 'dashboard') {
-                                renderDashboard();
-                            } else {
-                                connectToNode(currentNodeId);
+                    if (isGatewayMode) {
+                        if (consoleClient && consoleClient.established) {
+                            consoleClient.sendMessage(request);
+                        }
+                    } else {
+                        selectedNodes.forEach(id => {
+                            const client = consoleClients[id];
+                            if (client && client.established) {
+                                const nodeReq = Object.assign({}, request, { targetNodeId: id });
+                                delete nodeReq.targetNodeIds;
+                                client.sendMessage(nodeReq);
                             }
-                        }, 500);
+                        });
                     }
+                    bootstrap.Modal.getInstance(document.getElementById('bulkControlModal')).hide();
+                        
+                    setTimeout(() => {
+                        if (isDashboardView()) {
+                            renderDashboard();
+                        } else {
+                            connectToNode(currentNodeId);
+                        }
+                    }, 500);
                 });
 
                 $('#node-selector').on('change', function() {
@@ -1590,17 +1757,20 @@
 
                 $('#refresh-btn').on('click', function() {
                     refreshNodeList().then(() => {
-                        if (currentViewMode === 'dashboard') {
+                        if (isDashboardView()) {
                             renderDashboard();
-                        } else if (consoleClient && consoleClient.established && consoleClient.mode === 'websocket') {
-                            const request = {
-                                header: "execute",
-                                targetNodeId: currentNodeId,
-                                command: "services"
-                            };
-                            consoleClient.sendMessage(request);
                         } else {
-                            doConnectToNode(currentNodeId);
+                            const client = getConsoleClient(currentNodeId);
+                            if (client && client.established) {
+                                const request = {
+                                    header: "execute",
+                                    targetNodeId: currentNodeId,
+                                    command: "services"
+                                };
+                                client.sendMessage(request);
+                            } else {
+                                doConnectToNode(currentNodeId);
+                            }
                         }
                     });
                 });

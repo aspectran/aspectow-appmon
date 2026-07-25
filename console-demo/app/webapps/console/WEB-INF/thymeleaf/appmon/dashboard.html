@@ -3,7 +3,8 @@
       xmlns:th="https://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{templates/__${page.layout}__}">
-<head th:if="${#{currentEnvironment}.matchesProfiles('cdn-assets')}">
+<head>
+<th:block th:if="${#{currentEnvironment}.matchesProfiles('cdn-assets')}">
     <link rel="stylesheet" th:href="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/css/appmon.css|"/>
     <link rel="stylesheet" th:href="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/css/appmon-dark.css|"/>
     <script th:src="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/js/dashboard-builder.js|"></script>
@@ -13,8 +14,8 @@
     <script th:src="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/js/base-client.js|"></script>
     <script th:src="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/js/websocket-client.js|"></script>
     <script th:src="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.0/js/polling-client.js|"></script>
-</head>
-<head th:unless="${#{currentEnvironment}.matchesProfiles('cdn-assets')}">
+</th:block>
+<th:block th:unless="${#{currentEnvironment}.matchesProfiles('cdn-assets')}">
     <link rel="stylesheet" th:href="@{/assets/appmon/css/appmon.css}"/>
     <link rel="stylesheet" th:href="@{/assets/appmon/css/appmon-dark.css}"/>
     <script th:src="@{/assets/appmon/js/dashboard-builder.js}"></script>
@@ -24,6 +25,7 @@
     <script th:src="@{/assets/appmon/js/base-client.js}"></script>
     <script th:src="@{/assets/appmon/js/websocket-client.js}"></script>
     <script th:src="@{/assets/appmon/js/polling-client.js}"></script>
+</th:block>
 </head>
 <body>
     <th:block layout:fragment="content">
