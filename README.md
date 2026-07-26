@@ -2,6 +2,7 @@
 
 [![Build Status](https://github.com/aspectran/aspectow/workflows/Java%20CI/badge.svg)](https://github.com/aspectran/aspectow/actions?query=workflow%3A%22Java+CI%22)
 [![Maven Central Version](https://img.shields.io/maven-central/v/com.aspectran/aspectow)](https://central.sonatype.com/artifact/com.aspectran/aspectow)
+[![javadoc](https://javadoc.io/badge2/com.aspectran/aspectow/javadoc.svg)](https://javadoc.io/doc/com.aspectran/aspectow-console)
 [![License](https://img.shields.io/:license-apache-brightgreen.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
 Aspectow is an enterprise-grade platform management system and control plane for Aspectran-based web applications. Serving as the foundational framework for **Aspectow Enterprise**, it provides integrated **Observability**, **Controllability**, and **Security Governance** across distributed and clustered environments through the **Aspectow Management Console**.
