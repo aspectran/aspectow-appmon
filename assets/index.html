@@ -4,7 +4,27 @@
   <meta charset="utf-8" />
   <title>Redirecting...</title>
   <meta http-equiv="refresh" content="0;url=https://aspectran.com/en/aspectow/" />
-  <script>window.location.href = "https://aspectran.com/en/aspectow/";</script>
+  <script>
+    const supportedLanguages = ['en', 'ko'];
+    const getPreferredLangCode = () => {
+      const languages = navigator.languages;
+      if (languages && languages.length) {
+        for (const lang of languages) {
+          let code = lang.substring(0, 2);
+          if (supportedLanguages.includes(code)) {
+            return code;
+          }
+        }
+      }
+      return 'en';
+    };
+    (() => {
+      const langCode = getPreferredLangCode();
+      if (langCode) {
+        location.href = "https://aspectran.com/" + langCode + "/aspectow/";
+      }
+    })();
+  </script>
 </head>
 <body>
   <p>Redirecting to <a href="https://aspectran.com/en/aspectow/">https://aspectran.com/en/aspectow/</a>...</p>
