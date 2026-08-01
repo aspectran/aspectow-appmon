@@ -82,9 +82,13 @@ public class AccessControlAspect {
         } else if (requestName.startsWith("/cluster") ||
                 requestName.startsWith("/scheduler") ||
                 requestName.startsWith("/vault")) {
-            hasAccess = (userInfo.hasRole("SUPER_ADMIN") ||
-                    userInfo.hasRole("ADMIN") ||
-                    userInfo.hasRole("DEMO"));
+            if (requestName.equals("/vault/encryption-password")) {
+                hasAccess = userInfo.hasRole("SUPER_ADMIN");
+            } else {
+                hasAccess = (userInfo.hasRole("SUPER_ADMIN") ||
+                        userInfo.hasRole("ADMIN") ||
+                        userInfo.hasRole("DEMO"));
+            }
         } else if (requestName.startsWith("/appmon")) {
             hasAccess = (userInfo.hasPermission("MONITOR_VIEW") ||
                     userInfo.hasRole("SUPER_ADMIN") ||

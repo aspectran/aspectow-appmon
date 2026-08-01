@@ -15,6 +15,7 @@
  */
 package com.aspectran.aspectow.console.vault;
 
+import com.aspectran.aspectow.console.auth.UserInfo;
 import com.aspectran.aspectow.console.common.db.model.Vault;
 import com.aspectran.aspectow.console.common.pagination.PageInfo;
 import com.aspectran.aspectow.console.common.service.VaultService;
@@ -69,7 +70,11 @@ public class VaultActivity {
     }
 
     @RequestToPost("/encryption-password")
-    public RestResponse getEncryptionPassword() {
+    public RestResponse getEncryptionPassword(@NonNull Translet translet) {
+        UserInfo userInfo = translet.getSessionAdapter().getAttribute(UserInfo.USERINFO_KEY);
+        if (userInfo == null || !userInfo.hasRole("SUPER_ADMIN")) {
+            return new FailureResponse().forbidden();
+        }
         try {
             String password = PBEncryptionUtils.getPassword();
             return new SuccessResponse(password).ok();
