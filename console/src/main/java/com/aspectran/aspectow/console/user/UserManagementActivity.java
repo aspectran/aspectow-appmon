@@ -70,6 +70,11 @@ public class UserManagementActivity {
     public Map<String, Object> list(@NonNull Translet translet, String searchKeyword) {
         PageInfo pageInfo = PageInfo.of(translet, "user_list_page_size");
         List<User> userList = userService.getUserList(pageInfo, searchKeyword);
+        if (userList != null) {
+            for (User u : userList) {
+                u.setPassword(null);
+            }
+        }
         List<Role> roleList = userService.getRoleList();
         List<Permission> permissionList = userService.getPermissionList();
         return Map.of(
