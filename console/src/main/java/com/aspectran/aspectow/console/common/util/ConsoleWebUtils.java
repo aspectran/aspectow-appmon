@@ -45,4 +45,35 @@ public abstract class ConsoleWebUtils {
         return remoteAddr;
     }
 
+    /**
+     * Escapes HTML special characters in the input string to prevent XSS attacks.
+     * @param input the raw input string
+     * @return the HTML-escaped string
+     */
+    public static String escapeHtml(String input) {
+        if (input == null) {
+            return null;
+        }
+        return input.replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                    .replace("\"", "&quot;")
+                    .replace("'", "&#x27;")
+                    .replace("/", "&#x2F;");
+    }
+
+    /**
+     * Sanitizes user input string by stripping potential script tags.
+     * @param input the raw input string
+     * @return the sanitized string
+     */
+    public static String cleanInput(String input) {
+        if (input == null) {
+            return null;
+        }
+        return input.replaceAll("(?i)<script.*?>.*?</script>", "")
+                    .replaceAll("(?i)<iframe.*?>.*?</iframe>", "")
+                    .replaceAll("(?i)javascript:", "");
+    }
+
 }
