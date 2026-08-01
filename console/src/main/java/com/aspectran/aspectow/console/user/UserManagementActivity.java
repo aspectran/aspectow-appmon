@@ -16,12 +16,14 @@
 package com.aspectran.aspectow.console.user;
 
 import com.aspectran.aspectow.console.auth.UserInfo;
+import com.aspectran.aspectow.console.common.db.model.AuditLog;
 import com.aspectran.aspectow.console.common.db.model.LoginHistory;
 import com.aspectran.aspectow.console.common.db.model.Permission;
 import com.aspectran.aspectow.console.common.db.model.Role;
 import com.aspectran.aspectow.console.common.db.model.User;
 import com.aspectran.aspectow.console.common.pagination.PageInfo;
 import com.aspectran.aspectow.console.common.service.UserService;
+import com.aspectran.aspectow.console.common.util.ConsoleWebUtils;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
@@ -115,6 +117,37 @@ public class UserManagementActivity {
     }
 
     /**
+     * Displays the security audit log page.
+     * @param translet the current translet
+     * @param username the target username filter
+     * @param searchKeyword the search keyword
+     * @return a map of attributes for rendering the view
+     */
+    @Request("/audit-log")
+    @Dispatch("user/audit-log")
+    @Action("page")
+    public Map<String, Object> auditLog(@NonNull Translet translet, String username, String searchKeyword) {
+        UserInfo userInfo = translet.getSessionAdapter().getAttribute(UserInfo.USERINFO_KEY);
+        String targetUsername = username;
+
+        if (userInfo != null && !userInfo.hasRole("SUPER_ADMIN")) {
+            targetUsername = userInfo.getUsername();
+        }
+
+        PageInfo pageInfo = PageInfo.of(translet, "audit_log_page_size");
+        List<AuditLog> auditList = userService.getAuditLogList(pageInfo, targetUsername, searchKeyword);
+        return Map.of(
+            "title", "Audit Log",
+            "style", "audit-log-page",
+            "group", "accounts-menu",
+            "auditList", auditList,
+            "pageInfo", pageInfo,
+            "username", (targetUsername != null ? targetUsername : ""),
+            "searchKeyword", (searchKeyword != null ? searchKeyword : "")
+        );
+    }
+
+    /**
      * Saves user details, either creating a new user or updating an existing one,
      * along with their assigned roles.
      * @param user the user data
@@ -122,12 +155,15 @@ public class UserManagementActivity {
      * @return a {@link RestResponse} representing success or failure of the operation
      */
     @RequestToPost("/save")
-    public RestResponse save(@NonNull User user, Long[] roleIds) {
+    public RestResponse save(@NonNull Translet translet, @NonNull User user, Long[] roleIds) {
         if (StringUtils.isEmpty(user.getUsername())) {
             return new FailureResponse().setError("required", "Username is required.");
         }
 
         List<Long> roleIdList = (roleIds != null ? List.of(roleIds) : null);
+        UserInfo actor = translet.getSessionAdapter().getAttribute(UserInfo.USERINFO_KEY);
+        String actorName = (actor != null ? actor.getUsername() : "system");
+        String remoteAddr = ConsoleWebUtils.getRemoteAddr(translet);
 
         if (user.getUserId() != null) {
             // Update
@@ -136,6 +172,7 @@ public class UserManagementActivity {
                  return new FailureResponse().setError("not_found", "User not found.");
             }
             userService.updateUser(user, roleIdList);
+            userService.recordAuditLog(actorName, "USER_UPDATE", user.getUsername(), "Updated user status: " + user.getStatus(), remoteAddr);
             return new SuccessResponse("Updated").ok();
         } else {
             // Insert
@@ -146,37 +183,39 @@ public class UserManagementActivity {
                 return new FailureResponse().setError("required", "Password is required for a new user.");
             }
             userService.createUser(user, roleIdList);
+            userService.recordAuditLog(actorName, "USER_CREATE", user.getUsername(), "Created new user", remoteAddr);
             return new SuccessResponse("Created").ok();
         }
     }
 
-    /**
-     * Deletes the user with the specified user ID.
-     * @param userId the ID of the user to delete
-     * @return a {@link RestResponse} representing success or failure of the operation
-     */
     @RequestToPost("/delete")
-    public RestResponse delete(Long userId) {
+    public RestResponse delete(@NonNull Translet translet, Long userId) {
         if (userId == null) {
             return new FailureResponse().setError("required", "User ID is required.");
         }
+        User targetUser = userService.getUserById(userId);
+        String targetName = (targetUser != null ? targetUser.getUsername() : String.valueOf(userId));
         userService.deleteUser(userId);
+
+        UserInfo actor = translet.getSessionAdapter().getAttribute(UserInfo.USERINFO_KEY);
+        String actorName = (actor != null ? actor.getUsername() : "system");
+        userService.recordAuditLog(actorName, "USER_DELETE", targetName, "Deleted user ID: " + userId, ConsoleWebUtils.getRemoteAddr(translet));
+
         return new SuccessResponse("Deleted").ok();
     }
 
-    /**
-     * Saves permission mapping for a specific role.
-     * @param roleId the role ID
-     * @param permIds the array of permission IDs to associate with the role
-     * @return a {@link RestResponse} representing success or failure of the operation
-     */
     @RequestToPost("/role/save-permissions")
-    public RestResponse saveRolePermissions(Long roleId, Long[] permIds) {
+    public RestResponse saveRolePermissions(@NonNull Translet translet, Long roleId, Long[] permIds) {
         if (roleId == null) {
             return new FailureResponse().setError("required", "Role ID is required.");
         }
         List<Long> permIdList = (permIds != null ? List.of(permIds) : null);
         userService.updateRolePermissions(roleId, permIdList);
+
+        UserInfo actor = translet.getSessionAdapter().getAttribute(UserInfo.USERINFO_KEY);
+        String actorName = (actor != null ? actor.getUsername() : "system");
+        userService.recordAuditLog(actorName, "ROLE_PERM_UPDATE", "RoleID:" + roleId, "Updated permissions for role ID: " + roleId, ConsoleWebUtils.getRemoteAddr(translet));
+
         return new SuccessResponse("Role permissions updated").ok();
     }
 

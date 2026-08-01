@@ -15,6 +15,7 @@
  */
 package com.aspectran.aspectow.console.common.service;
 
+import com.aspectran.aspectow.console.common.db.model.AuditLog;
 import com.aspectran.aspectow.console.common.db.model.LoginHistory;
 import com.aspectran.aspectow.console.common.db.model.Permission;
 import com.aspectran.aspectow.console.common.db.model.Role;
@@ -147,6 +148,29 @@ public interface UserService {
      */
     default List<LoginHistory> getLoginHistoryList(PageInfo pageInfo, String username) {
         return getLoginHistoryList(pageInfo, username, null);
+    }
+
+    /**
+     * Records a security audit log entry.
+     * @param username the username performing the action
+     * @param eventType the event type
+     * @param target the target resource/user
+     * @param details the details
+     * @param ipAddress the IP address
+     */
+    void recordAuditLog(String username, String eventType, String target, String details, String ipAddress);
+
+    /**
+     * Retrieves audit logs with pagination and search keyword.
+     * @param pageInfo the pagination info
+     * @param username the username filter
+     * @param searchKeyword the search keyword
+     * @return the list of audit log records
+     */
+    List<AuditLog> getAuditLogList(PageInfo pageInfo, String username, String searchKeyword);
+
+    default List<AuditLog> getAuditLogList(PageInfo pageInfo) {
+        return getAuditLogList(pageInfo, null, null);
     }
 
 }

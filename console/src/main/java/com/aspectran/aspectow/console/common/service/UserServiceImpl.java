@@ -16,6 +16,7 @@
 package com.aspectran.aspectow.console.common.service;
 
 import com.aspectran.aspectow.console.common.db.mapper.AccountMapper;
+import com.aspectran.aspectow.console.common.db.model.AuditLog;
 import com.aspectran.aspectow.console.common.db.model.LoginHistory;
 import com.aspectran.aspectow.console.common.db.model.Permission;
 import com.aspectran.aspectow.console.common.db.model.Role;
@@ -241,5 +242,25 @@ public class UserServiceImpl implements UserService, EnvironmentAware {
             pageInfo.setTotalElements(historyList.size(), () -> accountMapper.getLoginHistoryCount(username, searchKeyword));
         }
         return historyList;
+    }
+
+    @Override
+    public void recordAuditLog(String username, String eventType, String target, String details, String ipAddress) {
+        AuditLog auditLog = new AuditLog();
+        auditLog.setUsername(username);
+        auditLog.setEventType(eventType);
+        auditLog.setTarget(target);
+        auditLog.setDetails(details);
+        auditLog.setIpAddress(ipAddress);
+        accountMapper.insertAuditLog(auditLog);
+    }
+
+    @Override
+    public List<AuditLog> getAuditLogList(PageInfo pageInfo, String username, String searchKeyword) {
+        List<AuditLog> auditList = accountMapper.getAuditLogList(pageInfo, username, searchKeyword);
+        if (pageInfo != null) {
+            pageInfo.setTotalElements(auditList.size(), () -> accountMapper.getAuditLogCount(username, searchKeyword));
+        }
+        return auditList;
     }
 }

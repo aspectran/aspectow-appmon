@@ -18,7 +18,9 @@ package com.aspectran.aspectow.console.vault;
 import com.aspectran.aspectow.console.auth.UserInfo;
 import com.aspectran.aspectow.console.common.db.model.Vault;
 import com.aspectran.aspectow.console.common.pagination.PageInfo;
+import com.aspectran.aspectow.console.common.service.UserService;
 import com.aspectran.aspectow.console.common.service.VaultService;
+import com.aspectran.aspectow.console.common.util.ConsoleWebUtils;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
@@ -44,10 +46,12 @@ import java.util.Map;
 public class VaultActivity {
 
     private final VaultService vaultService;
+    private final UserService userService;
 
     @Autowired
-    public VaultActivity(VaultService vaultService) {
+    public VaultActivity(VaultService vaultService, UserService userService) {
         this.vaultService = vaultService;
+        this.userService = userService;
     }
 
     @Request("/")
@@ -77,6 +81,7 @@ public class VaultActivity {
         }
         try {
             String password = PBEncryptionUtils.getPassword();
+            userService.recordAuditLog(userInfo.getUsername(), "ENCRYPTION_PASSWORD_VIEW", "System Encryption", "Viewed system encryption password", ConsoleWebUtils.getRemoteAddr(translet));
             return new SuccessResponse(password).ok();
         } catch (Exception e) {
             return new FailureResponse().setError("failed", e.getMessage());
@@ -123,7 +128,7 @@ public class VaultActivity {
     }
 
     @RequestToPost("/save")
-    public RestResponse save(@NonNull Vault vault, String plainText, Integer expirationMinutes) {
+    public RestResponse save(@NonNull Translet translet, @NonNull Vault vault, String plainText, Integer expirationMinutes) {
         if (StringUtils.isEmpty(vault.getLabel())) {
             return new FailureResponse().setError("required", "Label is required.");
         }
@@ -131,6 +136,9 @@ public class VaultActivity {
         if (expirationMinutes != null && expirationMinutes > 0) {
             vault.setValidUntil(LocalDateTime.now().plusMinutes(expirationMinutes));
         }
+
+        UserInfo userInfo = translet.getSessionAdapter().getAttribute(UserInfo.USERINFO_KEY);
+        String username = (userInfo != null ? userInfo.getUsername() : "system");
 
         try {
             if (vault.getVaultId() != null) {
@@ -140,6 +148,7 @@ public class VaultActivity {
                     return new FailureResponse().setError("not_found", "Token not found.");
                 }
                 vaultService.updateVault(vault, plainText, existing.getEncryptedValue());
+                userService.recordAuditLog(username, "VAULT_UPDATE", vault.getLabel(), "Updated vault token metadata", ConsoleWebUtils.getRemoteAddr(translet));
                 return new SuccessResponse("Updated").ok();
             } else {
                 // Create
@@ -147,6 +156,7 @@ public class VaultActivity {
                     return new FailureResponse().setError("required", "Value to encrypt is required.");
                 }
                 vaultService.createVault(vault, plainText);
+                userService.recordAuditLog(username, "VAULT_CREATE", vault.getLabel(), "Created new vault token (" + vault.getTokenType() + ")", ConsoleWebUtils.getRemoteAddr(translet));
                 return new SuccessResponse("Created").ok();
             }
         } catch (Exception e) {
@@ -155,11 +165,18 @@ public class VaultActivity {
     }
 
     @RequestToPost("/delete")
-    public RestResponse delete(Long vaultId) {
+    public RestResponse delete(@NonNull Translet translet, Long vaultId) {
         if (vaultId == null) {
             return new FailureResponse().setError("required", "Vault ID is required.");
         }
+        Vault existing = vaultService.getVaultById(vaultId);
+        String label = (existing != null ? existing.getLabel() : String.valueOf(vaultId));
         vaultService.deleteVault(vaultId);
+
+        UserInfo userInfo = translet.getSessionAdapter().getAttribute(UserInfo.USERINFO_KEY);
+        String username = (userInfo != null ? userInfo.getUsername() : "system");
+        userService.recordAuditLog(username, "VAULT_DELETE", label, "Deleted vault token ID: " + vaultId, ConsoleWebUtils.getRemoteAddr(translet));
+
         return new SuccessResponse("Deleted").ok();
     }
 

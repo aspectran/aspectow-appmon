@@ -17,6 +17,7 @@ package com.aspectran.aspectow.console.auth;
 
 import com.aspectran.aspectow.console.common.db.model.User;
 import com.aspectran.aspectow.console.common.service.UserService;
+import com.aspectran.aspectow.console.common.util.ConsoleWebUtils;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.adapter.SessionAdapter;
 import com.aspectran.core.component.bean.annotation.Autowired;
@@ -64,7 +65,7 @@ public class DemoActivity {
                 if ("NORMAL".equals(user.getStatus())) {
                     loginActivity.doLogin(translet, user);
 
-                    String remoteAddr = loginActivity.getRemoteAddr(translet);
+                    String remoteAddr = ConsoleWebUtils.getRemoteAddr(translet);
                     String userAgent = translet.getRequestAdapter().getHeader(HttpHeaders.USER_AGENT);
 
                     userService.recordLogin(user.getUsername(), remoteAddr, userAgent, true);

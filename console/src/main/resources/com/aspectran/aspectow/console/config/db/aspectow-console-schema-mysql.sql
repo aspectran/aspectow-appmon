@@ -136,6 +136,18 @@ create table if not exists asc_vault (
     primary key (vault_id)
 ) comment = 'Vault (Encrypted Tokens)';
 
+-- Security Audit Log
+create table if not exists asc_audit_log (
+    audit_id bigint not null auto_increment,
+    username varchar(50),
+    event_type varchar(50) not null,
+    target varchar(100),
+    details varchar(1000),
+    ip_address varchar(45),
+    created_at timestamp default current_timestamp not null,
+    primary key (audit_id)
+) comment = 'Security Audit Log';
+
 -- Initial data
 insert ignore into asc_role (role_name, description) values ('SUPER_ADMIN', 'Super administrator with full access');
 insert ignore into asc_role (role_name, description) values ('ADMIN', 'Administrator with limited management access');

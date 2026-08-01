@@ -15,6 +15,7 @@
  */
 package com.aspectran.aspectow.console.common.db.mapper;
 
+import com.aspectran.aspectow.console.common.db.model.AuditLog;
 import com.aspectran.aspectow.console.common.db.model.LoginHistory;
 import com.aspectran.aspectow.console.common.db.model.Permission;
 import com.aspectran.aspectow.console.common.db.model.Role;
@@ -174,6 +175,30 @@ public interface AccountMapper {
     long getLoginHistoryCount(@Param("username") String username, @Param("searchKeyword") String searchKeyword);
 
     /**
+     * Inserts a new audit log record into the database.
+     * @param auditLog the audit log record
+     * @return the number of affected rows
+     */
+    int insertAuditLog(AuditLog auditLog);
+
+    /**
+     * Retrieves audit logs with pagination and search keyword.
+     * @param pageInfo the pagination info
+     * @param username the username filter
+     * @param searchKeyword the search keyword
+     * @return the list of audit log records
+     */
+    List<AuditLog> getAuditLogList(@Param("pageInfo") PageInfo pageInfo, @Param("username") String username, @Param("searchKeyword") String searchKeyword);
+
+    /**
+     * Retrieves total count of audit log records matching the search criteria.
+     * @param username the username filter
+     * @param searchKeyword the search keyword
+     * @return total count
+     */
+    long getAuditLogCount(@Param("username") String username, @Param("searchKeyword") String searchKeyword);
+
+    /**
      * Data Access Object (DAO) for {@link AccountMapper}.
      * Provides a convenient way to access the mapper methods using Aspectran's bean container.
      */
@@ -283,6 +308,21 @@ public interface AccountMapper {
         @Override
         public long getLoginHistoryCount(String username, String searchKeyword) {
             return mapper().getLoginHistoryCount(username, searchKeyword);
+        }
+
+        @Override
+        public int insertAuditLog(AuditLog auditLog) {
+            return mapper().insertAuditLog(auditLog);
+        }
+
+        @Override
+        public List<AuditLog> getAuditLogList(PageInfo pageInfo, String username, String searchKeyword) {
+            return mapper().getAuditLogList(pageInfo, username, searchKeyword);
+        }
+
+        @Override
+        public long getAuditLogCount(String username, String searchKeyword) {
+            return mapper().getAuditLogCount(username, searchKeyword);
         }
     }
 

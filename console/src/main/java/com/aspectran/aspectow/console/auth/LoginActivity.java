@@ -19,6 +19,7 @@ import com.aspectran.aspectow.console.common.db.model.Permission;
 import com.aspectran.aspectow.console.common.db.model.Role;
 import com.aspectran.aspectow.console.common.db.model.User;
 import com.aspectran.aspectow.console.common.service.UserService;
+import com.aspectran.aspectow.console.common.util.ConsoleWebUtils;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.adapter.SessionAdapter;
 import com.aspectran.core.component.bean.annotation.Action;
@@ -33,7 +34,6 @@ import com.aspectran.web.activity.response.RestResponse;
 import com.aspectran.web.support.http.HttpHeaders;
 import com.aspectran.web.support.rest.response.FailureResponse;
 import com.aspectran.web.support.rest.response.SuccessResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.NonNull;
 
 import java.util.HashSet;
@@ -69,7 +69,7 @@ public class LoginActivity {
             return new FailureResponse().setError("required", "Username and password are required.");
         }
 
-        String remoteAddr = getRemoteAddr(translet);
+        String remoteAddr = ConsoleWebUtils.getRemoteAddr(translet);
         String userAgent = translet.getRequestAdapter().getHeader(HttpHeaders.USER_AGENT);
 
         User user = userService.getUserByUsername(username);
@@ -111,7 +111,7 @@ public class LoginActivity {
         userInfo.setUserId(user.getUserId());
         userInfo.setUsername(user.getUsername());
         userInfo.setNickname(user.getNickname());
-        userInfo.setLoginIp(getRemoteAddr(translet));
+        userInfo.setLoginIp(ConsoleWebUtils.getRemoteAddr(translet));
 
         Set<String> roles = new HashSet<>();
         Set<String> permissions = new HashSet<>();
@@ -154,21 +154,6 @@ public class LoginActivity {
         SessionAdapter sessionAdapter = translet.getSessionAdapter();
         sessionAdapter.removeAttribute(UserInfo.USERINFO_KEY);
         sessionAdapter.invalidate();
-    }
-
-    /**
-     * Gets the remote address from the translet, considering the X-Forwarded-For header.
-     */
-    public String getRemoteAddr(@NonNull Translet translet) {
-        String remoteAddr = translet.getRequestAdapter().getHeader(HttpHeaders.X_FORWARDED_FOR);
-        if (StringUtils.hasLength(remoteAddr)) {
-            if (remoteAddr.contains(",")) {
-                remoteAddr = StringUtils.tokenize(remoteAddr, ",", true)[0];
-            }
-        } else {
-            remoteAddr = ((HttpServletRequest)translet.getRequestAdaptee()).getRemoteAddr();
-        }
-        return remoteAddr;
     }
 
 }

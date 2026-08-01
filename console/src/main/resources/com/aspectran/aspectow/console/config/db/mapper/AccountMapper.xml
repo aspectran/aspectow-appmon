@@ -28,6 +28,16 @@
                     select="getPermissionsByRoleId" column="role_id" />
     </resultMap>
 
+    <resultMap id="AuditLogResultMap" type="com.aspectran.aspectow.console.common.db.model.AuditLog">
+        <id property="auditId" column="audit_id" />
+        <result property="username" column="username" />
+        <result property="eventType" column="event_type" />
+        <result property="target" column="target" />
+        <result property="details" column="details" />
+        <result property="ipAddress" column="ip_address" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
     <select id="getUserById" parameterType="long" resultMap="UserResultMap">
         select * from asc_user where user_id = #{userId}
     </select>
@@ -166,6 +176,51 @@
                     lower(username) like lower(concat('%', #{searchKeyword}, '%'))
                     or lower(ip_address) like lower(concat('%', #{searchKeyword}, '%'))
                     or lower(user_agent) like lower(concat('%', #{searchKeyword}, '%'))
+                )
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertAuditLog" parameterType="com.aspectran.aspectow.console.common.db.model.AuditLog" useGeneratedKeys="true" keyProperty="auditId">
+        insert into asc_audit_log (username, event_type, target, details, ip_address)
+        values (#{username}, #{eventType}, #{target}, #{details}, #{ipAddress})
+    </insert>
+
+    <select id="getAuditLogList" resultMap="AuditLogResultMap">
+        select * from asc_audit_log
+        <where>
+            <if test="username != null and username != ''">
+                username = #{username}
+            </if>
+            <if test="searchKeyword != null and searchKeyword != ''">
+                and (
+                    lower(username) like lower(concat('%', #{searchKeyword}, '%'))
+                    or lower(event_type) like lower(concat('%', #{searchKeyword}, '%'))
+                    or lower(target) like lower(concat('%', #{searchKeyword}, '%'))
+                    or lower(details) like lower(concat('%', #{searchKeyword}, '%'))
+                    or lower(ip_address) like lower(concat('%', #{searchKeyword}, '%'))
+                )
+            </if>
+        </where>
+        order by audit_id desc
+        <if test="pageInfo != null">
+            limit #{pageInfo.size} offset #{pageInfo.offset}
+        </if>
+    </select>
+
+    <select id="getAuditLogCount" resultType="long">
+        select count(*) from asc_audit_log
+        <where>
+            <if test="username != null and username != ''">
+                username = #{username}
+            </if>
+            <if test="searchKeyword != null and searchKeyword != ''">
+                and (
+                    lower(username) like lower(concat('%', #{searchKeyword}, '%'))
+                    or lower(event_type) like lower(concat('%', #{searchKeyword}, '%'))
+                    or lower(target) like lower(concat('%', #{searchKeyword}, '%'))
+                    or lower(details) like lower(concat('%', #{searchKeyword}, '%'))
+                    or lower(ip_address) like lower(concat('%', #{searchKeyword}, '%'))
                 )
             </if>
         </where>
