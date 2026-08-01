@@ -24,9 +24,9 @@ import java.io.IOException;
 import static com.aspectran.aspectow.node.manager.NodeManagerBuilder.MY_NODE_ID_PROPERTY;
 import static com.aspectran.core.context.config.AspectranConfig.BASE_PATH_PROPERTY;
 import static com.aspectran.core.context.config.AspectranConfig.COMMANDS_PATH_PROPERTY;
+import static com.aspectran.core.context.config.AspectranConfig.LOGS_DIR_PROPERTY;
 import static com.aspectran.core.context.config.AspectranConfig.TEMP_PATH_PROPERTY;
 import static com.aspectran.core.context.config.AspectranConfig.WORK_PATH_PROPERTY;
-import static com.aspectran.logging.LoggingDefaults.LOGS_DIR_PROPERTY;
 
 /**
  * Main entry point for the application.
