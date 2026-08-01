@@ -72,7 +72,7 @@
                         <td th:if="${session.USER_INFO.hasPermission('USER_MANAGE')}" class="text-end pe-3">
                             <div class="d-flex justify-content-end flex-wrap gap-1">
                                 <button class="btn btn-sm btn-outline-secondary"
-                                        th:onclick="openUserModal([[${user.userId}]], [[${user.username}]], [[${user.nickname}]], [[${user.email}]], [[${user.status}]], [[${user.roles != null ? user.roles.![roleId] : null}]])">
+                                        th:onclick="openUserModal([[${user.userId}]], [[${user.username}]], [[${user.nickname}]], [[${user.email}]], [[${user.status}]], [[${user.roles != null ? user.roles.![roleId] : null}]], [[${user.allowedIps}]])">
                                     <i class="bi bi-pencil"></i>
                                 </button>
                                 <button class="btn btn-sm btn-outline-danger" th:onclick="deleteUser([[${user.userId}]])" th:disabled="${user.username == 'admin'}">
@@ -216,6 +216,12 @@
                                 <option value="LOCKED">LOCKED</option>
                                 <option value="EXPIRED">EXPIRED</option>
                             </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="allowedIps" class="form-label">Allowed IPs</label>
+                            <input type="text" class="form-control" id="allowedIps" name="allowedIps" placeholder="e.g. 192.168.1.*, 10.0.0.100 (leave blank for any IP)">
+                            <div class="form-text">Comma or space-separated list of allowed IP patterns.</div>
                         </div>
                         
                         <div class="mb-3">
@@ -420,7 +426,7 @@
             });
         });
 
-        function openUserModal(id, username, nickname, email, status, roleIds) {
+        function openUserModal(id, username, nickname, email, status, roleIds, allowedIps) {
             const $form = $('#userForm');
             $form[0].reset();
             
@@ -432,6 +438,7 @@
             $('#nickname').val(nickname || '');
             $('#email').val(email || '');
             $('#status').val(status || 'NORMAL');
+            $('#allowedIps').val(allowedIps || '');
             
             // Clear and set checkboxes
             $('.role-checkbox').prop('checked', false);

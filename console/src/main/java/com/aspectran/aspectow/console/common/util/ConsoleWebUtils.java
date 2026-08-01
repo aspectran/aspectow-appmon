@@ -15,35 +15,12 @@
  */
 package com.aspectran.aspectow.console.common.util;
 
-import com.aspectran.core.activity.Translet;
 import com.aspectran.utils.StringUtils;
-import com.aspectran.web.support.http.HttpHeaders;
-import jakarta.servlet.http.HttpServletRequest;
-import org.jspecify.annotations.NonNull;
 
 /**
  * Utility class providing web-related helper methods for Aspectow Console.
  */
 public abstract class ConsoleWebUtils {
-
-    /**
-     * Extracts the remote client IP address from the request.
-     * Checks the X-Forwarded-For header first for proxies/load balancers,
-     * falling back to the remote address of the underlying servlet request.
-     * @param translet the current translet
-     * @return the remote IP address
-     */
-    public static String getRemoteAddr(@NonNull Translet translet) {
-        String remoteAddr = translet.getRequestAdapter().getHeader(HttpHeaders.X_FORWARDED_FOR);
-        if (StringUtils.hasLength(remoteAddr)) {
-            if (remoteAddr.contains(",")) {
-                remoteAddr = StringUtils.tokenize(remoteAddr, ",", true)[0];
-            }
-        } else {
-            remoteAddr = ((HttpServletRequest)translet.getRequestAdaptee()).getRemoteAddr();
-        }
-        return remoteAddr;
-    }
 
     /**
      * Escapes HTML special characters in the input string to prevent XSS attacks.

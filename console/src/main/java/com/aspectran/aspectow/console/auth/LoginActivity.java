@@ -19,7 +19,6 @@ import com.aspectran.aspectow.console.common.db.model.Permission;
 import com.aspectran.aspectow.console.common.db.model.Role;
 import com.aspectran.aspectow.console.common.db.model.User;
 import com.aspectran.aspectow.console.common.service.UserService;
-import com.aspectran.aspectow.console.common.util.ConsoleWebUtils;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.adapter.SessionAdapter;
 import com.aspectran.core.component.bean.annotation.Action;
@@ -29,11 +28,13 @@ import com.aspectran.core.component.bean.annotation.Dispatch;
 import com.aspectran.core.component.bean.annotation.Redirect;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.RequestToPost;
+import com.aspectran.utils.net.IpAddressUtils;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.web.activity.response.RestResponse;
 import com.aspectran.web.support.http.HttpHeaders;
 import com.aspectran.web.support.rest.response.FailureResponse;
 import com.aspectran.web.support.rest.response.SuccessResponse;
+import com.aspectran.web.support.util.WebUtils;
 import org.jspecify.annotations.NonNull;
 
 import java.util.HashSet;
@@ -69,7 +70,7 @@ public class LoginActivity {
             return new FailureResponse().setError("required", "Username and password are required.");
         }
 
-        String remoteAddr = ConsoleWebUtils.getRemoteAddr(translet);
+        String remoteAddr = WebUtils.getRemoteAddr(translet);
         String userAgent = translet.getRequestAdapter().getHeader(HttpHeaders.USER_AGENT);
 
         User user = userService.getUserByUsername(username);
@@ -79,6 +80,12 @@ public class LoginActivity {
         }
 
         if (user != null && userService.checkPassword(user, password)) {
+            if (!IpAddressUtils.isAllowedIp(remoteAddr, user.getAllowedIps())) {
+                userService.recordLogin(username, remoteAddr, userAgent, false);
+                userService.recordAuditLog(username, "LOGIN_FAILED_UNALLOWED_IP", "User: " + username,
+                        "Login attempt from unallowed IP address: " + remoteAddr, remoteAddr);
+                return new FailureResponse().setError("ip_denied", "Access denied. Your IP address (" + remoteAddr + ") is not allowed for this account.");
+            }
             if (userService.isPasswordChangeRequired(user, password)) {
                 return new FailureResponse().setError("setup_required", "Administrator password setup is required.");
             }
@@ -111,7 +118,7 @@ public class LoginActivity {
         userInfo.setUserId(user.getUserId());
         userInfo.setUsername(user.getUsername());
         userInfo.setNickname(user.getNickname());
-        userInfo.setLoginIp(ConsoleWebUtils.getRemoteAddr(translet));
+        userInfo.setLoginIp(WebUtils.getRemoteAddr(translet));
 
         Set<String> roles = new HashSet<>();
         Set<String> permissions = new HashSet<>();

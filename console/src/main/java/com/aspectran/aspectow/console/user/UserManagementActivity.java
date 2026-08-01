@@ -23,7 +23,6 @@ import com.aspectran.aspectow.console.common.db.model.Role;
 import com.aspectran.aspectow.console.common.db.model.User;
 import com.aspectran.aspectow.console.common.pagination.PageInfo;
 import com.aspectran.aspectow.console.common.service.UserService;
-import com.aspectran.aspectow.console.common.util.ConsoleWebUtils;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
@@ -35,6 +34,7 @@ import com.aspectran.utils.StringUtils;
 import com.aspectran.web.activity.response.RestResponse;
 import com.aspectran.web.support.rest.response.FailureResponse;
 import com.aspectran.web.support.rest.response.SuccessResponse;
+import com.aspectran.web.support.util.WebUtils;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
@@ -168,7 +168,7 @@ public class UserManagementActivity {
         List<Long> roleIdList = (roleIds != null ? List.of(roleIds) : null);
         UserInfo actor = translet.getSessionAdapter().getAttribute(UserInfo.USERINFO_KEY);
         String actorName = (actor != null ? actor.getUsername() : "system");
-        String remoteAddr = ConsoleWebUtils.getRemoteAddr(translet);
+        String remoteAddr = WebUtils.getRemoteAddr(translet);
 
         if (user.getUserId() != null) {
             // Update
@@ -204,7 +204,7 @@ public class UserManagementActivity {
 
         UserInfo actor = translet.getSessionAdapter().getAttribute(UserInfo.USERINFO_KEY);
         String actorName = (actor != null ? actor.getUsername() : "system");
-        userService.recordAuditLog(actorName, "USER_DELETE", targetName, "Deleted user ID: " + userId, ConsoleWebUtils.getRemoteAddr(translet));
+        userService.recordAuditLog(actorName, "USER_DELETE", targetName, "Deleted user ID: " + userId, WebUtils.getRemoteAddr(translet));
 
         return new SuccessResponse("Deleted").ok();
     }
@@ -219,7 +219,7 @@ public class UserManagementActivity {
 
         UserInfo actor = translet.getSessionAdapter().getAttribute(UserInfo.USERINFO_KEY);
         String actorName = (actor != null ? actor.getUsername() : "system");
-        userService.recordAuditLog(actorName, "ROLE_PERM_UPDATE", "RoleID:" + roleId, "Updated permissions for role ID: " + roleId, ConsoleWebUtils.getRemoteAddr(translet));
+        userService.recordAuditLog(actorName, "ROLE_PERM_UPDATE", "RoleID:" + roleId, "Updated permissions for role ID: " + roleId, WebUtils.getRemoteAddr(translet));
 
         return new SuccessResponse("Role permissions updated").ok();
     }

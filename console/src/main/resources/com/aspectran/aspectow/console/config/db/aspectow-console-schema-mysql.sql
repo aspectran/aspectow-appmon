@@ -72,9 +72,10 @@ create table if not exists asc_user (
     nickname varchar(50),
     email varchar(100),
     status varchar(10) default 'NORMAL' not null, -- NORMAL, LOCKED, EXPIRED
+    allowed_ips varchar(500),
     last_login_at timestamp null,
     created_at timestamp default current_timestamp not null,
-    updated_at timestamp default current_timestamp not null,
+    updated_at timestamp default current_timestamp not null on update current_timestamp,
     primary key (user_id)
 ) comment = 'User accounts';
 

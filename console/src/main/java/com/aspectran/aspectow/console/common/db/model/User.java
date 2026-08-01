@@ -34,6 +34,7 @@ public class User implements Serializable {
     private String nickname;
     private String email;
     private String status;
+    private String allowedIps;
     private LocalDateTime lastLoginAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -134,6 +135,22 @@ public class User implements Serializable {
      */
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    /**
+     * Gets the allowed IPs pattern for the user.
+     * @return the allowed IPs pattern
+     */
+    public String getAllowedIps() {
+        return allowedIps;
+    }
+
+    /**
+     * Sets the allowed IPs pattern for the user.
+     * @param allowedIps the allowed IPs pattern
+     */
+    public void setAllowedIps(String allowedIps) {
+        this.allowedIps = allowedIps;
     }
 
     /**

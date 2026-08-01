@@ -15,7 +15,6 @@
  */
 package com.aspectran.aspectow.console.auth;
 
-import com.aspectran.aspectow.console.common.util.ConsoleWebUtils;
 import com.aspectran.core.activity.HintParameters;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.core.adapter.SessionAdapter;
@@ -59,7 +58,7 @@ public class AccessControlAspect {
         }
 
         // Validate Session IP Binding (Session Hijacking Protection)
-        String currentIp = ConsoleWebUtils.getRemoteAddr(translet);
+        String currentIp = WebUtils.getRemoteAddr(translet);
         if (StringUtils.hasText(userInfo.getLoginIp()) && !userInfo.getLoginIp().equals(currentIp)) {
             sessionAdapter.removeAttribute(UserInfo.USERINFO_KEY);
             sessionAdapter.invalidate();
