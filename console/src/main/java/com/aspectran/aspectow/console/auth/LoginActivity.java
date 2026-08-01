@@ -104,10 +104,14 @@ public class LoginActivity {
     }
 
     public void doLogin(@NonNull Translet translet, @NonNull User user) {
+        SessionAdapter sessionAdapter = translet.getSessionAdapter();
+        sessionAdapter.invalidate();
+
         UserInfo userInfo = new UserInfo();
         userInfo.setUserId(user.getUserId());
         userInfo.setUsername(user.getUsername());
         userInfo.setNickname(user.getNickname());
+        userInfo.setLoginIp(getRemoteAddr(translet));
 
         Set<String> roles = new HashSet<>();
         Set<String> permissions = new HashSet<>();
@@ -124,7 +128,6 @@ public class LoginActivity {
         userInfo.setRoles(roles);
         userInfo.setPermissions(permissions);
 
-        SessionAdapter sessionAdapter = translet.getSessionAdapter();
         sessionAdapter.setAttribute(UserInfo.USERINFO_KEY, userInfo);
         sessionAdapter.setMaxInactiveInterval(1800); // 30 min.
     }
@@ -150,6 +153,7 @@ public class LoginActivity {
     public void logout(@NonNull Translet translet) {
         SessionAdapter sessionAdapter = translet.getSessionAdapter();
         sessionAdapter.removeAttribute(UserInfo.USERINFO_KEY);
+        sessionAdapter.invalidate();
     }
 
     /**

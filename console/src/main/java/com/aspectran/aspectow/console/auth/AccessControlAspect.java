@@ -22,9 +22,12 @@ import com.aspectran.core.component.bean.annotation.Aspect;
 import com.aspectran.core.component.bean.annotation.Before;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Joinpoint;
+import com.aspectran.utils.StringUtils;
+import com.aspectran.web.support.http.HttpHeaders;
 import com.aspectran.web.support.http.MediaType;
 import com.aspectran.web.support.rest.response.FailureResponse;
 import com.aspectran.web.support.util.WebUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -53,6 +56,15 @@ public class AccessControlAspect {
         SessionAdapter sessionAdapter = translet.getSessionAdapter();
         UserInfo userInfo = sessionAdapter.getAttribute(UserInfo.USERINFO_KEY);
         if (userInfo == null) {
+            return;
+        }
+
+        // Validate Session IP Binding (Session Hijacking Protection)
+        String currentIp = getRemoteAddr(translet);
+        if (StringUtils.hasText(userInfo.getLoginIp()) && !userInfo.getLoginIp().equals(currentIp)) {
+            sessionAdapter.removeAttribute(UserInfo.USERINFO_KEY);
+            sessionAdapter.invalidate();
+            accessDenied(translet);
             return;
         }
 
@@ -117,6 +129,18 @@ public class AccessControlAspect {
         } else {
             translet.transform(new FailureResponse().forbidden());
         }
+    }
+
+    private String getRemoteAddr(@NonNull Translet translet) {
+        String remoteAddr = translet.getRequestAdapter().getHeader(HttpHeaders.X_FORWARDED_FOR);
+        if (StringUtils.hasLength(remoteAddr)) {
+            if (remoteAddr.contains(",")) {
+                remoteAddr = StringUtils.tokenize(remoteAddr, ",", true)[0];
+            }
+        } else {
+            remoteAddr = ((HttpServletRequest)translet.getRequestAdaptee()).getRemoteAddr();
+        }
+        return remoteAddr;
     }
 
 }

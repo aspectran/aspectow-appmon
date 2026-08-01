@@ -32,6 +32,7 @@ public class UserInfo implements Serializable {
     private Long userId;
     private String username;
     private String nickname;
+    private String loginIp;
     private Set<String> roles;
     private Set<String> permissions;
 
@@ -81,6 +82,22 @@ public class UserInfo implements Serializable {
      */
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    /**
+     * Gets the login IP address.
+     * @return the login IP address
+     */
+    public String getLoginIp() {
+        return loginIp;
+    }
+
+    /**
+     * Sets the login IP address.
+     * @param loginIp the login IP address to set
+     */
+    public void setLoginIp(String loginIp) {
+        this.loginIp = loginIp;
     }
 
     /**
