@@ -191,7 +191,12 @@
                         
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Leave blank to keep existing password">
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Leave blank to keep existing password">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword" title="Toggle password visibility">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="mb-3">
@@ -292,6 +297,14 @@
         }
 
         $(function() {
+            $('#togglePassword').on('click', function() {
+                const $passwordInput = $('#password');
+                const $icon = $(this).find('i');
+                const isPassword = $passwordInput.attr('type') === 'password';
+                $passwordInput.attr('type', isPassword ? 'text' : 'password');
+                $icon.toggleClass('bi-eye', !isPassword).toggleClass('bi-eye-slash', isPassword);
+            });
+
             $('#user-search').on('keydown', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -413,6 +426,8 @@
             
             $('#userId').val(id || '');
             $('#username').val(username || '').prop('readonly', !!id);
+            $('#password').attr('type', 'password');
+            $('#togglePassword i').removeClass('bi-eye-slash').addClass('bi-eye');
             $('#password').prop('required', !id);
             $('#nickname').val(nickname || '');
             $('#email').val(email || '');
