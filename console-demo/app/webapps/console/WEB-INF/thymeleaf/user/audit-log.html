@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{templates/default}">
+<body>
+<th:block layout:fragment="content">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <h4 class="mb-0 text-nowrap">
+                <i class="bi bi-shield-check me-2"></i> 
+                <span th:if="${!#strings.isEmpty(page.username)}" th:text="|Audit Log for '${page.username}'|">Audit Log</span>
+                <span th:if="${#strings.isEmpty(page.username)}">Security Audit Log</span>
+            </h4>
+            <span class="badge bg-secondary-subtle text-secondary small fw-semibold text-nowrap" id="total-audit-count" th:text="${page.pageInfo != null ? page.pageInfo.totalElements : (#lists.size(page.auditList))} + ' Records'">0 Records</span>
+        </div>
+        <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2">
+            <div class="input-group input-group-sm" style="width: 180px;">
+                <span class="input-group-text cursor-pointer" onclick="performSearch()"><i class="bi bi-search"></i></span>
+                <input type="text" id="audit-search" class="form-control" placeholder="Search..." th:value="${page.searchKeyword}">
+                <button th:if="${!#strings.isEmpty(page.searchKeyword)}" class="btn btn-outline-secondary" type="button" onclick="clearSearch()" title="Clear search">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <select class="form-select form-select-sm" id="pageSizeSelect" style="width: auto;">
+                <option value="auto">Auto</option>
+                <option value="10">10 / page</option>
+                <option value="20">20 / page</option>
+                <option value="30">30 / page</option>
+                <option value="50">50 / page</option>
+                <option value="100">100 / page</option>
+            </select>
+            <div th:if="${!#strings.isEmpty(page.username)}">
+                <a th:href="@{/user/audit-log(size=${page.pageInfo.size})}" class="btn btn-outline-secondary btn-sm text-nowrap">Show All</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm overflow-hidden mb-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0 align-middle">
+                    <thead>
+                    <tr>
+                        <th class="ps-3 text-muted small text-uppercase" style="width: 60px;">ID</th>
+                        <th class="text-muted small text-uppercase">Username</th>
+                        <th class="text-muted small text-uppercase">Event Type</th>
+                        <th class="text-muted small text-uppercase">Target</th>
+                        <th class="text-muted small text-uppercase">Details</th>
+                        <th class="text-muted small text-uppercase">IP Address</th>
+                        <th class="pe-3 text-muted small text-uppercase">Time</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="audit : ${page.auditList}">
+                        <td class="ps-3" th:text="${audit.auditId}">1</td>
+                        <td>
+                            <a th:href="@{/user/audit-log(username=${audit.username})}" 
+                               class="text-decoration-none fw-bold" th:text="${audit.username}">admin</a>
+                        </td>
+                        <td>
+                            <span th:class="${#strings.contains(audit.eventType, 'DELETE') ? 'badge bg-danger' : (#strings.contains(audit.eventType, 'CREATE') ? 'badge bg-success' : (#strings.contains(audit.eventType, 'VIEW') ? 'badge bg-info' : 'badge bg-warning'))}"
+                                  th:text="${audit.eventType}">USER_CREATE</span>
+                        </td>
+                        <td class="fw-semibold text-primary" th:text="${audit.target}">admin</td>
+                        <td class="small text-muted text-truncate" style="max-width: 300px;" 
+                            th:text="${audit.details}" th:title="${audit.details}">Created new user</td>
+                        <td th:text="${session.USER_INFO.hasRole('DEMO') ? (audit.ipAddress.indexOf('.') != -1 ? audit.ipAddress.replaceAll('(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)', '$1.$2.*.*') : (audit.ipAddress.indexOf(':') != -1 ? audit.ipAddress.replaceAll('(:[^:]*){1,4}$', ':*:*:*:*') : '***')) : audit.ipAddress}">127.0.0.1</td>
+                        <td class="pe-3 small text-muted" th:text="${#temporals.format(audit.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2026-08-01 12:00:00</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(page.auditList)}">
+                        <td colspan="7" class="text-center py-4 text-muted">No audit logs found.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${page.pageInfo.totalPages > 1}" aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item">
+                <a th:if="${page.pageInfo.number > 1}" th:href="@{/user/audit-log(page=1, size=${page.pageInfo.size}, username=${#strings.isEmpty(page.username) ? null : page.username}, searchKeyword=${#strings.isEmpty(page.searchKeyword) ? null : page.searchKeyword})}" title="First"
+                   class="page-link">First</a>
+                <span th:unless="${page.pageInfo.number > 1}" title="First" class="page-link disabled">First</span>
+            </li>
+            <li class="page-item">
+                <a th:if="${page.pageInfo.number > 5 and page.pageInfo.number % 5 == 1}"
+                   th:href="@{/user/audit-log(page=${page.pageInfo.number - 1}, size=${page.pageInfo.size}, username=${#strings.isEmpty(page.username) ? null : page.username}, searchKeyword=${#strings.isEmpty(page.searchKeyword) ? null : page.searchKeyword})}" title="Previous"
+                   class="page-link">&laquo;</a>
+                <a th:if="${page.pageInfo.number > 5 and page.pageInfo.number % 5 != 1}"
+                   th:href="@{/user/audit-log(page=${page.pageInfo.number - 5}, size=${page.pageInfo.size}, username=${#strings.isEmpty(page.username) ? null : page.username}, searchKeyword=${#strings.isEmpty(page.searchKeyword) ? null : page.searchKeyword})}" title="Previous"
+                   class="page-link">&laquo;</a>
+                <span th:unless="${page.pageInfo.number > 5}" title="Previous" class="page-link disabled">&laquo;</span>
+            </li>
+            <li class="page-item"
+                th:if="${i <= page.pageInfo.totalPages}"
+                th:each="i: ${#numbers.sequence(page.pageInfo.number - (page.pageInfo.number - 1) % 5, page.pageInfo.number - (page.pageInfo.number - 1) % 5 + 4)}">
+                <a th:if="${page.pageInfo.number != i}" th:href="@{/user/audit-log(page=${i}, size=${page.pageInfo.size}, username=${#strings.isEmpty(page.username) ? null : page.username}, searchKeyword=${#strings.isEmpty(page.searchKeyword) ? null : page.searchKeyword})}"
+                   th:text="${i}" class="page-link"></a>
+                <span th:if="${page.pageInfo.number == i}" th:text="${i}" class="page-link active"></span>
+            </li>
+            <li class="page-item">
+                <a th:if="${page.pageInfo.number < page.pageInfo.totalPages - 5 and page.pageInfo.number % 5 == 0}"
+                   th:href="@{/user/audit-log(page=${page.pageInfo.number + 1}, size=${page.pageInfo.size}, username=${#strings.isEmpty(page.username) ? null : page.username}, searchKeyword=${#strings.isEmpty(page.searchKeyword) ? null : page.searchKeyword})}"
+                   title="Next" class="page-link">&raquo;</a>
+                <a th:if="${page.pageInfo.number < page.pageInfo.totalPages - 5 and page.pageInfo.number % 5 != 0}"
+                   th:href="@{/user/audit-log(page=${page.pageInfo.number + 5}, size=${page.pageInfo.size}, username=${#strings.isEmpty(page.username) ? null : page.username}, searchKeyword=${#strings.isEmpty(page.searchKeyword) ? null : page.searchKeyword})}"
+                   title="Next" class="page-link">&raquo;</a>
+                <a th:if="${page.pageInfo.number >= page.pageInfo.totalPages - 5 and page.pageInfo.number < page.pageInfo.totalPages - (page.pageInfo.totalPages - 1) % 5}"
+                   th:href="@{/user/audit-log(page=${page.pageInfo.totalPages}, size=${page.pageInfo.size}, username=${#strings.isEmpty(page.username) ? null : page.username}, searchKeyword=${#strings.isEmpty(page.searchKeyword) ? null : page.searchKeyword})}" title="Next" class="page-link">&raquo;</a>
+                <span th:if="${page.pageInfo.number >= page.pageInfo.totalPages - (page.pageInfo.totalPages - 1) % 5}" title="Next" class="page-link disabled">&raquo;</span>
+            </li>
+            <li class="page-item">
+                <a th:if="${page.pageInfo.number < page.pageInfo.totalPages}" th:href="@{/user/audit-log(page=${page.pageInfo.totalPages}, size=${page.pageInfo.size}, username=${#strings.isEmpty(page.username) ? null : page.username}, searchKeyword=${#strings.isEmpty(page.searchKeyword) ? null : page.searchKeyword})}"
+                   title="Last" class="page-link">Last</a>
+                <span th:unless="${page.pageInfo.number < page.pageInfo.totalPages}" title="Last" class="page-link disabled">Last</span>
+            </li>
+        </ul>
+    </nav>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "")  + expires + "; path=/; SameSite=Lax";
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i=0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function performSearch() {
+            const query = $.trim($('#audit-search').val());
+            const urlParams = new URLSearchParams(window.location.search);
+            if (query) {
+                urlParams.set('searchKeyword', query);
+            } else {
+                urlParams.delete('searchKeyword');
+            }
+            urlParams.set('page', '1');
+            window.location.search = urlParams.toString();
+        }
+
+        function clearSearch() {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.delete('searchKeyword');
+            urlParams.set('page', '1');
+            window.location.search = urlParams.toString();
+        }
+
+        $(function() {
+            $('#audit-search').on('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
+            const sizeCookieKey = 'audit_log_page_size';
+            const modeCookieKey = 'audit_log_page_size_mode';
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentSizeParam = urlParams.get('size');
+            const currentUsername = [[${page.username}]];
+            const renderedSize = [[${page.pageInfo.size}]];
+            
+            let savedMode = getCookie(modeCookieKey) || 'auto';
+            let savedSize = getCookie(sizeCookieKey);
+
+            if (currentSizeParam) {
+                if (savedMode === 'manual') {
+                    if (savedSize !== currentSizeParam) {
+                        setCookie(sizeCookieKey, currentSizeParam, 365);
+                    }
+                }
+                $('#pageSizeSelect').val(savedMode === 'auto' ? 'auto' : currentSizeParam);
+            } else {
+                if (savedMode === 'auto') {
+                    $('#pageSizeSelect').val('auto');
+                    
+                    const optimalSize = calculateAutoPageSize();
+                    if (optimalSize !== renderedSize) {
+                        setCookie(sizeCookieKey, optimalSize, 365);
+                        setCookie(modeCookieKey, 'auto', 365);
+                        
+                        urlParams.set('size', optimalSize);
+                        if (currentUsername) {
+                            urlParams.set('username', currentUsername);
+                        }
+                        window.location.search = urlParams.toString();
+                        return;
+                    }
+                } else {
+                    $('#pageSizeSelect').val(renderedSize);
+                }
+            }
+
+            $('#pageSizeSelect').on('change', function() {
+                const val = $(this).val();
+                
+                if (val === 'auto') {
+                    setCookie(modeCookieKey, 'auto', 365);
+                    const optimalSize = calculateAutoPageSize();
+                    setCookie(sizeCookieKey, optimalSize, 365);
+                    urlParams.set('size', optimalSize);
+                } else {
+                    setCookie(modeCookieKey, 'manual', 365);
+                    setCookie(sizeCookieKey, val, 365);
+                    urlParams.set('size', val);
+                }
+                
+                urlParams.set('page', '1');
+                if (currentUsername) {
+                    urlParams.set('username', currentUsername);
+                } else {
+                    urlParams.delete('username');
+                }
+                window.location.search = urlParams.toString();
+            });
+        });
+
+        function calculateAutoPageSize() {
+            const reservedHeight = 310;
+            const rowHeight = 41;
+            const availableHeight = window.innerHeight - reservedHeight;
+            let count = Math.floor(availableHeight / rowHeight);
+            if (count < 5) count = 5;
+            if (count > 50) count = 50;
+            return count;
+        }
+    </script>
+</th:block>
+</body>
+</html>
