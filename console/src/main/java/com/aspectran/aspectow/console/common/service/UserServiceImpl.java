@@ -31,6 +31,8 @@ import org.jspecify.annotations.NonNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Implementation of the UserService.
@@ -41,6 +43,10 @@ public class UserServiceImpl implements UserService, EnvironmentAware {
     private final StrongPasswordEncryptor passwordEncryptor = new StrongPasswordEncryptor();
 
     private final AccountMapper accountMapper;
+
+    private final Map<String, Integer> failedAttemptsMap = new ConcurrentHashMap<>();
+
+    private static final int MAX_FAILED_ATTEMPTS = 5;
 
     private Environment environment;
 
@@ -184,6 +190,9 @@ public class UserServiceImpl implements UserService, EnvironmentAware {
             user.setPassword(passwordEncryptor.encryptPassword(user.getPassword()));
         }
         accountMapper.updateUser(user);
+        if ("NORMAL".equals(user.getStatus()) && StringUtils.hasText(user.getUsername())) {
+            failedAttemptsMap.remove(user.getUsername());
+        }
         if (roleIds != null) {
             accountMapper.deleteUserRoles(user.getUserId());
             for (Long roleId : roleIds) {
@@ -207,6 +216,21 @@ public class UserServiceImpl implements UserService, EnvironmentAware {
         accountMapper.insertLoginHistory(history);
         if (success) {
             accountMapper.updateLastLogin(username);
+            if (StringUtils.hasText(username)) {
+                failedAttemptsMap.remove(username);
+            }
+        } else {
+            if (StringUtils.hasText(username)) {
+                int failedCount = failedAttemptsMap.compute(username, (k, v) -> (v == null ? 1 : v + 1));
+                if (failedCount >= MAX_FAILED_ATTEMPTS) {
+                    User user = accountMapper.getUserByUsername(username);
+                    if (user != null && "NORMAL".equals(user.getStatus())) {
+                        user.setStatus("LOCKED");
+                        accountMapper.updateUser(user);
+                        failedAttemptsMap.remove(username);
+                    }
+                }
+            }
         }
     }
 

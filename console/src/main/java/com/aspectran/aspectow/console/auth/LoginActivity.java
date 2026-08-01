@@ -73,6 +73,11 @@ public class LoginActivity {
         String userAgent = translet.getRequestAdapter().getHeader(HttpHeaders.USER_AGENT);
 
         User user = userService.getUserByUsername(username);
+        if (user != null && "LOCKED".equals(user.getStatus())) {
+            userService.recordLogin(username, remoteAddr, userAgent, false);
+            return new FailureResponse().setError("locked", "Account is LOCKED. Please contact administrator.");
+        }
+
         if (user != null && userService.checkPassword(user, password)) {
             if (userService.isPasswordChangeRequired(user, password)) {
                 return new FailureResponse().setError("setup_required", "Administrator password setup is required.");
@@ -88,6 +93,12 @@ public class LoginActivity {
             return new SuccessResponse("OK").ok();
         } else {
             userService.recordLogin(username, remoteAddr, userAgent, false);
+            if (user != null) {
+                User updatedUser = userService.getUserByUsername(username);
+                if (updatedUser != null && "LOCKED".equals(updatedUser.getStatus())) {
+                    return new FailureResponse().setError("locked", "Account has been LOCKED due to 5 consecutive failed login attempts.");
+                }
+            }
             return new FailureResponse().setError("invalid", "Invalid username or password.");
         }
     }
