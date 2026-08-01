@@ -11,6 +11,11 @@
                     border-left: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
                 }
             }
+            @media (max-width: 768px) {
+                .border-bottom-sm {
+                    border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+                }
+            }
         </style>
     </th:block>
 </head>
@@ -58,11 +63,11 @@
         </div>
         <div class="card-body py-2">
             <div class="row align-items-center">
-                <div class="col-md-4 mb-2 mb-md-0">
+                <div class="col-md-4 border-bottom-sm mb-2 mb-md-0">
                     <label class="small text-muted mb-0">Algorithm</label>
                     <div class="fw-bold font-monospace text-primary" th:text="${page.encryptionAlgorithm}">PBEWITHHMACSHA256ANDAES_128</div>
                 </div>
-                <div class="col-md-4 border-start-md mb-2 mb-md-0">
+                <div class="col-md-4 border-start-md border-bottom-sm mb-2 mb-md-0">
                     <label class="small text-muted mb-0">Password</label>
                     <div class="d-flex align-items-center">
                         <input type="text" class="form-control form-control-sm font-monospace border-0 bg-transparent p-0 fw-bold text-primary"
@@ -72,7 +77,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="col-md-4 border-start-md">
+                <div class="col-md-4 border-start-md border-bottom-sm">
                     <label class="small text-muted mb-0">Salt</label>
                     <div class="fw-bold font-monospace text-primary" th:text="${#strings.isEmpty(page.encryptionSalt) ? '(none)' : page.encryptionSalt}">salt_value</div>
                 </div>
