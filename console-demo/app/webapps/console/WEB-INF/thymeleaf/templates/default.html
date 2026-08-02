@@ -23,9 +23,11 @@
             </button>
         </div>
         <nav class="nav-links">
-            <a th:href="@{/../}" class="nav-link">
-                <i class="bi bi-arrow-left"></i> Back to Main
-            </a>
+            <th:block th:with="portalUrl=${'%{aspectow.console.portalUrl}'}">
+                <a th:href="${portalUrl}" class="nav-link" th:if="${portalUrl != null and !portalUrl.isEmpty()}">
+                    <i class="bi bi-arrow-left"></i> Back to Main
+                </a>
+            </th:block>
 
             <div class="mt-4 px-3 small text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Management</div>
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 9.0//EN"
+        "https://aspectran.com/dtd/aspectran-9.dtd">
+<aspectran>
+
+    <environment>
+        <property name="aspectow.console.portalUrl">%{system:aspectow.console.portalUrl}</property>
+    </environment>
+
+    <append file="/config/console/node-rules.xml"/>
+    <append file="/config/console/appmon-rules.xml"/>
+
+</aspectran>
