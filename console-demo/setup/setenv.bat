@@ -6,7 +6,7 @@ rem This file is called by other batch scripts to configure deployment and
 rem runtime variables.
 
 rem The name of the application. Used for directory names and service names.
-set "APP_NAME=aspectow"
+set "APP_NAME=aspectow-console-demo"
 
 rem The Git repository URL for the application source code.
 set "REPO_URL=https://github.com/aspectran/%APP_NAME%"
@@ -27,4 +27,4 @@ rem A directory for backing up the previous version during an update.
 set "RESTORE_DIR=%BASE_DIR%\app-restore"
 
 rem Java system properties to be passed to the Aspectran application at runtime.
-set "ASPECTRAN_OPTS=-Daspectran.profiles.active=prod"
+set "ASPECTRAN_OPTS=-Daspectran.profiles.active=prod -Duser.timezone=UTC"
