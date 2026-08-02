@@ -74,13 +74,13 @@
         </advice>
     </aspect>
 
-    <!--
-        Aspect to inject security response headers specifically for HTML view requests.
-        - Triggered declaratively only for browser HTML page requests matching the 'Accept=text/html' joinpoint header condition.
-        - Sets Content-Type to 'text/html; charset=utf-8' to prevent HTML source code from rendering as plain text when 'X-Content-Type-Options: nosniff' is active.
-        - Configures Content-Security-Policy (CSP) to mitigate XSS attacks and permit trusted external CDN/font domains (jsdelivr, jquery, googleapis, gstatic).
-    -->
     <aspect id="htmlWebSecuritySettings">
+        <description style="apon">
+            |Aspect to inject security response headers specifically for HTML view requests.
+            |- Triggered declaratively only for browser HTML page requests matching the 'Accept=text/html' joinpoint header condition.
+            |- Sets Content-Type to 'text/html; charset=utf-8' to prevent HTML source code from rendering as plain text when 'X-Content-Type-Options: nosniff' is active.
+            |- Configures Content-Security-Policy (CSP) to mitigate XSS attacks and permit trusted external CDN/font domains (jsdelivr, jquery, googleapis, gstatic).
+        </description>
         <joinpoint>
             headers: [
                 "Accept=text/html"
