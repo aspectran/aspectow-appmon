@@ -57,7 +57,7 @@
 
     <bean id="appmonSqlSessionFactory" class="com.aspectran.mybatis.SqlSessionFactoryBean" lazyDestroy="true">
         <description>
-            FactoryBean that creates an MyBatis SqlSessionFactory using default MyBatis Configuration.
+            FactoryBean that creates a MyBatis SqlSessionFactory using default MyBatis Configuration.
         </description>
         <properties>
             <item name="configLocation" value="classpath:com/aspectran/aspectow/appmon/config/db/mybatis-config.xml"/>
