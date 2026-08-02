@@ -22,6 +22,7 @@ import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
  * Activity for the home page of the Aspectow Management Console.
  */
 @Component("/")
+@Profile("[console.ui, console.custom-ui]")
 public class HomeActivity {
 
     private final NodeManager nodeManager;

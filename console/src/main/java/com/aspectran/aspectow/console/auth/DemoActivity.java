@@ -33,7 +33,7 @@ import org.jspecify.annotations.NonNull;
  * Handles authentication requests.
  */
 @Component("/auth/demo")
-@Profile("demo")
+@Profile("([console.ui, console.custom-ui], demo)")
 public class DemoActivity {
 
     private final UserService userService;

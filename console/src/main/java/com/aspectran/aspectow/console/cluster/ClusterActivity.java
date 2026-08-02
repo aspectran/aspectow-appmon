@@ -27,6 +27,7 @@ import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.daemon.command.CommandParameters;
 import com.aspectran.web.activity.response.RestResponse;
@@ -48,6 +49,7 @@ import java.util.stream.Collectors;
  * <p>Created: 2026-04-19</p>
  */
 @Component("/cluster")
+@Profile("[console.ui, console.custom-ui]")
 public class ClusterActivity {
 
     private static final Logger logger = LoggerFactory.getLogger(ClusterActivity.class);

@@ -25,11 +25,12 @@ import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Redirect;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.RequestToPost;
-import com.aspectran.utils.net.IpAddressUtils;
 import com.aspectran.utils.StringUtils;
+import com.aspectran.utils.net.IpAddressUtils;
 import com.aspectran.web.activity.response.RestResponse;
 import com.aspectran.web.support.http.HttpHeaders;
 import com.aspectran.web.support.rest.response.FailureResponse;
@@ -45,6 +46,7 @@ import java.util.Set;
  * Handles authentication requests.
  */
 @Component("/auth")
+@Profile("[console.ui, console.custom-ui]")
 public class LoginActivity {
 
     private final UserService userService;

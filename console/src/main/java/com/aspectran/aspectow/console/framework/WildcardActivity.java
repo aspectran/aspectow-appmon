@@ -19,6 +19,7 @@ import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.RequestToPost;
 import com.aspectran.utils.StringUtils;
@@ -36,6 +37,7 @@ import java.util.Map;
  * Handles wildcard pattern testing requests.
  */
 @Component("/framework/wildcard")
+@Profile("[console.ui, console.custom-ui]")
 @Bean("wildcardActivity")
 public class WildcardActivity {
 

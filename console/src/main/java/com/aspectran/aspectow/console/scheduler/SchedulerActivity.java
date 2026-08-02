@@ -25,6 +25,7 @@ import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.web.activity.response.RestResponse;
@@ -40,6 +41,7 @@ import java.util.Map;
  * <p>Created: 2026-04-26</p>
  */
 @Component("/cluster/scheduler")
+@Profile("[console.ui, console.custom-ui]")
 public class SchedulerActivity {
 
     private final NodeManager nodeManager;

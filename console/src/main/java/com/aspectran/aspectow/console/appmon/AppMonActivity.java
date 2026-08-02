@@ -27,6 +27,7 @@ import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
 import com.aspectran.core.component.bean.annotation.Hint;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.RequestToGet;
 import com.aspectran.utils.StringUtils;
@@ -49,6 +50,7 @@ import java.util.stream.Collectors;
  * data to backend agents.
  */
 @Component("/appmon")
+@Profile("[console.ui, console.custom-ui]")
 public class AppMonActivity {
 
     private final AppMonManager appMonManager;

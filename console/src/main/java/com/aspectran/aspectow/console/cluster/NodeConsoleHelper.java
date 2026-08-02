@@ -21,6 +21,7 @@ import com.aspectran.aspectow.node.manager.NodeManager;
 import com.aspectran.aspectow.node.manager.NodeRegistry;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
+import com.aspectran.core.component.bean.annotation.Profile;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import java.util.Map;
  * <p>Created: 2026-04-19</p>
  */
 @Component
+@Profile("[console.ui, console.custom-ui]")
 public class NodeConsoleHelper {
 
     private final NodeManager nodeManager;

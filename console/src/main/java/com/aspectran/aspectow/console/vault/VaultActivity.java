@@ -25,6 +25,7 @@ import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.RequestToPost;
 import com.aspectran.utils.PBEncryptionUtils;
@@ -43,6 +44,7 @@ import java.util.Map;
  * Handles vault management requests.
  */
 @Component("/vault")
+@Profile("[console.ui, console.custom-ui]")
 public class VaultActivity {
 
     private final VaultService vaultService;

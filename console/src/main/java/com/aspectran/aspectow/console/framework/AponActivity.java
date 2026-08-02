@@ -19,6 +19,7 @@ import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 
 import java.util.Map;
@@ -27,6 +28,7 @@ import java.util.Map;
  * Handles APON converter tool requests.
  */
 @Component("/framework/apon")
+@Profile("[console.ui, console.custom-ui]")
 @Bean("aponActivity")
 public class AponActivity {
 

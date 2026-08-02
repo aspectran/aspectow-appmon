@@ -17,6 +17,7 @@ package com.aspectran.aspectow.console.framework;
 
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
+import com.aspectran.core.component.bean.annotation.Profile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.Map;
  * A sample bean for testing AsEL expressions.
  */
 @Component
+@Profile("[console.ui, console.custom-ui]")
 @Bean("aselTestBean")
 public class AselTestBean {
 

@@ -19,6 +19,7 @@ import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.core.context.config.AspectranConfig;
@@ -38,6 +39,7 @@ import java.util.Map;
  * A controller that provides framework configuration data for the viewer.
  */
 @Component("/framework/config")
+@Profile("[console.ui, console.custom-ui]")
 @Bean("configurationActivity")
 public class ConfigurationActivity {
 

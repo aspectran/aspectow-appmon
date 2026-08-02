@@ -22,6 +22,7 @@ import com.aspectran.core.component.bean.annotation.Aspect;
 import com.aspectran.core.component.bean.annotation.Before;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Joinpoint;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.web.support.http.MediaType;
 import com.aspectran.web.support.rest.response.FailureResponse;
@@ -34,6 +35,7 @@ import org.jspecify.annotations.NonNull;
  * <p>Created: 2026/06/25</p>
  */
 @Component
+@Profile("[console.ui, console.custom-ui]")
 @Aspect(
         id = "AccessControlAspect",
         order = 2

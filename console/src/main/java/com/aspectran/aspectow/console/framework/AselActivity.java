@@ -22,6 +22,7 @@ import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.RequestToPost;
 import com.aspectran.utils.StringUtils;
@@ -37,6 +38,7 @@ import java.util.Map;
  * Handles AsEL expression testing requests using an isolated InstantActivity.
  */
 @Component("/framework/asel")
+@Profile("[console.ui, console.custom-ui]")
 @Bean("aselActivity")
 public class AselActivity extends InstantActivitySupport {
 

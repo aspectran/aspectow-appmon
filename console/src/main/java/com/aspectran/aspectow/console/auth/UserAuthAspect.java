@@ -22,6 +22,7 @@ import com.aspectran.core.component.bean.annotation.Aspect;
 import com.aspectran.core.component.bean.annotation.Before;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Joinpoint;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.web.support.http.MediaType;
 import com.aspectran.web.support.rest.response.FailureResponse;
 import com.aspectran.web.support.util.WebUtils;
@@ -35,6 +36,7 @@ import java.util.Map;
  * <p>Created: 2020/09/25</p>
  */
 @Component
+@Profile("[console.ui, console.custom-ui]")
 @Aspect(
         id = "userAuthAspect",
         order = 1

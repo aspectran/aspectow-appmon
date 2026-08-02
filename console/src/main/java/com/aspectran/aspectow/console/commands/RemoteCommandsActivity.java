@@ -21,6 +21,7 @@ import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.web.activity.response.RestResponse;
 import com.aspectran.web.support.rest.response.FailureResponse;
@@ -37,6 +38,7 @@ import java.util.Map;
  * <p>Created: 2026-04-16</p>
  */
 @Component("/cluster/commands")
+@Profile("[console.ui, console.custom-ui]")
 public class RemoteCommandsActivity {
 
     private final NodeManager nodeManager;

@@ -26,6 +26,7 @@ import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.AbstractComponent;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.daemon.command.CommandParameters;
 import com.aspectran.utils.StringUtils;
@@ -44,6 +45,7 @@ import static com.aspectran.aspectow.node.manager.NodeMessageProtocol.NODES_BASE
  * and uses a central message buffer to distribute command results.
  */
 @Component(NODES_BASE_PATH + "/${nodeId}/" + CATEGORY_COMMANDS)
+@Profile("[console.ui, console.custom-ui]")
 public class PollingCommandBridge extends AbstractComponent implements CommandBridge {
 
     private final PollingSessionManager pollingSessionManager;

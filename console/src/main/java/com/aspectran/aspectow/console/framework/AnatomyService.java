@@ -19,6 +19,7 @@ import com.aspectran.core.component.bean.BeanRuleRegistry;
 import com.aspectran.core.component.bean.DefaultBeanRegistry;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.event.EventListenerRegistry;
 import com.aspectran.core.component.bean.event.ListenerMethod;
 import com.aspectran.core.component.converter.TypeConverter;
@@ -50,6 +51,7 @@ import java.util.stream.Collectors;
  * A service that provides framework anatomy data.
  */
 @Component
+@Profile("[console.ui, console.custom-ui]")
 @Bean("anatomyService")
 public class AnatomyService {
 

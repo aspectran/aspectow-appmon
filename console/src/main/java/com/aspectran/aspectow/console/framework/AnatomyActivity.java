@@ -20,6 +20,7 @@ import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
+import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.core.service.CoreService;
@@ -41,6 +42,7 @@ import java.util.Set;
  * A controller that provides framework anatomy data for the viewer.
  */
 @Component("/framework/anatomy")
+@Profile("[console.ui, console.custom-ui]")
 @Bean("anatomyActivity")
 public class AnatomyActivity {
 
