@@ -93,6 +93,11 @@
             </div>
             <div class="top-bar-right d-lg-flex align-items-center gap-3">
                 <ul class="navbar-nav">
+                    <th:block th:with="portalUrl=${'%{aspectow.appmon.portalUrl}'}">
+                        <li class="nav-item" th:if="${portalUrl != null and !portalUrl.isEmpty()}">
+                            <a class="nav-link" th:href="${portalUrl}"><i class="bi bi-arrow-left me-1"></i> Back To Main</a>
+                        </li>
+                    </th:block>
                     <li class="nav-item">
                         <a class="nav-link" href="https://github.com/aspectran/aspectow-appmon" title="Get Involved"
                            th:text="|v${@com.aspectran.aspectow.appmon.AboutMe@getVersion()}|">v1.0.0</a>
@@ -175,30 +180,11 @@
     </div>
 </div>
 <footer id="footer-content">
-    <div id="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-8 col-md-7 col-lg-6 col-xl-5 d-flex">
-                    <div class="d-none d-sm-block mt-1"><a class="logo float-start me-3 me-lg-4" href="https://aspectran.com/aspectran/" title="Aspectran"></a></div>
-                    <div>
-                        <a href="https://aspectran.com/aspectow/"><h5>About AppMon</h5></a>
-                        <p><a href="https://aspectran.com/aspectow/">Aspectow AppMon is a lightweight, real-time monitoring solution for applications based on the Aspectran framework.</a></p>
-                    </div>
-                </div>
-                <div class="col-sm-4 col-md-5 col-lg-3 offset-lg-1">
-                    <h5>Get Involved</h5>
-                    <ul class="list-unstyled">
-                        <li class="bi bi-github"> <a href="https://github.com/aspectran" target="_blank" title="" class="external">GitHub</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
     <div id="subfooter">
         <div class="container">
             <nav class="row mb-1">
                 <section id="subfooter-left" class="col-md-6 credits">
-                    <p>Copyright © 2008-present The Aspectran Project</p>
+                    <p>Copyright © 2026 The Aspectran Project</p>
                 </section>
                 <section id="subfooter-right" class="col-md-6 social-icons text-end"
                          th:with="poweredByLink=${@com.aspectran.core.AboutMe@getPoweredByLink()}"

@@ -13,7 +13,7 @@ system: {
         jboss.threads.eqe.statistics.active-count: true
         aspectow.node.id: appmon-demo-node1
         aspectow.redis.uri: redis://132.226.17.47:6379/6
-        aspectran.profiles.base.appmon: appmon.standalone,h2,gateway
+        aspectran.profiles.base.appmon: h2,appmon.standalone,gateway,appmon.custom-ui
     }
 }
 context: {

@@ -14,7 +14,7 @@
                 <property type="set" name="dialects">
                     <bean class="nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect"/>
                 </property>
-                <properties profile="!custom-ui">
+                <properties profile="!appmon.custom-ui">
                     <item name="templateResolvers" type="set">
                         <bean class="com.aspectran.thymeleaf.template.ClassLoaderTemplateResolver">
                             <property name="prefix">META-INF/thymeleaf/appmon/</property>
@@ -27,7 +27,7 @@
                         </bean>
                     </item>
                 </properties>
-                <properties profile="custom-ui">
+                <properties profile="appmon.custom-ui">
                     <item name="templateResolvers" type="set">
                         <bean class="com.aspectran.thymeleaf.template.FileTemplateResolver">
                             <property name="prefix">#{basePath}/webapps/appmon/WEB-INF/thymeleaf/</property>

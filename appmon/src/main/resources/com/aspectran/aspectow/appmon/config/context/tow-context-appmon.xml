@@ -49,14 +49,14 @@
                 <property name="bufferSize" valueType="int">16384</property>
             </bean>
         </property>
-        <properties profile="!custom-ui">
+        <properties profile="!appmon.custom-ui">
             <item name="resourceManager">
                 <bean class="com.aspectran.undertow.server.handler.resource.TowClassPathResourceManager">
                     <argument>META-INF/resources/appmon/</argument>
                 </bean>
             </item>
         </properties>
-        <properties profile="custom-ui">
+        <properties profile="appmon.custom-ui">
             <item name="resourceManager">
                 <bean class="com.aspectran.undertow.server.handler.resource.TowResourceManager">
                     <property name="base">/webapps/%{tow.context.appmon.name}</property>

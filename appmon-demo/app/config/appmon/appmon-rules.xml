@@ -3,6 +3,12 @@
         "https://aspectran.com/dtd/aspectran-9.dtd">
 <aspectran>
 
+    <!-- Specifies the URL to return to the main portal or home site from the AppMon UI.
+         Resolves the system property 'aspectow.appmon.portalUrl'. -->
+    <environment>
+        <property name="aspectow.appmon.portalUrl">%{system:aspectow.appmon.portalUrl}</property>
+    </environment>
+
     <bean class="com.aspectran.aspectow.appmon.engine.config.AppMonConfigResolver">
         <properties profile="!prod">
             <item name="configLocation">/config/appmon/appmon-config.apon</item>

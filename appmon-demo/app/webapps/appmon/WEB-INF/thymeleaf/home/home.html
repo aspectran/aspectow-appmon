@@ -86,7 +86,7 @@
                                     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mt-2">
                                         <th:block th:each="appInfo : ${page.appInfoList}" th:if="${appInfo.groupId == groupInfo.id}">
                                             <div class="col">
-                                                <a th:href="@{/dashboard/{appId}(appId=${appInfo.appId})}" class="app-link">
+                                                <a th:href="@{|/dashboard/#${appInfo.appId}|}" class="app-link">
                                                     <i class="bi bi-box"></i> [[${appInfo.title}]]
                                                 </a>
                                             </div>
@@ -134,7 +134,7 @@
                             <th:block th:if="${not #lists.isEmpty(page.appInfoList)}">
                                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mt-3">
                                     <div class="col" th:each="appInfo : ${page.appInfoList}">
-                                        <a th:href="@{/dashboard/{appId}(appId=${appInfo.appId})}" class="app-link">
+                                        <a th:href="@{|/dashboard/#${appInfo.appId}|}" class="app-link">
                                             <i class="bi bi-box"></i> [[${appInfo.title}]]
                                         </a>
                                     </div>
