@@ -5,7 +5,8 @@
 
     <append file="/config/server/undertow/tow-server.xml"/>
     <append file="/config/server/undertow/tow-context-root.xml"/>
-    <append resource="com/aspectran/aspectow/console/config/rules/context/tow-context-console.xml"/>
+    <append resource="com/aspectran/aspectow/console/config/rules/context/tow-context-console.xml" profile="console.ui"/>
+    <append resource="com/aspectran/aspectow/console/config/rules/context/tow-context-console-headless.xml" profile="!console.ui"/>
     <append file="/config/server/undertow/tow-support.xml"/>
 
 </aspectran>
