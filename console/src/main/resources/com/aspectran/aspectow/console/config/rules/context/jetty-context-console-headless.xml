@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 9.0//EN"
+        "https://aspectran.com/dtd/aspectran-9.dtd">
+<aspectran>
+
+    <description>
+        Aspectran configuration for setting up the servlet context.
+    </description>
+
+    <environment>
+        <property name="jetty.context.console.name">console</property>
+        <property name="jetty.context.console.config">classpath:com/aspectran/aspectow/console/config/aspectran-config.apon</property>
+    </environment>
+
+    <bean id="jetty.context.console.webAppContext"
+          class="com.aspectran.jetty.server.servlet.JettyWebAppContext"
+          scope="prototype">
+        <property name="contextPath">/%{jetty.context.console.name}</property>
+        <property name="defaultsDescriptor">/config/server/jetty/webdefault-ee10.xml</property>
+        <property name="initParams" type="map">
+            <entry name="aspectran:config">%{jetty.context.console.config}</entry>
+        </property>
+        <property name="servlets" type="array">
+            <bean class="com.aspectran.jetty.server.servlet.DefaultJspServlet">
+                <property name="initOrder" valueType="int">1</property>
+            </bean>
+            <bean class="com.aspectran.jetty.server.servlet.JettyServlet">
+                <argument>webActivityServlet</argument>
+                <argument>com.aspectran.web.servlet.WebActivityServlet</argument>
+                <property name="initOrder" valueType="int">2</property>
+            </bean>
+        </property>
+        <property name="webSocketServerContainerInitializer">
+            <bean class="com.aspectran.jetty.server.servlet.JettyWebSocketServerContainerInitializer">
+                <property name="idleTimeout" valueType="long">60000</property>
+            </bean>
+        </property>
+    </bean>
+
+</aspectran>
