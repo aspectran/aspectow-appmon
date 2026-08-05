@@ -40,15 +40,15 @@
                     <i class="bi bi-chevron-down small"></i>
                 </a>
                 <div class="collapse" th:classappend="${page.group == 'cluster-menu' ? 'show' : ''}" id="cluster-menu">
-                    <a th:href="@{/cluster/nodes}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'nodes-page' ? 'active' : ''}"
+                    <a th:href="@{/cluster/nodes/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'nodes-page' ? 'active' : ''}"
                        th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                         Nodes
                     </a>
-                    <a th:href="@{/cluster/commands}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'commands-page' ? 'active' : ''}"
+                    <a th:href="@{/cluster/commands/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'commands-page' ? 'active' : ''}"
                        th:if="${session.USER_INFO.hasPermission('COMMAND_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
                         Remote Commands
                     </a>
-                    <a th:href="@{/cluster/scheduler}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'scheduler-page' ? 'active' : ''}"
+                    <a th:href="@{/cluster/scheduler/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'scheduler-page' ? 'active' : ''}"
                        th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                         Scheduler Manager
                     </a>
@@ -67,7 +67,7 @@
                     <i class="bi bi-chevron-down small"></i>
                 </a>
                 <div class="collapse" th:classappend="${page.group == 'security-menu' ? 'show' : ''}" id="security-menu">
-                    <a th:href="@{/vault}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'vault-page' ? 'active' : ''}">
+                    <a th:href="@{/vault/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'vault-page' ? 'active' : ''}">
                         Vault
                     </a>
                 </div>
@@ -128,7 +128,7 @@
                     <i class="bi bi-chevron-down small"></i>
                 </a>
                 <div class="collapse" th:classappend="${page.group == 'accounts-menu' ? 'show' : ''}" id="user-menu">
-                    <a th:href="@{/user}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'user-management-page' ? 'active' : ''}"
+                    <a th:href="@{/user/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'user-management-page' ? 'active' : ''}"
                        th:if="${session.USER_INFO.hasPermission('USER_MANAGE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
                         Users
                     </a>

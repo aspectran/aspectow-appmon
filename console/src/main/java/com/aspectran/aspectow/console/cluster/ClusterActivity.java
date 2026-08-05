@@ -78,7 +78,7 @@ public class ClusterActivity {
      * Displays the cluster nodes list page.
      * @return a map of attributes for rendering the view
      */
-    @Request("/nodes")
+    @Request("/nodes/")
     @Dispatch("cluster/nodes")
     @Action("page")
     public Map<String, Object> listNodes(@NonNull Translet translet) {

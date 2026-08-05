@@ -63,7 +63,7 @@ public class RemoteCommandsActivity {
      * @param nodeId the node ID
      * @return a map of attributes for rendering the view
      */
-    @Request
+    @Request("/")
     @Dispatch("cluster/commands")
     @Action("page")
     public Map<String, Object> commands(String nodeId) {
