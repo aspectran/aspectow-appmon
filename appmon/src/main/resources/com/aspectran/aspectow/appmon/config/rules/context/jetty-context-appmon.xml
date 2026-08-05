@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 9.0//EN"
+        "https://aspectran.com/dtd/aspectran-9.dtd">
+<aspectran>
+
+    <description>
+        Aspectran configuration for setting up the servlet context.
+    </description>
+
+    <environment>
+        <property name="jetty.context.appmon.name">appmon</property>
+        <property name="jetty.context.appmon.config">classpath:com/aspectran/aspectow/appmon/config/aspectran-config.apon</property>
+    </environment>
+
+    <bean id="jetty.context.appmon.webAppContext"
+          class="com.aspectran.jetty.server.servlet.JettyWebAppContext"
+          scope="prototype">
+        <property name="contextPath">/%{jetty.context.appmon.name}</property>
+        <property name="tempDirectory">/work/_webapps/%{jetty.context.appmon.name}</property>
+        <property name="tempDirectoryPersistent" valueType="boolean">true</property>
+        <property name="defaultsDescriptor">/config/server/jetty/webdefault-ee10.xml</property>
+        <property name="sessionHandler">#{jetty.context.appmon.sessionHandler}</property>
+        <property name="initParams" type="map">
+            <entry name="aspectran:config">%{jetty.context.appmon.config}</entry>
+        </property>
+        <property name="servlets" type="array">
+            <bean class="com.aspectran.jetty.server.servlet.DefaultJspServlet">
+                <property name="initOrder" valueType="int">1</property>
+            </bean>
+            <bean class="com.aspectran.jetty.server.servlet.JettyServlet">
+                <argument>webActivityServlet</argument>
+                <argument>com.aspectran.web.servlet.WebActivityServlet</argument>
+                <property name="mappings" type="array">
+                    <value>/</value>
+                </property>
+                <property name="initOrder" valueType="int">2</property>
+            </bean>
+        </property>
+        <property name="webSocketServerContainerInitializer">
+            <bean class="com.aspectran.jetty.server.servlet.JettyWebSocketServerContainerInitializer">
+                <property name="idleTimeout" valueType="long">60000</property>
+            </bean>
+        </property>
+        <properties profile="!appmon.custom-ui">
+            <item name="war">classpath:META-INF/resources/appmon/</item>
+        </properties>
+        <properties profile="appmon.custom-ui">
+            <item name="war">/webapps/%{jetty.context.appmon.name}</item>
+        </properties>
+    </bean>
+
+    <bean id="jetty.context.appmon.sessionHandler"
+          class="com.aspectran.jetty.server.session.JettySessionHandler"
+          scope="prototype">
+        <property name="sessionDataStore">
+            <bean class="com.aspectran.jetty.server.session.JettyFileSessionDataStoreFactory">
+                <property name="storeDir">%{system:aspectran.workPath:/work}/_sessions/%{jetty.context.appmon.name}</property>
+                <property name="deleteUnrestorableFiles" valueType="boolean">true</property>
+            </bean>
+        </property>
+    </bean>
+
+</aspectran>
