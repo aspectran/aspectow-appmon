@@ -115,26 +115,23 @@ public class AppMonActivity {
 
         String[] appIds = StringUtils.splitWithComma(appsToSubscribe);
         String[] verifiedAppIds = appMonManager.getVerifiedAppIds(appIds, appInfoList);
-
         if (StringUtils.hasText(appsToSubscribe)) {
             Set<String> verifiedAppIdSet = new HashSet<>(Arrays.asList(verifiedAppIds));
             appInfoList = appInfoList.stream()
                     .filter(app -> verifiedAppIdSet.contains(app.getAppId()))
                     .collect(Collectors.toList());
-
-            Set<String> activeGroupIds = appInfoList.stream()
-                    .map(AppInfo::getGroupId)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-
-            nodeInfoList = nodeInfoList.stream()
-                    .filter(node -> activeGroupIds.contains(node.getGroup()))
-                    .collect(Collectors.toList());
-
-            groupInfoList = groupInfoList.stream()
-                    .filter(group -> activeGroupIds.contains(group.getId()))
-                    .collect(Collectors.toList());
         }
+
+        Set<String> activeGroupIds = appInfoList.stream()
+                .filter(app -> !app.isHidden())
+                .map(AppInfo::getGroupId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        groupInfoList = groupInfoList.stream()
+                .filter(group -> activeGroupIds.contains(group.getId()))
+                .collect(Collectors.toList());
+
         if (appMonManager.isGatewayMode()) {
             nodeInfoList = new ArrayList<>(nodeInfoList);
             nodeInfoList.sort(Comparator.comparing(NodeInfo::getId, Comparator.nullsLast(String::compareTo)));
