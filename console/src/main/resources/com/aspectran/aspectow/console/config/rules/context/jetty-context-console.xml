@@ -42,7 +42,7 @@
             </bean>
         </property>
         <properties profile="!console.custom-ui">
-            <item name="war">classpath:META-INF/resources/console/</item>
+            <item name="war">classpath:META-INF/resources/console</item>
         </properties>
         <properties profile="console.custom-ui">
             <item name="war">/webapps/%{jetty.context.console.name}</item>

@@ -75,6 +75,8 @@
                         maxActiveSessions: 999
                         maxIdleSeconds: 600
                         evictionIdleSeconds: 300
+                        maxIdleSecondsForNew: 120
+                        evictionIdleSecondsForNew: 60
                         scavengingIntervalSeconds: 180
                         clusterEnabled: false
                     </argument>
