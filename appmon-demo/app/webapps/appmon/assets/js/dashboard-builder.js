@@ -169,7 +169,6 @@ class DashboardBuilder {
 
     rebuild() {
         this.build(this.basePath, this.appsToSubscribe, this.nodeToSubscribe);
-        // location.reload();
     }
 
     random(min, max) {
@@ -186,7 +185,7 @@ class DashboardBuilder {
             node.subscribed = true;
             node.subscribeAttempts++;
             console.log(node.id, "subscribe attempts:", node.subscribeAttempts);
-            this.clearConsole(node.index);
+            //this.clearConsole(node.index);
             this.changeNodeState(node);
             if (node.subscribeAttempts === 1) {
                 this.initView();
