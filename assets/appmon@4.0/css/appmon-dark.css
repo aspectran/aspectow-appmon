@@ -16,7 +16,7 @@
 
 /*
  * @version 4.0
- * @last-modified 2026-05-22
+ * @last-modified 2026-08-08
  */
 
 [data-bs-theme=dark] {
@@ -39,6 +39,9 @@
     }
     .node.metrics-bar .metric {
         border-left: 1px solid #3b3f42;
+        @media screen and (max-width: 768px) {
+            border-right: 1px solid #3b3f42;
+        }
     }
     .instance.metrics-bar {
         background-color: #2a2f33;

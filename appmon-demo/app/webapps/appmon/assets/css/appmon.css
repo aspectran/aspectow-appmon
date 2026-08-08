@@ -16,20 +16,25 @@
 
 /*
  * @version 4.0
- * @last-modified 2026-05-22
+ * @last-modified 2026-08-08
  */
 
 /* For console-integrated */
 .monitoring-page .group.tabs {
     box-shadow: none;
-    @media screen and (max-width: 576px) {
-        height: auto;
-    }
 }
 .monitoring-page .group.tabs > .tabs-title > a, .monitoring-page .group.tabs > .tabs-title button {
     margin-right: 4px;
     border-radius: 30px !important;
-    padding: 6px 18px 6px 14px !important;
+    @media screen and (min-width: 768px) {
+        padding: 3px 13px !important;
+        font-size: .8em !important;
+    }
+}
+.monitoring-page .node.tabs > .tabs-title > a, .monitoring-page .node.tabs > .tabs-title button {
+    @media screen and (min-width: 768px) {
+        padding: 3px 13px !important;
+    }
 }
 
 .tabs > .tabs-title .indicator {
@@ -135,6 +140,9 @@
 }
 .node.metrics-bar .metric {
     border-left: 1px solid #ccc;
+    @media screen and (max-width: 768px) {
+        border-right: 1px solid #ccc;
+    }
     @media screen and (max-width: 768px) {
         display: block;
         grid-column: 2;
