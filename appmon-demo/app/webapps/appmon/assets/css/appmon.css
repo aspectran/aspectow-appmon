@@ -51,10 +51,10 @@
 }
 .node.tabs {
     box-shadow: none;
-    @media screen and (max-width: 576px) {
+    @media screen and (max-width: 768px) {
         height: auto;
     }
-    @media screen and (min-width: 576px) {
+    @media screen and (min-width: 768px) {
         margin-top: 1px;
     }
 }
@@ -67,11 +67,11 @@
 
 .metrics-bar {
     background-color: #d3d3d3;
-    @media screen and (max-width: 576px) {
+    @media screen and (max-width: 768px) {
         display: block;
         height: auto;
     }
-    @media screen and (min-width: 576px) {
+    @media screen and (min-width: 768px) {
         display: flex;
         height: 1.8rem;
     }
@@ -79,16 +79,16 @@
 .metrics-bar .metric dl {
     display: flex;
     margin: 0;
-    @media screen and (max-width: 576px) {
+    @media screen and (max-width: 768px) {
         height: auto;
     }
-    @media screen and (min-width: 576px) {
+    @media screen and (min-width: 768px) {
         height: 1.8rem;
     }
 }
 .metrics-bar .metric dl dt {
-    margin: 0;
-    padding: 0 5px 0 10px;
+    margin: 0 .5rem 0 0;
+    padding: 0 .5rem;
     align-content: center;
     font-weight: normal;
     font-size: .9em;
@@ -114,14 +114,6 @@
         grid-template-columns: auto 1fr;
         align-items: center;
     }
-}
-.node.metrics-bar.no-title {
-    @media screen and (max-width: 768px) {
-        grid-template-columns: 1fr;
-    }
-}
-.node.metrics-bar.no-title .title {
-    display: none;
 }
 .node.metrics-bar .title {
     display: inline-flex;
@@ -149,13 +141,6 @@
         text-align: left;
     }
 }
-.node.metrics-bar.no-title .metric {
-    @media screen and (max-width: 768px) {
-        grid-column: 1;
-        border-left: 0;
-        text-align: center;
-    }
-}
 .node.metrics-bar .metric dl {
     @media screen and (max-width: 768px) {
         display: inline-flex;
@@ -171,7 +156,6 @@
     @media screen and (min-width: 576px) {
         display: flex;
         justify-content: center;
-        height: 28px;
     }
 }
 .instance.metrics-bar .metric dl {
