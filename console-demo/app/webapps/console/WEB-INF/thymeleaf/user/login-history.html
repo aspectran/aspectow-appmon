@@ -7,11 +7,11 @@
 <th:block layout:fragment="content">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-3">
         <div class="d-flex align-items-center gap-2">
-            <h4 class="mb-0 text-nowrap">
+            <h3 class="fw-bold mb-0">
                 <i class="bi bi-clock-history me-2"></i> 
                 <span th:if="${!#strings.isEmpty(page.username)}" th:text="|Login History for '${page.username}'|">Login History</span>
                 <span th:if="${#strings.isEmpty(page.username)}">All Login History</span>
-            </h4>
+            </h3>
             <span class="badge bg-secondary-subtle text-secondary small fw-semibold text-nowrap" id="total-history-count" th:text="${page.pageInfo != null ? page.pageInfo.totalElements : (#lists.size(page.historyList))} + ' Records'">0 Records</span>
         </div>
         <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2">
