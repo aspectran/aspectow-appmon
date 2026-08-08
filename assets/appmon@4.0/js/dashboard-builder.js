@@ -19,7 +19,7 @@
  * Responsible for assembling the dashboard UI based on configuration data.
  *
  * @version 4.0
- * @last-modified 2026-07-15
+ * @last-modified 2026-08-08
  */
 class DashboardBuilder {
     constructor(options = {}) {
@@ -384,7 +384,6 @@ class DashboardBuilder {
         this.nodes.filter(d => d.active && d.group === this.currentGroupId).forEach(d => {
             $(".node.tabs .tabs-title[data-node-index=" + d.index + "]").addClass("active");
         })
-        $(".node.metrics-bar.available").toggleClass("no-title", (availableTabs.length === 1));
     }
 
     updateNodeVisibility(node, appId) {
@@ -893,11 +892,7 @@ class DashboardBuilder {
     addNodeMetricsBar(nodeInfo) {
         const $metricsBar = $(".node.metrics-bar");
         const $newBar = $metricsBar.first().hide().clone().addClass("available").attr("data-node-index", nodeInfo.index);
-        const nodesInGroup = this.nodes.filter(n => n.group === nodeInfo.group);
-        if (nodesInGroup.length > 1) {
-            $newBar.find(".number").text(" " + nodeInfo.nodeNoInGroup);
-            $newBar.removeClass("no-title");
-        }
+        $newBar.find(".number").text(" " + nodeInfo.nodeNoInGroup);
         return $newBar.insertAfter($metricsBar.last());
     }
 
