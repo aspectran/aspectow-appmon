@@ -118,11 +118,14 @@
 <body>
     <th:block layout:fragment="content">
         <div th:if="${session.USER_INFO.hasPermission('COMMAND_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-3">
                 <div>
-                    <h2 class="fw-bold mb-0">Remote Commands</h2>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h3 class="fw-bold mb-0">Remote Commands</h3>
+                    </div>
+                    <p class="text-muted mb-0">Execute remote commands and inspect real-time outputs across cluster nodes.</p>
                 </div>
-                <div class="d-flex gap-1 align-items-center">
+                <div class="d-flex align-items-center gap-2">
                     <div>
                         <span class="text-muted small">Target Mode:</span>
                         <span class="fw-bold text-primary" th:text="${page.clusterMode.toUpperCase()}">GATEWAY</span>
@@ -131,18 +134,18 @@
             </div>
 
             <div class="card target-selector">
-                <div class="row align-items-center g-3">
+                <div class="row align-items-center g-2 md-g-3">
                     <div class="col-12 col-sm-auto">
                         <label class="fw-bold small text-muted text-uppercase">Target Nodes</label>
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-3">
                         <select id="target-type" class="form-select form-select-sm" onchange="onTargetTypeChange()">
                             <option value="all" th:selected="${page.targetNodeId == null}">All Nodes in Cluster</option>
                             <option value="group" th:if="${page.clusterMode == 'gateway'}">Specific Group</option>
                             <option value="node" th:selected="${page.targetNodeId != null}">Individual Node</option>
                         </select>
                     </div>
-                    <div class="col-12 col-md-4" id="target-value-container">
+                    <div class="col-12 col-md-5" id="target-value-container">
                         <select id="target-value" class="form-select form-select-sm">
                             <!-- Dynamic options -->
                         </select>
@@ -224,6 +227,12 @@ arguments: {
             const targetNodeId = [[${page.targetNodeId}]];
             let nodes = [[${page.nodes}]];
 
+            const initialTargetNodeId = targetNodeId || new URLSearchParams(window.location.search).get('nodeId');
+            let isInitialLoad = true;
+            if (initialTargetNodeId) {
+                $('#target-type').val('node');
+            }
+
             let consoleClient = null;
             let consoleClients = {};
             let commandHistory = [];
@@ -260,6 +269,7 @@ arguments: {
                 const type = $('#target-type').val();
                 const $container = $('#target-value-container');
                 const $select = $('#target-value');
+                const prevValue = $select.val();
                 $select.empty();
 
                 if (type === 'all') {
@@ -287,7 +297,6 @@ arguments: {
                     updateUrl();
                     checkSelectedGroupStatus($select.val());
                 } else {
-                    const prevValue = $select.val();
                     $container.show();
                     if (isGatewayMode) {
                         const groups = [...new Set(nodes.map(n => n.group).filter(g => g))];
@@ -339,7 +348,14 @@ arguments: {
                         });
                     }
 
-                    const currentNodeId = prevValue || targetNodeId;
+                    let currentNodeId = null;
+                    if (isInitialLoad && initialTargetNodeId && nodes.some(n => n.id === initialTargetNodeId)) {
+                        currentNodeId = initialTargetNodeId;
+                        isInitialLoad = false;
+                    } else {
+                        currentNodeId = (prevValue && nodes.some(n => n.id === prevValue)) ? prevValue : (targetNodeId || (nodes.length > 0 ? nodes[0].id : null));
+                    }
+
                     if (currentNodeId) {
                         $select.val(currentNodeId);
                         updateUrl(currentNodeId);
@@ -933,6 +949,9 @@ arguments: {
             }
 
             $(function() {
+                if (initialTargetNodeId) {
+                    $('#target-type').val('node');
+                }
                 onTargetTypeChange();
 
                 $('#target-value').on('change', function() {

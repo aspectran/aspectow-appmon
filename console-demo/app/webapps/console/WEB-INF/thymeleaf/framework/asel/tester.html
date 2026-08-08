@@ -3,8 +3,7 @@
       xmlns:th="https://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{templates/default}">
-<body>
-<th:block layout:fragment="content">
+<head>
     <style>
         /* Java Syntax Highlighting */
         .java-code .hl-keyword { color: #d73a49; font-weight: bold; }
@@ -24,8 +23,11 @@
         [data-bs-theme="dark"] .java-code .hl-number { color: #79c0ff; }
         [data-bs-theme="dark"] .java-code .hl-type { color: #ff7b72; }
     </style>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0"><i class="bi bi-braces-asterisk me-2"></i> AsEL Tester</h4>
+</head>
+<body>
+<th:block layout:fragment="content">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-3">
+        <h3 class="fw-bold mb-0"><i class="bi bi-braces-asterisk me-2"></i> AsEL Tester</h3>
         <a href="https://aspectran.com/en/docs/guides/introduce-asel/" target="_blank" class="btn btn-outline-info btn-sm">
             <i class="bi bi-book me-1"></i> AsEL Guide
         </a>
