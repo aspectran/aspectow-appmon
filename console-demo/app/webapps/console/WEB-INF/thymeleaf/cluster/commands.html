@@ -8,8 +8,8 @@
         .command-container {
             display: grid;
             grid-template-columns: 350px minmax(0, 1fr);
-            gap: 20px;
-            min-height: calc(100vh - 250px);
+            gap: 1rem;
+            min-height: calc(100vh - 270px);
         }
         .status-pill {
             font-size: 0.7rem;
@@ -21,7 +21,7 @@
         .target-selector {
             background: var(--bs-secondary-bg);
             padding: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 1rem;
             border: 1px solid var(--bs-border-color);
         }
         .history-panel {
@@ -54,7 +54,7 @@
         .editor-panel {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 1rem;
             min-width: 0;
         }
         .command-editor {
@@ -117,7 +117,7 @@
 </head>
 <body>
     <th:block layout:fragment="content">
-        <div th:if="${session.USER_INFO.hasPermission('COMMAND_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
+        <th:block th:if="${session.USER_INFO.hasPermission('COMMAND_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-3">
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-1">
@@ -205,7 +205,7 @@ arguments: {
                     </div>
                 </div>
             </div>
-        </div>
+        </th:block>
         <div th:unless="${session.USER_INFO.hasPermission('COMMAND_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}" class="alert alert-danger my-4">
             <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Access Denied</h4>
             <p class="mb-0">You do not have permission to access this page.</p>

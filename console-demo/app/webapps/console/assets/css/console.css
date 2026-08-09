@@ -2,18 +2,18 @@
     --sidebar-width: 240px;
     --sidebar-bg: #111;
     --top-bar-height: 60px;
-    --accent-color: #3ecf8e; /* Supabase Green */
+    --accent-color: #3ecf8e;
 }
 [data-bs-theme="light"] {
     --sidebar-bg: #f8f9fa;
 }
 body {
-    font-family: 'Open Sans', sans-serif;
     margin: 0;
     overflow: hidden;
     display: flex;
     height: 100vh;
 }
+
 /* Sidebar */
 #sidebar {
     width: var(--sidebar-width);
@@ -55,6 +55,7 @@ body {
     background: rgba(62, 207, 142, 0.1);
     border-left-color: var(--accent-color);
 }
+
 /* Main Content Area */
 #main-container {
     flex: 1;
@@ -105,6 +106,7 @@ body {
         display: block;
     }
 }
+
 /* Theme Toggler override */
 .theme-toggler .btn {
     border: none;

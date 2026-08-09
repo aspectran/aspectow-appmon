@@ -24,27 +24,11 @@
             font-family: var(--bs-font-monospace);
             font-size: 0.75rem;
         }
-        #clusterTabs .nav-link:not(.active) {
-            border: 1px solid var(--bs-border-color);
-            background-color: var(--bs-body-bg);
-        }
-        #clusterTabs .nav-link:not(.active):hover {
-            border-color: var(--bs-primary-border-subtle);
-            background-color: var(--bs-tertiary-bg);
-        }
-        @media (max-width: 575.98px) {
-            #clusterTabs .nav-link {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                width: 100%;
-            }
-        }
     </style>
 </head>
 <body>
     <th:block layout:fragment="content">
-        <div th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
+        <th:block th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-3">
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-1">
@@ -52,29 +36,33 @@
                     </div>
                     <p class="text-muted mb-0">Monitor and manage all active instances in the cluster.</p>
                 </div>
-                <div class="d-flex align-items-center gap-2">
-                    <div class="input-group input-group-sm" style="max-width: 260px;">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" id="node-search" class="form-control" placeholder="Search nodes...">
+                <div class="d-flex flex-wrap align-items-center justify-content-between justify-content-md-end gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <div class="input-group input-group-sm" style="max-width: 260px;">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" id="node-search" class="form-control" placeholder="Search nodes...">
+                        </div>
                     </div>
-                    <button id="bulk-ctrl-btn" class="btn btn-outline-warning btn-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#bulkControlModal" th:if="${session.USER_INFO.hasPermission('NODE_MANAGE') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('DEMO')}">
-                        <i class="bi bi-sliders me-1"></i> Bulk Control
-                    </button>
-                    <button class="btn btn-outline-primary btn-sm text-nowrap" onclick="location.reload()">
-                        <i class="bi bi-arrow-clockwise"></i> Refresh
-                    </button>
+                    <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap">
+                        <button id="bulk-ctrl-btn" class="btn btn-outline-warning btn-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#bulkControlModal" th:if="${session.USER_INFO.hasPermission('NODE_MANAGE') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('DEMO')}">
+                            <i class="bi bi-sliders me-1"></i> Bulk Control
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm text-nowrap" onclick="location.reload()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <th:block th:if="${page.clusterMode == 'gateway' and page.groups != null}">
-                <ul class="nav nav-pills flex-column flex-sm-row gap-2 mb-4" id="clusterTabs" role="tablist">
+                <ul class="nav nav-tabs mobile-btn-tabs mb-3" id="clusterTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="all-tab" data-bs-toggle="pill" data-bs-target="#all-nodes" type="button" role="tab">
+                        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-nodes" type="button" role="tab">
                             All Nodes <span class="badge bg-body-tertiary text-body-secondary ms-1" th:text="${page.nodes != null ? #lists.size(page.nodes) : 0}">0</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation" th:each="group : ${page.groups}">
-                        <button class="nav-link" th:id="${group.id} + '-tab'" data-bs-toggle="pill" th:data-bs-target="'#group-' + ${group.id}" type="button" role="tab">
+                        <button class="nav-link" th:id="${group.id} + '-tab'" data-bs-toggle="tab" th:data-bs-target="'#group-' + ${group.id}" type="button" role="tab">
                             <span th:text="${group.title}">Group Title</span>
                             <span class="badge bg-body-tertiary text-body-secondary ms-1" th:text="${page.groupedNodes != null && page.groupedNodes[group.id] != null ? #lists.size(page.groupedNodes[group.id]) : 0}">0</span>
                         </button>
@@ -83,7 +71,7 @@
 
                 <div class="tab-content" id="clusterTabContent">
                     <div class="tab-pane fade show active" id="all-nodes" role="tabpanel">
-                        <div class="row g-4">
+                        <div class="row g-3">
                             <th:block th:each="nodeItem : ${page.nodes}">
                                 <div class="col-md-6 col-xxl-4">
                                     <th:block th:insert="~{::node-card(nodeInfo=${nodeItem})}"></th:block>
@@ -95,9 +83,9 @@
                         <div class="mb-3 px-1" th:if="${group.description}">
                             <p class="text-muted small mb-0" th:text="${group.description}">Group Description</p>
                         </div>
-                        <div class="row g-4">
+                        <div class="row g-3">
                             <th:block th:if="${page.groupedNodes != null}" th:each="nodeItem : ${page.groupedNodes[group.id]}">
-                                <div class="col-md-6" th:classappend="${#lists.size(page.groupedNodes[group.id]) > 2} ? 'col-lg-4'">
+                                <div class="col-md-6 col-xxl-4">
                                     <th:block th:insert="~{::node-card(nodeInfo=${nodeItem})}"></th:block>
                                 </div>
                             </th:block>
@@ -107,7 +95,7 @@
             </th:block>
 
             <th:block th:if="${page.clusterMode != 'gateway' or page.groups == null}">
-                <div class="row g-4">
+                <div class="row g-3">
                     <th:block th:each="nodeItem : ${page.nodes}">
                         <div class="col-md-6" th:classappend="${#lists.size(page.nodes) > 2} ? 'col-lg-4'">
                             <th:block th:insert="~{::node-card(nodeInfo=${nodeItem})}"></th:block>
@@ -233,7 +221,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </th:block>
         <div th:unless="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}" class="alert alert-danger my-4">
             <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Access Denied</h4>
             <p class="mb-0">You do not have permission to access this page.</p>

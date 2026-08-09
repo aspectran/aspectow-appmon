@@ -5,9 +5,6 @@
       layout:decorate="~{templates/default}">
 <head>
     <style>
-        .dashboard-header {
-            margin-bottom: 2rem;
-        }
         .stat-card {
             border: 1px solid var(--bs-border-color);
             padding: 24px;
@@ -45,12 +42,12 @@
 </head>
 <body>
     <th:block layout:fragment="content">
-        <div class="dashboard-header">
+        <div class="mb-4">
             <h2 class="fw-bold mb-1" th:text="${page.headline}">Aspectow Management Console</h2>
             <p class="text-muted">Welcome to the central control system for your Aspectran application.</p>
         </div>
 
-        <div class="row g-4">
+        <div class="row g-3 mb-4">
             <!-- Module 2: Operations -->
             <div class="col-md-4" th:if="${session.USER_INFO.hasPermission('MONITOR_VIEW') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                 <div class="card stat-card">
@@ -94,20 +91,20 @@
             </div>
         </div>
 
-        <div class="row mt-3 g-4">
+        <div class="row g-3">
             <!-- Left Side: Cluster Status -->
             <div class="col-lg-7 col-xxl-8">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="d-flex align-items-center gap-2">
-                        <h5 class="fw-bold mb-0">Cluster Status</h5>
+                <div class="d-flex flex-column flex-sm-row align-items-md-start gap-3 mb-3">
+                    <h5 class="fw-bold mb-0">Cluster Status</h5>
+                    <div class="d-flex gap-2 align-items-center">
                         <span class="badge bg-secondary-subtle text-secondary small fw-semibold" id="total-node-count" th:text="${page.nodes != null ? #lists.size(page.nodes) : 0} + ' Nodes'">0 Nodes</span>
+                        <a th:href="@{/cluster/nodes}" class="btn btn-sm btn-link p-0 ms-auto text-decoration-none"
+                           th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">Manage Nodes <i class="bi bi-arrow-right"></i></a>
                     </div>
-                    <a th:href="@{/cluster/nodes}" class="btn btn-sm btn-link p-0 ms-auto text-decoration-none"
-                       th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">Manage Nodes <i class="bi bi-arrow-right"></i></a>
                 </div>
 
                 <th:block th:if="${page.clusterMode == 'gateway' and page.groups != null}">
-                    <div th:each="group : ${page.groups}" class="mb-4" th:if="${page.groupedNodes != null and page.groupedNodes[group.id] != null}">
+                    <div th:each="group : ${page.groups}" class="mb-3" th:if="${page.groupedNodes != null and page.groupedNodes[group.id] != null}">
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <div class="small text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;" th:text="${group.title}">Group Title</div>
                             <span class="badge bg-body-tertiary text-body-secondary small" style="font-size: 0.65rem;" th:text="${page.groupedNodes[group.id] != null ? #lists.size(page.groupedNodes[group.id]) : 0} + ' Nodes'">0 Nodes</span>
@@ -207,7 +204,6 @@
 
         <!-- Script for checking direct nodes health -->
         <script th:inline="javascript">
-            /*<![CDATA[*/
             const clusterMode = [[${page.clusterMode}]];
             const nodes = [[${page.nodes}]];
             const myNodeId = [[${page.myNodeId}]];
@@ -257,7 +253,6 @@
             $(function() {
                 checkDirectNodesHealth();
             });
-            /*]]>*/
         </script>
     </th:block>
 </body>

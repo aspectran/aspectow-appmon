@@ -5,10 +5,73 @@
       layout:decorate="~{templates/default}">
 <head>
     <style>
+        .left-column-scroll {
+            max-height: calc(100vh - 410px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 2px;
+        }
+        .right-column-scroll {
+            height: calc(100vh - 380px);
+            min-height: 500px;
+        }
+        .node-grid-card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid var(--bs-border-color);
+            background: var(--bs-tertiary-bg);
+        }
+        .node-grid-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: var(--accent-color);
+
+        }
+        .status-led {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .status-led.live {
+            background-color: var(--bs-success);
+            box-shadow: 0 0 8px var(--bs-success);
+        }
+        .status-led.dead {
+            background-color: var(--bs-danger);
+            box-shadow: 0 0 8px var(--bs-danger);
+        }
+        .status-led.connecting {
+            background-color: var(--bs-warning);
+            box-shadow: 0 0 8px var(--bs-warning);
+        }
+        @keyframes logPulseGlow {
+            0% {
+                box-shadow: 0 0 0 2px var(--bs-primary), 0 0 14px rgba(13, 110, 253, 0.5);
+                transform: translateY(-2px);
+            }
+            50% {
+                box-shadow: 0 0 0 2px var(--bs-primary), 0 0 18px rgba(13, 110, 253, 0.7);
+            }
+            100% {
+                box-shadow: var(--bs-box-shadow-sm);
+                transform: translateY(0);
+            }
+        }
+        .node-grid-card.log-pulsing {
+            animation: logPulseGlow 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        @keyframes ledFlash {
+            0% { transform: scale(1.5); filter: brightness(1.6); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+        .status-led.log-flash {
+            animation: ledFlash 0.5s ease-out;
+        }
         .scheduler-card {
             border: 1px solid var(--bs-border-color);
             background: var(--bs-body-bg);
-            margin-bottom: 1.5rem;
         }
         .service-header {
             background: var(--bs-tertiary-bg);
@@ -43,7 +106,7 @@
         .target-selector {
             background: var(--bs-secondary-bg);
             padding: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 1rem;
             border: 1px solid var(--bs-border-color);
         }
         .log-container {
@@ -100,73 +163,19 @@
             border: none;
             font-size: 0.9rem;
         }
-        .node-grid-card {
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid var(--bs-border-color);
-            background: var(--bs-tertiary-bg);
-        }
-        .node-grid-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border-color: var(--accent-color);
-
-        }
-        .status-led {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-        }
-        .status-led.live {
-            background-color: var(--bs-success);
-            box-shadow: 0 0 8px var(--bs-success);
-        }
-        .status-led.dead {
-            background-color: var(--bs-danger);
-            box-shadow: 0 0 8px var(--bs-danger);
-        }
-        .status-led.connecting {
-            background-color: var(--bs-warning);
-            box-shadow: 0 0 8px var(--bs-warning);
-        }
-        @keyframes logPulseGlow {
-            0% {
-                box-shadow: 0 0 0 2px var(--bs-primary), 0 0 14px rgba(13, 110, 253, 0.5);
-                transform: translateY(-2px);
-            }
-            50% {
-                box-shadow: 0 0 0 2px var(--bs-primary), 0 0 18px rgba(13, 110, 253, 0.7);
-            }
-            100% {
-                box-shadow: var(--bs-box-shadow-sm);
-                transform: translateY(0);
-            }
-        }
-        .node-grid-card.log-pulsing {
-            animation: logPulseGlow 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-        @keyframes ledFlash {
-            0% { transform: scale(1.5); filter: brightness(1.6); }
-            100% { transform: scale(1); filter: brightness(1); }
-        }
-        .status-led.log-flash {
-            animation: ledFlash 0.5s ease-out;
-        }
     </style>
 </head>
 <body>
     <th:block layout:fragment="content">
-        <div th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-3">
+        <th:block th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3">
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-1">
                         <h3 class="fw-bold mb-0">Scheduler Manager</h3>
                     </div>
                     <p class="text-muted mb-0">Monitor and control scheduled jobs across the cluster.</p>
                 </div>
-                <div class="d-flex flex-column align-items-end gap-1">
+                <div class="d-flex flex-md-column align-items-end gap-3 gap-md-1">
                     <div>
                         <span class="text-muted small">Target Mode:</span>
                         <span class="fw-bold text-primary" th:text="${page.clusterMode?.toUpperCase() ?: 'GATEWAY'}">GATEWAY</span>
@@ -179,7 +188,7 @@
                 </div>
             </div>
 
-            <div class="card target-selector mb-4">
+            <div class="card target-selector mt-3">
                 <div class="row align-items-center g-2 md-g-3">
                     <div class="col-auto">
                         <div class="btn-group btn-group-sm" role="group">
@@ -217,7 +226,7 @@
             </div>
 
             <!-- Summary Section -->
-            <div class="row g-2 g-lg-4 mb-4">
+            <div class="row g-2 g-lg-3">
                 <div class="col-sm-6 col-md-4 col-lg-3">
                     <div class="card shadow-sm p-3 d-flex flex-row flex-lg-column justify-content-between align-items-center">
                         <div class="small text-muted text-uppercase fw-bold">Active Schedules</div>
@@ -319,7 +328,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </th:block>
         <div th:unless="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}" class="alert alert-danger my-4">
             <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Access Denied</h4>
             <p class="mb-0">You do not have permission to access this page.</p>
@@ -851,7 +860,7 @@
             }
 
             function renderDashboard() {
-                let html = '<div class="row g-4" id="dashboard-view-container">';
+                let html = '<div id="dashboard-view-container" class="row g-3 mt-0">';
                 
                 // Left Column: Node Cards (Spacious Layout)
                 html += '<div class="col-lg-5 col-xl-4 col-md-12 d-flex flex-column">';
@@ -859,8 +868,8 @@
                 html += '<span class="fw-bold text-uppercase small text-muted"><i class="bi bi-grid-fill me-1"></i> Cluster Nodes</span>';
                 html += '<span class="badge bg-secondary-subtle text-secondary small" id="dashboard-node-count">' + (nodes ? nodes.length : 0) + ' Nodes</span>';
                 html += '</div>';
-                html += '<div id="nodes-dashboard-scroll" style="max-height: calc(100vh - 400px); overflow-y: auto; overflow-x: hidden; padding-right: 2px;">';
-                html += '<div class="row g-3 mx-0" id="nodes-dashboard">';
+                html += '<div id="left-column-scroll" class="left-column-scroll">';
+                html += '<div class="row g-2 mx-0" id="nodes-dashboard">';
                 
                 if (!nodes || nodes.length === 0) {
                     html += `<div class="col-12 text-center py-5">
@@ -899,7 +908,7 @@
                 // Right Column: Live Logs (Fills remaining height)
                 html += `
                 <div class="col-lg-7 col-xl-8 col-md-12 d-flex flex-column">
-                    <div class="card scheduler-card shadow-sm overflow-hidden flex-grow-1" style="height: calc(100vh - 400px); min-height: 500px;">
+                    <div class="card shadow-sm overflow-hidden flex-grow-1 right-column-scroll">
                         <div id="log-wrapper-cluster-dashboard" class="log-wrapper h-100 d-flex flex-column">
                             <div class="log-header">
                                 <span><i class="bi bi-terminal-fill me-2 text-primary"></i>Live Cluster Logs (All Nodes)</span>
@@ -1253,7 +1262,7 @@
 
                 services.forEach(service => {
                     const serviceId = service.serviceName.replace(/[^a-zA-Z0-9]/g, '_');
-                    html += `<div class="card scheduler-card shadow-sm overflow-hidden">
+                    html += `<div class="card scheduler-card shadow-sm overflow-hidden mt-3">
                         <div class="service-header d-flex align-items-center gap-3 p-3">
                             <i class="bi bi-gear-wide-connected fs-4 text-primary d-none d-md-block"></i>
                             <div>
@@ -1359,8 +1368,7 @@
                         </div>`;
 
                     if (service.schedules && service.schedules.length > 0) {
-                        html += `<!-- Log Viewer Section -->
-                        <div id="log-wrapper-${service.loggingGroup}" class="log-wrapper">
+                        html += `<div id="log-wrapper-${service.loggingGroup}" class="log-wrapper">
                             <div class="log-header">
                                 <span><i class="bi bi-terminal me-2"></i>Live Scheduler Logs</span>
                                 <div class="d-flex align-items-center gap-3">

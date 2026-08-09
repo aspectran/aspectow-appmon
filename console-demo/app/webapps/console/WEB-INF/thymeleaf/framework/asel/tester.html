@@ -22,6 +22,12 @@
         [data-bs-theme="dark"] .java-code .hl-string { color: #a5d6ff; }
         [data-bs-theme="dark"] .java-code .hl-number { color: #79c0ff; }
         [data-bs-theme="dark"] .java-code .hl-type { color: #ff7b72; }
+
+        @media (min-width: 992px) {
+            .border-start-lg {
+                border-left: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -33,9 +39,9 @@
         </a>
     </div>
 
-    <div class="row">
+    <div class="row g-3">
         <div class="col-lg-6">
-            <div class="card shadow-sm overflow-hidden mb-4">
+            <div class="card shadow-sm overflow-hidden">
                 <div class="card-header bg-body-tertiary">
                     <h6 class="mb-0 small fw-bold">Expression Evaluation</h6>
                 </div>
@@ -58,7 +64,7 @@
                 </div>
             </div>
 
-            <div class="card shadow-sm overflow-hidden d-none" id="resultCard">
+            <div class="card shadow-sm overflow-hidden d-none mt-3" id="resultCard">
                 <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-2">
                     <h6 class="mb-0 small fw-bold">Evaluation Result</h6>
                     <span class="badge bg-secondary font-monospace" id="resultType" style="font-size: 0.7rem;">java.lang.String</span>
@@ -72,7 +78,7 @@
         </div>
 
         <div class="col-lg-6">
-            <div class="card shadow-sm overflow-hidden mb-4">
+            <div class="card shadow-sm overflow-hidden mt-3 mt-lg-0">
                 <div class="card-header bg-body-tertiary">
                     <h6 class="mb-0 small fw-bold">Quick Examples</h6>
                 </div>
@@ -123,7 +129,7 @@
                 </div>
             </div>
 
-            <div class="card shadow-sm overflow-hidden">
+            <div class="card shadow-sm overflow-hidden mt-3">
                 <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 small fw-bold">Execution History</h6>
                     <button class="btn btn-link btn-sm text-danger p-0" onclick="clearHistory()">
@@ -201,7 +207,7 @@
 </pre>
                             </div>
                         </div>
-                        <div class="col-lg-6 border-start">
+                        <div class="col-lg-6 border-start-lg">
                             <div class="mb-4">
                                 <label class="small text-muted fw-bold mb-2 text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Attributes: <code>@{}</code></label>
                                 <div class="table-responsive">

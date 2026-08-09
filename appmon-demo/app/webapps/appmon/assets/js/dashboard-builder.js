@@ -19,7 +19,7 @@
  * Responsible for assembling the dashboard UI based on configuration data.
  *
  * @version 4.0
- * @last-modified 2026-08-08
+ * @last-modified 2026-08-09
  */
 class DashboardBuilder {
     constructor(options = {}) {
@@ -838,8 +838,8 @@ class DashboardBuilder {
                         const $eventBox = $(`.event-box[data-node-index=${node.index}][data-app-id=${app.id}]`);
                         app.metrics.forEach(metric => {
                             const $metric = (metric.heading || !$eventBox.length) ? 
-                                           this.addNodeMetric(node, metric) : 
-                                           this.addInstanceMetric($eventBox, node, app, metric);
+                                this.addNodeMetric(node, metric) :
+                                this.addAppMetric($eventBox, node, app, metric);
                             viewer.putMetric$(app.id, metric.id, $metric);
                         });
                     }
@@ -898,7 +898,7 @@ class DashboardBuilder {
     addNodeMetric(nodeInfo, metricInfo) {
         const $bar = $(`.node.metrics-bar[data-node-index=${nodeInfo.index}]`).show();
         const $metric = $bar.find(".metric").first().hide().clone().addClass("available");
-        $metric.find("dt").text(metricInfo.title).attr("title", metricInfo.description);
+        $metric.find("dt").text(metricInfo.title + " :").attr("title", metricInfo.description);
         return $metric.appendTo($bar).show();
     }
 
@@ -931,11 +931,11 @@ class DashboardBuilder {
             .insertAfter($track.last()).show();
     }
 
-    addInstanceMetric($eventBox, nodeInfo, appInfo, metricInfo) {
+    addAppMetric($eventBox, nodeInfo, appInfo, metricInfo) {
         const $bar = $eventBox.find(".metrics-bar").show();
         const $metric = $bar.find(".metric").first().hide().clone().addClass("available")
             .attr({ "data-node-index": nodeInfo.index, "data-app-id": appInfo.id, "data-metric-id": metricInfo.id });
-        $metric.find("dt").text(metricInfo.title).attr("title", metricInfo.description);
+        $metric.find("dt").text(metricInfo.title + " :").attr("title", metricInfo.description);
         return $metric.appendTo($bar).show();
     }
 
