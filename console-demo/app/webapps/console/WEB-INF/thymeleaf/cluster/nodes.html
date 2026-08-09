@@ -241,7 +241,7 @@
             function openAppMon(nodeId) {
                 const url = basePath + "/appmon/dashboard/popup/?nodeId=" + nodeId;
                 const name = "appmon_dashboard_popup_" + nodeId.replace(/[^a-zA-Z0-9]/g, '_');
-                const features = "width=1500,height=1045,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes";
+                const features = "width=1500,height=1068,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes";
                 const popup = window.open(url, name, features);
                 if (popup) {
                     popup.focus();
