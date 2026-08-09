@@ -58,13 +58,13 @@
                 <ul class="nav nav-tabs mobile-btn-tabs mb-3" id="clusterTabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-nodes" type="button" role="tab">
-                            All Nodes <span class="badge bg-body-tertiary text-body-secondary ms-1" th:text="${page.nodes != null ? #lists.size(page.nodes) : 0}">0</span>
+                            All Nodes <span class="badge bg-body-secondary text-body-secondary ms-auto" th:text="${page.nodes != null ? #lists.size(page.nodes) : 0}">0</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation" th:each="group : ${page.groups}">
                         <button class="nav-link" th:id="${group.id} + '-tab'" data-bs-toggle="tab" th:data-bs-target="'#group-' + ${group.id}" type="button" role="tab">
                             <span th:text="${group.title}">Group Title</span>
-                            <span class="badge bg-body-tertiary text-body-secondary ms-1" th:text="${page.groupedNodes != null && page.groupedNodes[group.id] != null ? #lists.size(page.groupedNodes[group.id]) : 0}">0</span>
+                            <span class="badge bg-body-secondary text-body-secondary ms-auto" th:text="${page.groupedNodes != null && page.groupedNodes[group.id] != null ? #lists.size(page.groupedNodes[group.id]) : 0}">0</span>
                         </button>
                     </li>
                 </ul>
@@ -106,7 +106,7 @@
 
             <!-- Fragment for node card -->
             <th:block th:fragment="node-card(nodeInfo)">
-                <div class="card node-card p-4 h-100" th:if="${nodeInfo != null}"
+                <div class="card node-card p-3 p-lg-4 h-100" th:if="${nodeInfo != null}"
                      th:data-node-id="${nodeInfo.id}"
                      th:data-node-title="${nodeInfo.title}"
                      th:data-node-host="${nodeInfo.host}"

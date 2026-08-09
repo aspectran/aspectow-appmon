@@ -36,7 +36,7 @@
 <body>
     <th:block layout:fragment="content">
         <div class="config-tabs mb-3">
-            <ul class="nav nav-tabs">
+            <ul class="nav nav-tabs mobile-btn-tabs">
                 <li class="nav-item" th:each="name : ${page.allContextNames}">
                     <a class="nav-link"
                        th:href="@{/framework/config/{name}(name=${name})}"

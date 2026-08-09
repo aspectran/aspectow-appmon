@@ -7,7 +7,6 @@
     <style>
         .stat-card {
             border: 1px solid var(--bs-border-color);
-            padding: 24px;
             background: var(--bs-tertiary-bg);
             height: 100%;
             transition: transform 0.2s ease, border-color 0.2s ease;
@@ -43,14 +42,14 @@
 <body>
     <th:block layout:fragment="content">
         <div class="mb-4">
-            <h2 class="fw-bold mb-1" th:text="${page.headline}">Aspectow Management Console</h2>
+            <h2 class="fw-bold mb-1">Aspectow <span class="text-nowrap">Management Console</span></h2>
             <p class="text-muted">Welcome to the central control system for your Aspectran application.</p>
         </div>
 
         <div class="row g-3 mb-4">
             <!-- Module 2: Operations -->
             <div class="col-md-4" th:if="${session.USER_INFO.hasPermission('MONITOR_VIEW') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
-                <div class="card stat-card">
+                <div class="card stat-card p-3 p-lg-4">
                     <div class="icon-box">
                         <i class="bi bi-activity"></i>
                     </div>
@@ -64,7 +63,7 @@
 
             <!-- Module 3: Framework -->
             <div class="col-md-4" th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('VIEWER') || session.USER_INFO.hasRole('DEMO')}">
-                <div class="card stat-card">
+                <div class="card stat-card p-3 p-lg-4">
                     <div class="icon-box">
                         <i class="bi bi-diagram-3"></i>
                     </div>
@@ -78,7 +77,7 @@
 
             <!-- Module 1: Governance -->
             <div class="col-md-4" th:if="${session.USER_INFO.hasPermission('USER_MANAGE') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('DEMO')}">
-                <div class="card stat-card">
+                <div class="card stat-card p-3 p-lg-4">
                     <div class="icon-box">
                         <i class="bi bi-person-badge"></i>
                     </div>
@@ -156,42 +155,42 @@
             <div class="col-lg-5 col-xxl-4">
                 <h5 class="fw-bold mb-3">Quick Actions</h5>
                 <div class="list-group list-group-flush border rounded shadow-sm">
-                    <a th:href="@{/vault}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
+                    <a th:href="@{/vault}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 py-md-3"
                        th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                         <div>
                             <i class="bi bi-safe me-2 text-primary"></i> Manage Security Tokens in Vault
                         </div>
                         <i class="bi bi-chevron-right text-muted small"></i>
                     </a>
-                    <a th:href="@{/cluster/commands}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
+                    <a th:href="@{/cluster/commands}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 py-md-3"
                        th:if="${session.USER_INFO.hasPermission('COMMAND_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
                         <div>
                             <i class="bi bi-terminal-fill me-2 text-secondary"></i> Execute Remote Cluster Commands
                         </div>
                         <i class="bi bi-chevron-right text-muted small"></i>
                     </a>
-                    <a th:href="@{/vault/tool}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
+                    <a th:href="@{/vault/tool}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 py-md-3"
                        th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                         <div>
                             <i class="bi bi-key-fill me-2 text-warning"></i> Run Encryption / Decryption Tool
                         </div>
                         <i class="bi bi-chevron-right text-muted small"></i>
                     </a>
-                    <a th:href="@{/framework/asel/}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
+                    <a th:href="@{/framework/asel/}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 py-md-3"
                        th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('VIEWER') || session.USER_INFO.hasRole('DEMO')}">
                         <div>
                             <i class="bi bi-braces-asterisk me-2 text-info"></i> Evaluate AsEL Expression
                         </div>
                         <i class="bi bi-chevron-right text-muted small"></i>
                     </a>
-                    <a th:href="@{/framework/wildcard/}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
+                    <a th:href="@{/framework/wildcard/}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 py-md-3"
                        th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('VIEWER') || session.USER_INFO.hasRole('DEMO')}">
                         <div>
                             <i class="bi bi-stars me-2 text-success"></i> Test Wildcard Pattern Matching
                         </div>
                         <i class="bi bi-chevron-right text-muted small"></i>
                     </a>
-                    <a th:href="@{/framework/apon/}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
+                    <a th:href="@{/framework/apon/}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 py-md-3"
                        th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('VIEWER') || session.USER_INFO.hasRole('DEMO')}">
                         <div>
                             <i class="bi bi-arrow-left-right me-2 text-primary"></i> Convert APON / JSON Data

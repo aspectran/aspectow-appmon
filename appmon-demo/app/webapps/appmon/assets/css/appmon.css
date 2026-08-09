@@ -31,11 +31,6 @@
         font-size: .8em !important;
     }
 }
-.monitoring-page .node.tabs > .tabs-title > a, .monitoring-page .node.tabs > .tabs-title button {
-    @media screen and (min-width: 768px) {
-        padding: 3px 13px !important;
-    }
-}
 
 .tabs > .tabs-title .indicator {
     padding: 0;
@@ -57,6 +52,9 @@
     @media screen and (min-width: 768px) {
         margin-top: 1px;
     }
+}
+.node.tabs > .tabs-title > a, .node.tabs > .tabs-title button {
+    padding: 3px 13px !important;
 }
 .node.tabs .tabs-title .indicator.disconnected {
     color: #ff9900;
