@@ -96,6 +96,10 @@ public class AnatomyActivity {
         return new DefaultRestResponse("anatomyData", data).nullWritable(false).ok();
     }
 
+    /**
+     * Prepares a map of context names to their corresponding activity contexts.
+     * @return a map of context names to activity contexts
+     */
     @NonNull
     public static Map<String, ActivityContext> prepareContextMap() {
         List<CoreService> services = new ArrayList<>(CoreServiceHolder.getAllServices());

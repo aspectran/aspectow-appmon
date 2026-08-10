@@ -6,14 +6,16 @@
 <head>
     <title>Framework Configuration - Aspectow Console</title>
     <style>
-        .config-container {
-            height: calc(100vh - 200px);
-            min-height: 600px;
-        }
         .left-panel, .right-panel {
-            height: 100%;
+            height: calc(100vh - 180px);
+            min-height: 380px;
             display: flex;
             flex-direction: column;
+        }
+        @media (max-width: 768px) {
+            .left-panel {
+                height: calc(100vh - 580px);
+            }
         }
         .scrollable-pane {
             flex: 1;
@@ -48,7 +50,7 @@
             </ul>
         </div>
         <div class="row config-container gx-3">
-            <div class="col-md-4 left-panel">
+            <div class="col-md-4 left-panel mb-3 mb-md-0">
                 <div class="card h-100 border shadow-sm overflow-hidden">
                     <div class="scrollable-pane p-0" id="config-menu-list">
                         <div class="text-center p-5 text-muted">

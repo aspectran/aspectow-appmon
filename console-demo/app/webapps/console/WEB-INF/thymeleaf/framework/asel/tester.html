@@ -132,7 +132,7 @@
             <div class="card shadow-sm overflow-hidden mt-3">
                 <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 small fw-bold">Execution History</h6>
-                    <button class="btn btn-link btn-sm text-danger p-0" onclick="clearHistory()">
+                    <button class="btn btn-link btn-xs text-danger p-0" onclick="clearHistory()">
                         <i class="bi bi-trash me-1"></i> Clear
                     </button>
                 </div>
@@ -167,10 +167,10 @@
                     <span class="badge bg-primary" style="font-size: 0.65rem;">AVAILABLE DATA</span>
                 </div>
                 <div class="card-body bg-body-tertiary">
-                    <div class="row g-4">
+                    <div class="row g-3">
                         <div class="col-lg-6">
                             <label class="small text-muted fw-bold mb-2 text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Bean: <code>#{aselTestBean}</code> (Java Source)</label>
-                            <div class="p-3 border rounded bg-body" style="max-height: 568px; overflow-y: auto;">
+                            <div class="p-3 border rounded bg-body" style="max-height: 520px; overflow-y: auto;">
 <pre class="mb-0 font-monospace java-code" style="font-size: 0.8rem; line-height: 1.5;">
 <span class="hl-annotation">@Component</span>
 <span class="hl-annotation">@Bean</span>(<span class="hl-string">"aselTestBean"</span>)
@@ -208,7 +208,7 @@
                             </div>
                         </div>
                         <div class="col-lg-6 border-start-lg">
-                            <div class="mb-4">
+                            <div class="mb-2">
                                 <label class="small text-muted fw-bold mb-2 text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Attributes: <code>@{}</code></label>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-bordered small mb-0">
@@ -223,7 +223,7 @@
                                     </table>
                                 </div>
                             </div>
-                            <div class="mb-4">
+                            <div class="mb-2">
                                 <label class="small text-muted fw-bold mb-2 text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Parameters: <code>${}</code></label>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-bordered small mb-0">
@@ -237,7 +237,7 @@
                                     </table>
                                 </div>
                             </div>
-                            <div class="mb-4">
+                            <div class="mb-2">
                                 <label class="small text-muted fw-bold mb-2 text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Properties: <code>%{}</code></label>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-bordered small mb-0">
@@ -252,7 +252,7 @@
                                 </div>
                                 <div class="form-text mt-1 text-danger" style="font-size: 0.7rem;">
                                     <i class="bi bi-shield-lock-fill me-1"></i>
-                                    System properties (system:, classpath:) are restricted for security.
+                                    System properties (<code>system:</code>, <code>classpath:</code>) are restricted for security.
                                 </div>
                             </div>
                             <div class="alert alert-info py-2 mb-0 border-0 shadow-none" style="font-size: 0.75rem;">

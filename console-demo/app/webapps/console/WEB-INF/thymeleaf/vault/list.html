@@ -73,7 +73,7 @@
                 <div class="col-md-4 border-start-md border-bottom-sm mb-2 mb-md-0">
                     <label class="small text-muted mb-0">Password</label>
                     <div class="d-flex align-items-center">
-                        <input type="text" class="form-control form-control-sm font-monospace border-0 bg-transparent p-0 fw-bold text-primary"
+                        <input type="text" class="form-control form-control-sm font-monospace border-0 border-bottom rounded-0 bg-transparent p-0 fw-bold text-primary"
                                value="********" readonly id="sys_pwd" style="-webkit-text-security: disc; width: auto; min-width: 150px;">
                         <button class="btn btn-link btn-sm text-secondary p-0 ms-2" type="button" onclick="toggleSystemPassword(this)" title="Show/Hide Password"
                                 th:if="${session.USER_INFO.hasRole('SUPER_ADMIN')}">

@@ -15,6 +15,7 @@
  */
 package com.aspectran.aspectow.console.framework;
 
+import com.aspectran.aspectow.console.common.util.ConsoleWebUtils;
 import com.aspectran.core.component.bean.BeanRuleRegistry;
 import com.aspectran.core.component.bean.DefaultBeanRegistry;
 import com.aspectran.core.component.bean.annotation.Bean;
@@ -211,18 +212,10 @@ public class AnatomyService {
     private String paramsToString(Parameters params) {
         try {
             String apon = new AponWriter().nullWritable(false).write(params).toString();
-            return maskSensitiveData(apon);
+            return ConsoleWebUtils.maskSensitiveApon(apon);
         } catch (IOException e) {
             return StringUtils.EMPTY;
         }
-    }
-
-    private String maskSensitiveData(String apon) {
-        if (apon == null) {
-            return null;
-        }
-        String regex = "(?i)([\\w\\-\\.]*(?:password|secret|passphrase|privatekey|secretkey)[\\w\\-\\.]*)\\s*:\\s*(\"(?:[^\"\\\\]|\\\\.)*\"|'(?:[^'\\\\]|\\\\.)*'|[^\\s,{}#\\[\\]\\(\\)]+)";
-        return apon.replaceAll(regex, "$1: ********");
     }
 
 }

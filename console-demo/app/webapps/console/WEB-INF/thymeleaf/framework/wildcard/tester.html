@@ -32,7 +32,7 @@
                         <div class="mb-3">
                             <label for="separator" class="form-label small">Separator (Optional)</label>
                             <input type="text" class="form-control form-control-sm font-monospace" id="separator" name="separator" maxlength="1" value="/" style="width: 60px;">
-                            <div class="form-text small">e.g. / for paths, . for packages.</div>
+                            <div class="form-text small">e.g. <code>/</code> for paths, <code>.</code> for packages.</div>
                         </div>
                         <div class="d-grid mt-4">
                             <button type="submit" class="btn btn-primary">
@@ -113,7 +113,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h6 class="small fw-bold mb-0">Token Reference</h6>
                         </div>
-                        <div class="row g-1 g-md-3">
+                        <div class="row g-1 gx-md-2">
                             <div class="col-md-6">
                                 <div class="d-flex align-items-start gap-2">
                                     <code class="fw-bold text-primary" style="font-size: 1.1rem;">*</code>
@@ -151,7 +151,7 @@
             <div class="card shadow-sm overflow-hidden mt-3">
                 <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 small fw-bold">Execution History</h6>
-                    <button class="btn btn-link btn-sm text-danger p-0" onclick="clearHistory()">
+                    <button class="btn btn-link btn-xs text-danger p-0" onclick="clearHistory()">
                         <i class="bi bi-trash me-1"></i> Clear
                     </button>
                 </div>
@@ -257,13 +257,13 @@
                     const statusText = item.matched ? 'MATCHED' : 'NO MATCH';
                     const row = `
                         <tr>
-                            <td class="ps-3 text-muted">${item.time}</td>
-                            <td><span class="badge ${statusBadge}">${statusText}</span></td>
-                            <td class="text-truncate" style="max-width: 300px;">
+                            <td class="align-middle ps-3 text-muted">${item.time}</td>
+                            <td class="align-middle"><span class="badge ${statusBadge}">${statusText}</span></td>
+                            <td class="align-middle text-truncate" style="max-width: 300px;">
                                 <div class="fw-bold">${item.pattern}</div>
                                 <div class="text-muted" style="font-size: 0.75rem;">${item.input}</div>
                             </td>
-                            <td class="text-end pe-3">
+                            <td class="align-middle text-end pe-3">
                                 <button class="btn btn-sm btn-outline-secondary py-0" onclick="restoreFromHistory(${index})">
                                     <i class="bi bi-arrow-repeat"></i>
                                 </button>

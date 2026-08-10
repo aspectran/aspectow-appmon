@@ -109,4 +109,17 @@ public abstract class ConsoleWebUtils {
         return secret.substring(0, 4) + "*".repeat(secret.length() - 4);
     }
 
+    /**
+     * Masks sensitive Apon configuration for UI display.
+     * @param apon the Apon configuration string
+     * @return the masked Apon configuration string
+     */
+    public static String maskSensitiveApon(String apon) {
+        if (apon == null) {
+            return null;
+        }
+        String regex = "(?i)([\\w\\-\\.]*(?:password|secret|passphrase|privatekey|secretkey)[\\w\\-\\.]*)\\s*:\\s*(\"(?:[^\"\\\\]|\\\\.)*\"|'(?:[^'\\\\]|\\\\.)*'|[^\\s,{}#\\[\\]\\(\\)]+)";
+        return apon.replaceAll(regex, "$1: ********");
+    }
+
 }
