@@ -25,12 +25,6 @@ public class AboutMe {
     /** The version of AppMon. */
     public static final String VERSION;
 
-    /** A string indicating that the application is "Powered by Aspectran" with the version. */
-    public static final String POWERED_BY;
-
-    /** An HTML link for "Powered by Aspectran" with the version. */
-    public static final String POWERED_BY_LINK;
-
     /** A boolean indicating whether the current version is a stable release. */
     public static final boolean STABLE;
 
@@ -41,9 +35,6 @@ public class AboutMe {
         } else {
             VERSION = System.getProperty("aspectow.version", "4.0.x");
         }
-
-        POWERED_BY = "Powered by Aspectran " + com.aspectran.core.AboutMe.VERSION;
-        POWERED_BY_LINK = "<a href=\"https://aspectran.com\">Powered by Aspectran " + com.aspectran.core.AboutMe.VERSION + "</a>";
 
         // Show warning when RC# or M# or -SNAPSHOT is in version string
         STABLE = !VERSION.matches("^.*[.-](RC|M|SNAPSHOT|x)[0-9]?$");
@@ -74,22 +65,6 @@ public class AboutMe {
         } else {
             return VERSION + " (THIS IS NOT A STABLE RELEASE! DO NOT USE IN PRODUCTION!)";
         }
-    }
-
-    /**
-     * Returns the "Powered by" string.
-     * @return the "Powered by" string
-     */
-    public static String getPoweredBy() {
-        return POWERED_BY;
-    }
-
-    /**
-     * Returns the "Powered by" HTML link.
-     * @return the "Powered by" HTML link
-     */
-    public static String getPoweredByLink() {
-        return POWERED_BY_LINK;
     }
 
 }
