@@ -16,6 +16,7 @@
 package com.aspectran.aspectow.node.manager;
 
 import com.aspectran.aspectow.node.config.ClusterConfig;
+import com.aspectran.aspectow.node.config.GroupInfo;
 import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.aspectow.node.redis.RedisConnectionPool;
 import com.aspectran.utils.ToStringBuilder;
@@ -121,7 +122,8 @@ public class NodeReporter {
     }
 
     private void registerNode() throws IOException {
-        String key = NodeMessageProtocol.getNodesHashKey(getClusterConfig().getId());
+        String clusterId = getClusterConfig().getId();
+        String key = NodeMessageProtocol.getNodesHashKey(clusterId);
 
         // Extract and set active service port from NodePortProvider
         if (portProvider != null) {
@@ -145,6 +147,17 @@ public class NodeReporter {
         try (StatefulRedisConnection<String, String> connection = getConnectionPool().getConnection()) {
             RedisCommands<String, String> sync = connection.sync();
             sync.hset(key, getNodeInfo().getId(), aponData);
+
+            // Ensure group info is also registered in Redis
+            GroupInfo groupInfo = nodeManager.getGroupInfoHolder().getGroupInfo(nodeManager.getGroupId());
+            if (groupInfo != null) {
+                String groupsKey = NodeMessageProtocol.getGroupsHashKey(clusterId);
+                Boolean groupExists = sync.hexists(groupsKey, groupInfo.getId());
+                if (Boolean.FALSE.equals(groupExists)) {
+                    sync.hset(groupsKey, groupInfo.getId(), groupInfo.toString());
+                    logger.info("Registered group info to Redis hash '{}': (Group: {})", groupsKey, groupInfo.getId());
+                }
+            }
         } catch (Exception e) {
             logger.error("Failed to register node '{}' in Redis registry", getNodeInfo().getId(), e);
         }
@@ -182,16 +195,24 @@ public class NodeReporter {
     }
 
     private void sendPulse() {
-        String key = NodeMessageProtocol.getPulsesHashKey(getClusterConfig().getId());
+        String clusterId = getClusterConfig().getId();
+        String pulsesKey = NodeMessageProtocol.getPulsesHashKey(clusterId);
+        String nodesKey = NodeMessageProtocol.getNodesHashKey(clusterId);
         long timestamp = System.currentTimeMillis();
 
         if (logger.isTraceEnabled()) {
-            logger.trace("Sending pulse for node '{}' to '{}': {}", getNodeInfo().getId(), key, timestamp);
+            logger.trace("Sending pulse for node '{}' to '{}': {}", getNodeInfo().getId(), pulsesKey, timestamp);
         }
 
         try (StatefulRedisConnection<String, String> connection = getConnectionPool().getConnection()) {
             RedisCommands<String, String> sync = connection.sync();
-            sync.hset(key, getNodeInfo().getId(), String.valueOf(timestamp));
+            Boolean nodeExists = sync.hexists(nodesKey, getNodeInfo().getId());
+            if (Boolean.FALSE.equals(nodeExists)) {
+                logger.warn("Node '{}' missing from Redis registry hash '{}'. Re-registering...", getNodeInfo().getId(), nodesKey);
+                registerNode();
+                broadcastJoin();
+            }
+            sync.hset(pulsesKey, getNodeInfo().getId(), String.valueOf(timestamp));
         } catch (Exception e) {
             logger.error("Failed to send pulse for node '{}' to Redis registry", getNodeInfo().getId(), e);
         }

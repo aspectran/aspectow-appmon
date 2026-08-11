@@ -37,6 +37,7 @@ import com.aspectran.utils.Assert;
 import com.aspectran.utils.PBEncryptionUtils;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.SystemUtils;
+import io.lettuce.core.api.StatefulRedisConnection;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,15 +203,6 @@ public abstract class NodeManagerBuilder {
             nodeManager.setNodeMessagePublisher(nodeMessagePublisher);
             nodeManager.setNodeMessageSubscriber(nodeMessageSubscriber);
             nodeManager.setClusterEventSubscriber(clusterEventSubscriber);
-
-            // Register group info to Redis
-            String groupsKey = NodeMessageProtocol.getGroupsHashKey(clusterId);
-            try (var connection = connectionPool.getConnection()) {
-                connection.sync().hset(groupsKey, myGroupInfo.getId(), myGroupInfo.toString());
-                logger.info("Registered group info to Redis: {} (Group: {})", groupsKey, myGroupInfo.getId());
-            } catch (Exception e) {
-                logger.error("Failed to register group info to Redis", e);
-            }
 
             for (NodeInfo info : nodeRegistry.getNodes()) {
                 if (!nodeId.equals(info.getId())) {
