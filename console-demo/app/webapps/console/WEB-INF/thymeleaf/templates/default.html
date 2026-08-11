@@ -155,7 +155,6 @@
                     <i class="bi bi-box-arrow-right fs-5"></i>
                 </a>
             </div>
-            <div class="small text-muted" th:text="|Aspectow Console v${@com.aspectran.aspectow.console.AboutMe@getVersion()}|">Aspectow Console v1.0.0</div>
         </div>
     </aside>
 
@@ -184,7 +183,12 @@
                     </ol>
                 </nav>
             </div>
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2 gap-lg-3">
+                <!-- About Console Button -->
+                <button class="btn p-0 border-0 bg-transparent text-body" type="button" data-bs-toggle="modal" data-bs-target="#aboutConsoleModal" title="About Aspectow Console">
+                    <i class="bi bi-question-circle fs-5"></i>
+                </button>
+
                 <!-- Theme Toggler -->
                 <div class="theme-toggler dropdown">
                     <button class="btn dropdown-toggle" type="button" id="theme-toggler-btn" data-bs-toggle="dropdown">
@@ -208,6 +212,52 @@
             </div>
         </main>
     </div>
+    <!-- About Console Modal -->
+    <div class="modal fade" id="aboutConsoleModal" tabindex="-1" aria-labelledby="aboutConsoleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title d-flex align-items-center gap-2" id="aboutConsoleModalLabel">
+                        <img src="https://cdn.jsdelivr.net/gh/aspectran/aspectran-assets@main/assets/img/aspectran-logo.svg" class="logo-img" alt="Aspectran" style="height: 24px;"/>
+                        <span class="fw-bold">Aspectow Console</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-3 pb-4">
+                    <p class="text-muted small mb-3">
+                        Aspectow Console is an administrative and management console for Aspectran framework applications.
+                    </p>
+                    <div class="bg-body-tertiary rounded p-3 mb-3 border">
+                        <div class="row g-2 small">
+                            <div class="col-5 text-muted">Console Version:</div>
+                            <div class="col-7 fw-semibold" th:text="${@com.aspectran.aspectow.console.AboutMe@getVersion()}">1.0.0</div>
+                            <div class="col-5 text-muted">Aspectran Version:</div>
+                            <div class="col-7 fw-semibold" th:text="${@com.aspectran.aspectow.console.AboutMe@getAspectranVersion()}">9.6.0</div>
+                            <div class="col-5 text-muted">Java Runtime:</div>
+                            <div class="col-7 fw-semibold" th:text="${@com.aspectran.aspectow.console.AboutMe@getJavaVersion()}">Java</div>
+                            <div class="col-5 text-muted">Operating System:</div>
+                            <div class="col-7 fw-semibold" th:text="${@com.aspectran.aspectow.console.AboutMe@getOsInfo()}">OS</div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column gap-2 mb-3">
+                        <a href="https://aspectran.com/docs/" target="_blank" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-between">
+                            <span><i class="bi bi-book me-2"></i>Documentation &amp; Guides</span>
+                            <i class="bi bi-box-arrow-up-right small"></i>
+                        </a>
+                        <a href="https://github.com/aspectran/aspectow" target="_blank" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-between">
+                            <span><i class="bi bi-github me-2"></i>GitHub Repository</span>
+                            <i class="bi bi-box-arrow-up-right small"></i>
+                        </a>
+                    </div>
+                    <div class="text-center text-muted border-top pt-3" style="font-size: 0.75rem;">
+                        <div th:text="${@com.aspectran.aspectow.console.AboutMe@getCopyright()}">Copyright &copy; 2020-2026 The Aspectran Project</div>
+                        <div>Licensed under the Apache License, Version 2.0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <th:block layout:fragment="script"></th:block>
     <script>
         $(function() {

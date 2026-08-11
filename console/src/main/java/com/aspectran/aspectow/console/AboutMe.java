@@ -15,6 +15,8 @@
  */
 package com.aspectran.aspectow.console;
 
+import org.jspecify.annotations.NonNull;
+
 /**
  * Provides information about the Aspectow Management Console build.
  * <p>This class retrieves the version of the Aspectow Management Console from the manifest file
@@ -24,12 +26,6 @@ public class AboutMe {
 
     /** The version of the Aspectow Management Console. */
     public static final String VERSION;
-
-    /** A string indicating that the application is "Powered by Aspectran" with the version. */
-    public static final String POWERED_BY;
-
-    /** An HTML link for "Powered by Aspectran" with the version. */
-    public static final String POWERED_BY_LINK;
 
     /** A boolean indicating whether the current version is a stable release. */
     public static final boolean STABLE;
@@ -41,9 +37,6 @@ public class AboutMe {
         } else {
             VERSION = System.getProperty("aspectow.version", "4.0.x");
         }
-
-        POWERED_BY = "Powered by Aspectran " + com.aspectran.core.AboutMe.VERSION;
-        POWERED_BY_LINK = "<a href=\"https://aspectran.com\">Powered by Aspectran " + com.aspectran.core.AboutMe.VERSION + "</a>";
 
         // Show warning when RC# or M# or -SNAPSHOT is in version string
         STABLE = !VERSION.matches("^.*[.-](RC|M|SNAPSHOT|x)[0-9]?$");
@@ -77,19 +70,56 @@ public class AboutMe {
     }
 
     /**
-     * Returns the "Powered by" string.
-     * @return the "Powered by" string
+     * Returns the Aspectran framework version.
+     * @return the Aspectran framework version string
      */
-    public static String getPoweredBy() {
-        return POWERED_BY;
+    public static String getAspectranVersion() {
+        return com.aspectran.core.AboutMe.VERSION;
     }
 
     /**
-     * Returns the "Powered by" HTML link.
-     * @return the "Powered by" HTML link
+     * Returns Java runtime environment information.
+     * @return the Java runtime information string
      */
-    public static String getPoweredByLink() {
-        return POWERED_BY_LINK;
+    public static @NonNull String getJavaVersion() {
+        String version = System.getProperty("java.version");
+        String vendor = System.getProperty("java.vendor");
+        if (version != null && vendor != null) {
+            return version + " (" + vendor + ")";
+        } else if (version != null) {
+            return version;
+        } else {
+            return "Unknown";
+        }
+    }
+
+    /**
+     * Returns operating system information.
+     * @return the OS information string
+     */
+    public static @NonNull String getOsInfo() {
+        String name = System.getProperty("os.name");
+        String version = System.getProperty("os.version");
+        String arch = System.getProperty("os.arch");
+        if (name != null) {
+            StringBuilder sb = new StringBuilder(name);
+            if (version != null) {
+                sb.append(" ").append(version);
+            }
+            if (arch != null) {
+                sb.append(" (").append(arch).append(")");
+            }
+            return sb.toString();
+        }
+        return "Unknown";
+    }
+
+    /**
+     * Returns the copyright notice string.
+     * @return the copyright string
+     */
+    public static @NonNull String getCopyright() {
+        return "Copyright \u00a9 2020-" + java.time.Year.now().getValue() + " The Aspectran Project";
     }
 
 }
