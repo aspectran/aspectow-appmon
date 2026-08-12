@@ -132,6 +132,16 @@ public class ClusterActivity {
     }
 
     /**
+     * Returns the current cluster node list in JSON format for sync.
+     * @return the REST response containing the node list
+     */
+    @Request("/nodes/list")
+    public RestResponse listNodesJson() {
+        List<Map<String, Object>> nodes = nodeConsoleHelper.getNodes(true);
+        return new SuccessResponse(nodes).ok();
+    }
+
+    /**
      * Dispatches a restart command to a specific node using RemoteCommandManager.
      * @param translet the active translet
      * @return the REST response indicating success or failure

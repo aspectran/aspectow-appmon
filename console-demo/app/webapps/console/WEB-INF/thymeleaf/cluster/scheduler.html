@@ -344,7 +344,7 @@
             const basePath = [[@{/}]].replace(/\/$/, '');
             const clusterMode = [[${page.clusterMode}]];
             const isGatewayMode = (clusterMode === 'gateway');
-            const isDirectMode = (clusterMode === 'direct');
+            const isDirectMode = (clusterMode !== 'gateway');
             const myNodeId = [[${page.myNodeId}]];
             let nodes = [[${page.nodes}]];
             let consoleClient = null;
@@ -622,6 +622,34 @@
                                 return null;
                             });
                     },
+                    onClose: (event) => {
+                        const targetNode = nodes.find(n => n.id === nodeInfo.id);
+                        if (targetNode) {
+                            targetNode.status = 'DEAD';
+                            renderNodeSelector();
+                            if (isDashboardView()) {
+                                markDashboardNodeDead(nodeInfo.id);
+                            }
+                        }
+                        updateConnectionIndicator();
+                    },
+                    onRetry: (count, max) => {
+                        updateConnectionIndicator();
+                    },
+                    onFailed: () => {
+                        const targetNode = nodes.find(n => n.id === nodeInfo.id);
+                        if (targetNode) {
+                            targetNode.status = 'DEAD';
+                            renderNodeSelector();
+                            if (isDashboardView()) {
+                                markDashboardNodeDead(nodeInfo.id);
+                            }
+                        }
+                        updateConnectionIndicator();
+                        if (isDetailView() && nodeInfo.id === currentNodeId) {
+                            showDeadNodeError(currentNodeId);
+                        }
+                    },
                     onEstablished: () => {
                         const targetNode = nodes.find(n => n.id === nodeInfo.id);
                         if (targetNode) {
@@ -645,34 +673,6 @@
                                     }
                                 });
                             }
-                        }
-                    },
-                    onRetry: (count, max) => {
-                        updateConnectionIndicator();
-                    },
-                    onClose: (event) => {
-                        const targetNode = nodes.find(n => n.id === nodeInfo.id);
-                        if (targetNode) {
-                            targetNode.status = 'DEAD';
-                            renderNodeSelector();
-                            if (isDashboardView()) {
-                                markDashboardNodeDead(nodeInfo.id);
-                            }
-                        }
-                        updateConnectionIndicator();
-                    },
-                    onFailed: () => {
-                        const targetNode = nodes.find(n => n.id === nodeInfo.id);
-                        if (targetNode) {
-                            targetNode.status = 'DEAD';
-                            renderNodeSelector();
-                            if (isDashboardView()) {
-                                markDashboardNodeDead(nodeInfo.id);
-                            }
-                        }
-                        updateConnectionIndicator();
-                        if (isDetailView() && nodeInfo.id === currentNodeId) {
-                            showDeadNodeError(currentNodeId);
                         }
                     },
                     onMessage: (response) => {

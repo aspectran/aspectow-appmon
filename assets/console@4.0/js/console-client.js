@@ -19,7 +19,7 @@
  * automatically falling back to HTTP long-polling if WebSockets are unavailable.
  *
  * @version 4.0
- * @last-modified 2026-06-10
+ * @last-modified 2026-08-12
  */
 class ConsoleClient {
 
@@ -31,15 +31,13 @@ class ConsoleClient {
             maxRetries: 10,
             retryInterval: 5000,
             token: null,
+            onBeforeConnect: null,
             onOpen: null,
-            onMessage: null,
             onClose: null,
             onRetry: null,
-            onBeforeConnect: null,
-            onSubscribed: null,
-            onEstablished: null,
             onFailed: null,
-            onError: null
+            onEstablished: null,
+            onMessage: null
         }, options);
 
         if (this.options.token && this.node.endpoint) {

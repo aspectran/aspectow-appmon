@@ -150,14 +150,14 @@ public class RemoteNodeManager implements InitializableBean, DisposableBean, Clu
     }
 
     @Override
-    public void onNodeJoined(NodeInfo info) {
+    public void onNodeJoined(NodeInfo nodeInfo) {
         if (sessionBridgeMap.isEmpty()) {
             return;
         }
         try {
-            NodeResponseParameters response = new NodeResponseParameters();
-            response.setHeader("joined");
-            response.setNode(info);
+            NodeResponseParameters response = new NodeResponseParameters()
+                    .setHeader("nodeJoined")
+                    .setNode(nodeInfo);
             String message = response.toString();
             for (Map.Entry<String, NodeBridge> entry : sessionBridgeMap.entrySet()) {
                 String sessionId = entry.getKey();
@@ -168,7 +168,7 @@ public class RemoteNodeManager implements InitializableBean, DisposableBean, Clu
                 }
             }
         } catch (Exception e) {
-            logger.error("Failed to broadcast join event of node {}", info.getId(), e);
+            logger.error("Failed to broadcast nodeJoined event of node {}", nodeInfo.getId(), e);
         }
     }
 
@@ -182,9 +182,9 @@ public class RemoteNodeManager implements InitializableBean, DisposableBean, Clu
             nodeInfo.setId(leftNodeId);
             nodeInfo.setStatus("offline");
 
-            NodeResponseParameters response = new NodeResponseParameters();
-            response.setHeader("left");
-            response.setNode(nodeInfo);
+            NodeResponseParameters response = new NodeResponseParameters()
+                    .setHeader("nodeLeft")
+                    .setNode(nodeInfo);
             String message = response.toString();
             for (Map.Entry<String, NodeBridge> entry : sessionBridgeMap.entrySet()) {
                 String sessionId = entry.getKey();
@@ -195,19 +195,19 @@ public class RemoteNodeManager implements InitializableBean, DisposableBean, Clu
                 }
             }
         } catch (Exception e) {
-            logger.error("Failed to broadcast left event of node {}", leftNodeId, e);
+            logger.error("Failed to broadcast nodeLeft event of node {}", leftNodeId, e);
         }
     }
 
     @Override
-    public void onNodeStatusChanged(NodeInfo info) {
+    public void onNodeStatusChanged(NodeInfo nodeInfo) {
         if (sessionBridgeMap.isEmpty()) {
             return;
         }
         try {
-            NodeResponseParameters response = new NodeResponseParameters();
-            response.setHeader("statusChanged");
-            response.setNode(info);
+            NodeResponseParameters response = new NodeResponseParameters()
+                    .setHeader("nodeStatusChanged")
+                    .setNode(nodeInfo);
             String message = response.toString();
             for (Map.Entry<String, NodeBridge> entry : sessionBridgeMap.entrySet()) {
                 String sessionId = entry.getKey();
@@ -218,7 +218,7 @@ public class RemoteNodeManager implements InitializableBean, DisposableBean, Clu
                 }
             }
         } catch (Exception e) {
-            logger.error("Failed to broadcast statusChanged event of node {}", info.getId(), e);
+            logger.error("Failed to broadcast nodeStatusChanged event of node {}", nodeInfo.getId(), e);
         }
     }
 

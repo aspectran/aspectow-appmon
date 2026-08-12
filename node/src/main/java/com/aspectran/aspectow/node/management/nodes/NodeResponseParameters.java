@@ -28,6 +28,7 @@ import com.aspectran.utils.json.JsonBuilder;
 public class NodeResponseParameters extends DefaultParameters {
 
     public static final ParameterKey header;
+    public static final ParameterKey nodeId;
     public static final ParameterKey node;
     public static final ParameterKey error;
 
@@ -35,11 +36,13 @@ public class NodeResponseParameters extends DefaultParameters {
 
     static {
         header = new ParameterKey("header", ValueType.STRING);
+        nodeId = new ParameterKey("nodeId", ValueType.STRING);
         node = new ParameterKey("node", NodeInfo.class);
         error = new ParameterKey("error", ValueType.TEXT);
 
         parameterKeys = new ParameterKey[] {
                 header,
+                nodeId,
                 node,
                 error
         };
@@ -68,6 +71,24 @@ public class NodeResponseParameters extends DefaultParameters {
      */
     public NodeResponseParameters setHeader(String header) {
         putValue(NodeResponseParameters.header, header);
+        return this;
+    }
+
+    /**
+     * Returns the ID of the node sending the response.
+     * @return the node ID
+     */
+    public String getNodeId() {
+        return getString(nodeId);
+    }
+
+    /**
+     * Sets the ID of the node sending the response.
+     * @param nodeId the node ID
+     * @return this instance
+     */
+    public NodeResponseParameters setNodeId(String nodeId) {
+        putValue(NodeResponseParameters.nodeId, nodeId);
         return this;
     }
 

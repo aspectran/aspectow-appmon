@@ -5,10 +5,10 @@
 
     <bean class="com.aspectran.aspectow.node.config.NodeConfigResolver">
         <properties profile="direct">
-            <item name="configLocation">/config/console/node-config-test-direct.apon</item>
+            <item name="configLocation">/config/console/node-config-direct.apon</item>
         </properties>
         <properties profile="!direct">
-            <item name="configLocation">/config/console/node-config-test-gateway.apon</item>
+            <item name="configLocation">/config/console/node-config-gateway.apon</item>
         </properties>
     </bean>
 

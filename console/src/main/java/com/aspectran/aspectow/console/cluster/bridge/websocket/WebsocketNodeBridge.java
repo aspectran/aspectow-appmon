@@ -149,7 +149,8 @@ public class WebsocketNodeBridge extends SimplifiedEndpoint implements NodeBridg
             remoteNodeManager.registerSession(session.getId(), this);
             remoteNodeManager.getBroker().subscribe(nodeSession);
             NodeResponseParameters response = new NodeResponseParameters()
-                    .setHeader("subscribed");
+                    .setHeader("subscribed")
+                    .setNodeId(remoteNodeManager.getNodeId());
             sendText(session, response.toString());
             if (logger.isDebugEnabled()) {
                 logger.debug("ConsoleClient joined node management: session {}, targetNodeId: {}",

@@ -234,9 +234,10 @@
         <script th:inline="javascript">
             const basePath = [[@{/}]].replace(/\/$/, '');
             const clusterMode = [[${page.clusterMode}]];
-            const isDirectMode = (clusterMode === 'direct');
-            const nodes = [[${page.nodes}]];
+            const isGatewayMode = (clusterMode === 'gateway');
+            const isDirectMode = (clusterMode !== 'gateway');
             const node = [[${page.node}]];
+            let nodes = [[${page.nodes}]];
 
             function openAppMon(nodeId) {
                 const url = basePath + "/appmon/dashboard/popup/?nodeId=" + nodeId;
@@ -270,8 +271,7 @@
                     })
                     .then(res => {
                         if (res.success) {
-                            alert("Restart command dispatched successfully.");
-                            location.reload();
+                            updateNodeStatus({ id: nodeId, status: 'stopping' });
                         } else {
                             alert("Failed to dispatch restart command: " + (res.error ? res.error.message : "Unknown error"));
                         }
@@ -468,12 +468,29 @@
                 $('#node-search').on('input', filterNodes);
 
                 let isUnloading = false;
-                $(window).on('beforeunload', function() {
+                $(window).on('beforeunload pagehide', function() {
                     isUnloading = true;
                 });
 
-                function createConsoleClient(node) {
-                    return new ConsoleClient(node, {
+                function refreshNodeList() {
+                    return fetch(basePath + "/cluster/nodes/list", {
+                            headers: { 'Accept': 'application/json' }
+                        })
+                        .then(res => res.json())
+                        .then(res => {
+                            if (res.success && res.data) {
+                                nodes = res.data;
+                                nodes.forEach(n => updateNodeStatus(n));
+                                return res.data;
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Failed to refresh node list:", err);
+                        });
+                }
+
+                function createConsoleClient(targetNode) {
+                    return new ConsoleClient(targetNode, {
                         onBeforeConnect: () => {
                             return fetch(basePath + "/cluster/token", {
                                     headers: { 'Accept': 'application/json' }
@@ -486,21 +503,30 @@
                                 });
                         },
                         onOpen: () => {
-                            if (node.status !== 'paused' && node.status !== 'stopping') {
-                                node.status = 'live';
+                            if (targetNode.status !== 'paused') {
+                                targetNode.status = 'live';
+                                updateNodeStatus(targetNode);
                             }
-                            updateNodeStatus(node);
                         },
                         onClose: () => {
                             if (!isUnloading) {
-                                node.status = 'dead';
-                                updateNodeStatus(node);
+                                targetNode.status = 'dead';
+                                updateNodeStatus(targetNode);
                             }
                         },
                         onFailed: () => {
                             if (!isUnloading) {
-                                node.status = 'dead';
-                                updateNodeStatus(node);
+                                targetNode.status = 'dead';
+                                updateNodeStatus(targetNode);
+                            }
+                        },
+                        onEstablished: () => {
+                            if (targetNode.status !== 'paused') {
+                                targetNode.status = 'live';
+                                updateNodeStatus(targetNode);
+                            }
+                            if (isGatewayMode) {
+                                refreshNodeList();
                             }
                         },
                         onMessage: (response) => {
@@ -509,7 +535,12 @@
                                 console.error("Received error message:", response.error);
                                 return;
                             }
-                            if (response.node) updateNodeStatus(response.node);
+                            const header = response.header;
+                            if (header === 'nodeJoined' || header === 'nodeLeft' || header === 'nodeStatusChanged') {
+                                if (response.node) updateNodeStatus(response.node);
+                            } else if (response.node) {
+                                updateNodeStatus(response.node);
+                            }
                         }
                     });
                 }
@@ -661,6 +692,18 @@
                         $btn.prop('disabled', false).text('Execute Action');
                         bootstrap.Modal.getInstance(document.getElementById('bulkControlModal')).hide();
 
+                        results.forEach(r => {
+                            if (r.success) {
+                                if (action === 'restart') {
+                                    updateNodeStatus({ id: r.nodeId, status: 'stopping' });
+                                } else if (action === 'pause') {
+                                    updateNodeStatus({ id: r.nodeId, status: 'paused' });
+                                } else if (action === 'resume') {
+                                    updateNodeStatus({ id: r.nodeId, status: 'live' });
+                                }
+                            }
+                        });
+
                         const successCount = results.filter(r => r.success).length;
                         const failedCount = results.length - successCount;
 
@@ -670,10 +713,6 @@
                             const failedDetails = results.filter(r => !r.success).map(r => `${r.nodeId}: ${r.error ? r.error.message : 'Failed'}`).join('\n');
                             alert(`Dispatched '${actionName}' command to ${successCount} node(s). ${failedCount} node(s) failed:\n` + failedDetails);
                         }
-
-                        setTimeout(() => {
-                            location.reload();
-                        }, 500);
                     });
                 });
             });

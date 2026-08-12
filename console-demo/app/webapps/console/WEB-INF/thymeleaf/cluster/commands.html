@@ -219,7 +219,7 @@ arguments: {
             const basePath = [[@{/}]].replace(/\/$/, '');
             const clusterMode = [[${page.clusterMode}]];
             const isGatewayMode = (clusterMode === 'gateway');
-            const isDirectMode = (clusterMode === 'direct');
+            const isDirectMode = (clusterMode !== 'gateway');
             const isDemoUser = /*[[${session.USER_INFO.hasRole('DEMO')}]]*/ false;
             const myNodeId = [[${page.myNodeId}]];
             const targetNodeId = [[${page.targetNodeId}]];
@@ -744,31 +744,6 @@ arguments: {
                                 return null;
                             });
                     },
-                    onEstablished: () => {
-                        const targetNode = nodes.find(n => n.id === nodeInfo.id);
-                        if (targetNode) {
-                            targetNode.status = 'LIVE';
-                        }
-
-                        if (isGatewayMode) {
-                            $('#connection-indicator').text("CONNECTED").removeClass("bg-secondary bg-danger bg-warning").addClass("bg-success");
-                            const type = $('#target-type').val();
-                            const val = $('#target-value').val();
-                            if (type === 'node' && val) {
-                                checkSelectedNodeStatus(val);
-                            }
-                        } else {
-                            updateConnectionIndicatorForDirectMode();
-                            doTargetTypeChange();
-                        }
-                    },
-                    onRetry: (count, max) => {
-                        if (isGatewayMode) {
-                            $('#connection-indicator').text(`RECONNECTING (${count}/${max})...`).removeClass("bg-success bg-danger").addClass("bg-warning");
-                        } else {
-                            updateConnectionIndicatorForDirectMode();
-                        }
-                    },
                     onClose: (event) => {
                         const targetNode = nodes.find(n => n.id === nodeInfo.id);
                         if (targetNode) {
@@ -812,6 +787,13 @@ arguments: {
                             updateHistoryUI();
                         }
                     },
+                    onRetry: (count, max) => {
+                        if (isGatewayMode) {
+                            $('#connection-indicator').text(`RECONNECTING (${count}/${max})...`).removeClass("bg-success bg-danger").addClass("bg-warning");
+                        } else {
+                            updateConnectionIndicatorForDirectMode();
+                        }
+                    },
                     onFailed: () => {
                         const targetNode = nodes.find(n => n.id === nodeInfo.id);
                         if (targetNode) {
@@ -820,6 +802,24 @@ arguments: {
 
                         if (isGatewayMode) {
                             renderUnreachableError(nodeInfo.id);
+                        } else {
+                            updateConnectionIndicatorForDirectMode();
+                            doTargetTypeChange();
+                        }
+                    },
+                    onEstablished: () => {
+                        const targetNode = nodes.find(n => n.id === nodeInfo.id);
+                        if (targetNode) {
+                            targetNode.status = 'LIVE';
+                        }
+
+                        if (isGatewayMode) {
+                            $('#connection-indicator').text("CONNECTED").removeClass("bg-secondary bg-danger bg-warning").addClass("bg-success");
+                            const type = $('#target-type').val();
+                            const val = $('#target-value').val();
+                            if (type === 'node' && val) {
+                                checkSelectedNodeStatus(val);
+                            }
                         } else {
                             updateConnectionIndicatorForDirectMode();
                             doTargetTypeChange();

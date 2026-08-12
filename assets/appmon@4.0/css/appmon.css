@@ -16,7 +16,7 @@
 
 /*
  * @version 4.0
- * @last-modified 2026-08-09
+ * @last-modified 2026-08-12
  */
 
 /* For console-integrated */
@@ -53,8 +53,10 @@
         margin-top: 1px;
     }
 }
-.node.tabs > .tabs-title > a, .node.tabs > .tabs-title button {
-    padding: 3px 13px !important;
+@media screen and (min-width: 768px) {
+    .node.tabs > .tabs-title > a, .node.tabs > .tabs-title button {
+        padding: 3px 13px !important;
+    }
 }
 .node.tabs .tabs-title .indicator.disconnected {
     color: #ff9900;

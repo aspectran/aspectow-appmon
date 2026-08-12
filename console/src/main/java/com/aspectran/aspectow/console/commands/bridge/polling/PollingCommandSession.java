@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * A {@link CommandSession} implementation for HTTP polling.
  * It tracks the last message index retrieved by the client.
  */
-public class PollingCommandSession implements CommandSession {
+class PollingCommandSession implements CommandSession {
 
     private static final int DEFAULT_POLLING_INTERVAL = 3000;
 

@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * A {@link SchedulerSession} implementation for HTTP polling.
  * It tracks the last message index retrieved by the client.
  */
-public class PollingSchedulerSession implements SchedulerSession {
+class PollingSchedulerSession implements SchedulerSession {
 
     private static final int DEFAULT_POLLING_INTERVAL = 3000;
 

@@ -1,20 +1,23 @@
 # Cluster-wide settings
 cluster: {
-    id: console-demo-cluster1
+    id: console-demo-cluster2
     mode: direct  # direct or gateway
+    scheduler: {
+        releasedOnUnlock: false
+    }
 }
 node: {
     id: node1
-    group: group1
     title: Node-1
+    port: 8091
     endpoint: {
         mode: auto
     }
 }
 node: {
     id: node2
-    group: group1
     title: Node-2
+    port: 8092
     endpoint: {
         mode: auto
     }

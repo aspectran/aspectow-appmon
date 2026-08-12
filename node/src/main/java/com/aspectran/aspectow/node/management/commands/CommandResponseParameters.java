@@ -102,11 +102,11 @@ public class CommandResponseParameters extends DefaultParameters {
 
     /**
      * Sets the ID of the node sending the response.
-     * @param nodeIdValue the node ID value
+     * @param nodeId the node ID
      * @return this instance
      */
-    public CommandResponseParameters setNodeId(String nodeIdValue) {
-        putValue(nodeId, nodeIdValue);
+    public CommandResponseParameters setNodeId(String nodeId) {
+        putValue(CommandResponseParameters.nodeId, nodeId);
         return this;
     }
 

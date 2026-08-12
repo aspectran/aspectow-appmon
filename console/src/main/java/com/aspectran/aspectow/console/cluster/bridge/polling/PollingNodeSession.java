@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * A {@link NodeSession} implementation for HTTP polling.
  * It tracks the last message index retrieved by the client.
  */
-public class PollingNodeSession implements NodeSession {
+class PollingNodeSession implements NodeSession {
 
     private static final int DEFAULT_POLLING_INTERVAL = 3000;
 

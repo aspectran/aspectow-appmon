@@ -55,18 +55,14 @@ public class WebsocketCommandBridge extends SimplifiedEndpoint implements Comman
 
     private final RemoteCommandManager remoteCommandManager;
 
-    private final NodeManager nodeManager;
-
     /**
      * Constructs a new {@code WebsocketCommandBridge} with the specified remote
      * command manager and node manager.
      * @param remoteCommandManager the manager for executing remote commands
-     * @param nodeManager the manager for local node information
      */
     @Autowired
-    public WebsocketCommandBridge(RemoteCommandManager remoteCommandManager, NodeManager nodeManager) {
+    public WebsocketCommandBridge(RemoteCommandManager remoteCommandManager) {
         this.remoteCommandManager = remoteCommandManager;
-        this.nodeManager = nodeManager;
     }
 
     /**
@@ -160,7 +156,7 @@ public class WebsocketCommandBridge extends SimplifiedEndpoint implements Comman
             remoteCommandManager.getBroker().subscribe(commandSession);
             CommandResponseParameters response = new CommandResponseParameters()
                     .setHeader("subscribed")
-                    .setNodeId(nodeManager.getNodeId());
+                    .setNodeId(remoteCommandManager.getNodeId());
             sendText(session, response.toString());
             if (logger.isDebugEnabled()) {
                 logger.debug("ConsoleClient joined remote command management: session {}, targetNodeId: {}",
