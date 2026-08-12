@@ -350,7 +350,7 @@
                         target.status = node.status;
                     }
                 }
-                const $card = $(`.node-id-badge:contains("${node.id}")`).closest('.node-card');
+                const $card = $(`.node-card[data-node-id="${node.id}"]`);
                 if ($card.length) {
                     const $dot = $card.find('.status-dot');
                     const $statusText = $card.find('.small.fw-bold');
