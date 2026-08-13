@@ -42,6 +42,18 @@ public interface RelaySession {
     String[] getSubscribedApps();
 
     /**
+     * Gets the ID of the node that this session has subscribed to.
+     * @return the subscribed node ID
+     */
+    String getSubscribedNodeId();
+
+    /**
+     * Sets the ID of the node that this session has subscribed to.
+     * @param nodeId the subscribed node ID
+     */
+    void setSubscribedNodeId(String nodeId);
+
+    /**
      * Sets the names of the apps that this session has subscribed to.
      * @param appIds an array of app IDs
      */

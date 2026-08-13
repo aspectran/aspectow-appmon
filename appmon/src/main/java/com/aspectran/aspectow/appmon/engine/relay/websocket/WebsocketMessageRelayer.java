@@ -147,6 +147,9 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
             if (addSession(session)) {
                 messageRelayManager.registerSession(session.getId(), this);
                 WebsocketRelaySession relaySession = new WebsocketRelaySession(session);
+                if (StringUtils.hasText(nodeToSubscribe)) {
+                    relaySession.setSubscribedNodeId(nodeToSubscribe);
+                }
                 String timeZone = commandOptions.getTimeZone();
                 if (StringUtils.hasText(timeZone)) {
                     relaySession.setTimeZone(timeZone);

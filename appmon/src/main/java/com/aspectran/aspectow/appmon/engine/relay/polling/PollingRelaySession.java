@@ -56,6 +56,8 @@ public class PollingRelaySession implements RelaySession {
 
     private String[] subscribedApps;
 
+    private String subscribedNodeId;
+
     private String timeZone;
 
     private String focusedAppId;
@@ -124,6 +126,20 @@ public class PollingRelaySession implements RelaySession {
     @Override
     public String[] getSubscribedApps() {
         return subscribedApps;
+    }
+
+    @Override
+    public String getSubscribedNodeId() {
+        return subscribedNodeId;
+    }
+
+    @Override
+    public void setSubscribedNodeId(String nodeId) {
+        if (StringUtils.hasText(nodeId)) {
+            this.subscribedNodeId = nodeId;
+        } else {
+            this.subscribedNodeId = null;
+        }
     }
 
     @Override

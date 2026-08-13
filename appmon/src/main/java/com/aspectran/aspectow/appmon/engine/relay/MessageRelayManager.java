@@ -20,6 +20,7 @@ import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.aspectow.node.manager.NodeMessagePublisher;
 import com.aspectran.aspectow.node.manager.NodeRegistry;
 import com.aspectran.utils.Assert;
+import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.json.JsonBuilder;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -264,11 +265,12 @@ public class MessageRelayManager {
      */
     public void relayLocally(String message) {
         Assert.notNull(message, "message must not be null");
-        String appId = extractAppId(message);
+        String messageNodeId = extractNodeId(message);
+        String messageAppId = extractAppId(message);
         boolean isLog = isLogMessage(message);
         Set<String> sessionIds;
-        if (appId != null) {
-            sessionIds = subscriptionRegistry.getSessionsSubscribedToApp(appId);
+        if (messageAppId != null) {
+            sessionIds = subscriptionRegistry.getSessionsSubscribedToApp(messageAppId);
         } else {
             sessionIds = subscriptionRegistry.getAllSessionIds();
         }
@@ -277,7 +279,7 @@ public class MessageRelayManager {
             if (relayer != null) {
                 RelaySession session = relayer.findRelaySession(sid);
                 if (session != null) {
-                    relayLocally(relayer, session, message, appId, isLog);
+                    relayLocally(relayer, session, message, messageNodeId, messageAppId, isLog);
                 }
             }
         }
@@ -296,25 +298,42 @@ public class MessageRelayManager {
         if (relayer != null) {
             RelaySession session = relayer.findRelaySession(sessionId);
             if (session != null) {
-                String appId = extractAppId(message);
+                String messageNodeId = extractNodeId(message);
+                String messageAppId = extractAppId(message);
                 boolean isLog = isLogMessage(message);
-                relayLocally(relayer, session, message, appId, isLog);
+                relayLocally(relayer, session, message, messageNodeId, messageAppId, isLog);
             }
         }
     }
 
     private void relayLocally(
             @NonNull MessageRelayer relayer, @NonNull RelaySession session, @NonNull String message,
-            @Nullable String appId, boolean isLog) {
-        if (appId != null && isLog) {
+            @Nullable String messageNodeId, @Nullable String messageAppId, boolean isLog) {
+        String subscribedNodeId = session.getSubscribedNodeId();
+        if (StringUtils.hasText(subscribedNodeId) && messageNodeId != null) {
+            if (!subscribedNodeId.equals(messageNodeId)) {
+                return;
+            }
+        }
+        if (messageAppId != null && isLog) {
             String focusedAppId = session.getFocusedAppId();
-            if (focusedAppId != null && !focusedAppId.equals(appId)) {
+            if (focusedAppId != null && !focusedAppId.equals(messageAppId)) {
                 return;
             }
         }
         if (session.isValid()) {
             relayer.relay(session, message);
         }
+    }
+
+    @Nullable
+    private String extractNodeId(@NonNull String message) {
+        int idx = message.indexOf(DELIMITER);
+        if (idx != -1) {
+            String nodeId = message.substring(0, idx);
+            return (!nodeId.isEmpty() ? nodeId : null);
+        }
+        return null;
     }
 
     @Nullable

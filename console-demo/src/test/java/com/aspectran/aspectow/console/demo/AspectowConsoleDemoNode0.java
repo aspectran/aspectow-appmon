@@ -41,7 +41,7 @@ public class AspectowConsoleDemoNode0 {
             File workDir = new File(root, "work");
             File cmdDir = new File(root, "cmd");
 
-            System.setProperty(MY_NODE_ID_PROPERTY, "node0"); // Console Node
+            System.setProperty(MY_NODE_ID_PROPERTY, "console-node1"); // Console Node
             System.setProperty(BASE_PATH_PROPERTY, root.getCanonicalPath()); // for logging configuration
             System.setProperty(LOGS_DIR_PROPERTY, logsDir.getCanonicalPath()); // for logging configuration
             System.setProperty(WORK_PATH_PROPERTY, workDir.getCanonicalPath());
@@ -51,7 +51,6 @@ public class AspectowConsoleDemoNode0 {
             System.setProperty("tow.context.root.session.cookieName", "JSESSIONID-8082");
             System.setProperty("tow.context.console.session.cookieName", "JSESSIONID-8082");
             System.setProperty("aspectow.console.config.db.h2.path_explicit", "~/aspectow-console-demo-node0");
-            //System.setProperty("aspectow.appmon.config.db.h2.path_explicit", "~/aspectow-console-demo-appmon");
             System.setProperty("aspectran.profiles.active", "dev,gateway,console.ui");
             System.setProperty("aspectran.profiles.base.console", "dev,h2,console.custom-ui");
 
