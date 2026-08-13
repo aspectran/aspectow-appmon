@@ -16,12 +16,16 @@
 package com.aspectran.aspectow.node.manager;
 
 import com.aspectran.aspectow.node.redis.RedisConnectionPool;
+import io.lettuce.core.RedisChannelHandler;
+import io.lettuce.core.RedisConnectionStateListener;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
+import io.lettuce.core.pubsub.RedisPubSubListener;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.SocketAddress;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -32,7 +36,7 @@ import static com.aspectran.aspectow.node.manager.NodeMessageProtocol.TYPE_RELAY
  * Listens to management control and transparent relay channels and notifies
  * registered listeners based on the message category.
  */
-public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> {
+public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> implements RedisConnectionStateListener {
 
     private static final Logger logger = LoggerFactory.getLogger(NodeMessageSubscriber.class);
 
@@ -132,12 +136,36 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> {
      * Starts the subscriber, establishing a connection and subscribing to the Redis pattern.
      */
     public void start() {
-        this.pubSubConnection = connectionPool.getPubSubConnection();
-        this.pubSubConnection.addListener(this);
+        pubSubConnection = connectionPool.getPubSubConnection();
+        pubSubConnection.addListener((RedisPubSubListener<String, String>)this);
+        pubSubConnection.addListener((RedisConnectionStateListener)this);
 
         String subscribePattern = NodeMessageProtocol.getClusterSubscriptionPattern(clusterId, nodeId);
-        this.pubSubConnection.sync().psubscribe(subscribePattern);
+        pubSubConnection.sync().psubscribe(subscribePattern);
         logger.info("NodeMessageSubscriber initialized and subscribed to pattern: {}", subscribePattern);
+    }
+
+    @Override
+    public void onRedisConnected(RedisChannelHandler<?, ?> connection, SocketAddress socketAddress) {
+        if (pubSubConnection != null && pubSubConnection.isOpen()) {
+            try {
+                String subscribePattern = NodeMessageProtocol.getClusterSubscriptionPattern(clusterId, nodeId);
+                pubSubConnection.async().psubscribe(subscribePattern);
+                logger.info("NodeMessageSubscriber re-subscribed to pattern after reconnection: {}", subscribePattern);
+            } catch (Exception e) {
+                logger.error("Failed to re-subscribe pattern after reconnection for node '{}'", nodeId, e);
+            }
+        }
+    }
+
+    @Override
+    public void onRedisDisconnected(RedisChannelHandler<?, ?> connection) {
+        logger.warn("NodeMessageSubscriber disconnected from Redis for node '{}'", nodeId);
+    }
+
+    @Override
+    public void onRedisExceptionCaught(RedisChannelHandler<?, ?> connection, @NonNull Throwable cause) {
+        logger.warn("NodeMessageSubscriber caught Redis exception for node '{}': {}", nodeId, cause.getMessage());
     }
 
     /**
@@ -145,7 +173,8 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> {
      */
     public void stop() {
         if (pubSubConnection != null) {
-            pubSubConnection.removeListener(this);
+            pubSubConnection.removeListener((RedisPubSubListener<String, String>)this);
+            pubSubConnection.removeListener((RedisConnectionStateListener)this);
             pubSubConnection.close();
             pubSubConnection = null;
         }

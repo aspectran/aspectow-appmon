@@ -98,13 +98,23 @@ public class NodeReporter {
         getNodeInfo().setStatus("stopping");
         try {
             registerNode();
-        } catch (IOException e) {
-            // ignore
+        } catch (Exception e) {
+            logger.warn("Failed to update status to 'stopping' for node '{}'", getNodeInfo().getId(), e);
         }
 
         scheduler.shutdownNow();
-        broadcastLeave();
-        unregisterNode();
+
+        try {
+            broadcastLeave();
+        } catch (Exception e) {
+            logger.warn("Failed to broadcast leave event during stop for node '{}'", getNodeInfo().getId(), e);
+        }
+
+        try {
+            unregisterNode();
+        } catch (Exception e) {
+            logger.warn("Failed to unregister node during stop for node '{}'", getNodeInfo().getId(), e);
+        }
     }
 
     /**
@@ -188,7 +198,7 @@ public class NodeReporter {
     private void broadcastLeave() {
         try {
             String channel = NodeMessageProtocol.getClusterEventsChannel(getClusterConfig().getId());
-            nodeManager.getNodeMessagePublisher().syncPublish(channel, MESSAGE_LEFT + getNodeInfo().getId());
+            nodeManager.getNodeMessagePublisher().asyncPublish(channel, MESSAGE_LEFT + getNodeInfo().getId());
         } catch (Exception e) {
             logger.error("Failed to broadcast leave event for node '{}'", getNodeInfo().getId(), e);
         }

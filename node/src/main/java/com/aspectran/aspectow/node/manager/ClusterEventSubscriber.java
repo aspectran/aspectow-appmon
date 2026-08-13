@@ -17,13 +17,17 @@ package com.aspectran.aspectow.node.manager;
 
 import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.aspectow.node.redis.RedisConnectionPool;
+import io.lettuce.core.RedisChannelHandler;
+import io.lettuce.core.RedisConnectionStateListener;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
+import io.lettuce.core.pubsub.RedisPubSubListener;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -33,7 +37,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  *
  * <p>Created: 2026-05-24</p>
  */
-public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> {
+public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> implements RedisConnectionStateListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ClusterEventSubscriber.class);
 
@@ -113,12 +117,36 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> {
      * Starts the subscriber, establishing a connection and subscribing to cluster events.
      */
     public void start() {
-        this.pubSubConnection = connectionPool.getPubSubConnection();
-        this.pubSubConnection.addListener(this);
+        pubSubConnection = connectionPool.getPubSubConnection();
+        pubSubConnection.addListener((RedisPubSubListener<String, String>)this);
+        pubSubConnection.addListener((RedisConnectionStateListener)this);
 
         String eventsChannel = NodeMessageProtocol.getClusterEventsChannel(clusterId);
-        this.pubSubConnection.sync().subscribe(eventsChannel);
+        pubSubConnection.sync().subscribe(eventsChannel);
         logger.info("ClusterEventSubscriber initialized and subscribed to channel: {}", eventsChannel);
+    }
+
+    @Override
+    public void onRedisConnected(RedisChannelHandler<?, ?> connection, SocketAddress socketAddress) {
+        if (pubSubConnection != null && pubSubConnection.isOpen()) {
+            try {
+                String eventsChannel = NodeMessageProtocol.getClusterEventsChannel(clusterId);
+                pubSubConnection.async().subscribe(eventsChannel);
+                logger.info("ClusterEventSubscriber re-subscribed to channel after reconnection: {}", eventsChannel);
+            } catch (Exception e) {
+                logger.error("Failed to re-subscribe channel after reconnection for cluster '{}'", clusterId, e);
+            }
+        }
+    }
+
+    @Override
+    public void onRedisDisconnected(RedisChannelHandler<?, ?> connection) {
+        logger.warn("ClusterEventSubscriber disconnected from Redis for cluster '{}'", clusterId);
+    }
+
+    @Override
+    public void onRedisExceptionCaught(RedisChannelHandler<?, ?> connection, @NonNull Throwable cause) {
+        logger.warn("ClusterEventSubscriber caught Redis exception for cluster '{}': {}", clusterId, cause.getMessage());
     }
 
     /**
@@ -126,7 +154,8 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> {
      */
     public void stop() {
         if (pubSubConnection != null) {
-            pubSubConnection.removeListener(this);
+            pubSubConnection.removeListener((RedisPubSubListener<String, String>)this);
+            pubSubConnection.removeListener((RedisConnectionStateListener)this);
             pubSubConnection.close();
             pubSubConnection = null;
         }

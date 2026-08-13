@@ -23,6 +23,7 @@ import io.lettuce.core.api.StatefulRedisConnection;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.jspecify.annotations.NonNull;
 
+import java.time.Duration;
 import java.util.Properties;
 
 /**
@@ -50,6 +51,10 @@ public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulR
     public RedisConnectionPoolConfig(@NonNull Properties properties) {
         super();
         setUri(properties.getProperty("aspectow.redis.uri"));
+        String timeout = properties.getProperty("aspectow.redis.timeout");
+        if (StringUtils.hasText(timeout)) {
+            setTimeout(timeout);
+        }
     }
 
     /**
@@ -82,6 +87,47 @@ public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulR
             throw new IllegalArgumentException("uri must not be null or empty");
         }
         this.redisURI = RedisURI.create(uri);
+    }
+
+    /**
+     * Sets the connection timeout for Redis.
+     * @param timeout the duration timeout
+     */
+    public void setTimeout(Duration timeout) {
+        if (this.redisURI != null && timeout != null) {
+            this.redisURI.setTimeout(timeout);
+        }
+    }
+
+    /**
+     * Sets the connection timeout for Redis as a string (e.g. "5s", "5000ms").
+     * @param timeout the timeout string
+     */
+    public void setTimeout(String timeout) {
+        if (StringUtils.hasText(timeout)) {
+            setTimeout(parseDuration(timeout));
+        }
+    }
+
+    private static Duration parseDuration(@NonNull String text) {
+        String trimmed = text.trim().toLowerCase();
+        try {
+            if (trimmed.endsWith("ms")) {
+                long ms = Long.parseLong(trimmed.substring(0, trimmed.length() - 2).trim());
+                return Duration.ofMillis(ms);
+            } else if (trimmed.endsWith("s")) {
+                long s = Long.parseLong(trimmed.substring(0, trimmed.length() - 1).trim());
+                return Duration.ofSeconds(s);
+            } else if (trimmed.endsWith("m")) {
+                long m = Long.parseLong(trimmed.substring(0, trimmed.length() - 1).trim());
+                return Duration.ofMinutes(m);
+            } else {
+                long s = Long.parseLong(trimmed);
+                return Duration.ofSeconds(s);
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid duration string: " + text, e);
+        }
     }
 
     /**

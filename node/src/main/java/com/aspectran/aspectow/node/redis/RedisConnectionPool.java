@@ -25,6 +25,7 @@ import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.support.ConnectionPoolSupport;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -84,6 +85,10 @@ public class RedisConnectionPool implements InitializableBean, DisposableBean {
         RedisURI redisURI = poolConfig.getRedisURI();
         if (redisURI == null) {
             throw new IllegalArgumentException("redisURI must not be null");
+        }
+        if (redisURI.getTimeout() == null || redisURI.getTimeout().isZero() ||
+                redisURI.getTimeout() == RedisURI.DEFAULT_TIMEOUT_DURATION) {
+            redisURI.setTimeout(Duration.ofSeconds(5));
         }
         client = RedisClient.create(redisURI);
         if (poolConfig.getClientOptions() != null) {
