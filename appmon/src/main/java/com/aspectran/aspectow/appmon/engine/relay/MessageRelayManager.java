@@ -113,7 +113,7 @@ public class MessageRelayManager {
      * @return true if targetNodeId is equal to this node's ID, false otherwise
      */
     public boolean isSameNode(String targetNodeId) {
-        return (targetNodeId != null && targetNodeId.equals(this.nodeId));
+        return (targetNodeId != null && targetNodeId.equals(nodeId));
     }
 
     /**
@@ -351,11 +351,13 @@ public class MessageRelayManager {
 
     /**
      * Handles a client subscribing to monitor apps.
-     * Starts the necessary exporters for the subscribeed apps.
+     * Starts the necessary exporters for the subscribed apps.
      * @param session the client session that is subscribing
-     * @return {@code true} if the subscribe was successful, {@code false} otherwise
+     * @param nodeId the node id of the client session
+     * @param singleNodeDesignated whether a specific single node is designated
+     * @return {@code true} if the subscription was successful, {@code false} otherwise
      */
-    public synchronized boolean subscribe(@NonNull RelaySession session, String nodeId, boolean specified) {
+    public synchronized boolean subscribe(@NonNull RelaySession session, String nodeId, boolean singleNodeDesignated) {
         if (!session.isValid()) {
             return false;
         }
@@ -365,7 +367,7 @@ public class MessageRelayManager {
         }
         CommandOptions commandOptions = new CommandOptions();
         commandOptions.setCommand(COMMAND_SUBSCRIBE);
-        commandOptions.setNodeId(this.nodeId);
+        commandOptions.setNodeId(getNodeId());
         commandOptions.setSessionId(session.getId());
         commandOptions.setTimeZone(session.getTimeZone());
         for (String appId : subscribedApps) {
@@ -374,7 +376,7 @@ public class MessageRelayManager {
             }
             if (isGatewayMode()) {
                 commandOptions.setAppId(appId);
-                if (specified) {
+                if (singleNodeDesignated) {
                     publishControl(nodeId, commandOptions);
                 } else {
                     for (NodeInfo nodeInfo : nodeRegistry.getNodes()) {
@@ -441,7 +443,7 @@ public class MessageRelayManager {
                 if (isGatewayMode()) {
                     CommandOptions commandOptions = new CommandOptions();
                     commandOptions.setCommand(COMMAND_UNSUBSCRIBE);
-                    commandOptions.setNodeId(nodeId);
+                    commandOptions.setNodeId(getNodeId());
                     commandOptions.setAppId(appId);
                     for (NodeInfo nodeInfo : nodeRegistry.getNodes()) {
                         if (!isSameNode(nodeInfo.getId())) {
@@ -489,7 +491,7 @@ public class MessageRelayManager {
             return getNewMessages(session, commandOptions);
         }
         if (isGatewayMode()) {
-            commandOptions.setNodeId(nodeId);
+            commandOptions.setNodeId(getNodeId());
             commandOptions.setSessionId(session.getId());
             publishControl(targetNodeId, commandOptions);
         }

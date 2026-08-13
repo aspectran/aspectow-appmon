@@ -23,7 +23,7 @@ import jakarta.websocket.Session;
 
 /**
  * A {@link RelaySession} implementation that wraps a JSR-356 {@link Session}.
- * It stores session-specific data, like subscribeed instances, in the WebSocket session's user properties.
+ * It stores session-specific data, like subscribed instances, in the WebSocket session's user properties.
  *
  * <p>Created: 2020. 12. 24.</p>
  */

@@ -171,16 +171,15 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
         String nodeId = commandOptions.getNodeId();
         Assert.hasText(nodeId, "Node ID cannot be empty");
         String nodeToSubscribe = commandOptions.getNodeToSubscribe();
-        String appsToSubscribe = commandOptions.getAppsToSubscribe();
-        if (messageRelayManager.isSameNode(nodeId) || StringUtils.hasText(nodeToSubscribe) ||
-                StringUtils.hasText(appsToSubscribe)) {
+        if (messageRelayManager.isSameNode(nodeId) || StringUtils.hasText(nodeToSubscribe)) {
             RelaySession relaySession = new WebsocketRelaySession(session);
-            boolean specified = (!messageRelayManager.isSameNode(nodeId) &&
-                    (StringUtils.hasText(nodeToSubscribe) || StringUtils.hasText(appsToSubscribe)));
-            if (messageRelayManager.subscribe(relaySession, nodeId, specified) && !specified) {
-                List<String> messages = messageRelayManager.getLastMessages(relaySession);
-                for (String message : messages) {
-                    sendText(session, message);
+            boolean singleNodeDesignated = (!messageRelayManager.isSameNode(nodeId) && StringUtils.hasText(nodeToSubscribe));
+            if (messageRelayManager.subscribe(relaySession, nodeId, singleNodeDesignated)) {
+                if (messageRelayManager.isSameNode(nodeId)) {
+                    List<String> messages = messageRelayManager.getLastMessages(relaySession);
+                    for (String message : messages) {
+                        sendText(session, message);
+                    }
                 }
             }
         }
