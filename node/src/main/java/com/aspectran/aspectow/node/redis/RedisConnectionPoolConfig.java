@@ -27,7 +27,30 @@ import java.time.Duration;
 import java.util.Properties;
 
 /**
- * Redis connection pool configuration based on Lettuce.
+ * Configuration holder for a Lettuce-backed Redis connection pool used by Aspectow Node Manager.
+ * <p>Manages Redis endpoint URIs, timeouts, client options, and pooling parameters.</p>
+ *
+ * <h2>Supported Configuration Properties (via properties or bean setters)</h2>
+ * <ul>
+ *   <li>{@code aspectow.redis.uri} / {@code uri} — Target Redis connection URI (e.g., {@code "redis://10.0.0.3:6379/5"})</li>
+ *   <li>{@code aspectow.redis.timeout} / {@code timeout} — Redis command/connection timeout (e.g., {@code "5s"}, {@code "5000ms"})</li>
+ * </ul>
+ *
+ * <h2>Example Aspectran Bean Definition</h2>
+ * <pre>{@code
+ * <bean id="redisConnectionPoolConfig" class="com.aspectran.aspectow.node.redis.RedisConnectionPoolConfig">
+ *     <property name="timeout" value="5s"/>
+ *     <argument>
+ *         <bean class="com.aspectran.core.support.PropertiesFactoryBean">
+ *             <properties profile="prod">
+ *                 <item name="locations" type="array">
+ *                     <value>/config/console/redis-prod.properties</value>
+ *                 </item>
+ *             </properties>
+ *         </bean>
+ *     </argument>
+ * </bean>
+ * }</pre>
  *
  * <p>Created: 2019/12/07</p>
  */
