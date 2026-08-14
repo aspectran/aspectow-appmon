@@ -159,6 +159,8 @@ public class ExporterManager {
         if (scheduler == null) {
             return;
         }
+        scheduler.stop();
+        scheduler = null;
         for (Exporter exporter : exporters.values()) {
             try {
                 exporter.stop();
@@ -166,8 +168,6 @@ public class ExporterManager {
                 logger.warn(e.getMessage(), e);
             }
         }
-        scheduler.stop();
-        scheduler = null;
     }
 
     /**
