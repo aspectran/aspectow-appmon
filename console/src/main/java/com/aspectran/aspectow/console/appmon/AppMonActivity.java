@@ -33,6 +33,7 @@ import com.aspectran.core.component.bean.annotation.RequestToGet;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.web.activity.response.DefaultRestResponse;
 import com.aspectran.web.activity.response.RestResponse;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,14 +97,14 @@ public class AppMonActivity {
         return Map.of(
                 "title", "Application Monitoring",
                 "style", "monitoring-page",
-                "appsToJoin", StringUtils.nullToEmpty(appsToSubscribe),
+                "appsToSubscribe", StringUtils.nullToEmpty(appsToSubscribe),
                 "layout", "popup",
                 "clusterMode", appMonManager.getClusterMode()
         );
     }
 
     @RequestToGet("/config/data")
-    public RestResponse getConfigData(Translet translet, String appsToSubscribe) {
+    public RestResponse getConfigData(@NonNull Translet translet, String appsToSubscribe) {
         Map<String, Object> settings = Map.of(
                 "counterPersistInterval", appMonManager.getCounterPersistInterval(),
                 "clusterMode", appMonManager.getClusterMode()

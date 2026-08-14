@@ -34,8 +34,6 @@ import com.aspectran.web.activity.response.RestResponse;
 import com.aspectran.web.support.rest.response.FailureResponse;
 import com.aspectran.web.support.rest.response.SuccessResponse;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,8 +49,6 @@ import java.util.stream.Collectors;
 @Component("/cluster")
 @Profile("[console.ui, console.custom-ui]")
 public class ClusterActivity {
-
-    private static final Logger logger = LoggerFactory.getLogger(ClusterActivity.class);
 
     private final NodeManager nodeManager;
 

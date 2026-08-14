@@ -203,7 +203,7 @@ class WebsocketClient extends BaseClient {
             if (this.isGatewayMode && !this.getNodeConfig(nodeId)) {
                 this.stop();
                 // Unknown node ID became primary!
-                // This happens in Autoscaling mode when the gateway instance restarts with a new ID.
+                // This happens in Autoscaling mode when the gateway node restarts with a new ID.
                 if (this.onRequireRebuild) {
                     console.log(nodeId, "unknown node became primary, requesting full rebuild");
                     this.onRequireRebuild();

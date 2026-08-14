@@ -176,7 +176,7 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
         String nodeToSubscribe = commandOptions.getNodeToSubscribe();
         if (messageRelayManager.isSameNode(nodeId) || StringUtils.hasText(nodeToSubscribe)) {
             RelaySession relaySession = new WebsocketRelaySession(session);
-            boolean singleNodeDesignated = (!messageRelayManager.isSameNode(nodeId) && StringUtils.hasText(nodeToSubscribe));
+            boolean singleNodeDesignated = StringUtils.hasText(nodeToSubscribe);
             if (messageRelayManager.subscribe(relaySession, nodeId, singleNodeDesignated)) {
                 if (messageRelayManager.isSameNode(nodeId)) {
                     List<String> messages = messageRelayManager.getLastMessages(relaySession);

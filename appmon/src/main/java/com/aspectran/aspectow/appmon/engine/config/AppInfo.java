@@ -61,29 +61,11 @@ public class AppInfo extends DefaultParameters {
         };
     }
 
-    private String nodeId;
-
     /**
      * Instantiates a new AppInfo.
      */
     public AppInfo() {
         super(parameterKeys);
-    }
-
-    /**
-     * Returns the identifier of the node to which this app belongs.
-     * @return the node identifier
-     */
-    public String getNodeId() {
-        return nodeId;
-    }
-
-    /**
-     * Sets the identifier of the node to which this app belongs.
-     * @param nodeId the node identifier
-     */
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
     }
 
     /**
@@ -128,10 +110,10 @@ public class AppInfo extends DefaultParameters {
 
     /**
      * Sets the display title of the application.
-     * @param name the app title
+     * @param title the app title
      */
-    public void setTitle(String name) {
-        putValue(AppInfo.title, name);
+    public void setTitle(String title) {
+        putValue(AppInfo.title, title);
     }
 
     /**

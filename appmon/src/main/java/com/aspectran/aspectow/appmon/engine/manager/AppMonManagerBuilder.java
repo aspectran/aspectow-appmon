@@ -81,28 +81,16 @@ public abstract class AppMonManagerBuilder {
         }
         NodeManager nodeManager = context.getBeanRegistry().getBean(NodeManager.class);
         String clusterId = nodeManager.getClusterConfig().getId();
-        String clusterMode = nodeManager.getClusterConfig().getMode();
         String nodeId = nodeManager.getNodeId();
         String groupId = nodeManager.getGroupId();
-        NodeInfoHolder nodeInfoHolder = nodeManager.getNodeInfoHolder();
-        GroupInfoHolder groupInfoHolder = nodeManager.getGroupInfoHolder();
+
+        List<AppInfo> appInfoList = appMonConfig.getAppInfoList();
+        AppInfoHolder appInfoHolder = new AppInfoHolder(nodeId, groupId, appInfoList);
 
         PollingConfig pollingConfig = appMonConfig.touchPollingConfig();
         int counterPersistInterval = appMonConfig.getCounterPersistInterval(DEFAULT_SAMPLE_INTERVAL_IN_MINUTES);
 
-        List<AppInfo> appInfoList = appMonConfig.getAppInfoList();
-        for (AppInfo appInfo : appInfoList) {
-            appInfo.setGroupId(groupId);
-        }
-
-        AppInfoHolder appInfoHolder = new AppInfoHolder(nodeId, appInfoList);
-
-        MessageRelayManager messageRelayManager = new MessageRelayManager(
-                nodeId, groupId, nodeManager.getNodeRegistry(), nodeManager.getNodeMessagePublisher());
-
-        AppMonManager appMonManager = new AppMonManager(
-                clusterMode, nodeId, groupId, pollingConfig, counterPersistInterval,
-                nodeInfoHolder, groupInfoHolder, appInfoHolder, messageRelayManager);
+        AppMonManager appMonManager = new AppMonManager(nodeManager, appInfoHolder, pollingConfig, counterPersistInterval);
         appMonManager.setActivityContext(context);
 
         try {
@@ -148,7 +136,7 @@ public abstract class AppMonManagerBuilder {
                 }
 
                 if (nodeManager.getNodeMessageSubscriber() != null) {
-                    NodeMessageRelayHandler nodeMessageRelayHandler = new NodeMessageRelayHandler(messageRelayManager);
+                    NodeMessageRelayHandler nodeMessageRelayHandler = new NodeMessageRelayHandler(appMonManager.getMessageRelayManager());
                     nodeManager.getNodeMessageSubscriber().addListener(nodeMessageRelayHandler);
                     appMonManager.setNodeMessageRelayHandler(nodeMessageRelayHandler);
                 }

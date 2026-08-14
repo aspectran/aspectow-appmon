@@ -48,13 +48,13 @@ import java.util.Map;
  */
 public class AppMonManager extends InstantActivitySupport {
 
+    private final NodeManager nodeManager;
+
+    private final String clusterMode;
+
     private final String nodeId;
 
     private final String groupId;
-
-    private final PollingConfig pollingConfig;
-
-    private final int counterPersistInterval;
 
     private final NodeInfoHolder nodeInfoHolder;
 
@@ -62,7 +62,9 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final AppInfoHolder appInfoHolder;
 
-    private final String clusterMode;
+    private final PollingConfig pollingConfig;
+
+    private final int counterPersistInterval;
 
     private final MessageRelayManager messageRelayManager;
 
@@ -74,35 +76,26 @@ public class AppMonManager extends InstantActivitySupport {
 
     /**
      * Instantiates a new AppMonManager.
-     * @param clusterMode the cluster mode
-     * @param nodeId the name of the current node
-     * @param groupId the name of the current node group
+     * @param nodeManager the node manager
+     * @param appInfoHolder the holder for app information
      * @param pollingConfig the polling configuration
-     * @param counterPersistInterval the counter persistence interval in minutes
-     * @param nodeInfoHolder the holder for node information
-     * @param groupInfoHolder the holder for group information
-     * @param appInfoHolder the holder for instance information
-     * @param messageRelayManager the message relay manager
+     * @param counterPersistInterval the counter persist interval in minutes
      */
     public AppMonManager(
-            String clusterMode,
-            String nodeId,
-            String groupId,
-            PollingConfig pollingConfig,
-            int counterPersistInterval,
-            NodeInfoHolder nodeInfoHolder,
-            GroupInfoHolder groupInfoHolder,
+            @NonNull NodeManager nodeManager,
             AppInfoHolder appInfoHolder,
-            MessageRelayManager messageRelayManager) {
-        this.clusterMode = clusterMode;
-        this.nodeId = nodeId;
-        this.groupId = groupId;
+            PollingConfig pollingConfig,
+            int counterPersistInterval) {
+        this.nodeManager = nodeManager;
+        this.clusterMode = nodeManager.getClusterConfig().getMode();
+        this.nodeId = nodeManager.getNodeId();
+        this.groupId = nodeManager.getGroupId();
+        this.nodeInfoHolder = nodeManager.getNodeInfoHolder();
+        this.groupInfoHolder = nodeManager.getGroupInfoHolder();
+        this.appInfoHolder = appInfoHolder;
         this.pollingConfig = pollingConfig;
         this.counterPersistInterval = counterPersistInterval;
-        this.nodeInfoHolder = nodeInfoHolder;
-        this.groupInfoHolder = groupInfoHolder;
-        this.appInfoHolder = appInfoHolder;
-        this.messageRelayManager = messageRelayManager;
+        this.messageRelayManager = new MessageRelayManager(nodeManager);
         this.persistManager = new PersistManager();
     }
 
@@ -197,7 +190,6 @@ public class AppMonManager extends InstantActivitySupport {
      */
     public List<AppInfo> getClusterAppInfoList() {
         if (isGatewayMode()) {
-            NodeManager nodeManager = getBean(NodeManager.class);
             NodeRegistry nodeRegistry = nodeManager.getNodeRegistry();
             List<AppInfo> apps = new ArrayList<>();
             Map<String, String> allGroups = nodeRegistry.getAllGroups();
@@ -225,7 +217,6 @@ public class AppMonManager extends InstantActivitySupport {
      */
     public List<GroupInfo> getGroupInfoList() {
         if (isGatewayMode()) {
-            NodeManager nodeManager = getBean(NodeManager.class);
             NodeRegistry nodeRegistry = nodeManager.getNodeRegistry();
             List<GroupInfo> groups = new ArrayList<>();
             Map<String, String> allGroups = nodeRegistry.getAllGroups();
@@ -342,19 +333,11 @@ public class AppMonManager extends InstantActivitySupport {
         if (messageRelayManager != null) {
             messageRelayManager.destroy();
         }
-
-        try {
-            if (containsBean(NodeManager.class)) {
-                NodeManager nodeManager = getBean(NodeManager.class);
-                if (nodeMessageRelayHandler != null && nodeManager.getNodeMessageSubscriber() != null) {
-                    nodeManager.getNodeMessageSubscriber().removeListener(nodeMessageRelayHandler);
-                }
-                if (clusterEventListener != null && nodeManager.getClusterEventSubscriber() != null) {
-                    nodeManager.getClusterEventSubscriber().removeListener(clusterEventListener);
-                }
-            }
-        } catch (Exception e) {
-            // ignore
+        if (nodeMessageRelayHandler != null && nodeManager.getNodeMessageSubscriber() != null) {
+            nodeManager.getNodeMessageSubscriber().removeListener(nodeMessageRelayHandler);
+        }
+        if (clusterEventListener != null && nodeManager.getClusterEventSubscriber() != null) {
+            nodeManager.getClusterEventSubscriber().removeListener(clusterEventListener);
         }
     }
 

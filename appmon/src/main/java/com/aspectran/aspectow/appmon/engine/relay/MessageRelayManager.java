@@ -17,6 +17,7 @@ package com.aspectran.aspectow.appmon.engine.relay;
 
 import com.aspectran.aspectow.appmon.engine.exporter.ExporterManager;
 import com.aspectran.aspectow.node.config.NodeInfo;
+import com.aspectran.aspectow.node.manager.NodeManager;
 import com.aspectran.aspectow.node.manager.NodeMessagePublisher;
 import com.aspectran.aspectow.node.manager.NodeRegistry;
 import com.aspectran.utils.Assert;
@@ -68,20 +69,13 @@ public class MessageRelayManager {
 
     /**
      * Instantiates a new MessageRelayManager.
-     * @param nodeId the current node ID
-     * @param groupId the current group ID
-     * @param nodeRegistry the node registry
-     * @param messagePublisher the Redis message publisher
+     * @param nodeManager the node manager
      */
-    public MessageRelayManager(
-            String nodeId,
-            String groupId,
-            NodeRegistry nodeRegistry,
-            NodeMessagePublisher messagePublisher) {
-        this.nodeId = nodeId;
-        this.groupId = groupId;
-        this.nodeRegistry = nodeRegistry;
-        this.messagePublisher = messagePublisher;
+    public MessageRelayManager(@NonNull NodeManager nodeManager) {
+        this.nodeId = nodeManager.getNodeId();
+        this.groupId = nodeManager.getGroupId();
+        this.nodeRegistry = nodeManager.getNodeRegistry();
+        this.messagePublisher = nodeManager.getNodeMessagePublisher();
     }
 
     /**
@@ -396,7 +390,9 @@ public class MessageRelayManager {
             if (isGatewayMode()) {
                 commandOptions.setAppId(appId);
                 if (singleNodeDesignated) {
-                    publishControl(nodeId, commandOptions);
+                    if (!isSameNode(nodeId)) {
+                        publishControl(nodeId, commandOptions);
+                    }
                 } else {
                     for (NodeInfo nodeInfo : nodeRegistry.getNodes()) {
                         if (!isSameNode(nodeInfo.getId())) {

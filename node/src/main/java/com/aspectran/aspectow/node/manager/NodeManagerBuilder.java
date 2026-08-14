@@ -181,7 +181,7 @@ public abstract class NodeManagerBuilder {
 
         if (clusterConfig.isGatewayMode()) {
             if (redisConnectionPoolConfig == null) {
-                throw new IllegalStateException("RedisConnectionPoolConfig is required for cluster mode");
+                throw new IllegalStateException("RedisConnectionPoolConfig is required for gateway mode");
             }
             RedisConnectionPool connectionPool = new RedisConnectionPool(redisConnectionPoolConfig);
             connectionPool.initialize();

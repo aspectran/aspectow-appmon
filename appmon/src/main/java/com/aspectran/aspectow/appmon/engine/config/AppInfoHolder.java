@@ -35,11 +35,12 @@ public class AppInfoHolder {
     /**
      * Instantiates a new AppInfoHolder.
      * @param nodeId the id of the node these apps belong to
+     * @param groupId the group id of the node these apps belong to
      * @param appInfoList the list of app information to hold
      */
-    public AppInfoHolder(String nodeId, @NonNull List<AppInfo> appInfoList) {
+    public AppInfoHolder(String nodeId, String groupId, @NonNull List<AppInfo> appInfoList) {
         for (AppInfo appInfo : appInfoList) {
-            appInfo.setNodeId(nodeId);
+            appInfo.setGroupId(groupId);
             appInfos.put(appInfo.getAppId(), appInfo);
 
             List<EventInfo> eventInfoList = appInfo.getEventInfoList();

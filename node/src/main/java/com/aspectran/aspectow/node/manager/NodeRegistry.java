@@ -129,7 +129,7 @@ public class NodeRegistry {
             logger.trace("Retrieving all apps for group: {} from Redis hash: {}", groupId, key);
         }
         try (StatefulRedisConnection<String, String> connection = connectionPool.getConnection()) {
-            var sync = connection.sync();
+            RedisCommands<String, String> sync = connection.sync();
             List<String> order = sync.lrange(orderKey, 0, -1);
             Map<String, String> allApps = sync.hgetall(key);
             if (order != null && !order.isEmpty()) {

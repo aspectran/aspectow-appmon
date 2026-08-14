@@ -21,7 +21,6 @@ import com.aspectran.aspectow.node.management.commands.CommandResponseParameters
 import com.aspectran.aspectow.node.management.commands.RemoteCommandManager;
 import com.aspectran.aspectow.node.management.commands.bridge.CommandBridge;
 import com.aspectran.aspectow.node.management.commands.bridge.CommandSession;
-import com.aspectran.aspectow.node.manager.NodeManager;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.daemon.command.CommandParameters;
