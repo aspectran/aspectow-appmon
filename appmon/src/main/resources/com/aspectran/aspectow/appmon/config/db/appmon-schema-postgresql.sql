@@ -1,9 +1,9 @@
 -- Raw event count data (typically 5-minute intervals)
 CREATE TABLE IF NOT EXISTS appmon_event_count (
-    node_id varchar(30) NOT NULL,
-    group_id varchar(30) NOT NULL,
-    app_id varchar(30) NOT NULL,
-    event_id varchar(30) NOT NULL,
+    node_id varchar(50) NOT NULL,
+    group_id varchar(50) NOT NULL,
+    app_id varchar(50) NOT NULL,
+    event_id varchar(50) NOT NULL,
     datetime timestamp NOT NULL,
     total bigint NOT NULL,
     delta bigint NOT NULL,
@@ -25,10 +25,10 @@ COMMENT ON COLUMN appmon_event_count.error IS 'Incremental error count for the i
 
 -- Hourly aggregated event count data
 CREATE TABLE IF NOT EXISTS appmon_event_count_hourly (
-    node_id varchar(30) NOT NULL,
-    group_id varchar(30) NOT NULL,
-    app_id varchar(30) NOT NULL,
-    event_id varchar(30) NOT NULL,
+    node_id varchar(50) NOT NULL,
+    group_id varchar(50) NOT NULL,
+    app_id varchar(50) NOT NULL,
+    event_id varchar(50) NOT NULL,
     datetime timestamp NOT NULL,
     total bigint NOT NULL,
     delta bigint NOT NULL,
@@ -50,10 +50,10 @@ COMMENT ON COLUMN appmon_event_count_hourly.error IS 'Total incremental error co
 
 -- Most recent event count state for incremental updates
 CREATE TABLE IF NOT EXISTS appmon_event_count_last (
-    node_id varchar(30) NOT NULL,
-    group_id varchar(30) NOT NULL,
-    app_id varchar(30) NOT NULL,
-    event_id varchar(30) NOT NULL,
+    node_id varchar(50) NOT NULL,
+    group_id varchar(50) NOT NULL,
+    app_id varchar(50) NOT NULL,
+    event_id varchar(50) NOT NULL,
     datetime timestamp NOT NULL,
     total bigint NOT NULL,
     delta bigint NOT NULL,

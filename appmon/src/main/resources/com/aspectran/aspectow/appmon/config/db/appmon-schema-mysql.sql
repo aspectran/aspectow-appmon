@@ -1,9 +1,9 @@
 -- Raw event count data (typically 5-minute intervals)
 create table if not exists appmon_event_count (
-    node_id varchar(30) not null comment 'Monitoring node identifier',
-    group_id varchar(30) not null comment 'Monitoring node group identifier',
-    app_id varchar(30) not null comment 'Application identifier',
-    event_id varchar(30) not null comment 'Event identifier',
+    node_id varchar(50) not null comment 'Monitoring node identifier',
+    group_id varchar(50) not null comment 'Monitoring node group identifier',
+    app_id varchar(50) not null comment 'Application identifier',
+    event_id varchar(50) not null comment 'Event identifier',
     datetime datetime not null comment 'Data point timestamp',
     total int not null comment 'Cumulative total count (Gauge)',
     delta int not null comment 'Incremental count for the interval (Counter)',
@@ -19,10 +19,10 @@ create index appmon_event_count_ix_group on appmon_event_count (group_id, app_id
 
 -- Hourly aggregated event count data
 create table if not exists appmon_event_count_hourly (
-    node_id varchar(30) not null comment 'Monitoring node identifier',
-    group_id varchar(30) not null comment 'Monitoring node group identifier',
-    app_id varchar(30) not null comment 'Application identifier',
-    event_id varchar(30) not null comment 'Event identifier',
+    node_id varchar(50) not null comment 'Monitoring node identifier',
+    group_id varchar(50) not null comment 'Monitoring node group identifier',
+    app_id varchar(50) not null comment 'Application identifier',
+    event_id varchar(50) not null comment 'Event identifier',
     datetime datetime not null comment 'Hourly truncated timestamp',
     total int not null comment 'Cumulative total count at the end of the hour',
     delta int not null comment 'Total incremental count for the hour',
@@ -38,10 +38,10 @@ create index appmon_event_count_hourly_ix_group on appmon_event_count_hourly (gr
 
 -- Most recent event count state for incremental updates
 create table if not exists appmon_event_count_last (
-    node_id varchar(30) not null comment 'Monitoring node identifier',
-    group_id varchar(30) not null comment 'Monitoring node group identifier',
-    app_id varchar(30) not null comment 'Application identifier',
-    event_id varchar(30) not null comment 'Event identifier',
+    node_id varchar(50) not null comment 'Monitoring node identifier',
+    group_id varchar(50) not null comment 'Monitoring node group identifier',
+    app_id varchar(50) not null comment 'Application identifier',
+    event_id varchar(50) not null comment 'Event identifier',
     datetime datetime not null comment 'Last data point timestamp',
     total int not null comment 'Last cumulative total count',
     delta int not null comment 'Last incremental count',

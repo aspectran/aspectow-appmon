@@ -1,9 +1,9 @@
 -- Raw event count data (typically 5-minute intervals)
 create table if not exists appmon_event_count (
-    node_id varchar(30) not null,
-    group_id varchar(30) not null,
-    app_id varchar(30) not null,
-    event_id varchar(30) not null,
+    node_id varchar(50) not null,
+    group_id varchar(50) not null,
+    app_id varchar(50) not null,
+    event_id varchar(50) not null,
     datetime timestamp not null,
     total int not null,
     delta int not null,
@@ -25,10 +25,10 @@ comment on column appmon_event_count.error is 'Incremental error count for the i
 
 -- Hourly aggregated event count data
 create table if not exists appmon_event_count_hourly (
-    node_id varchar(30) not null,
-    group_id varchar(30) not null,
-    app_id varchar(30) not null,
-    event_id varchar(30) not null,
+    node_id varchar(50) not null,
+    group_id varchar(50) not null,
+    app_id varchar(50) not null,
+    event_id varchar(50) not null,
     datetime timestamp not null,
     total int not null,
     delta int not null,
@@ -50,10 +50,10 @@ comment on column appmon_event_count_hourly.error is 'Total incremental error co
 
 -- Most recent event count state for incremental updates
 create table if not exists appmon_event_count_last (
-    node_id varchar(30) not null,
-    group_id varchar(30) not null,
-    app_id varchar(30) not null,
-    event_id varchar(30) not null,
+    node_id varchar(50) not null,
+    group_id varchar(50) not null,
+    app_id varchar(50) not null,
+    event_id varchar(50) not null,
     datetime timestamp not null,
     total int not null,
     delta int not null,
