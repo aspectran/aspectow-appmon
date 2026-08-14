@@ -114,7 +114,7 @@ public class RedisConnectionPool implements InitializableBean, DisposableBean {
         }
         if (client != null) {
             try {
-                client.shutdownAsync(0, 0, TimeUnit.MILLISECONDS);
+                client.shutdownAsync(0, 100, TimeUnit.MILLISECONDS).get(1, TimeUnit.SECONDS);
             } catch (Exception e) {
                 // ignore
             }

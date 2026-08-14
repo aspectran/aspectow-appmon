@@ -154,10 +154,15 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> i
      */
     public void stop() {
         if (pubSubConnection != null) {
-            pubSubConnection.removeListener((RedisPubSubListener<String, String>)this);
-            pubSubConnection.removeListener((RedisConnectionStateListener)this);
-            pubSubConnection.close();
-            pubSubConnection = null;
+            try {
+                pubSubConnection.removeListener((RedisPubSubListener<String, String>)this);
+                pubSubConnection.removeListener((RedisConnectionStateListener)this);
+                pubSubConnection.close();
+            } catch (Exception e) {
+                logger.warn("Error closing pub/sub connection for cluster '{}'", clusterId, e);
+            } finally {
+                pubSubConnection = null;
+            }
         }
     }
 

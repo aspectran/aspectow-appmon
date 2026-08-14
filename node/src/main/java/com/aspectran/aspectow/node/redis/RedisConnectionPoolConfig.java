@@ -34,12 +34,14 @@ import java.util.Properties;
  * <ul>
  *   <li>{@code aspectow.redis.uri} / {@code uri} — Target Redis connection URI (e.g., {@code "redis://10.0.0.3:6379/5"})</li>
  *   <li>{@code aspectow.redis.timeout} / {@code timeout} — Redis command/connection timeout (e.g., {@code "5s"}, {@code "5000ms"})</li>
+ *   <li>{@code aspectow.redis.pool.maxWait} / {@code maxWait} — Maximum wait duration for borrowing a connection from the pool (e.g., {@code "3s"}, {@code "3000ms"})</li>
  * </ul>
  *
  * <h2>Example Aspectran Bean Definition</h2>
  * <pre>{@code
  * <bean id="redisConnectionPoolConfig" class="com.aspectran.aspectow.node.redis.RedisConnectionPoolConfig">
  *     <property name="timeout" value="5s"/>
+ *     <property name="maxWait" value="3s"/>
  *     <argument>
  *         <bean class="com.aspectran.core.support.PropertiesFactoryBean">
  *             <properties profile="prod">
@@ -65,6 +67,7 @@ public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulR
      */
     public RedisConnectionPoolConfig() {
         super();
+        setMaxWait(Duration.ofSeconds(3));
     }
 
     /**
@@ -72,11 +75,15 @@ public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulR
      * @param properties the properties containing configuration values
      */
     public RedisConnectionPoolConfig(@NonNull Properties properties) {
-        super();
+        this();
         setUri(properties.getProperty("aspectow.redis.uri"));
         String timeout = properties.getProperty("aspectow.redis.timeout");
         if (StringUtils.hasText(timeout)) {
             setTimeout(timeout);
+        }
+        String maxWait = properties.getProperty("aspectow.redis.pool.maxWait");
+        if (StringUtils.hasText(maxWait)) {
+            setMaxWait(parseDuration(maxWait));
         }
     }
 
@@ -129,6 +136,16 @@ public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulR
     public void setTimeout(String timeout) {
         if (StringUtils.hasText(timeout)) {
             setTimeout(parseDuration(timeout));
+        }
+    }
+
+    /**
+     * Sets the maximum wait duration for borrowing a connection from the pool as a string (e.g. "3s", "3000ms").
+     * @param maxWait the max wait string
+     */
+    public void setMaxWait(String maxWait) {
+        if (StringUtils.hasText(maxWait)) {
+            setMaxWait(parseDuration(maxWait));
         }
     }
 

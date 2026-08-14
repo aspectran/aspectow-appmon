@@ -173,10 +173,15 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> im
      */
     public void stop() {
         if (pubSubConnection != null) {
-            pubSubConnection.removeListener((RedisPubSubListener<String, String>)this);
-            pubSubConnection.removeListener((RedisConnectionStateListener)this);
-            pubSubConnection.close();
-            pubSubConnection = null;
+            try {
+                pubSubConnection.removeListener((RedisPubSubListener<String, String>)this);
+                pubSubConnection.removeListener((RedisConnectionStateListener)this);
+                pubSubConnection.close();
+            } catch (Exception e) {
+                logger.warn("Error closing pub/sub connection for node '{}'", nodeId, e);
+            } finally {
+                pubSubConnection = null;
+            }
         }
     }
 

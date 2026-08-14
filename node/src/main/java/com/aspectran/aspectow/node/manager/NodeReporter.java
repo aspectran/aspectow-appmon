@@ -27,9 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.aspectran.aspectow.node.manager.ClusterEventSubscriber.MESSAGE_JOINED;
 import static com.aspectran.aspectow.node.manager.ClusterEventSubscriber.MESSAGE_LEFT;
@@ -95,25 +97,37 @@ public class NodeReporter {
     public void stop() {
         logger.info("Stopping NodeReporter for node: {}", getNodeInfo().getId());
 
-        getNodeInfo().setStatus("stopping");
-        try {
-            registerNode();
-        } catch (Exception e) {
-            logger.warn("Failed to update status to 'stopping' for node '{}'", getNodeInfo().getId(), e);
-        }
-
+        // 1. Immediately shutdown scheduler to cancel background pulse/maintenance tasks
         scheduler.shutdownNow();
 
+        getNodeInfo().setStatus("stopping");
+
+        // 2. Perform leave broadcast and unregistration asynchronously with a strict timeout
         try {
-            broadcastLeave();
+            CompletableFuture.runAsync(() -> {
+                try {
+                    broadcastLeave();
+                } catch (Exception e) {
+                    logger.warn("Failed to broadcast leave event during stop for node '{}'", getNodeInfo().getId(), e);
+                }
+                try {
+                    unregisterNode();
+                } catch (Exception e) {
+                    logger.warn("Failed to unregister node during stop for node '{}'", getNodeInfo().getId(), e);
+                }
+            }).get(2, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            logger.warn("Timed out waiting for node '{}' to unregister from cluster during shutdown", getNodeInfo().getId());
         } catch (Exception e) {
-            logger.warn("Failed to broadcast leave event during stop for node '{}'", getNodeInfo().getId(), e);
+            logger.warn("Error during node unregistration for node '{}'", getNodeInfo().getId(), e);
         }
 
         try {
-            unregisterNode();
-        } catch (Exception e) {
-            logger.warn("Failed to unregister node during stop for node '{}'", getNodeInfo().getId(), e);
+            if (!scheduler.awaitTermination(1, TimeUnit.SECONDS)) {
+                logger.debug("Scheduler for NodeReporter did not terminate within 1 second");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
