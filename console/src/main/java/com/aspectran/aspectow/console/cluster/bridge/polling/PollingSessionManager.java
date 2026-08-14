@@ -43,7 +43,7 @@ class PollingSessionManager extends AbstractComponent {
 
     private final SessionIdGenerator sessionIdGenerator = new SessionIdGenerator();
 
-    private final Scheduler scheduler = new ScheduledExecutorScheduler("PSM-Scheduler(nodes)", false);
+    private final Scheduler scheduler = new ScheduledExecutorScheduler("PSM-Scheduler(nodes)", true);
 
     private final Map<String, PollingNodeSession> sessions = new CopyOnWriteMap<>();
 

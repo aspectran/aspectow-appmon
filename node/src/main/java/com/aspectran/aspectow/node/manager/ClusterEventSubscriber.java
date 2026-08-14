@@ -131,10 +131,15 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> i
         if (pubSubConnection != null && pubSubConnection.isOpen()) {
             try {
                 String eventsChannel = NodeMessageProtocol.getClusterEventsChannel(clusterId);
-                pubSubConnection.async().subscribe(eventsChannel);
-                logger.info("ClusterEventSubscriber re-subscribed to channel after reconnection: {}", eventsChannel);
+                pubSubConnection.async().subscribe(eventsChannel).whenComplete((res, ex) -> {
+                    if (ex != null) {
+                        logger.error("Failed to re-subscribe channel after reconnection for cluster '{}'", clusterId, ex);
+                    } else {
+                        logger.info("ClusterEventSubscriber re-subscribed to channel after reconnection: {}", eventsChannel);
+                    }
+                });
             } catch (Exception e) {
-                logger.error("Failed to re-subscribe channel after reconnection for cluster '{}'", clusterId, e);
+                logger.error("Failed to trigger re-subscription after reconnection for cluster '{}'", clusterId, e);
             }
         }
     }

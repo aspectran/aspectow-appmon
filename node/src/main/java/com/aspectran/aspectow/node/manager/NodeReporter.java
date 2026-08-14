@@ -21,6 +21,7 @@ import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.aspectow.node.redis.RedisConnectionPool;
 import com.aspectran.utils.ToStringBuilder;
 import com.aspectran.utils.apon.AponWriter;
+import com.aspectran.utils.thread.CustomizableThreadFactory;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
 import org.slf4j.Logger;
@@ -28,8 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -52,7 +53,7 @@ public class NodeReporter {
 
     private final NodePortProvider portProvider;
 
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService scheduler;
 
     /**
      * Constructs a new NodeReporter.
@@ -62,6 +63,10 @@ public class NodeReporter {
     public NodeReporter(NodeManager nodeManager, NodePortProvider portProvider) {
         this.nodeManager = nodeManager;
         this.portProvider = portProvider;
+
+        CustomizableThreadFactory threadFactory = new CustomizableThreadFactory("node-reporter-");
+        threadFactory.setDaemon(true);
+        this.scheduler = new ScheduledThreadPoolExecutor(1, threadFactory);
     }
 
     /**

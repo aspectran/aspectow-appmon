@@ -150,10 +150,15 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> im
         if (pubSubConnection != null && pubSubConnection.isOpen()) {
             try {
                 String subscribePattern = NodeMessageProtocol.getClusterSubscriptionPattern(clusterId, nodeId);
-                pubSubConnection.async().psubscribe(subscribePattern);
-                logger.info("NodeMessageSubscriber re-subscribed to pattern after reconnection: {}", subscribePattern);
+                pubSubConnection.async().psubscribe(subscribePattern).whenComplete((res, ex) -> {
+                    if (ex != null) {
+                        logger.error("Failed to re-subscribe pattern after reconnection for node '{}'", nodeId, ex);
+                    } else {
+                        logger.info("NodeMessageSubscriber re-subscribed to pattern after reconnection: {}", subscribePattern);
+                    }
+                });
             } catch (Exception e) {
-                logger.error("Failed to re-subscribe pattern after reconnection for node '{}'", nodeId, e);
+                logger.error("Failed to trigger re-subscription after reconnection for node '{}'", nodeId, e);
             }
         }
     }

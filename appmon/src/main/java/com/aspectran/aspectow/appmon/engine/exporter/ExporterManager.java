@@ -141,7 +141,7 @@ public class ExporterManager {
         if (scheduler != null) {
             return;
         }
-        scheduler = new ScheduledExecutorScheduler(exporterType + "ExportScheduler", false);
+        scheduler = new ScheduledExecutorScheduler(exporterType + "ExportScheduler", true);
         scheduler.start();
         for (Exporter exporter : exporters.values()) {
             try {
