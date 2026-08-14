@@ -29,6 +29,7 @@ import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.context.ActivityContext;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -59,8 +60,8 @@ public class HomeActivity {
     public Map<String, Object> home() {
         List<NodeInfo> nodeInfoList = appMonManager.getNodeInfoList();
         if (appMonManager.isGatewayMode()) {
-            nodeInfoList = new java.util.ArrayList<>(nodeInfoList);
-            nodeInfoList.sort(java.util.Comparator.comparing(NodeInfo::getId, java.util.Comparator.nullsLast(String::compareTo)));
+            nodeInfoList = new ArrayList<>(nodeInfoList);
+            nodeInfoList.sort(Comparator.comparing(NodeInfo::getId, Comparator.nullsLast(String::compareTo)));
         }
         List<GroupInfo> groupInfoList = appMonManager.getGroupInfoList();
         List<AppInfo> appInfoList = appMonManager.getClusterAppInfoList();

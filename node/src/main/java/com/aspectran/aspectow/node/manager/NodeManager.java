@@ -154,6 +154,9 @@ public class NodeManager {
      * @return the list of node information
      */
     public List<NodeInfo> getNodeInfoList() {
+        if (clusterConfig.isGatewayMode() && nodeRegistry != null) {
+            syncNodes();
+        }
         return nodeInfoHolder.getNodeInfoList();
     }
 

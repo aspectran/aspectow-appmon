@@ -37,6 +37,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -104,7 +105,7 @@ public class AppMonActivity {
     }
 
     @RequestToGet("/config/data")
-    public RestResponse getConfigData(@NonNull Translet translet, String appsToSubscribe) {
+    public RestResponse getConfigData(@NonNull Translet translet, String nodeToSubscribe, String appsToSubscribe) {
         Map<String, Object> settings = Map.of(
                 "counterPersistInterval", appMonManager.getCounterPersistInterval(),
                 "clusterMode", appMonManager.getClusterMode()
@@ -114,17 +115,41 @@ public class AppMonActivity {
         List<GroupInfo> groupInfoList = appMonManager.getGroupInfoList();
         List<AppInfo> appInfoList = appMonManager.getClusterAppInfoList();
 
+        boolean isExplicitNode = StringUtils.hasText(nodeToSubscribe);
+        if (isExplicitNode) {
+            NodeInfo targetNode = nodeInfoList.stream()
+                    .filter(node -> nodeToSubscribe.equals(node.getId()))
+                    .findFirst().orElse(null);
+
+            nodeInfoList = (targetNode != null ? List.of(targetNode) : Collections.emptyList());
+            if (targetNode != null && targetNode.getGroup() != null) {
+                String targetGroupId = targetNode.getGroup();
+                appInfoList = appInfoList.stream()
+                        .filter(app -> app.getGroupId() == null || targetGroupId.equals(app.getGroupId()))
+                        .filter(app -> app.getNodeId() == null || nodeToSubscribe.equals(app.getNodeId()))
+                        .collect(Collectors.toList());
+            } else {
+                appInfoList = appInfoList.stream()
+                        .filter(app -> app.getNodeId() == null || nodeToSubscribe.equals(app.getNodeId()))
+                        .collect(Collectors.toList());
+            }
+        }
+
         String[] appIds = StringUtils.splitWithComma(appsToSubscribe);
-        String[] verifiedAppIds = appMonManager.getVerifiedAppIds(appIds, appInfoList);
+        String[] verifiedAppIds = appMonManager.getVerifiedAppIds(appIds, appInfoList, isExplicitNode);
         if (StringUtils.hasText(appsToSubscribe)) {
             Set<String> verifiedAppIdSet = new HashSet<>(Arrays.asList(verifiedAppIds));
             appInfoList = appInfoList.stream()
                     .filter(app -> verifiedAppIdSet.contains(app.getAppId()))
                     .collect(Collectors.toList());
+        } else if (!isExplicitNode) {
+            appInfoList = appInfoList.stream()
+                    .filter(app -> !app.isHidden())
+                    .collect(Collectors.toList());
         }
 
         Set<String> activeGroupIds = appInfoList.stream()
-                .filter(app -> !app.isHidden())
+                .filter(app -> isExplicitNode || !app.isHidden())
                 .map(AppInfo::getGroupId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());

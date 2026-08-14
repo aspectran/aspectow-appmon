@@ -40,7 +40,9 @@ public class AppInfoHolder {
      */
     public AppInfoHolder(String nodeId, String groupId, @NonNull List<AppInfo> appInfoList) {
         for (AppInfo appInfo : appInfoList) {
-            appInfo.setGroupId(groupId);
+            if (appInfo.getGroupId() == null) {
+                appInfo.setGroupId(groupId);
+            }
             appInfos.put(appInfo.getAppId(), appInfo);
 
             List<EventInfo> eventInfoList = appInfo.getEventInfoList();
@@ -68,17 +70,11 @@ public class AppInfoHolder {
     }
 
     /**
-     * Gets the list of all visible app information.
+     * Gets the list of all app information.
      * @return a list of {@link AppInfo}
      */
     public List<AppInfo> getAppInfoList() {
-        List<AppInfo> infoList = new ArrayList<>(appInfos.size());
-        for (AppInfo info : appInfos.values()) {
-            if (!info.isHidden()) {
-                infoList.add(info);
-            }
-        }
-        return infoList;
+        return new ArrayList<>(appInfos.values());
     }
 
     /**

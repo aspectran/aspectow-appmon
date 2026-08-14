@@ -5,54 +5,10 @@ pollingConfig: {
     # The duration in milliseconds after which an inactive polling session expires
     sessionTimeout: 30000
 }
+counterPersistInterval: 5
 app: {
-    id: root
-    title: Root
-    event: {
-        id: activity
-        target: root
-        parameters: {
-            +: /**
-        }
-    }
-    event: {
-        id: session
-        target: tow.server/root
-    }
-    metric: {
-        id: heap
-        title: Heap
-        description: Shows JVM Heap memory usage status
-        reader: com.aspectran.appmon.engine.exporter.metric.jvm.HeapMemoryUsageReader
-        sampleInterval: 500
-        heading: true
-    }
-    metric: {
-        id: undertow-tp
-        title: Undertow TP
-        description: Metrics of Undertow thread pool resources
-        reader: com.aspectran.appmon.engine.exporter.metric.undertow.NioWorkerMetricsReader
-        target: tow.server
-        sampleInterval: 30
-        exportInterval: 900
-        heading: true
-    }
-    log: {
-        id: app
-        file: /logs/root.log
-        sampleInterval: 300
-        lastLines: 300
-    }
-    log: {
-        id: access
-        file: /logs/root-access.log
-        sampleInterval: 300
-        lastLines: 100
-    }
-}
-app: {
-    id: console
-    title: Console
+    id: console-visible
+    title: Visible Console
     event: {
         id: activity
         target: console
@@ -67,46 +23,89 @@ app: {
     }
     log: {
         id: app
-        file: /logs/console.log
+        file: console.log
         sampleInterval: 300
-        lastLines: 300
+        lastLines: 100
     }
     log: {
         id: access
-        file: /logs/console-access.log
+        file: console-access.log
         sampleInterval: 300
         lastLines: 100
     }
 }
 app: {
-    id: jpetstore
-    title: JPetStore
+    id: console-hidden
+    node: console-node1
+    title: Hidden Console
+    hidden: true
+    event: {
+        id: activity
+        target: console
+        parameters: {
+            +: /**
+            -: /nodes/**/polling/**  # Ignore polling requests
+        }
+    }
+    event: {
+        id: session
+        target: tow.server/console
+    }
     log: {
         id: app
-        file: /logs/jpetstore.log
+        file: console.log
         sampleInterval: 300
-        lastLines: 300
+        lastLines: 100
     }
     log: {
         id: access
-        file: /logs/jpetstore-access.log
+        file: console-access.log
         sampleInterval: 300
         lastLines: 100
     }
 }
 app: {
-    id: demo
-    title: Demo
+    id: console-root
+    title: Root
+    event: {
+        id: activity
+        target: root
+        parameters: {
+            +: /**
+            -: /nodes/**/appmon/polling/**  # Ignore polling requests
+        }
+    }
+    metric: {
+        id: heap
+        title: Heap
+        description: Shows JVM Heap memory usage status
+        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.jvm.HeapMemoryUsageReader
+        sampleInterval: 500
+        heading: true
+    }
+    metric: {
+        id: undertow-tp
+        title: Undertow TP
+        description: Metrics of Undertow thread pool resources
+        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.undertow.NioWorkerMetricsReader
+        target: tow.server
+        sampleInterval: 500
+        heading: true
+    }
+    event: {
+        id: session
+        target: tow.server/root
+    }
     log: {
         id: app
-        file: /logs/demo.log
+        file: root.log
         sampleInterval: 300
-        lastLines: 300
+        lastLines: 30
     }
     log: {
         id: access
-        file: /logs/demo-access.log
+        file: root-access.log
         sampleInterval: 300
-        lastLines: 100
+        lastLines: 60
     }
 }

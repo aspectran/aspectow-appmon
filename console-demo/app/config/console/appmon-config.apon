@@ -7,8 +7,8 @@ pollingConfig: {
 }
 counterPersistInterval: 5
 app: {
-    id: console
-    title: Console
+    id: console-visible
+    title: Visible Console
     event: {
         id: activity
         target: console
@@ -21,22 +21,35 @@ app: {
         id: session
         target: tow.server/console
     }
-    metric: {
-        id: heap
-        title: Heap
-        description: Shows JVM Heap memory usage status
-        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.jvm.HeapMemoryUsageReader
-        sampleInterval: 500
-        heading: true
+    log: {
+        id: app
+        file: console.log
+        sampleInterval: 300
+        lastLines: 100
     }
-    metric: {
-        id: undertow-tp
-        title: Undertow TP
-        description: Metrics of Undertow thread pool resources
-        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.undertow.NioWorkerMetricsReader
-        target: tow.server
-        sampleInterval: 500
-        heading: true
+    log: {
+        id: access
+        file: console-access.log
+        sampleInterval: 300
+        lastLines: 100
+    }
+}
+app: {
+    id: console-hidden
+    node: console-node1
+    title: Hidden Console
+    hidden: true
+    event: {
+        id: activity
+        target: console
+        parameters: {
+            +: /**
+            -: /nodes/**/polling/**  # Ignore polling requests
+        }
+    }
+    event: {
+        id: session
+        target: tow.server/console
     }
     log: {
         id: app
@@ -61,6 +74,23 @@ app: {
             +: /**
             -: /nodes/**/appmon/polling/**  # Ignore polling requests
         }
+    }
+    metric: {
+        id: heap
+        title: Heap
+        description: Shows JVM Heap memory usage status
+        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.jvm.HeapMemoryUsageReader
+        sampleInterval: 500
+        heading: true
+    }
+    metric: {
+        id: undertow-tp
+        title: Undertow TP
+        description: Metrics of Undertow thread pool resources
+        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.undertow.NioWorkerMetricsReader
+        target: tow.server
+        sampleInterval: 500
+        heading: true
     }
     event: {
         id: session

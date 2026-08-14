@@ -17,6 +17,7 @@
           scope="prototype">
         <property name="deploymentName">%{tow.context.console.name}</property>
         <property name="contextPath">/%{tow.context.console.name}</property>
+        <property name="scratchDir">%{system:aspectran.workPath:/work}/_webapps/%{tow.context.console.name}</property>
         <property name="initParams" type="map">
             <entry name="aspectran:config">%{tow.context.console.config}</entry>
         </property>
@@ -24,6 +25,9 @@
             <bean class="com.aspectran.undertow.server.servlet.TowServlet">
                 <argument>webActivityServlet</argument>
                 <argument>com.aspectran.web.servlet.WebActivityServlet</argument>
+                <property name="mappings" type="array">
+                    <value>/</value>
+                </property>
                 <property name="loadOnStartup" valueType="int">1</property>
             </bean>
         </property>

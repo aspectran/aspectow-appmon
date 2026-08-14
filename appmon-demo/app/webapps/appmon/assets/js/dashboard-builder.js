@@ -51,6 +51,7 @@ class DashboardBuilder {
             type: "get",
             dataType: "json",
             data: {
+                nodeToSubscribe: nodeToSubscribe || null,
                 appsToSubscribe: appsToSubscribe || null
             },
             success: (data) => {
@@ -468,7 +469,7 @@ class DashboardBuilder {
 
         // Select first available app in the new group context
         const firstAvailableApp = this.apps.find(app => {
-            return app.group === groupId;
+            return !groupId || !app.group || app.group === groupId;
         });
 
         this.changeApp(firstAvailableApp ? firstAvailableApp.id : null);
@@ -597,7 +598,10 @@ class DashboardBuilder {
             });
         });
         $(".open-popup").off("click").on("click", (e) => {
-            const url = this.basePath + "/appmon/dashboard/popup/" + (this.appsToSubscribe || "");
+            let url = this.basePath + "/appmon/dashboard/popup/" + (this.appsToSubscribe || "");
+            if (this.nodeToSubscribe) {
+                url += "?nodeId=" + encodeURIComponent(this.nodeToSubscribe);
+            }
             const name = "appmon_dashboard_popup";
             const features = "width=1200,height=1068,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes";
             const popup = window.open(url, name, features);
@@ -709,7 +713,7 @@ class DashboardBuilder {
                     v.resetCurrentActivityCounts();
                 });
                 this.apps.forEach(app => {
-                    if (!app.hidden) {
+                    if (this.nodeToSubscribe || !app.hidden) {
                         this.refreshData(app.id, true);
                     }
                 });

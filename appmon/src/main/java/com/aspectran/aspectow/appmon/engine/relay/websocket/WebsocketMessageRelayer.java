@@ -142,12 +142,12 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
         Assert.hasText(nodeId, "Node ID cannot be empty");
         String nodeToSubscribe = commandOptions.getNodeToSubscribe();
         String appsToSubscribe = commandOptions.getAppsToSubscribe();
-        if (messageRelayManager.isSameNode(nodeId) || StringUtils.hasText(nodeToSubscribe) ||
-                StringUtils.hasText(appsToSubscribe)) {
+        boolean isExplicitNode = StringUtils.hasText(nodeToSubscribe);
+        if (messageRelayManager.isSameNode(nodeId) || isExplicitNode || StringUtils.hasText(appsToSubscribe)) {
             if (addSession(session)) {
                 messageRelayManager.registerSession(session.getId(), this);
                 WebsocketRelaySession relaySession = new WebsocketRelaySession(session);
-                if (StringUtils.hasText(nodeToSubscribe)) {
+                if (isExplicitNode) {
                     relaySession.setSubscribedNodeId(nodeToSubscribe);
                 }
                 String timeZone = commandOptions.getTimeZone();
@@ -155,7 +155,7 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
                     relaySession.setTimeZone(timeZone);
                 }
                 String[] appIds = StringUtils.splitWithComma(appsToSubscribe);
-                appIds = appMonManager.getVerifiedAppIds(appIds, appMonManager.getClusterAppInfoList());
+                appIds = appMonManager.getVerifiedAppIds(appIds, appMonManager.getClusterAppInfoList(), isExplicitNode);
                 if (appIds.length > 0) {
                     relaySession.setSubscribedApps(appIds);
                 }
@@ -174,10 +174,10 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
         String nodeId = commandOptions.getNodeId();
         Assert.hasText(nodeId, "Node ID cannot be empty");
         String nodeToSubscribe = commandOptions.getNodeToSubscribe();
-        if (messageRelayManager.isSameNode(nodeId) || StringUtils.hasText(nodeToSubscribe)) {
+        boolean isExplicitNode = StringUtils.hasText(nodeToSubscribe);
+        if (messageRelayManager.isSameNode(nodeId) || isExplicitNode) {
             RelaySession relaySession = new WebsocketRelaySession(session);
-            boolean singleNodeDesignated = StringUtils.hasText(nodeToSubscribe);
-            if (messageRelayManager.subscribe(relaySession, nodeId, singleNodeDesignated)) {
+            if (messageRelayManager.subscribe(relaySession, nodeId, isExplicitNode)) {
                 if (messageRelayManager.isSameNode(nodeId)) {
                     List<String> messages = messageRelayManager.getLastMessages(relaySession);
                     for (String message : messages) {

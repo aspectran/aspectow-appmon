@@ -93,7 +93,7 @@
             <before>
                 <headers>
                     <item name="Content-Type">text/html; charset=utf-8</item>
-                    <item name="Content-Security-Policy">default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net code.jquery.com; style-src 'self' 'unsafe-inline' localhost:* cdn.jsdelivr.net code.jquery.com fonts.googleapis.com; img-src 'self' data: cdn.jsdelivr.net code.jquery.com; font-src 'self' data: cdn.jsdelivr.net fonts.gstatic.com;</item>
+                    <item name="Content-Security-Policy">default-src 'self'; connect-src 'self' ws: wss: localhost:* 127.0.0.1:*; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net code.jquery.com; style-src 'self' 'unsafe-inline' localhost:* cdn.jsdelivr.net code.jquery.com fonts.googleapis.com; img-src 'self' data: cdn.jsdelivr.net code.jquery.com; font-src 'self' data: cdn.jsdelivr.net fonts.gstatic.com;</item>
                 </headers>
             </before>
         </advice>

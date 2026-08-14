@@ -32,6 +32,7 @@ import java.util.List;
 public class AppInfo extends DefaultParameters {
 
     private static final ParameterKey id;
+    private static final ParameterKey node;
     private static final ParameterKey group;
     private static final ParameterKey title;
     private static final ParameterKey hidden;
@@ -43,6 +44,7 @@ public class AppInfo extends DefaultParameters {
 
     static {
         id = new ParameterKey("id", ValueType.STRING);
+        node = new ParameterKey("node", ValueType.STRING);
         group = new ParameterKey("group", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
         hidden = new ParameterKey("hidden", ValueType.BOOLEAN);
@@ -52,6 +54,7 @@ public class AppInfo extends DefaultParameters {
 
         parameterKeys = new ParameterKey[] {
                 id,
+                node,
                 group,
                 title,
                 hidden,
@@ -66,6 +69,22 @@ public class AppInfo extends DefaultParameters {
      */
     public AppInfo() {
         super(parameterKeys);
+    }
+
+    /**
+     * Returns the identifier of the node to which this application belongs.
+     * @return the node identifier
+     */
+    public String getNodeId() {
+        return getString(node);
+    }
+
+    /**
+     * Sets the identifier of the node to which this application belongs.
+     * @param nodeId the node identifier
+     */
+    public void setNodeId(String nodeId) {
+        putValue(AppInfo.node, nodeId);
     }
 
     /**

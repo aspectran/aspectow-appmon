@@ -85,7 +85,7 @@
                         </div>
                         <div class="row g-3">
                             <th:block th:if="${page.groupedNodes != null}" th:each="nodeItem : ${page.groupedNodes[group.id]}">
-                                <div class="col-md-6 col-xxl-4">
+                                <div class="col-lg-6 col-xxl-4">
                                     <th:block th:insert="~{::node-card(nodeInfo=${nodeItem})}"></th:block>
                                 </div>
                             </th:block>
@@ -97,7 +97,7 @@
             <th:block th:if="${page.clusterMode != 'gateway' or page.groups == null}">
                 <div class="row g-3">
                     <th:block th:each="nodeItem : ${page.nodes}">
-                        <div class="col-md-6" th:classappend="${#lists.size(page.nodes) > 2} ? 'col-lg-4'">
+                        <div class="col-md-6 col-xxl-4">
                             <th:block th:insert="~{::node-card(nodeInfo=${nodeItem})}"></th:block>
                         </div>
                     </th:block>

@@ -98,10 +98,11 @@ public class PollingMessageRelayer implements MessageRelayer {
         String nodeId = translet.getParameter("nodeId");
         Assert.hasText(nodeId, "Node ID cannot be empty");
         String nodeToSubscribe = translet.getParameter("nodeToSubscribe");
-        if (messageRelayManager.isSameNode(nodeId) || StringUtils.hasText(nodeToSubscribe)) {
+        boolean isExplicitNode = StringUtils.hasText(nodeToSubscribe);
+        if (messageRelayManager.isSameNode(nodeId) || isExplicitNode) {
             String appsToSubscribe = translet.getParameter("appsToSubscribe");
             String[] appIds = StringUtils.splitWithComma(appsToSubscribe);
-            appIds = appMonManager.getVerifiedAppIds(appIds, appMonManager.getClusterAppInfoList());
+            appIds = appMonManager.getVerifiedAppIds(appIds, appMonManager.getClusterAppInfoList(), isExplicitNode);
 
             PollingRelaySession relaySession = pollingSessionManager.createSession(translet, appIds);
             String timeZone = translet.getParameter("timeZone");
@@ -181,9 +182,9 @@ public class PollingMessageRelayer implements MessageRelayer {
         String nodeId = commandOptions.getNodeId();
         Assert.hasText(nodeId, "Node ID cannot be empty");
         String nodeToSubscribe = commandOptions.getNodeToSubscribe();
-        if (messageRelayManager.isSameNode(nodeId) || StringUtils.hasText(nodeToSubscribe)) {
-            boolean singleNodeDesignated = StringUtils.hasText(nodeToSubscribe);
-            if (messageRelayManager.subscribe(relaySession, nodeId, singleNodeDesignated)) {
+        boolean isExplicitNode = StringUtils.hasText(nodeToSubscribe);
+        if (messageRelayManager.isSameNode(nodeId) || isExplicitNode) {
+            if (messageRelayManager.subscribe(relaySession, nodeId, isExplicitNode)) {
                 if (messageRelayManager.isSameNode(nodeId)) {
                     List<String> messages = messageRelayManager.getLastMessages(relaySession);
                     for (String message : messages) {

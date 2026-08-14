@@ -24,7 +24,6 @@ import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.AbstractComponent;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
-import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.web.activity.response.RestResponse;
@@ -41,7 +40,6 @@ import static com.aspectran.aspectow.node.manager.NodeMessageProtocol.NODES_BASE
  * to distribute cluster node status and join/left events.
  */
 @Component(NODES_BASE_PATH + "/${nodeId}")
-@Profile("[console.ui, console.custom-ui]")
 public class PollingNodeBridge extends AbstractComponent implements NodeBridge {
 
     private final PollingSessionManager pollingSessionManager;

@@ -25,7 +25,6 @@ import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.AbstractComponent;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
-import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.web.activity.response.RestResponse;
@@ -43,7 +42,6 @@ import static com.aspectran.aspectow.node.manager.NodeMessageProtocol.NODES_BASE
  * and uses a central message buffer to distribute scheduler management results.
  */
 @Component(NODES_BASE_PATH + "/${nodeId}/" + CATEGORY_SCHEDULER)
-@Profile("[console.ui, console.custom-ui]")
 public class PollingSchedulerBridge extends AbstractComponent implements SchedulerBridge {
 
     private final PollingSessionManager sessionManager;

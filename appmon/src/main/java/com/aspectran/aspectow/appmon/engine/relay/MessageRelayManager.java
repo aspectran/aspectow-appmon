@@ -367,10 +367,10 @@ public class MessageRelayManager {
      * Starts the necessary exporters for the subscribed apps.
      * @param session the client session that is subscribing
      * @param nodeId the node id of the client session
-     * @param singleNodeDesignated whether a specific single node is designated
+     * @param isExplicitNode whether a specific single node is designated
      * @return {@code true} if the subscription was successful, {@code false} otherwise
      */
-    public synchronized boolean subscribe(@NonNull RelaySession session, String nodeId, boolean singleNodeDesignated) {
+    public synchronized boolean subscribe(@NonNull RelaySession session, String nodeId, boolean isExplicitNode) {
         if (!session.isValid()) {
             return false;
         }
@@ -389,7 +389,7 @@ public class MessageRelayManager {
             }
             if (isGatewayMode()) {
                 commandOptions.setAppId(appId);
-                if (singleNodeDesignated) {
+                if (isExplicitNode) {
                     if (!isSameNode(nodeId)) {
                         publishControl(nodeId, commandOptions);
                     }

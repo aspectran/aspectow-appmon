@@ -242,6 +242,17 @@ public class AppMonManager extends InstantActivitySupport {
      * @return an array of verified instance IDs
      */
     public String[] getVerifiedAppIds(String[] appIds, List<AppInfo> allAppInfoList) {
+        return getVerifiedAppIds(appIds, allAppInfoList, false);
+    }
+
+    /**
+     * Verifies the given instance IDs against the configured instances and returns the valid ones.
+     * @param appIds an array of instance IDs to verify
+     * @param allAppInfoList a list of all available application definitions
+     * @param includeHidden whether to include hidden apps when appIds is not specified
+     * @return an array of verified instance IDs
+     */
+    public String[] getVerifiedAppIds(String[] appIds, List<AppInfo> allAppInfoList, boolean includeHidden) {
         if (allAppInfoList == null || allAppInfoList.isEmpty()) {
             return new String[0];
         }
@@ -256,12 +267,12 @@ public class AppMonManager extends InstantActivitySupport {
             }
         } else {
             for (AppInfo info : allAppInfoList) {
-                if (!info.isHidden()) {
+                if (includeHidden || !info.isHidden()) {
                     infoList.add(info);
                 }
             }
         }
-         if (!infoList.isEmpty()) {
+        if (!infoList.isEmpty()) {
             return AppInfoHolder.extractAppIds(infoList);
         } else {
             return new String[0];
