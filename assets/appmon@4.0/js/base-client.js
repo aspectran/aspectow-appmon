@@ -19,7 +19,7 @@
  * Provides common functionality for connection management and retries.
  *
  * @version 4.0
- * @last-modified 2026-07-11
+ * @last-modified 2026-08-15
  */
 class BaseClient {
     constructor(node, viewer, onSubscribed, onClosed, onFailed, isGatewayMode) {
@@ -43,6 +43,7 @@ class BaseClient {
         this.reconnecting = false;
         this.maxRetries = 10;
         this.retryInterval = 5000;
+        this.everConnected = false;
     }
 
     addClusterViewer(nodeId, viewer) {
@@ -170,17 +171,26 @@ class BaseClient {
     reconnect() {
         if (this.retryCount++ < this.maxRetries) {
             this.reconnecting = true;
-            const retryInterval = (this.retryInterval * this.retryCount) + (this.node.index * 200) + this.node.random1000;
-            const status = "(" + this.retryCount + "/" + this.maxRetries + ", interval=" + retryInterval + ")";
+            const nodeIndex = (this.node && typeof this.node.index === 'number') ? this.node.index : 0;
+            const jitter = Math.floor(Math.random() * 1000);
+            const retryInterval = (this.retryInterval * this.retryCount) + (nodeIndex * 200) + jitter;
+            const status = "(" + this.retryCount + "/" + this.maxRetries + ", interval=" + retryInterval + "ms)";
             console.log(this.node.id, "trying to reconnect", status);
             this.printMessage("Trying to reconnect... " + status);
             setTimeout(() => {
                 this.start(this.appsToSubscribe, this.nodeToSubscribe);
             }, retryInterval);
         } else {
-            console.log(this.node.id, "abort reconnect attempt");
+            console.log(this.node.id, "max connection attempts exceeded");
             this.printMessage("Max connection attempts exceeded.");
             this.notifyFailed();
+            if (this.everConnected) {
+                console.log(this.node.id, "will keep retrying connection in background...");
+                setTimeout(() => {
+                    this.retryCount = Math.max(0, this.maxRetries - 2);
+                    this.start(this.appsToSubscribe, this.nodeToSubscribe);
+                }, this.retryInterval * 2);
+            }
         }
     }
 }

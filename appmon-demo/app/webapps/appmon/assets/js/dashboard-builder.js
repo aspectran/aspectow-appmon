@@ -19,7 +19,7 @@
  * Responsible for assembling the dashboard UI based on configuration data.
  *
  * @version 4.0
- * @last-modified 2026-08-09
+ * @last-modified 2026-08-15
  */
 class DashboardBuilder {
     constructor(options = {}) {
@@ -72,8 +72,6 @@ class DashboardBuilder {
                     this.clients = [];
 
                     let index = 0;
-                    const random1000 = this.random(1, 1000);
-
                     data.nodes.forEach(nodeInfo => {
                         if (this.nodeToSubscribe && this.nodeToSubscribe !== nodeInfo.id) {
                             return;
@@ -81,7 +79,6 @@ class DashboardBuilder {
                         const node = {
                             ...nodeInfo,
                             index: index++,
-                            random1000: random1000,
                             active: true,
                             alive: false,
                             primary: false,
@@ -170,10 +167,6 @@ class DashboardBuilder {
 
     rebuild() {
         this.build(this.basePath, this.appsToSubscribe, this.nodeToSubscribe);
-    }
-
-    random(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     connect(nodeIndex) {

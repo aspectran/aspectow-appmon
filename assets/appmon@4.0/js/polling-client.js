@@ -18,7 +18,7 @@
  * HTTP Polling implementation of the AppMon client.
  *
  * @version 4.0
- * @last-modified 2026-07-17
+ * @last-modified 2026-08-15
  */
 class PollingClient extends BaseClient {
     constructor(node, viewer, onSubscribed, onClosed, onFailed, isGatewayMode = false) {
@@ -27,7 +27,7 @@ class PollingClient extends BaseClient {
         this.pollingTimer = null;
         this.stopped = false;
 
-        if (this.node.port && (location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
+        if (!this.isGatewayMode && this.node.port && (location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
             const url = new URL(this.node.endpoint.path, location.href);
             url.port = this.node.port;
             this.node.endpoint.path = url.origin + url.pathname;
@@ -69,13 +69,14 @@ class PollingClient extends BaseClient {
                         return;
                     }
 
+                    this.everConnected = true;
                     if (data.primary) {
                         this.retryCount = 0;
                         this.node.endpoint['mode'] = "polling";
                         this.node.endpoint['pollingInterval'] = data.pollingInterval;
                     }
 
-                     this.establish(data.nodeId, data.primary, data.alive);
+                    this.establish(data.nodeId, data.primary, data.alive);
 
                     if (this.primary && !this.stopped) {
                         this.appsToSubscribe = data.appsToSubscribe;
@@ -113,9 +114,10 @@ class PollingClient extends BaseClient {
                 if (this.stopped) return;
                 if (data && data.messages) {
                     this.processMessages(data.messages);
+                    const interval = this.node.endpoint.pollingInterval || 3000;
                     this.pollingTimer = setTimeout(() => {
                         this.poll();
-                    }, this.node.endpoint.pollingInterval);
+                    }, interval);
                 } else {
                     console.log(this.node.id, "connection lost");
                     this.printErrorMessage("Connection lost.");
@@ -125,6 +127,9 @@ class PollingClient extends BaseClient {
             },
             error: (xhr, status, error) => {
                 if (this.stopped) return;
+                if (commands && commands.length) {
+                    this.pendingCommands.unshift(...commands);
+                }
                 console.log(this.node.id, "connection lost", error);
                 this.printErrorMessage("Connection lost.");
                 this.notifyClosed();
@@ -144,6 +149,10 @@ class PollingClient extends BaseClient {
                     this.node.endpoint.pollingInterval = data.pollingInterval;
                     console.log(this.node.id, "pollingInterval", data.pollingInterval);
                     this.viewer.printMessage("Polling every " + data.pollingInterval + " milliseconds.");
+                    if (this.pollingTimer) {
+                        clearTimeout(this.pollingTimer);
+                        this.pollingTimer = setTimeout(() => this.poll(), data.pollingInterval);
+                    }
                 } else {
                     console.log(this.node.id, "failed to change polling interval");
                     this.viewer.printMessage("Failed to change polling interval.");
@@ -173,13 +182,21 @@ class PollingClient extends BaseClient {
                             return;
                         }
                         if (message.startsWith(":node:joined:")) {
-                            const nodeInfo = JSON.parse(message.substring(13));
-                            if (this.onNodeJoined) this.onNodeJoined(nodeInfo);
+                            try {
+                                const nodeInfo = JSON.parse(message.substring(13));
+                                if (this.onNodeJoined) this.onNodeJoined(nodeInfo);
+                            } catch (e) {
+                                console.error("Failed to parse node:joined message:", message, e);
+                            }
                             return;
                         }
                         if (message.startsWith(":node:statusChanged:")) {
-                            const nodeInfo = JSON.parse(message.substring(20));
-                            if (this.onNodeStatusChanged) this.onNodeStatusChanged(nodeInfo);
+                            try {
+                                const nodeInfo = JSON.parse(message.substring(20));
+                                if (this.onNodeStatusChanged) this.onNodeStatusChanged(nodeInfo);
+                            } catch (e) {
+                                console.error("Failed to parse node:statusChanged message:", message, e);
+                            }
                             return;
                         }
                         if (message === ":node:left") {
@@ -212,13 +229,13 @@ class PollingClient extends BaseClient {
         }
 
         if (primary) {
-            // Passive Swap: If the server routed us to a different node than we expected
-            if (this.isGatewayMode && this.node.id !== nodeId) {
+            // If an unknown node becomes primary in Gateway mode
+            // (e.g., topology change or gateway node restart with a new ID),
+            // request a full dashboard rebuild to refresh cluster node configurations.
+            if (this.isGatewayMode && !this.getNodeConfig(nodeId)) {
                 this.stop();
-                // Unknown node ID became primary!
-                // This happens in Autoscaling mode when the gateway instance restarts with a new ID.
                 if (this.onRequireRebuild) {
-                    console.log(this.node.id, "unknown node became primary, requesting full rebuild");
+                    console.log(nodeId, "unknown primary node detected, requesting full rebuild");
                     this.onRequireRebuild();
                 }
                 return;

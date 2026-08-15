@@ -19,7 +19,7 @@
  * In Gateway Mode, it manages a single physical connection for the entire cluster.
  *
  * @version 4.0
- * @last-modified 2026-07-17
+ * @last-modified 2026-08-15
  */
 class WebsocketClient extends BaseClient {
     constructor(node, viewer, onSubscribed, onClosed, onFailed, isGatewayMode) {
@@ -54,6 +54,7 @@ class WebsocketClient extends BaseClient {
 
         this.socket.onopen = () => {
             this.handshakeSuccessful = true;
+            this.everConnected = true;
             console.log(this.node.id, "websocket connected");
 
             // Connect to the current node
@@ -124,7 +125,7 @@ class WebsocketClient extends BaseClient {
             const wasHandshakeSuccessful = this.handshakeSuccessful;
             this.closeSocket(true);
 
-            if (!wasHandshakeSuccessful) {
+            if (!wasHandshakeSuccessful && !this.everConnected) {
                 console.warn("WebSocket handshake failed. Code:", event.code);
                 return;
             }
@@ -154,13 +155,13 @@ class WebsocketClient extends BaseClient {
 
         this.socket.onerror = (event) => {
             console.error(this.node.id, "websocket error:", event);
-            if (!this.handshakeSuccessful && this.node.endpoint.mode !== "polling") {
+            if (!this.everConnected && this.node.endpoint.mode !== "polling") {
                 this.node.endpoint.mode = "polling";
                 this.printErrorMessage("WebSocket is not supported. Switching to polling mode.");
+                this.notifyFailed();
             } else {
                 this.printErrorMessage("Could not connect to the WebSocket server.");
             }
-            this.notifyFailed();
         };
     }
 
@@ -199,13 +200,13 @@ class WebsocketClient extends BaseClient {
         }
 
         if (primary) {
-            // Passive Swap: If the server routed us to a different node than we expected
+            // If an unknown node becomes primary in Gateway mode
+            // (e.g., topology change or gateway node restart with a new ID),
+            // request a full dashboard rebuild to refresh cluster node configurations.
             if (this.isGatewayMode && !this.getNodeConfig(nodeId)) {
                 this.stop();
-                // Unknown node ID became primary!
-                // This happens in Autoscaling mode when the gateway node restarts with a new ID.
                 if (this.onRequireRebuild) {
-                    console.log(nodeId, "unknown node became primary, requesting full rebuild");
+                    console.log(nodeId, "unknown primary node detected, requesting full rebuild");
                     this.onRequireRebuild();
                 }
                 return;
