@@ -68,7 +68,6 @@
                         </button>
                     </li>
                 </ul>
-
                 <div class="tab-content" id="clusterTabContent">
                     <div class="tab-pane fade show active" id="all-nodes" role="tabpanel">
                         <div class="row g-3">
@@ -123,29 +122,25 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="border-top pt-3">
                         <div class="row g-2 small">
                             <div class="col-5 text-muted">Host Address</div>
                             <div class="col-7 text-end fw-medium" th:text="${nodeInfo.host}">127.0.0.1</div>
-
                             <div class="col-5 text-muted">Service Port</div>
                             <div class="col-7 text-end fw-medium" th:text="${nodeInfo.port}">8080</div>
-
                             <th:block th:if="${page.clusterMode == 'gateway'}">
                                 <div class="col-5 text-muted">Node Group</div>
                                 <div class="col-7 text-end fw-medium text-truncate" th:text="${nodeInfo.group ?: 'N/A'}" th:title="${nodeInfo.group ?: 'N/A'}">Group</div>
                             </th:block>
                         </div>
                     </div>
-
                     <div class="mt-4 d-flex gap-2">
+                        <a href="javascript:void(0)" th:onclick="openAppMon([[${nodeInfo.id}]])" class="btn btn-sm btn-outline-secondary flex-grow-1">
+                            <i class="bi bi-activity"></i> Metrics
+                        </a>
                         <a th:if="${session.USER_INFO.hasPermission('COMMAND_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}"
                            th:href="@{/cluster/commands/(nodeId=${nodeInfo.id})}" class="btn btn-sm btn-outline-secondary flex-grow-1">
                             <i class="bi bi-terminal"></i> Commands
-                        </a>
-                        <a href="javascript:void(0)" th:onclick="openAppMon([[${nodeInfo.id}]])" class="btn btn-sm btn-outline-secondary flex-grow-1">
-                            <i class="bi bi-activity"></i> Metrics
                         </a>
                         <div class="btn-group flex-grow-1" th:if="${session.USER_INFO.hasPermission('NODE_MANAGE') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                             <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle w-100" data-bs-toggle="dropdown" aria-expanded="false">
@@ -361,7 +356,6 @@
                         $statusText.removeClass('text-success text-warning text-danger')
                             .addClass(status === 'live' ? 'text-success' : (status === 'paused' ? 'text-warning' : (status === 'stopping' ? 'text-warning' : 'text-danger')))
                             .text(status.toUpperCase());
-
                         if (status === 'live') {
                             $card.find('.action-pause').show();
                             $card.find('.action-resume').hide();
@@ -406,9 +400,7 @@
                     const title = ($card.data('node-title') || '').toString().toLowerCase();
                     const host = ($card.data('node-host') || '').toString().toLowerCase();
                     const group = ($card.data('node-group') || '').toString().toLowerCase();
-
                     const match = !query || id.includes(query) || title.includes(query) || host.includes(query) || group.includes(query);
-                    
                     if ($wrapper.length) {
                         $wrapper.toggle(match);
                     } else {
@@ -428,7 +420,6 @@
                         const $pane = $(this);
                         const visibleCards = $pane.find('.node-card:visible').length;
                         let $noMatch = $pane.find('.no-nodes-match-msg');
-                        
                         if (visibleCards === 0) {
                             if ($noMatch.length === 0) {
                                 $pane.append(`
