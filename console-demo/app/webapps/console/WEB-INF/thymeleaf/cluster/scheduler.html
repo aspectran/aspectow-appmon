@@ -5,11 +5,12 @@
       layout:decorate="~{templates/default}">
 <head>
     <style>
-        .left-column-scroll {
-            max-height: calc(100vh - 410px);
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding-right: 2px;
+        @media (min-width: 992px) {
+            .left-column-scroll {
+                max-height: calc(100vh - 410px);
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
         }
         .right-column-scroll {
             height: calc(100vh - 380px);

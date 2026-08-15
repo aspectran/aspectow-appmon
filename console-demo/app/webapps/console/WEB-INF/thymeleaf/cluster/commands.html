@@ -10,6 +10,10 @@
             grid-template-columns: 350px minmax(0, 1fr);
             gap: 1rem;
             min-height: calc(100vh - 270px);
+            @media (max-width: 992px) {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
         }
         .status-pill {
             font-size: 0.7rem;
@@ -30,6 +34,9 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            @media (max-width: 992px) {
+                max-height: 380px;
+            }
         }
         .history-list {
             flex-grow: 1;
@@ -40,16 +47,21 @@
             padding: 12px;
             border-radius: 8px;
             border: 1px solid transparent;
+            background: var(--bs-secondary-bg);
             cursor: pointer;
             margin-bottom: 8px;
             transition: all 0.2s ease;
         }
         .history-item:hover {
             background: var(--bs-tertiary-bg);
+            border-color: var(--accent-color);
         }
         .history-item.active {
             background: var(--bs-primary-bg-subtle);
             border-color: var(--bs-primary-border-subtle);
+        }
+        .history-item.active:hover {
+            border-color: var(--accent-color);
         }
         .editor-panel {
             display: flex;
@@ -104,15 +116,6 @@
             background-color: var(--bs-danger-bg-subtle);
             color: var(--bs-danger-text-emphasis) !important;
         }
-        @media (max-width: 991.98px) {
-            .command-container {
-                grid-template-columns: 1fr;
-                min-height: auto;
-            }
-            .history-panel {
-                max-height: 280px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -162,7 +165,7 @@
                         <button class="btn btn-sm btn-outline-secondary" onclick="clearHistory()">Clear</button>
                     </div>
                     <div class="history-list" id="history-list">
-                        <div class="text-center text-muted mt-lg-5">No recent commands.</div>
+                        <div class="text-center text-muted m-3 m-lg-5">No recent commands.</div>
                     </div>
                 </div>
 
@@ -572,7 +575,7 @@ arguments: {
                 $list.empty();
 
                 if (commandHistory.length === 0) {
-                    $list.append('<div class="text-center text-muted mt-5">No recent commands.</div>');
+                    $list.append('<div class="text-center text-muted m-3 m-lg-5">No recent commands.</div>');
                     return;
                 }
 
