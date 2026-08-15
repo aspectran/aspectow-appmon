@@ -178,10 +178,9 @@
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li><a class="dropdown-item" href="#" onclick="loadTemplate('sysinfo')">System Info</a></li>
-                                        <li th:if="${!session.USER_INFO.hasRole('DEMO')}"><a class="dropdown-item" href="#" onclick="loadTemplate('polling')">Polling Interval</a></li>
                                         <li><a class="dropdown-item" href="#" onclick="loadTemplate('translet')">Execute Translet</a></li>
                                         <li th:if="${!session.USER_INFO.hasRole('DEMO')}"><hr class="dropdown-divider"></li>
-                                        <li th:if="${!session.USER_INFO.hasRole('DEMO')}"><a class="dropdown-item" href="#" onclick="loadTemplate('restart')">Restart Daemon</a></li>
+                                        <li th:if="${session.USER_INFO.hasRole('SUPER_ADMIN')}"><a class="dropdown-item" href="#" onclick="loadTemplate('restart')">Restart Daemon</a></li>
                                     </ul>
                                 </div>
                             </div>
