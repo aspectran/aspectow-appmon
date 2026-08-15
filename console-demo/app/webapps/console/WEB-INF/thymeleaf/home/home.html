@@ -47,7 +47,7 @@
         </div>
 
         <div class="row g-3 mb-4">
-            <!-- Module 2: Operations -->
+            <!-- Module 1: Operations -->
             <div class="col-md-4" th:if="${session.USER_INFO.hasPermission('MONITOR_VIEW') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                 <div class="card stat-card p-3 p-lg-4">
                     <div class="icon-box">
@@ -61,21 +61,21 @@
                 </div>
             </div>
 
-            <!-- Module 3: Framework -->
-            <div class="col-md-4" th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('VIEWER') || session.USER_INFO.hasRole('DEMO')}">
+            <!-- Module 2: Cluster Nodes -->
+            <div class="col-md-4" th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                 <div class="card stat-card p-3 p-lg-4">
                     <div class="icon-box">
-                        <i class="bi bi-diagram-3"></i>
+                        <i class="bi bi-hdd-network"></i>
                     </div>
-                    <h5 class="card-title text-primary">Framework Anatomy</h5>
-                    <p class="card-desc">Visualize the live internal structure including Translets, Beans, and Aspects.</p>
+                    <h5 class="card-title text-primary">Cluster Nodes</h5>
+                    <p class="card-desc">Monitor cluster topology, manage active node instances, and inspect health status.</p>
                     <div class="mt-3">
-                        <a th:href="@{/framework/anatomy/}" class="btn btn-sm btn-outline-primary">Explore Anatomy <i class="bi bi-arrow-right"></i></a>
+                        <a th:href="@{/cluster/nodes/}" class="btn btn-sm btn-outline-primary">Manage Nodes <i class="bi bi-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
 
-            <!-- Module 1: Governance -->
+            <!-- Module 3: Governance -->
             <div class="col-md-4" th:if="${session.USER_INFO.hasPermission('USER_MANAGE') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                 <div class="card stat-card p-3 p-lg-4">
                     <div class="icon-box">
