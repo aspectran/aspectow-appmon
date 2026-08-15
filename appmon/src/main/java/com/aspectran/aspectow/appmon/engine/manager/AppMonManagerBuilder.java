@@ -71,7 +71,6 @@ public abstract class AppMonManagerBuilder {
             throw new Exception("NodeManager is not defined");
         }
         NodeManager nodeManager = context.getBeanRegistry().getBean(NodeManager.class);
-        String clusterId = nodeManager.getClusterConfig().getId();
         String nodeId = nodeManager.getNodeId();
         String groupId = nodeManager.getGroupId();
 

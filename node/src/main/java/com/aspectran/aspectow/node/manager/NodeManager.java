@@ -131,7 +131,7 @@ public class NodeManager {
      * @return the list of all registered groups
      */
     public List<GroupInfo> getGroupInfoList() {
-        if (clusterConfig.isGatewayMode() && nodeRegistry != null) {
+        if (nodeRegistry != null) {
             List<GroupInfo> groups = new ArrayList<>();
             Map<String, String> allGroups = nodeRegistry.getAllGroups();
             for (String aponData : allGroups.values()) {
@@ -154,9 +154,6 @@ public class NodeManager {
      * @return the list of node information
      */
     public List<NodeInfo> getNodeInfoList() {
-        if (clusterConfig.isGatewayMode() && nodeRegistry != null) {
-            syncNodes();
-        }
         return nodeInfoHolder.getNodeInfoList();
     }
 
@@ -272,39 +269,39 @@ public class NodeManager {
         }
 
         List<NodeInfo> latestNodes = nodeRegistry.getNodes();
-        if (clusterConfig.isGatewayMode()) {
-            // 1. Update/Add from registry
-            for (NodeInfo info : latestNodes) {
-                if (nodeId.equals(info.getId())) {
-                    continue;
-                }
-                NodeInfo existingInfo = nodeInfoHolder.getNodeInfo(info.getId());
-                if (existingInfo != null) {
-                    // Partial update for Gateway Mode: keep static config, update dynamic state
-                    NodeInfo newInfo = existingInfo.copyWithUpdatedState(info);
-                    nodeInfoHolder.putNodeInfo(newInfo);
-                } else {
-                    // Full update for dynamic join
-                    nodeInfoHolder.putNodeInfo(info);
+
+        // 1. Update/Add from registry
+        for (NodeInfo info : latestNodes) {
+            if (nodeId.equals(info.getId())) {
+                continue;
+            }
+            NodeInfo existingInfo = nodeInfoHolder.getNodeInfo(info.getId());
+            if (existingInfo != null) {
+                // Partial update for Gateway Mode: keep static config, update dynamic state
+                NodeInfo newInfo = existingInfo.copyWithUpdatedState(info);
+                nodeInfoHolder.putNodeInfo(newInfo);
+            } else {
+                // Full update for dynamic join
+                nodeInfoHolder.putNodeInfo(info);
+            }
+        }
+
+        // 2. Remove nodes that are no longer in registry
+        List<NodeInfo> currentNodes = nodeInfoHolder.getNodeInfoList();
+        for (NodeInfo info : currentNodes) {
+            String id = info.getId();
+            if (nodeId.equals(id)) {
+                continue;
+            }
+            boolean found = false;
+            for (NodeInfo latest : latestNodes) {
+                if (id.equals(latest.getId())) {
+                    found = true;
+                    break;
                 }
             }
-            // 2. Remove nodes that are no longer in registry
-            List<NodeInfo> currentNodes = nodeInfoHolder.getNodeInfoList();
-            for (NodeInfo info : currentNodes) {
-                String id = info.getId();
-                if (nodeId.equals(id)) {
-                    continue;
-                }
-                boolean found = false;
-                for (NodeInfo latest : latestNodes) {
-                    if (id.equals(latest.getId())) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    nodeInfoHolder.removeNode(id);
-                }
+            if (!found) {
+                nodeInfoHolder.removeNode(id);
             }
         }
     }
@@ -393,7 +390,6 @@ public class NodeManager {
             throw new InvalidPBTokenException(token, "Encryption password not found for token validation");
         }
         String salt = (secretConfig != null ? secretConfig.getSalt() : PBEncryptionUtils.getSalt());
-
         TimeLimitedPBTokenIssuer.validate(token, password, salt);
     }
 

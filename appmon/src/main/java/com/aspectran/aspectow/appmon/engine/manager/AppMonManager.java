@@ -58,12 +58,6 @@ public class AppMonManager extends InstantActivitySupport {
 
     private final NodeManager nodeManager;
 
-    private final String clusterMode;
-
-    private final String nodeId;
-
-    private final String groupId;
-
     private final NodeInfoHolder nodeInfoHolder;
 
     private final GroupInfoHolder groupInfoHolder;
@@ -97,9 +91,6 @@ public class AppMonManager extends InstantActivitySupport {
             PollingConfig pollingConfig,
             int counterPersistInterval) {
         this.nodeManager = nodeManager;
-        this.clusterMode = nodeManager.getClusterConfig().getMode();
-        this.nodeId = nodeManager.getNodeId();
-        this.groupId = nodeManager.getGroupId();
         this.nodeInfoHolder = nodeManager.getNodeInfoHolder();
         this.groupInfoHolder = nodeManager.getGroupInfoHolder();
         this.appInfoHolder = appInfoHolder;
@@ -126,7 +117,7 @@ public class AppMonManager extends InstantActivitySupport {
      * @return the cluster mode
      */
     public String getClusterMode() {
-        return clusterMode;
+        return nodeManager.getClusterConfig().getMode();
     }
 
     /**
@@ -134,7 +125,7 @@ public class AppMonManager extends InstantActivitySupport {
      * @return {@code true} if in gateway mode, {@code false} otherwise
      */
     public boolean isGatewayMode() {
-        return "gateway".equals(clusterMode);
+        return nodeManager.getClusterConfig().isGatewayMode();
     }
 
     /**
@@ -142,7 +133,7 @@ public class AppMonManager extends InstantActivitySupport {
      * @return the current node ID
      */
     public String getNodeId() {
-        return nodeId;
+        return nodeManager.getNodeId();
     }
 
     /**
@@ -150,7 +141,7 @@ public class AppMonManager extends InstantActivitySupport {
      * @return the current node group name
      */
     public String getGroupId() {
-        return groupId;
+        return nodeManager.getGroupId();
     }
 
     /**
@@ -360,7 +351,7 @@ public class AppMonManager extends InstantActivitySupport {
         if (nodeRegistry == null) {
             return false;
         }
-        Map<String, String> registeredApps = nodeRegistry.getAllApps(groupId);
+        Map<String, String> registeredApps = nodeRegistry.getAllApps(getGroupId());
         List<AppInfo> myAppList = getAppInfoList();
         if (registeredApps.size() != myAppList.size()) {
             return false;
@@ -386,14 +377,14 @@ public class AppMonManager extends InstantActivitySupport {
             NodeRegistry nodeRegistry = nodeManager.getNodeRegistry();
             if (isAppsUpToDate(nodeRegistry)) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("App info in Redis for group '{}' is already up to date. Skipping registration.", groupId);
+                    logger.debug("App info in Redis for group '{}' is already up to date. Skipping registration.", getGroupId());
                 }
                 return;
             }
 
             String clusterId = nodeManager.getClusterConfig().getId();
-            String appsKey = NodeMessageProtocol.getAppsHashKey(clusterId, groupId);
-            String appsOrderKey = NodeMessageProtocol.getAppsOrderKey(clusterId, groupId);
+            String appsKey = NodeMessageProtocol.getAppsHashKey(clusterId, getGroupId());
+            String appsOrderKey = NodeMessageProtocol.getAppsOrderKey(clusterId, getGroupId());
             try (StatefulRedisConnection<String, String> connection = nodeManager.getRedisConnectionPool().getConnection()) {
                 RedisCommands<String, String> sync = connection.sync();
                 sync.multi();
@@ -419,16 +410,16 @@ public class AppMonManager extends InstantActivitySupport {
     protected void unregisterAppInfoFromRedis() {
         if (isGatewayMode() && nodeManager.getRedisConnectionPool() != null && nodeManager.getRedisConnectionPool().isAvailable()) {
             NodeRegistry nodeRegistry = nodeManager.getNodeRegistry();
-            if (nodeRegistry != null && nodeRegistry.hasOtherNodesInGroup(groupId, nodeId)) {
+            if (nodeRegistry != null && nodeRegistry.hasOtherNodesInGroup(getGroupId(), getNodeId())) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Skipping unregister of app info from Redis because other nodes exist in group '{}'", groupId);
+                    logger.debug("Skipping unregister of app info from Redis because other nodes exist in group '{}'", getGroupId());
                 }
                 return;
             }
 
             String clusterId = nodeManager.getClusterConfig().getId();
-            String appsKey = NodeMessageProtocol.getAppsHashKey(clusterId, groupId);
-            String appsOrderKey = NodeMessageProtocol.getAppsOrderKey(clusterId, groupId);
+            String appsKey = NodeMessageProtocol.getAppsHashKey(clusterId, getGroupId());
+            String appsOrderKey = NodeMessageProtocol.getAppsOrderKey(clusterId, getGroupId());
             try (StatefulRedisConnection<String, String> connection = nodeManager.getRedisConnectionPool().getConnection()) {
                 RedisCommands<String, String> sync = connection.sync();
                 sync.del(appsKey);
