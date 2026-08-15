@@ -38,14 +38,10 @@ import com.aspectran.aspectow.appmon.engine.relay.remote.NodeMessageRelayHandler
 import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.aspectow.node.manager.ClusterEventListener;
 import com.aspectran.aspectow.node.manager.NodeManager;
-import com.aspectran.aspectow.node.manager.NodeMessageProtocol;
+import com.aspectran.aspectow.node.manager.NodeRegistryListener;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.Assert;
-import io.lettuce.core.api.StatefulRedisConnection;
-import io.lettuce.core.api.sync.RedisCommands;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -58,8 +54,6 @@ import static com.aspectran.aspectow.appmon.engine.schedule.CounterPersistSchedu
  * <p>Created: 2024-12-17</p>
  */
 public abstract class AppMonManagerBuilder {
-
-    private static final Logger logger = LoggerFactory.getLogger(AppMonManagerBuilder.class);
 
     /**
      * Builds a fully configured {@link AppMonManager} instance.
@@ -139,19 +133,26 @@ public abstract class AppMonManagerBuilder {
                 }
 
                 // Register app metadata to Redis
-                String appsKey = NodeMessageProtocol.getAppsHashKey(clusterId, groupId);
-                String appsOrderKey = NodeMessageProtocol.getAppsOrderKey(clusterId, groupId);
-                try (StatefulRedisConnection<String, String> connection = nodeManager.getRedisConnectionPool().getConnection()) {
-                    RedisCommands<String, String> sync = connection.sync();
-                    sync.del(appsKey);
-                    sync.del(appsOrderKey);
-                    for (AppInfo appInfo : appMonManager.getAppInfoList()) {
-                        sync.hset(appsKey, appInfo.getAppId(), appInfo.toString());
-                        sync.rpush(appsOrderKey, appInfo.getAppId());
-                    }
-                    logger.info("Registered app info to Redis: {} (Apps: {})", appsKey, appMonManager.getAppIds());
-                } catch (Exception e) {
-                    logger.error("Failed to register app info to Redis", e);
+                appMonManager.registerAppInfoToRedis();
+
+                if (nodeManager.getNodeRegistry() != null) {
+                    NodeRegistryListener nodeRegistryListener = new NodeRegistryListener() {
+                        @Override
+                        public void onNodeRegistered(@NonNull NodeInfo nodeInfo) {
+                            if (nodeManager.getNodeId().equals(nodeInfo.getId())) {
+                                appMonManager.registerAppInfoToRedis();
+                            }
+                        }
+
+                        @Override
+                        public void onNodeUnregistered(String nodeId) {
+                            if (nodeManager.getNodeId().equals(nodeId)) {
+                                appMonManager.unregisterAppInfoFromRedis();
+                            }
+                        }
+                    };
+                    nodeManager.getNodeRegistry().addListener(nodeRegistryListener);
+                    appMonManager.setNodeRegistryListener(nodeRegistryListener);
                 }
             }
 

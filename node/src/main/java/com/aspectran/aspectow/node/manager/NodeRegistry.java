@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Provides an API for retrieving information about registered cluster nodes
@@ -44,6 +45,8 @@ public class NodeRegistry {
 
     private final RedisConnectionPool connectionPool;
 
+    private final List<NodeRegistryListener> listeners = new CopyOnWriteArrayList<>();
+
     /**
      * Constructs a new NodeRegistry.
      * @param clusterId the cluster ID
@@ -52,6 +55,60 @@ public class NodeRegistry {
     public NodeRegistry(String clusterId, RedisConnectionPool connectionPool) {
         this.clusterId = clusterId;
         this.connectionPool = connectionPool;
+    }
+
+    /**
+     * Adds a listener for node registry events.
+     * @param listener the listener to add
+     */
+    public void addListener(NodeRegistryListener listener) {
+        if (listener != null) {
+            listeners.add(listener);
+        }
+    }
+
+    /**
+     * Removes a listener for node registry events.
+     * @param listener the listener to remove
+     */
+    public void removeListener(NodeRegistryListener listener) {
+        if (listener != null) {
+            listeners.remove(listener);
+        }
+    }
+
+    /**
+     * Notifies all registered listeners that a node has been registered or re-registered.
+     * @param nodeInfo the node information
+     */
+    public void notifyNodeRegistered(NodeInfo nodeInfo) {
+        if (nodeInfo == null || listeners.isEmpty()) {
+            return;
+        }
+        for (NodeRegistryListener listener : listeners) {
+            try {
+                listener.onNodeRegistered(nodeInfo);
+            } catch (Exception e) {
+                logger.error("Error invoking NodeRegistryListener.onNodeRegistered() for node '{}'", nodeInfo.getId(), e);
+            }
+        }
+    }
+
+    /**
+     * Notifies all registered listeners that a node has been unregistered or evicted.
+     * @param nodeId the ID of the unregistered node
+     */
+    public void notifyNodeUnregistered(String nodeId) {
+        if (nodeId == null || listeners.isEmpty()) {
+            return;
+        }
+        for (NodeRegistryListener listener : listeners) {
+            try {
+                listener.onNodeUnregistered(nodeId);
+            } catch (Exception e) {
+                logger.error("Error invoking NodeRegistryListener.onNodeUnregistered() for node '{}'", nodeId, e);
+            }
+        }
     }
 
     /**
@@ -255,6 +312,7 @@ public class NodeRegistry {
             sync.hdel(nodesKey, nodeId);
             sync.hdel(pulsesKey, nodeId);
             cleanupOrphanedGroups(sync);
+            notifyNodeUnregistered(nodeId);
         } catch (Exception e) {
             logger.error("Failed to remove node '{}' and metadata from cluster '{}'", nodeId, clusterId, e);
         }
@@ -272,7 +330,7 @@ public class NodeRegistry {
             RedisCommands<String, String> sync = connection.sync();
             Map<String, String> pulses = sync.hgetall(pulsesKey);
             long now = System.currentTimeMillis();
-            boolean evicted = false;
+            List<String> evictedNodeIds = new ArrayList<>();
             for (Map.Entry<String, String> entry : pulses.entrySet()) {
                 String nodeId = entry.getKey();
                 try {
@@ -281,15 +339,18 @@ public class NodeRegistry {
                         logger.info("Evicting zombie node '{}' from cluster '{}'", nodeId, clusterId);
                         sync.hdel(nodesKey, nodeId);
                         sync.hdel(pulsesKey, nodeId);
-                        evicted = true;
+                        evictedNodeIds.add(nodeId);
                     }
                 } catch (NumberFormatException e) {
                     // ignore
                 }
             }
 
-            if (evicted) {
+            if (!evictedNodeIds.isEmpty()) {
                 cleanupOrphanedGroups(sync);
+                for (String evictedNodeId : evictedNodeIds) {
+                    notifyNodeUnregistered(evictedNodeId);
+                }
             }
         } catch (Exception e) {
             logger.error("Failed to evict zombie nodes and metadata from cluster '{}'", clusterId, e);
@@ -297,7 +358,7 @@ public class NodeRegistry {
     }
 
     /**
-     * Removes groups and apps that no longer have active nodes.
+     * Removes groups that no longer have active nodes.
      * @param sync the Redis commands
      */
     private void cleanupOrphanedGroups(@NonNull RedisCommands<String, String> sync) {
@@ -323,8 +384,6 @@ public class NodeRegistry {
             if (!activeGroups.contains(gid)) {
                 logger.info("Cleaning up orphaned group metadata: {} (Cluster: {})", gid, clusterId);
                 sync.hdel(groupsKey, gid);
-                sync.del(NodeMessageProtocol.getAppsHashKey(clusterId, gid));
-                sync.del(NodeMessageProtocol.getAppsOrderKey(clusterId, gid));
             }
         }
     }
@@ -333,7 +392,7 @@ public class NodeRegistry {
      * Stops the node registry and performs any necessary cleanup.
      */
     public void stop() {
-        // No-op for now, but can be used for cleanup if needed
+        listeners.clear();
     }
 
 }

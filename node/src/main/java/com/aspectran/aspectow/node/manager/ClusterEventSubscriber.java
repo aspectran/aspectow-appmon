@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * Specifically listens to the cluster-wide event channel and notifies
+ * Listens to the cluster-wide event channel and notifies
  * registered listeners about node join and leave events.
  *
  * <p>Created: 2026-05-24</p>

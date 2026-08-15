@@ -27,12 +27,18 @@ import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.aspectow.node.config.NodeInfoHolder;
 import com.aspectran.aspectow.node.manager.ClusterEventListener;
 import com.aspectran.aspectow.node.manager.NodeManager;
+import com.aspectran.aspectow.node.manager.NodeMessageProtocol;
 import com.aspectran.aspectow.node.manager.NodeRegistry;
+import com.aspectran.aspectow.node.manager.NodeRegistryListener;
 import com.aspectran.core.activity.InstantAction;
 import com.aspectran.core.activity.InstantActivitySupport;
 import com.aspectran.core.adapter.ApplicationAdapter;
 import com.aspectran.core.context.ActivityContext;
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.api.sync.RedisCommands;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +53,8 @@ import java.util.Map;
  * <p>Created: 4/3/2024</p>
  */
 public class AppMonManager extends InstantActivitySupport {
+
+    private static final Logger logger = LoggerFactory.getLogger(AppMonManager.class);
 
     private final NodeManager nodeManager;
 
@@ -73,6 +81,8 @@ public class AppMonManager extends InstantActivitySupport {
     private NodeMessageRelayHandler nodeMessageRelayHandler;
 
     private ClusterEventListener clusterEventListener;
+
+    private NodeRegistryListener nodeRegistryListener;
 
     /**
      * Instantiates a new AppMonManager.
@@ -337,10 +347,61 @@ public class AppMonManager extends InstantActivitySupport {
         this.clusterEventListener = clusterEventListener;
     }
 
+    protected void setNodeRegistryListener(NodeRegistryListener nodeRegistryListener) {
+        this.nodeRegistryListener = nodeRegistryListener;
+    }
+
+    /**
+     * Registers application metadata to the Redis cluster registry.
+     */
+    protected void registerAppInfoToRedis() {
+        if (isGatewayMode() && nodeManager.getRedisConnectionPool() != null && nodeManager.getRedisConnectionPool().isAvailable()) {
+            String clusterId = nodeManager.getClusterConfig().getId();
+            String appsKey = NodeMessageProtocol.getAppsHashKey(clusterId, groupId);
+            String appsOrderKey = NodeMessageProtocol.getAppsOrderKey(clusterId, groupId);
+            try (StatefulRedisConnection<String, String> connection = nodeManager.getRedisConnectionPool().getConnection()) {
+                RedisCommands<String, String> sync = connection.sync();
+                sync.del(appsKey);
+                sync.del(appsOrderKey);
+                for (AppInfo appInfo : getAppInfoList()) {
+                    sync.hset(appsKey, appInfo.getAppId(), appInfo.toString());
+                    sync.rpush(appsOrderKey, appInfo.getAppId());
+                }
+                logger.info("Registered app info to Redis: {} (Apps: {})", appsKey, getAppIds());
+            } catch (Exception e) {
+                if (nodeManager.getRedisConnectionPool().isAvailable()) {
+                    logger.error("Failed to register app info to Redis", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Unregisters application metadata from the Redis cluster registry.
+     */
+    protected void unregisterAppInfoFromRedis() {
+        if (isGatewayMode() && nodeManager.getRedisConnectionPool() != null && nodeManager.getRedisConnectionPool().isAvailable()) {
+            String clusterId = nodeManager.getClusterConfig().getId();
+            String appsKey = NodeMessageProtocol.getAppsHashKey(clusterId, groupId);
+            String appsOrderKey = NodeMessageProtocol.getAppsOrderKey(clusterId, groupId);
+            try (StatefulRedisConnection<String, String> connection = nodeManager.getRedisConnectionPool().getConnection()) {
+                RedisCommands<String, String> sync = connection.sync();
+                sync.del(appsKey);
+                sync.del(appsOrderKey);
+                logger.info("Unregistered app info from Redis: {}", appsKey);
+            } catch (Exception e) {
+                if (nodeManager.getRedisConnectionPool().isAvailable()) {
+                    logger.error("Failed to unregister app info from Redis", e);
+                }
+            }
+        }
+    }
+
     /**
      * Closes and releases all resources managed by this AppMonManager.
      */
     public void destroy() {
+        unregisterAppInfoFromRedis();
         if (messageRelayManager != null) {
             messageRelayManager.destroy();
         }
@@ -349,6 +410,9 @@ public class AppMonManager extends InstantActivitySupport {
         }
         if (clusterEventListener != null && nodeManager.getClusterEventSubscriber() != null) {
             nodeManager.getClusterEventSubscriber().removeListener(clusterEventListener);
+        }
+        if (nodeRegistryListener != null && nodeManager.getNodeRegistry() != null) {
+            nodeManager.getNodeRegistry().removeListener(nodeRegistryListener);
         }
     }
 

@@ -29,6 +29,7 @@ public class ClusterConfig extends DefaultParameters {
     private static final ParameterKey mode;
     private static final ParameterKey secret;
     private static final ParameterKey pulseInterval;
+    private static final ParameterKey pulseTimeout;
     private static final ParameterKey endpoint;
     private static final ParameterKey scheduler;
 
@@ -39,6 +40,7 @@ public class ClusterConfig extends DefaultParameters {
         mode = new ParameterKey("mode", ValueType.STRING);
         secret = new ParameterKey("secret", SecretConfig.class);
         pulseInterval = new ParameterKey("pulseInterval", ValueType.LONG);
+        pulseTimeout = new ParameterKey("pulseTimeout", ValueType.LONG);
         endpoint = new ParameterKey("endpoint", EndpointConfig.class);
         scheduler = new ParameterKey("scheduler", SchedulerConfig.class);
 
@@ -47,6 +49,7 @@ public class ClusterConfig extends DefaultParameters {
                 mode,
                 secret,
                 pulseInterval,
+                pulseTimeout,
                 endpoint,
                 scheduler
         };
@@ -138,6 +141,31 @@ public class ClusterConfig extends DefaultParameters {
      */
     public void setPulseInterval(long pulseInterval) {
         putValue(ClusterConfig.pulseInterval, pulseInterval);
+    }
+
+    /**
+     * Returns the timeout threshold for pulse signals in milliseconds.
+     * @return the timeout threshold for pulse signals
+     */
+    public Long getPulseTimeout() {
+        return getLong(pulseTimeout);
+    }
+
+    /**
+     * Returns the timeout threshold for pulse signals with a fallback default value.
+     * @param defaultValue the default timeout to return if not specified
+     * @return the timeout threshold for pulse signals
+     */
+    public long getPulseTimeout(long defaultValue) {
+        return getLong(pulseTimeout, defaultValue);
+    }
+
+    /**
+     * Sets the timeout threshold for pulse signals in milliseconds.
+     * @param pulseTimeout the timeout threshold for pulse signals
+     */
+    public void setPulseTimeout(long pulseTimeout) {
+        putValue(ClusterConfig.pulseTimeout, pulseTimeout);
     }
 
     /**
