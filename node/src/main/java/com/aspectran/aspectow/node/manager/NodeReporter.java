@@ -54,10 +54,6 @@ public class NodeReporter {
 
     private final NodeManager nodeManager;
 
-    private final NodeRegistry nodeRegistry;
-
-    private final NodeMessagePublisher nodeMessagePublisher;
-
     private final NodePortProvider portProvider;
 
     private final ScheduledExecutorService scheduler;
@@ -69,8 +65,6 @@ public class NodeReporter {
      */
     public NodeReporter(@NonNull NodeManager nodeManager, NodePortProvider portProvider) {
         this.nodeManager = nodeManager;
-        this.nodeRegistry = nodeManager.getNodeRegistry();
-        this.nodeMessagePublisher = nodeManager.getNodeMessagePublisher();
         this.portProvider = portProvider;
 
         CustomizableThreadFactory threadFactory = new CustomizableThreadFactory("node-reporter-");
@@ -202,7 +196,10 @@ public class NodeReporter {
                 }
             }
 
-            nodeRegistry.notifyNodeRegistered(nodeInfo);
+            NodeRegistry nodeRegistry = getNodeRegistry();
+            if (nodeRegistry != null) {
+                nodeRegistry.notifyNodeRegistered(nodeInfo);
+            }
         } catch (Exception e) {
             logger.error("Failed to register node '{}' in Redis registry", nodeInfo.getId(), e);
         }
@@ -214,7 +211,10 @@ public class NodeReporter {
             nodeInfo.setToken(nodeManager.generateToken());
             String aponData = new AponWriter().nullWritable(false).write(nodeInfo).toString();
             String channel = NodeMessageProtocol.getClusterEventsChannel(getClusterConfig().getId());
-            nodeMessagePublisher.asyncPublish(channel, MESSAGE_JOINED + aponData);
+            NodeMessagePublisher nodeMessagePublisher = getNodeMessagePublisher();
+            if (nodeMessagePublisher != null) {
+                nodeMessagePublisher.asyncPublish(channel, MESSAGE_JOINED + aponData);
+            }
         } catch (Exception e) {
             logger.error("Failed to broadcast join event for node '{}'", nodeInfo.getId(), e);
         }
@@ -226,7 +226,10 @@ public class NodeReporter {
             nodeInfo.setToken(nodeManager.generateToken());
             String aponData = new AponWriter().nullWritable(false).write(nodeInfo).toString();
             String channel = NodeMessageProtocol.getClusterEventsChannel(getClusterConfig().getId());
-            nodeMessagePublisher.asyncPublish(channel, MESSAGE_STATUS_CHANGED + aponData);
+            NodeMessagePublisher nodeMessagePublisher = getNodeMessagePublisher();
+            if (nodeMessagePublisher != null) {
+                nodeMessagePublisher.asyncPublish(channel, MESSAGE_STATUS_CHANGED + aponData);
+            }
         } catch (Exception e) {
             logger.error("Failed to broadcast statusChanged event for node '{}'", nodeInfo.getId(), e);
         }
@@ -236,7 +239,10 @@ public class NodeReporter {
         NodeInfo nodeInfo = getNodeInfo();
         try {
             String channel = NodeMessageProtocol.getClusterEventsChannel(getClusterConfig().getId());
-            nodeMessagePublisher.asyncPublish(channel, MESSAGE_LEFT + nodeInfo.getId());
+            NodeMessagePublisher nodeMessagePublisher = getNodeMessagePublisher();
+            if (nodeMessagePublisher != null) {
+                nodeMessagePublisher.asyncPublish(channel, MESSAGE_LEFT + nodeInfo.getId());
+            }
         } catch (Exception e) {
             logger.error("Failed to broadcast leave event for node '{}'", nodeInfo.getId(), e);
         }
@@ -273,7 +279,10 @@ public class NodeReporter {
         long pulseInterval = nodeInfo.getPulseInterval(getClusterConfig().getPulseInterval(DEFAULT_PULSE_INTERVAL));
         long defaultTimeout = Math.max(pulseInterval * 6, DEFAULT_PULSE_TIMEOUT);
         long timeout = getClusterConfig().getPulseTimeout(defaultTimeout);
-        nodeRegistry.evictZombieNodes(timeout);
+        NodeRegistry nodeRegistry = getNodeRegistry();
+        if (nodeRegistry != null) {
+            nodeRegistry.evictZombieNodes(timeout);
+        }
 
         // 2. Compensate for missed Pub/Sub events by syncing local cache with global registry
         nodeManager.syncNodes();
@@ -285,7 +294,10 @@ public class NodeReporter {
             logger.debug("Unregistering node '{}' from cluster '{}'", nodeInfo.getId(), getClusterConfig().getId());
         }
         try {
-            nodeRegistry.removeNode(nodeInfo.getId());
+            NodeRegistry nodeRegistry = getNodeRegistry();
+            if (nodeRegistry != null) {
+                nodeRegistry.removeNode(nodeInfo.getId());
+            }
         } catch (Exception e) {
             logger.error("Failed to unregister node '{}' from Redis registry", nodeInfo.getId(), e);
         }
@@ -301,6 +313,14 @@ public class NodeReporter {
 
     private GroupInfo getGroupInfo() {
         return nodeManager.getGroupInfoHolder().getGroupInfo(nodeManager.getGroupId());
+    }
+
+    private NodeRegistry getNodeRegistry() {
+        return nodeManager.getNodeRegistry();
+    }
+
+    private NodeMessagePublisher getNodeMessagePublisher() {
+        return nodeManager.getNodeMessagePublisher();
     }
 
     private RedisConnectionPool getConnectionPool() {

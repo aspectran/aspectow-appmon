@@ -37,7 +37,6 @@ import com.aspectran.utils.Assert;
 import com.aspectran.utils.PBEncryptionUtils;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.SystemUtils;
-import io.lettuce.core.api.StatefulRedisConnection;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,15 +193,16 @@ public abstract class NodeManagerBuilder {
 
             NodeRegistry nodeRegistry = new NodeRegistry(clusterId, connectionPool);
             NodeMessagePublisher nodeMessagePublisher = new NodeMessagePublisher(clusterId, nodeId, connectionPool);
-            NodeReporter nodeReporter = new NodeReporter(nodeManager, portProvider);
             NodeMessageSubscriber nodeMessageSubscriber = new NodeMessageSubscriber(clusterId, nodeId, connectionPool);
             ClusterEventSubscriber clusterEventSubscriber = new ClusterEventSubscriber(clusterId, connectionPool);
 
             nodeManager.setNodeRegistry(nodeRegistry);
-            nodeManager.setNodeReporter(nodeReporter);
             nodeManager.setNodeMessagePublisher(nodeMessagePublisher);
             nodeManager.setNodeMessageSubscriber(nodeMessageSubscriber);
             nodeManager.setClusterEventSubscriber(clusterEventSubscriber);
+
+            NodeReporter nodeReporter = new NodeReporter(nodeManager, portProvider);
+            nodeManager.setNodeReporter(nodeReporter);
 
             for (NodeInfo info : nodeRegistry.getNodes()) {
                 if (!nodeId.equals(info.getId())) {
