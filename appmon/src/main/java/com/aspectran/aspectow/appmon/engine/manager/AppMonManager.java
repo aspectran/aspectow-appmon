@@ -352,22 +352,59 @@ public class AppMonManager extends InstantActivitySupport {
     }
 
     /**
+     * Checks if the registered applications in Redis for this group exactly match the local app info list.
+     * @param nodeRegistry the node registry
+     * @return true if Redis contains the exact same apps in the same order and content, false otherwise
+     */
+    private boolean isAppsUpToDate(NodeRegistry nodeRegistry) {
+        if (nodeRegistry == null) {
+            return false;
+        }
+        Map<String, String> registeredApps = nodeRegistry.getAllApps(groupId);
+        List<AppInfo> myAppList = getAppInfoList();
+        if (registeredApps.size() != myAppList.size()) {
+            return false;
+        }
+        int index = 0;
+        for (Map.Entry<String, String> entry : registeredApps.entrySet()) {
+            AppInfo current = myAppList.get(index++);
+            if (!entry.getKey().equals(current.getAppId())) {
+                return false;
+            }
+            if (!entry.getValue().equals(current.toString())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Registers application metadata to the Redis cluster registry.
      */
     protected void registerAppInfoToRedis() {
         if (isGatewayMode() && nodeManager.getRedisConnectionPool() != null && nodeManager.getRedisConnectionPool().isAvailable()) {
+            NodeRegistry nodeRegistry = nodeManager.getNodeRegistry();
+            if (isAppsUpToDate(nodeRegistry)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("App info in Redis for group '{}' is already up to date. Skipping registration.", groupId);
+                }
+                return;
+            }
+
             String clusterId = nodeManager.getClusterConfig().getId();
             String appsKey = NodeMessageProtocol.getAppsHashKey(clusterId, groupId);
             String appsOrderKey = NodeMessageProtocol.getAppsOrderKey(clusterId, groupId);
             try (StatefulRedisConnection<String, String> connection = nodeManager.getRedisConnectionPool().getConnection()) {
                 RedisCommands<String, String> sync = connection.sync();
+                sync.multi();
                 sync.del(appsKey);
                 sync.del(appsOrderKey);
                 for (AppInfo appInfo : getAppInfoList()) {
                     sync.hset(appsKey, appInfo.getAppId(), appInfo.toString());
                     sync.rpush(appsOrderKey, appInfo.getAppId());
                 }
-                logger.info("Registered app info to Redis: {} (Apps: {})", appsKey, getAppIds());
+                sync.exec();
+                logger.info("Synchronized app info to Redis: {} (Apps: {})", appsKey, getAppIds());
             } catch (Exception e) {
                 if (nodeManager.getRedisConnectionPool().isAvailable()) {
                     logger.error("Failed to register app info to Redis", e);
@@ -381,6 +418,14 @@ public class AppMonManager extends InstantActivitySupport {
      */
     protected void unregisterAppInfoFromRedis() {
         if (isGatewayMode() && nodeManager.getRedisConnectionPool() != null && nodeManager.getRedisConnectionPool().isAvailable()) {
+            NodeRegistry nodeRegistry = nodeManager.getNodeRegistry();
+            if (nodeRegistry != null && nodeRegistry.hasOtherNodesInGroup(groupId, nodeId)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Skipping unregister of app info from Redis because other nodes exist in group '{}'", groupId);
+                }
+                return;
+            }
+
             String clusterId = nodeManager.getClusterConfig().getId();
             String appsKey = NodeMessageProtocol.getAppsHashKey(clusterId, groupId);
             String appsOrderKey = NodeMessageProtocol.getAppsOrderKey(clusterId, groupId);

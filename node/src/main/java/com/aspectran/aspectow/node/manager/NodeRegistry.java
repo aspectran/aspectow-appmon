@@ -131,6 +131,42 @@ public class NodeRegistry {
     }
 
     /**
+     * Retrieves registered nodes that belong to the specified group.
+     * @param groupId the group ID
+     * @return a list of NodeInfo objects in the group
+     */
+    public List<NodeInfo> getNodesByGroup(String groupId) {
+        if (groupId == null) {
+            return Collections.emptyList();
+        }
+        List<NodeInfo> groupNodes = new ArrayList<>();
+        for (NodeInfo nodeInfo : getNodes()) {
+            if (groupId.equals(nodeInfo.getGroup())) {
+                groupNodes.add(nodeInfo);
+            }
+        }
+        return groupNodes;
+    }
+
+    /**
+     * Checks if there are other nodes in the specified group, excluding the given node ID.
+     * @param groupId the group ID
+     * @param excludeNodeId the node ID to exclude from the check
+     * @return true if there is at least one other node in the group, false otherwise
+     */
+    public boolean hasOtherNodesInGroup(String groupId, String excludeNodeId) {
+        if (groupId == null) {
+            return false;
+        }
+        for (NodeInfo nodeInfo : getNodes()) {
+            if (groupId.equals(nodeInfo.getGroup()) && (excludeNodeId == null || !excludeNodeId.equals(nodeInfo.getId()))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Retrieves all registered nodes from Redis as raw APON strings.
      * @return a map of node IDs to their metadata (APON strings)
      */
