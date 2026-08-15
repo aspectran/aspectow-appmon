@@ -19,7 +19,7 @@
  * automatically falling back to HTTP long-polling if WebSockets are unavailable.
  *
  * @version 4.0
- * @last-modified 2026-08-12
+ * @last-modified 2026-08-15
  */
 class ConsoleClient {
 
@@ -53,6 +53,7 @@ class ConsoleClient {
         this.activityPath = null;
         this.primaryNodeId = node.id;
         this.mode = 'websocket'; // 'websocket' or 'polling'
+        this.wsEverConnected = false;
     }
 
     /**
@@ -147,6 +148,7 @@ class ConsoleClient {
 
             this.socket.onopen = (event) => {
                 console.log(this.node.id, "websocket connected");
+                this.wsEverConnected = true;
                 this.retryCount = 0;
 
                 const subscribeRequest = { header: "subscribe", targetNodeId: this.node.id };
@@ -205,16 +207,20 @@ class ConsoleClient {
 
             this.socket.onerror = (event) => {
                 console.error(this.node.id, "websocket error:", event);
-                this.switchToPolling();
+                if (!this.wsEverConnected) {
+                    this.switchToPolling();
+                }
             };
         } catch (e) {
             console.error(this.node.id, "failed to create websocket:", e);
-            this.switchToPolling();
+            if (!this.wsEverConnected) {
+                this.switchToPolling();
+            }
         }
     }
 
     switchToPolling() {
-        if (this.mode === 'polling' || this.manualClose) return;
+        if (this.mode === 'polling' || this.manualClose || this.wsEverConnected) return;
         console.warn(this.node.id, "switching to HTTP polling mode");
         this.mode = 'polling';
         this.closeSocket(false);
@@ -441,8 +447,19 @@ class ConsoleClient {
             }, interval);
         } else {
             if (this.mode === 'websocket') {
-                console.log(this.node.id, "abort reconnect attempt, switching to polling");
-                this.switchToPolling();
+                if (this.wsEverConnected) {
+                    console.log(this.node.id, "max reconnect attempts reached for websocket; retrying...");
+                    if (this.options.onFailed) {
+                        this.options.onFailed(this.node);
+                    }
+                    setTimeout(() => {
+                        this.retryCount = Math.max(0, this.options.maxRetries - 2);
+                        this.openSocket();
+                    }, this.options.retryInterval);
+                } else {
+                    console.log(this.node.id, "abort reconnect attempt, switching to polling");
+                    this.switchToPolling();
+                }
             } else if (this.mode === 'polling') {
                 console.log(this.node.id, "abort reconnect attempt, connection failed");
                 this.stopPolling();
