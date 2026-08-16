@@ -36,15 +36,27 @@ public class TowServerPortProvider implements NodePortProvider, ActivityContextA
 
     private ActivityContext context;
 
+    /**
+     * Constructs a new {@code TowServerPortProvider} with the specified bean ID of the Undertow server.
+     * @param serverBeanId the bean ID of the Undertow server
+     */
     public TowServerPortProvider(String serverBeanId) {
         this.serverBeanId = serverBeanId;
     }
 
+    /**
+     * Sets the activity context.
+     * @param context the activity context
+     */
     @Override
     public void setActivityContext(@NonNull ActivityContext context) {
         this.context = context;
     }
 
+    /**
+     * Retrieves the active port of the Undertow server.
+     * @return the active port, or {@code null} if it cannot be retrieved
+     */
     @Override
     public Integer getActivePort() {
         try {

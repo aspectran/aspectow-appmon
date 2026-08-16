@@ -15,88 +15,95 @@
  */
 package com.aspectran.aspectow.appmon.common.listener;
 
+import com.aspectran.aspectow.appmon.common.support.IPCountryResolver;
 import com.aspectran.core.activity.Activity;
-import com.aspectran.core.activity.InstantActivitySupport;
 import com.aspectran.core.activity.Translet;
-import com.aspectran.core.component.bean.ablility.InitializableBean;
-import com.aspectran.core.component.bean.annotation.Component;
-import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.session.Session;
 import com.aspectran.core.component.session.SessionListener;
-import com.aspectran.core.component.session.SessionListenerRegistration;
-import com.aspectran.undertow.server.TowServer;
-import com.aspectran.undertow.support.SessionListenerRegistrationBean;
+import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.StringUtils;
-import com.aspectran.web.support.http.HttpHeaders;
-import jakarta.servlet.http.HttpServletRequest;
+import com.aspectran.web.support.util.WebUtils;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
+import java.util.Locale;
+
+import static com.aspectran.aspectow.appmon.engine.exporter.event.session.SessionEventReader.USER_COUNTRY_CODE;
 import static com.aspectran.aspectow.appmon.engine.exporter.event.session.SessionEventReader.USER_IP_ADDRESS;
 
 /**
  * A listener that tracks user information by listening to session events.
- * It captures the user's IP address when a session is created.
+ * It captures the user's IP address and resolves the country code when a session is created.
  *
  * <p>Created: 2024-12-13</p>
  */
-@Component
-@Profile("appmon.standalone")
-public class UserTrackingListener extends InstantActivitySupport implements SessionListener, InitializableBean {
+public class UserTrackingListener implements SessionListener {
+
+    private final ActivityContext context;
+
+    private final IPCountryResolver ipCountryResolver;
+
+    /**
+     * Instantiates a new UserTrackingListener without country code resolution.
+     */
+    public UserTrackingListener() {
+        this(null, null);
+    }
+
+    /**
+     * Instantiates a new UserTrackingListener.
+     * @param context the activity context
+     */
+    public UserTrackingListener(@Nullable ActivityContext context) {
+        this(context, null);
+    }
+
+    /**
+     * Instantiates a new UserTrackingListener.
+     * @param context the activity context
+     * @param ipCountryResolver the resolver for determining the country code from an IP address
+     */
+    public UserTrackingListener(
+            @Nullable ActivityContext context,
+            @Nullable IPCountryResolver ipCountryResolver) {
+        this.context = context;
+        this.ipCountryResolver = ipCountryResolver;
+    }
 
     /**
      * Called when a session is created. It retrieves the remote IP address
-     * from the current activity and stores it in the session.
+     * and locale from the current activity and stores them in the session attributes.
      * @param session the session that was created
      */
     @Override
     public void sessionCreated(@NonNull Session session) {
-        Activity activity = getCurrentActivity();
-        String ipAddress = getRemoteAddr(activity.getTranslet());
-        if (!StringUtils.isEmpty(ipAddress)) {
-            session.setAttribute(USER_IP_ADDRESS, ipAddress);
+        if (context != null && context.hasCurrentActivity()) {
+            Activity activity = context.getCurrentActivity();
+            if (activity.hasTranslet()) {
+                Translet translet = activity.getTranslet();
+                String ipAddress = WebUtils.getRemoteAddr(translet);
+                if (StringUtils.hasLength(ipAddress)) {
+                    session.setAttribute(USER_IP_ADDRESS, ipAddress);
+                    if (ipCountryResolver != null) {
+                        Locale locale = translet.getRequestAdapter().getLocale();
+                        String countryCode = ipCountryResolver.resolveCountryCode(ipAddress, locale);
+                        if (StringUtils.hasLength(countryCode)) {
+                            session.setAttribute(USER_COUNTRY_CODE, countryCode);
+                        }
+                    }
+                }
+            }
         }
     }
 
-    /**
-     * Initializes the listener by registering it with the session management framework.
-     * @throws Exception if initialization fails
-     */
     @Override
-    public void initialize() throws Exception {
-        SessionListenerRegistration sessionListenerRegistration;
-        if (getBeanRegistry().containsBean(SessionListenerRegistration.class)) {
-            sessionListenerRegistration = getBeanRegistry().getBean(SessionListenerRegistration.class);
-        } else {
-            try {
-                Class.forName("com.aspectran.undertow.server.TowServer");
-            } catch (ClassNotFoundException e) {
-                // Undertow not available
-                return;
-            }
-            if (getBeanRegistry().containsBean(TowServer.class)) {
-                sessionListenerRegistration = new SessionListenerRegistrationBean();
-            } else {
-                throw new IllegalStateException("Bean for SessionListenerRegistration must be defined");
-            }
-        }
-        sessionListenerRegistration.register(this, getActivityContext().getName());
+    public boolean equals(Object obj) {
+        return (obj instanceof UserTrackingListener);
     }
 
-    /**
-     * Gets the remote address from the translet, considering the X-Forwarded-For header.
-     * @param translet the current translet
-     * @return the remote IP address
-     */
-    public static String getRemoteAddr(@NonNull Translet translet) {
-        String remoteAddr = translet.getRequestAdapter().getHeader(HttpHeaders.X_FORWARDED_FOR);
-        if (StringUtils.hasLength(remoteAddr)) {
-            if (remoteAddr.contains(",")) {
-                remoteAddr = StringUtils.tokenize(remoteAddr, ",", true)[0];
-            }
-        } else {
-            remoteAddr = ((HttpServletRequest)translet.getRequestAdaptee()).getRemoteAddr();
-        }
-        return remoteAddr;
+    @Override
+    public int hashCode() {
+        return UserTrackingListener.class.hashCode();
     }
 
 }

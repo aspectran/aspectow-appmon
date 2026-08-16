@@ -308,7 +308,7 @@ public class AppMonManager extends InstantActivitySupport {
      * @return the bean instance
      */
     public <V> V getBean(@NonNull String id) {
-        return getActivityContext().getBeanRegistry().getBean(id);
+        return getBeanRegistry().getBean(id);
     }
 
     /**
@@ -318,7 +318,16 @@ public class AppMonManager extends InstantActivitySupport {
      * @return the bean instance
      */
     public <V> V getBean(Class<V> type) {
-        return getActivityContext().getBeanRegistry().getBean(type);
+        return getBeanRegistry().getBean(type);
+    }
+
+    /**
+     * Checks if a bean with the given ID exists in the ActivityContext's bean registry.
+     * @param id the ID of the bean
+     * @return {@code true} if the bean exists, {@code false} otherwise
+     */
+    public boolean containsBean(String id) {
+        return getBeanRegistry().containsBean(id);
     }
 
     /**
@@ -327,7 +336,7 @@ public class AppMonManager extends InstantActivitySupport {
      * @return {@code true} if the bean exists, {@code false} otherwise
      */
     public boolean containsBean(Class<?> type) {
-        return getActivityContext().getBeanRegistry().containsBean(type);
+        return getBeanRegistry().containsBean(type);
     }
 
     protected void setNodeMessageRelayHandler(NodeMessageRelayHandler nodeMessageRelayHandler) {

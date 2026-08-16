@@ -33,7 +33,7 @@ public class SessionEventReadingListener implements SessionListener {
      * Instantiates a new SessionEventReadingListener.
      * @param eventReader the reader to which events will be forwarded
      */
-    public SessionEventReadingListener(SessionEventReader eventReader) {
+    public SessionEventReadingListener(@NonNull SessionEventReader eventReader) {
         this.eventReader = eventReader;
     }
 

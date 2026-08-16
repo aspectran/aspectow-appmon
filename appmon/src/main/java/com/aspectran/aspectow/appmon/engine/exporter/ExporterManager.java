@@ -209,6 +209,15 @@ public class ExporterManager {
     }
 
     /**
+     * Checks if a bean with the given ID exists in the ActivityContext.
+     * @param id the ID of the bean
+     * @return {@code true} if the bean exists, {@code false} otherwise
+     */
+    public boolean containsBean(String id) {
+        return appMonManager.containsBean(id);
+    }
+
+    /**
      * Checks if a bean of the given type exists in the ActivityContext.
      * @param type the type of the bean
      * @return {@code true} if the bean exists, {@code false} otherwise

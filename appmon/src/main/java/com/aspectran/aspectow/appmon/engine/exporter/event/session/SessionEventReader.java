@@ -15,6 +15,9 @@
  */
 package com.aspectran.aspectow.appmon.engine.exporter.event.session;
 
+import com.aspectran.aspectow.appmon.common.listener.UserTrackingListener;
+import com.aspectran.aspectow.appmon.common.support.IPCountryResolver;
+import com.aspectran.aspectow.appmon.common.support.SessionUserResolver;
 import com.aspectran.aspectow.appmon.engine.config.EventInfo;
 import com.aspectran.aspectow.appmon.engine.exporter.ExporterManager;
 import com.aspectran.aspectow.appmon.engine.exporter.event.AbstractEventReader;
@@ -26,12 +29,17 @@ import com.aspectran.core.component.session.SessionListener;
 import com.aspectran.core.component.session.SessionListenerRegistration;
 import com.aspectran.core.component.session.SessionManager;
 import com.aspectran.core.component.session.SessionStatistics;
+import com.aspectran.core.context.ActivityContext;
 import com.aspectran.undertow.server.TowServer;
 import com.aspectran.undertow.support.SessionListenerRegistrationBean;
+import com.aspectran.utils.BeanUtils;
+import com.aspectran.utils.ClassUtils;
 import com.aspectran.utils.StringUtils;
+import com.aspectran.utils.apon.Parameters;
 import com.aspectran.utils.json.JsonBuilder;
 import com.aspectran.utils.json.JsonString;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +47,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -51,14 +60,27 @@ public class SessionEventReader extends AbstractEventReader {
 
     private static final Logger logger = LoggerFactory.getLogger(SessionEventReader.class);
 
+    public static final String PARAMETER_USERNAME_ATTRIBUTE = "usernameAttribute";
+    public static final String PARAMETER_USER_RESOLVER = "userResolver";
+
     public static final String USER_NAME = "user.name";
     public static final String USER_IP_ADDRESS = "user.ipAddress";
     public static final String USER_COUNTRY_CODE = "user.countryCode";
     public static final String USER_ACTIVITY_COUNT = "user.activityCount";
 
+    private static final Set<String> registeredTrackingTargets = ConcurrentHashMap.newKeySet();
+
     private String serverId;
 
     private String deploymentName;
+
+    private SessionUserResolver userResolver;
+
+    private String usernameAttribute;
+
+    private String rootAttributeName;
+
+    private String nestedPropertyPath;
 
     private SessionManager sessionManager;
 
@@ -84,6 +106,53 @@ public class SessionEventReader extends AbstractEventReader {
         String[] arr = StringUtils.divide(getEventInfo().getTarget(), "/");
         serverId = arr[0];
         deploymentName = arr[1];
+
+        String targetKey = serverId + "/" + deploymentName;
+        if (registeredTrackingTargets.add(targetKey)) {
+            IPCountryResolver ipCountryResolver = null;
+            if (getExporterManager().containsBean(IPCountryResolver.class)) {
+                ipCountryResolver = getExporterManager().getBean(IPCountryResolver.class);
+            }
+            ActivityContext context = getExporterManager().getAppMonManager().getActivityContext();
+            UserTrackingListener userTrackingListener = new UserTrackingListener(context, ipCountryResolver);
+            getSessionListenerRegistration().register(userTrackingListener, deploymentName);
+        }
+
+        if (getEventInfo().hasParameters()) {
+            Parameters params = getEventInfo().getParameters();
+            String userResolverParam = params.getString(PARAMETER_USER_RESOLVER);
+            if (StringUtils.hasText(userResolverParam)) {
+                if (getExporterManager().containsBean(userResolverParam)) {
+                    userResolver = getExporterManager().getBean(userResolverParam);
+                } else {
+                    Class<?> resolverType = ClassUtils.classForName(userResolverParam);
+                    userResolver = (SessionUserResolver)ClassUtils.createInstance(resolverType);
+                }
+            } else if (getExporterManager().containsBean(SessionUserResolver.class)) {
+                userResolver = getExporterManager().getBean(SessionUserResolver.class);
+            }
+
+            usernameAttribute = params.getString(PARAMETER_USERNAME_ATTRIBUTE);
+            if (StringUtils.hasText(usernameAttribute)) {
+                int dotIdx = usernameAttribute.indexOf('.');
+                if (dotIdx > 0) {
+                    rootAttributeName = usernameAttribute.substring(0, dotIdx);
+                    nestedPropertyPath = usernameAttribute.substring(dotIdx + 1);
+                } else {
+                    rootAttributeName = usernameAttribute;
+                    nestedPropertyPath = null;
+                }
+            } else {
+                rootAttributeName = USER_NAME;
+                nestedPropertyPath = null;
+            }
+        } else {
+            if (getExporterManager().containsBean(SessionUserResolver.class)) {
+                userResolver = getExporterManager().getBean(SessionUserResolver.class);
+            }
+            rootAttributeName = USER_NAME;
+            nestedPropertyPath = null;
+        }
     }
 
     @Override
@@ -176,13 +245,13 @@ public class SessionEventReader extends AbstractEventReader {
     }
 
     void attributeAdded(Session session, String name) {
-        if (USER_NAME.equals(name)) {
+        if ((rootAttributeName != null && rootAttributeName.equals(name)) || USER_NAME.equals(name)) {
             sessionCreated(session);
         }
     }
 
     void attributeUpdated(Session session, String name) {
-        if (USER_NAME.equals(name)) {
+        if ((rootAttributeName != null && rootAttributeName.equals(name)) || USER_NAME.equals(name)) {
             sessionCreated(session);
         }
     }
@@ -245,14 +314,14 @@ public class SessionEventReader extends AbstractEventReader {
         return list.toArray(new JsonString[0]);
     }
 
-    private static JsonString serialize(@NonNull Session session) {
+    private JsonString serialize(@NonNull Session session) {
         AtomicInteger count = session.getAttribute(USER_ACTIVITY_COUNT);
         return new JsonBuilder()
                 .nullWritable(false)
                 .prettyPrint(false)
                 .object()
                     .put("sessionId", session.getId())
-                    .put("username", session.getAttribute(USER_NAME))
+                    .put("username", resolveUsername(session))
                     .put("ipAddress", session.getAttribute(USER_IP_ADDRESS))
                     .put("countryCode", session.getAttribute(USER_COUNTRY_CODE))
                     .put("activityCount", (count != null ? count.get() : 0))
@@ -261,6 +330,43 @@ public class SessionEventReader extends AbstractEventReader {
                     .put("tempResident", session.isTempResident())
                 .endObject()
                 .toJsonString();
+    }
+
+    @Nullable
+    private String resolveUsername(@NonNull Session session) {
+        if (userResolver != null) {
+            try {
+                String username = userResolver.resolveUsername(deploymentName, session);
+                if (StringUtils.hasLength(username)) {
+                    return username;
+                }
+            } catch (Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to resolve username using userResolver for deployment {}", deploymentName, e);
+                }
+            }
+        }
+        if (StringUtils.hasText(usernameAttribute)) {
+            try {
+                Object rootObj = session.getAttribute(rootAttributeName);
+                if (rootObj != null) {
+                    if (nestedPropertyPath != null) {
+                        Object propVal = BeanUtils.getProperty(rootObj, nestedPropertyPath);
+                        if (propVal != null) {
+                            return propVal.toString();
+                        }
+                    } else {
+                        return rootObj.toString();
+                    }
+                }
+            } catch (Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to resolve username attribute '{}' for deployment {}", usernameAttribute, deploymentName, e);
+                }
+            }
+        }
+        Object username = session.getAttribute(USER_NAME);
+        return (username != null ? username.toString() : null);
     }
 
     @NonNull
