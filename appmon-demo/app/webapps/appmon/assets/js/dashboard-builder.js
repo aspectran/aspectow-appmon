@@ -596,7 +596,7 @@ class DashboardBuilder {
                 url += "?nodeId=" + encodeURIComponent(this.nodeToSubscribe);
             }
             const name = "appmon_dashboard_popup";
-            const features = "width=1200,height=1068,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes";
+            const features = "width=1500,height=1070,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes";
             const popup = window.open(url, name, features);
             if (popup) {
                 this.suspendMonitoring();
