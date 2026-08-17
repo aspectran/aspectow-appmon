@@ -114,15 +114,17 @@ public class AnatomyActivity {
         Set<ActivityContext> seenContexts = new LinkedHashSet<>();
         int index = 0;
         for (CoreService service : services) {
-            ActivityContext currentContext = service.getActivityContext();
-            if (seenContexts.add(currentContext)) {
-                String name = service.getContextName();
-                if (StringUtils.isEmpty(name)) {
-                    name = Integer.toString(index);
+            if (!service.isDerived() || service.getContextName() != null) {
+                ActivityContext context = service.getActivityContext();
+                if (seenContexts.add(context)) {
+                    String name = service.getContextName();
+                    if (StringUtils.isEmpty(name)) {
+                        name = Integer.toString(index);
+                    }
+                    contextMap.putIfAbsent(name, context);
                 }
-                contextMap.putIfAbsent(name, currentContext);
+                index++;
             }
-            index++;
         }
         return contextMap;
     }
