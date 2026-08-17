@@ -32,7 +32,9 @@ import com.aspectran.aspectow.node.redis.RedisScheduledJobLockProvider;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.core.context.rule.ScheduleRule;
 import com.aspectran.core.context.rule.type.TriggerType;
+import com.aspectran.core.service.CoreService;
 import com.aspectran.core.service.CoreServiceHolder;
+import com.aspectran.core.service.ServiceHoldingListener;
 import com.aspectran.utils.Assert;
 import com.aspectran.utils.PBEncryptionUtils;
 import com.aspectran.utils.StringUtils;
@@ -238,18 +240,32 @@ public abstract class NodeManagerBuilder {
             CoreServiceHolder.setJobLockProvider(jobLockProvider);
             logger.info("Registered RedisScheduledJobLockProvider for cluster-wide job locking");
 
-            if (context.getScheduleRuleRegistry() != null) {
-                for (ScheduleRule scheduleRule : context.getScheduleRuleRegistry().getScheduleRules()) {
-                    if (scheduleRule.getTriggerType() == TriggerType.SIMPLE && !scheduleRule.isIsolated()) {
-                        logger.warn("Schedule '{}' is configured with a SIMPLE trigger but is not isolated. " +
-                                "Simple triggers cannot be locked reliably across multiple nodes due to potential time drift. " +
-                                "It will be forced to execute in isolated mode.", scheduleRule.getId());
-                        scheduleRule.setIsolated(true);
-                    }
+            isolateSimpleTriggers(context);
+            for (CoreService service : CoreServiceHolder.getAllServices()) {
+                isolateSimpleTriggers(service.getActivityContext());
+            }
+            CoreServiceHolder.addServiceHoldingListener(new ServiceHoldingListener() {
+                @Override
+                public void afterServiceHolding(CoreService service) {
+                    isolateSimpleTriggers(service.getActivityContext());
+                }
+            });
+        }
+        return nodeManager;
+    }
+
+    private static void isolateSimpleTriggers(ActivityContext context) {
+        if (context != null && context.getScheduleRuleRegistry() != null) {
+            for (ScheduleRule scheduleRule : context.getScheduleRuleRegistry().getScheduleRules()) {
+                if (scheduleRule.getTriggerType() == TriggerType.SIMPLE && !scheduleRule.isIsolated()) {
+                    logger.warn("Schedule '{}' in context '{}' is configured with a SIMPLE trigger but is not isolated. " +
+                            "Simple triggers cannot be locked reliably across multiple nodes due to potential time drift. " +
+                            "It will be forced to execute in isolated mode.",
+                            scheduleRule.getId(), (context.getName() != null ? context.getName() : "root"));
+                    scheduleRule.setIsolated(true);
                 }
             }
         }
-        return nodeManager;
     }
 
     private static String resolveMyNodeId() {
