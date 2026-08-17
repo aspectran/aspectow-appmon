@@ -96,7 +96,7 @@
                 <div class="d-flex flex-column flex-sm-row align-items-md-start gap-3 mb-3">
                     <h5 class="fw-bold mb-0">Cluster Status</h5>
                     <div class="d-flex gap-2 align-items-center">
-                        <span class="badge bg-secondary-subtle text-secondary small fw-semibold" id="total-node-count" th:text="${page.nodes != null ? #lists.size(page.nodes) : 0} + ' Nodes'">0 Nodes</span>
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle small fw-semibold" id="total-node-count" th:text="${page.nodes != null ? #lists.size(page.nodes) : 0} + ' Nodes'">0 Nodes</span>
                         <a th:href="@{/cluster/nodes}" class="btn btn-sm btn-link p-0 ms-auto text-decoration-none"
                            th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">Manage Nodes <i class="bi bi-arrow-right"></i></a>
                     </div>
@@ -106,7 +106,7 @@
                     <div th:each="group : ${page.groups}" class="mb-3" th:if="${page.groupedNodes != null and page.groupedNodes[group.id] != null}">
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <div class="small text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;" th:text="${group.title}">Group Title</div>
-                            <span class="badge bg-body-tertiary text-body-secondary small" style="font-size: 0.65rem;" th:text="${page.groupedNodes[group.id] != null ? #lists.size(page.groupedNodes[group.id]) : 0} + ' Nodes'">0 Nodes</span>
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle small" style="font-size: 0.65rem;" th:text="${page.groupedNodes[group.id] != null ? #lists.size(page.groupedNodes[group.id]) : 0} + ' Nodes'">0 Nodes</span>
                         </div>
                         <div class="row g-3">
                             <div class="col-md-6" th:each="nodeItem : ${page.groupedNodes[group.id]}">
@@ -139,7 +139,7 @@
                         <div class="d-flex align-items-center mb-2">
                             <div class="status-indicator me-2" th:classappend="${nodeInfo.status == 'live' ? 'bg-success' : (nodeInfo.status == 'stopping' ? 'bg-warning' : 'bg-danger')}" style="width: 10px; height: 10px; border-radius: 50%;"></div>
                             <span class="fw-bold" th:text="${nodeInfo.title}">Node Title</span>
-                            <span class="badge bg-secondary ms-auto small" style="font-size: 0.65rem;" th:text="${nodeInfo.id}">node-id</span>
+                            <span class="badge bg-secondary ms-auto small font-monospace" th:text="${nodeInfo.id}">node-id</span>
                         </div>
                         <div class="small text-muted mb-1">
                             <i class="bi bi-pc-display me-1"></i> <span th:text="${nodeInfo.host}">127.0.0.1</span>

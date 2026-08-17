@@ -17,6 +17,11 @@
                     padding-bottom: .5rem;
                 }
             }
+            .decryption-result {
+                white-space: pre-wrap;
+                word-break: break-all;
+                display: none;
+            }
         </style>
     </th:block>
 </head>
@@ -257,8 +262,9 @@
                     <h6 class="modal-title">Decryption Result</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body text-center">
-                    <div id="decryptedValue" class="fw-bold fs-5 font-monospace text-primary" style="white-space: pre-wrap; word-break: break-all;"></div>
+                <div class="modal-body">
+                    <div class="decryption-result success text-center"><span class="text-primary fw-bold fs-5 font-monospace"></span></div>
+                    <div class="decryption-result failed"><div class="display-6 text-danger text-center pb-2"><i class="bi bi-x-circle-fill"></i></div><span class="text-danger"></span></div>
                 </div>
             </div>
         </div>
@@ -567,24 +573,23 @@
         }
 
         function verifyToken(id, encryptedValue, tokenType) {
+            $('.decryption-result').hide();
             $.ajax({
                 url: /*[[@{/vault/decrypt}]]*/ '/vault/decrypt',
                 type: 'POST',
                 data: { encryptedValue: encryptedValue, tokenType: tokenType },
                 dataType: 'json',
                 success: function(res) {
-                    const $val = $('#decryptedValue');
                     if (res.success) {
-                        $val.text(res.data).removeClass('text-danger').addClass('text-primary');
+                        $('.decryption-result.success').show().find('span').text(res.data);
                     } else {
                         const msg = (res.error && res.error.message) ? res.error.message : 'Decryption failed.';
-                        $val.text(msg).removeClass('text-primary').addClass('text-danger');
+                        $('.decryption-result.failed').show().find('span').text(msg);
                     }
                     verifyModal.show();
                 },
                 error: function(xhr) {
-                    const $val = $('#decryptedValue');
-                    $val.text('System error occurred.').removeClass('text-primary').addClass('text-danger');
+                    $('.decryption-result.failed').show().find('span').text('System error occurred.');
                     verifyModal.show();
                 }
             });

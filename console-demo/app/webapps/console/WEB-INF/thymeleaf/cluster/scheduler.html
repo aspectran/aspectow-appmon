@@ -867,7 +867,7 @@
                 html += '<div class="col-lg-5 col-xl-4 col-md-12 d-flex flex-column">';
                 html += '<div class="d-flex justify-content-between align-items-center mb-2 px-1">';
                 html += '<span class="fw-bold text-uppercase small text-muted"><i class="bi bi-grid-fill me-1"></i> Cluster Nodes</span>';
-                html += '<span class="badge bg-secondary-subtle text-secondary small" id="dashboard-node-count">' + (nodes ? nodes.length : 0) + ' Nodes</span>';
+                html += '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle small" id="dashboard-node-count">' + (nodes ? nodes.length : 0) + ' Nodes</span>';
                 html += '</div>';
                 html += '<div id="left-column-scroll" class="left-column-scroll">';
                 html += '<div class="row g-2 mx-0" id="nodes-dashboard">';
@@ -890,7 +890,7 @@
                             <div class="card node-grid-card shadow-sm p-3 h-100" onclick="switchToDetailView('${n.id}')">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <h6 class="fw-bold mb-0 text-truncate" style="max-width: 70%;" title="${title}">${title}</h6>
-                                    <span class="small text-muted font-monospace">${n.id}</span>
+                                    <span class="badge bg-secondary small font-monospace">${n.id}</span>
                                 </div>
                                 <div class="d-flex align-items-center mb-1">
                                     <span id="led-${n.id}" class="status-led ${statusClass}"></span>
@@ -1307,7 +1307,7 @@
                                     ${schedule.id}
                                 </td>
                                 <td>
-                                    <code class="small px-2 py-1 bg-body-tertiary rounded">${schedule.scheduler?.trigger?.expression?.expression || schedule.scheduler?.trigger?.type || 'N/A'}</code>
+                                    <code class="small px-2 py-1 bg-body-tertiary border border-secondary-subtle rounded">${schedule.scheduler?.trigger?.expression?.expression || schedule.scheduler?.trigger?.type || 'N/A'}</code>
                                 </td>
                                 <td class="text-center">
                                     <span id="badge-${serviceId}-${safeScheduleId}" class="badge rounded-pill status-badge ${isScheduleEnabled ? 'text-bg-success' : 'text-bg-danger'}">
@@ -1325,7 +1325,7 @@
                             </tr>
                             <tr class="collapse" id="jobs-${serviceId}-${safeScheduleId}">
                                 <td colspan="5" class="p-0">
-                                    <div class="p-3">
+                                    <div class="px-3 py-1">
                                         <div class="job-table p-3">
                                             <div class="small fw-bold text-muted mb-2 text-uppercase">Jobs in this Schedule</div>
                                             <div class="list-group list-group-flush border-top border-bottom">`;
