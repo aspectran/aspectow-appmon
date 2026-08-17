@@ -238,7 +238,7 @@ arguments: {
             let commandHistory = [];
             const templates = {
                 sysinfo: 'command: sysinfo\narguments: {\n    item: { value: mem }\n}',
-                translet: 'command: translet\ntranslet: sample/commands/hello',
+                translet: 'command: translet\ntranslet: demo/commands/hello',
                 restart: 'command: restart\nrequeuable: false'
             };
 
@@ -497,8 +497,8 @@ arguments: {
                         return;
                     }
 
-                    if (commandVal === 'translet' && transletVal !== 'sample/commands/hello') {
-                        alert('Only "sample/commands/hello" translet can be executed in the demo environment.');
+                    if (commandVal === 'translet' && transletVal !== 'demo/commands/hello') {
+                        alert('Only "demo/commands/hello" translet can be executed in the demo environment.');
                         return;
                     }
                 }

@@ -185,9 +185,9 @@ public class WebsocketCommandBridge extends SimplifiedEndpoint implements Comman
                     return;
                 }
 
-                if ("translet".equals(commandName) && !"sample/commands/hello".equals(transletName)) {
+                if ("translet".equals(commandName) && !"demo/commands/hello".equals(transletName)) {
                     CommandResponseParameters response = new CommandResponseParameters()
-                            .setError("Only 'sample/commands/hello' translet can be executed in the demo environment.");
+                            .setError("Only 'demo/commands/hello' translet can be executed in the demo environment.");
                     sendText(session, response.toString());
                     return;
                 }
