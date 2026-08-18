@@ -7,9 +7,9 @@
     <style>
         .build-container {
             display: grid;
-            grid-template-columns: 360px 1fr;
+            grid-template-columns: 420px 1fr;
             gap: 20px;
-            height: calc(100vh - 250px);
+            height: calc(100vh - 320px);
             min-height: 650px;
         }
         .control-panel {
@@ -25,6 +25,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            min-height: 550px;
         }
         .terminal-header {
             background: #222;
@@ -92,6 +93,26 @@
             font-weight: 600;
             font-family: monospace;
         }
+
+        /* Mobile & Tablet Responsive Layout */
+        @media (max-width: 991.98px) {
+            .build-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                min-height: auto;
+                gap: 15px;
+            }
+            .control-panel {
+                overflow-y: visible;
+            }
+            .terminal-panel {
+                height: 500px;
+                min-height: 380px;
+            }
+            .quick-actions .btn-outline-danger {
+                margin-left: 0 !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -119,7 +140,7 @@
                         <option value="all" th:selected="${page.targetNodeId == null}">All Nodes in Cluster</option>
                     </select>
                 </div>
-                <div class="col-md-4" id="target-value-container">
+                <div class="col-md-5" id="target-value-container">
                     <select id="target-value" class="form-select form-select-sm">
                         <!-- Dynamic options -->
                     </select>
@@ -160,21 +181,32 @@
                     <h6 class="fw-bold mb-3"><i class="bi bi-terminal me-1"></i> Script Execution</h6>
                     
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">Script File</label>
-                        <select id="script-selector" class="form-select form-select-sm">
-                            <option value="5-pull_build_deploy.sh" selected>5-pull_build_deploy.sh (Full Deploy)</option>
-                            <option value="1-pull.sh">1-pull.sh (Git Pull Only)</option>
-                            <option value="2-build.sh">2-build.sh (Maven Build Only)</option>
-                            <option value="3-deploy_config.sh">3-deploy_config.sh (Deploy Config)</option>
-                            <option value="4-deploy_webapps.sh">4-deploy_webapps.sh (Deploy Webapps)</option>
-                            <option value="6-pull_deploy.sh">6-pull_deploy.sh (Pull &amp; Deploy)</option>
-                            <option value="7-pull_deploy_config_only.sh">7-pull_deploy_config_only.sh</option>
-                            <option value="8-pull_deploy_webapps_only.sh">8-pull_deploy_webapps_only.sh</option>
-                            <option value="9-pull_deploy_config_webapps_only.sh">9-pull_deploy_config_webapps_only.sh</option>
-                            <option value="daemon.sh">daemon.sh (Daemon Control)</option>
-                            <option value="service.sh">service.sh (Service Control)</option>
+                        <label class="form-label small fw-bold text-muted">Execution Action / Script</label>
+                        <select id="script-selector" class="form-select form-select-sm" onchange="onScriptChange()">
+                            <optgroup label="🚀 Standard Deploy (Recommended)">
+                                <option value="5-pull_build_deploy.sh" selected>Full Build &amp; Deploy (Git Pull + Build + Deploy All)</option>
+                                <option value="6-pull_deploy.sh">Fast Deploy (Git Pull + Deploy, No Rebuild)</option>
+                            </optgroup>
+                            <optgroup label="⚙️ Single Step (Pipeline Execution)">
+                                <option value="1-pull.sh">1. Git Pull Only (Fetch Source)</option>
+                                <option value="2-build.sh">2. Maven Build Only (Compile &amp; Package)</option>
+                                <option value="3-deploy_config.sh">3. Deploy Config Only</option>
+                                <option value="4-deploy_webapps.sh">4. Deploy Webapps Only</option>
+                            </optgroup>
+                            <optgroup label="🛠️ Selective Deploy (Advanced)">
+                                <option value="7-pull_deploy_config_only.sh">Pull &amp; Deploy Config Only</option>
+                                <option value="8-pull_deploy_webapps_only.sh">Pull &amp; Deploy Webapps Only</option>
+                                <option value="9-pull_deploy_config_webapps_only.sh">Pull &amp; Deploy Config &amp; Webapps</option>
+                            </optgroup>
+                            <optgroup label="🔄 Server Control">
+                                <option value="daemon.sh">Restart Daemon Server (daemon.sh)</option>
+                                <option value="service.sh">Restart System Service (service.sh)</option>
+                            </optgroup>
                         </select>
                     </div>
+
+                    <!-- Pipeline Flow Preview Card -->
+                    <div id="pipeline-preview" class="p-2 mb-3 rounded bg-body-tertiary border" style="display: none;"></div>
 
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted">Git Branch / Tag (Optional)</label>
@@ -332,6 +364,126 @@
                 window.history.replaceState({}, '', url);
             }
 
+            const scriptPipelineMap = {
+                '5-pull_build_deploy.sh': {
+                    title: 'Full Build & Deploy',
+                    desc: 'Fetch latest commits from Git, execute Maven compile & package, and deploy config/webapps.',
+                    steps: [
+                        { icon: 'bi-cloud-arrow-down-fill', name: '1. Git Pull' },
+                        { icon: 'bi-gear-fill', name: '2. Maven Build' },
+                        { icon: 'bi-sliders', name: '3. Config Deploy' },
+                        { icon: 'bi-window-desktop', name: '4. Webapps Deploy' }
+                    ]
+                },
+                '6-pull_deploy.sh': {
+                    title: 'Fast Deploy (No Rebuild)',
+                    desc: 'Fetch latest source from Git and deploy directly without Maven compile step.',
+                    steps: [
+                        { icon: 'bi-cloud-arrow-down-fill', name: '1. Git Pull' },
+                        { icon: 'bi-sliders', name: '3. Config Deploy' },
+                        { icon: 'bi-window-desktop', name: '4. Webapps Deploy' }
+                    ]
+                },
+                '1-pull.sh': {
+                    title: 'Git Pull Only',
+                    desc: 'Pull latest commits and revisions from target Git remote repository.',
+                    steps: [
+                        { icon: 'bi-cloud-arrow-down-fill', name: '1. Git Pull' }
+                    ]
+                },
+                '2-build.sh': {
+                    title: 'Maven Build Only',
+                    desc: 'Compile source files and build deployment artifacts using Maven.',
+                    steps: [
+                        { icon: 'bi-gear-fill', name: '2. Maven Build' }
+                    ]
+                },
+                '3-deploy_config.sh': {
+                    title: 'Deploy Config Only',
+                    desc: 'Deploy updated configuration files to target node app/config directory.',
+                    steps: [
+                        { icon: 'bi-sliders', name: '3. Config Deploy' }
+                    ]
+                },
+                '4-deploy_webapps.sh': {
+                    title: 'Deploy Webapps Only',
+                    desc: 'Deploy web applications and static assets to app/webapps directory.',
+                    steps: [
+                        { icon: 'bi-window-desktop', name: '4. Webapps Deploy' }
+                    ]
+                },
+                '7-pull_deploy_config_only.sh': {
+                    title: 'Pull & Deploy Config Only',
+                    desc: 'Fetch latest changes and deploy configuration files only.',
+                    steps: [
+                        { icon: 'bi-cloud-arrow-down-fill', name: '1. Git Pull' },
+                        { icon: 'bi-sliders', name: '3. Config Deploy' }
+                    ]
+                },
+                '8-pull_deploy_webapps_only.sh': {
+                    title: 'Pull & Deploy Webapps Only',
+                    desc: 'Fetch latest changes and deploy web application assets only.',
+                    steps: [
+                        { icon: 'bi-cloud-arrow-down-fill', name: '1. Git Pull' },
+                        { icon: 'bi-window-desktop', name: '4. Webapps Deploy' }
+                    ]
+                },
+                '9-pull_deploy_config_webapps_only.sh': {
+                    title: 'Pull & Deploy Config + Webapps',
+                    desc: 'Fetch latest changes and deploy both configs and webapps (without build).',
+                    steps: [
+                        { icon: 'bi-cloud-arrow-down-fill', name: '1. Git Pull' },
+                        { icon: 'bi-sliders', name: '3. Config Deploy' },
+                        { icon: 'bi-window-desktop', name: '4. Webapps Deploy' }
+                    ]
+                },
+                'daemon.sh': {
+                    title: 'Restart Daemon Server',
+                    desc: 'Gracefully shutdown and restart daemon process in detached OS session.',
+                    steps: [
+                        { icon: 'bi-stop-circle', name: 'Daemon Stop' },
+                        { icon: 'bi-play-circle-fill', name: 'Daemon Start' },
+                        { icon: 'bi-heart-pulse-fill', name: 'Health Check' }
+                    ]
+                },
+                'service.sh': {
+                    title: 'Restart System Service',
+                    desc: 'Restart background system service process with automated health check.',
+                    steps: [
+                        { icon: 'bi-stop-circle', name: 'Service Stop' },
+                        { icon: 'bi-play-circle-fill', name: 'Service Start' },
+                        { icon: 'bi-heart-pulse-fill', name: 'Health Check' }
+                    ]
+                }
+            };
+
+            function onScriptChange() {
+                const script = $('#script-selector').val();
+                const info = scriptPipelineMap[script];
+                const $preview = $('#pipeline-preview');
+                if (!info) {
+                    $preview.empty().hide();
+                    return;
+                }
+
+                const stepsHtml = info.steps.map(s => `
+                    <span class="badge bg-secondary-subtle text-body border px-2 py-1">
+                        <i class="bi ${s.icon} me-1 text-primary"></i>${s.name}
+                    </span>
+                `).join('<i class="bi bi-arrow-right text-muted small mx-1"></i>');
+
+                $preview.html(`
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <span class="fw-bold small text-primary"><i class="bi bi-diagram-3-fill me-1"></i>Pipeline Flow</span>
+                        <code class="small text-muted">${script}</code>
+                    </div>
+                    <div class="d-flex flex-wrap align-items-center my-2 lh-lg">
+                        ${stepsHtml}
+                    </div>
+                    <div class="text-muted" style="font-size: 0.76rem;">${info.desc}</div>
+                `).show();
+            }
+
             let healthCheckTimer = null;
             let executionStartTime = null;
             let durationTicker = null;
@@ -364,12 +516,22 @@
             }
 
             function quickRun(scriptName) {
+                const targetType = $('#target-type').val();
+                const targetNodeId = (targetType === 'all' ? 'ALL nodes in cluster' : ($('#target-value').val() || 'target node'));
+                const info = scriptPipelineMap[scriptName];
+                const title = info ? info.title : scriptName;
+
+                let confirmMsg = `Are you sure you want to execute [${title}] on ${targetNodeId}?`;
                 if (scriptName === 'daemon.sh' || scriptName === 'service.sh') {
-                    if (!confirm('Are you sure you want to restart the server on the target node?\n\nThe server will temporarily go offline and reconnect automatically once restarted.')) {
-                        return;
-                    }
+                    confirmMsg += `\n\nWarning: The server will temporarily go offline and reconnect automatically once restarted.`;
                 }
+
+                if (!confirm(confirmMsg)) {
+                    return;
+                }
+
                 $('#script-selector').val(scriptName);
+                onScriptChange();
                 dispatchBuild();
             }
 
@@ -644,6 +806,7 @@
 
             $(function() {
                 onTargetTypeChange();
+                onScriptChange();
 
                 fetch(basePath + "/cluster/token", {
                         headers: { 'Accept': 'application/json' }
