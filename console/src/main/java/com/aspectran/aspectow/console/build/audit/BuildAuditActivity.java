@@ -23,9 +23,11 @@ import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
+import com.aspectran.core.component.bean.annotation.Hint;
 import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.RequestToGet;
+import com.aspectran.utils.StringUtils;
 import com.aspectran.web.activity.response.RestResponse;
 import com.aspectran.web.support.rest.response.FailureResponse;
 import com.aspectran.web.support.rest.response.SuccessResponse;
@@ -88,9 +90,15 @@ public class BuildAuditActivity {
 
         List<BuildHistory> historyList = buildAuditService.searchHistory(query);
 
+        String layout = translet.getParameter("layout");
+        if (!StringUtils.hasText(layout)) {
+            layout = "popup";
+        }
+
         Map<String, Object> model = new HashMap<>();
         model.put("title", "Build & Deployment Audit Trail");
         model.put("style", "audit-page");
+        model.put("layout", layout);
         model.put("group", "cluster-menu");
         model.put("clusterMode", clusterMode);
         model.put("nodes", nodes);

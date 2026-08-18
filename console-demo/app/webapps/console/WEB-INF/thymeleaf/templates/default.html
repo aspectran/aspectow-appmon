@@ -44,17 +44,13 @@
                        th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                         Nodes
                     </a>
-                    <a th:href="@{/cluster/commands/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'commands-page' ? 'active' : ''}"
-                       th:if="${session.USER_INFO.hasPermission('COMMAND_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
-                        Remote Commands
-                    </a>
                     <a th:href="@{/cluster/build/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'build-page' ? 'active' : ''}"
                        th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                         Build &amp; Deployment
                     </a>
-                    <a th:href="@{/cluster/build/audit/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'audit-page' ? 'active' : ''}"
-                       th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
-                        Audit Trail
+                    <a th:href="@{/cluster/commands/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'commands-page' ? 'active' : ''}"
+                       th:if="${session.USER_INFO.hasPermission('COMMAND_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
+                        Remote Commands
                     </a>
                     <a th:href="@{/cluster/scheduler/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'scheduler-page' ? 'active' : ''}"
                        th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">

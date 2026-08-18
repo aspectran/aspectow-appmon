@@ -156,15 +156,13 @@ insert IGNORE into asc_permission (perm_code, description) values ('NODE_MANAGE'
 insert IGNORE into asc_permission (perm_code, description) values ('COMMAND_EXECUTE', 'Execute remote commands');
 insert IGNORE into asc_permission (perm_code, description) values ('BUILD_VIEW', 'View build and deployment status');
 insert IGNORE into asc_permission (perm_code, description) values ('BUILD_EXECUTE', 'Execute build and deployment scripts');
-insert IGNORE into asc_permission (perm_code, description) values ('AUDIT_VIEW', 'View compliance audit records');
-insert IGNORE into asc_permission (perm_code, description) values ('AUDIT_EXPORT', 'Export compliance audit reports');
 
 -- Map permissions to SUPER_ADMIN
 insert IGNORE into asc_role_permission (role_id, perm_id) select 1, perm_id from asc_permission;
 -- Map permissions to ADMIN
-insert IGNORE into asc_role_permission (role_id, perm_id) select 2, perm_id from asc_permission where perm_code in ('MONITOR_VIEW', 'COMMAND_EXECUTE', 'NODE_MANAGE', 'BUILD_VIEW', 'BUILD_EXECUTE', 'AUDIT_VIEW', 'AUDIT_EXPORT');
+insert IGNORE into asc_role_permission (role_id, perm_id) select 2, perm_id from asc_permission where perm_code in ('MONITOR_VIEW', 'COMMAND_EXECUTE', 'NODE_MANAGE', 'BUILD_VIEW', 'BUILD_EXECUTE');
 -- Map permissions to VIEWER
-insert IGNORE into asc_role_permission (role_id, perm_id) select 3, perm_id from asc_permission where perm_code in ('MONITOR_VIEW', 'BUILD_VIEW', 'AUDIT_VIEW');
+insert IGNORE into asc_role_permission (role_id, perm_id) select 3, perm_id from asc_permission where perm_code in ('MONITOR_VIEW');
 -- Map permissions to DEMO
 insert IGNORE into asc_role_permission (role_id, perm_id) select 4, perm_id from asc_permission;
 

@@ -6,7 +6,8 @@
 /*.iws
 /.idea
 /target
+/.build
 app/.lock
-app/jsvc_daemon.pid
+app/*.pid
 app/bin/jdk-*
 app/**/*.xml.apon

@@ -79,8 +79,8 @@ public class AppMonActivity {
                 "title", "Application Monitoring",
                 "style", "monitoring-page",
                 "group", "cluster-menu",
-                "appsToSubscribe", StringUtils.nullToEmpty(appsToSubscribe),
                 "layout", "default",
+                "appsToSubscribe", StringUtils.nullToEmpty(appsToSubscribe),
                 "clusterMode", appMonManager.getClusterMode()
         );
     }
@@ -98,8 +98,8 @@ public class AppMonActivity {
         return Map.of(
                 "title", "Application Monitoring",
                 "style", "monitoring-page",
-                "appsToSubscribe", StringUtils.nullToEmpty(appsToSubscribe),
                 "layout", "popup",
+                "appsToSubscribe", StringUtils.nullToEmpty(appsToSubscribe),
                 "clusterMode", appMonManager.getClusterMode()
         );
     }

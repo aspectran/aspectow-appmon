@@ -927,7 +927,7 @@
                                 </div>
                             </div>
                             <div id="log-viewer-cluster-dashboard" class="log-container flex-grow-1" style="height: 100%; min-height: 440px;">
-                                <div class="text-muted italic">Listening for live log events from all cluster nodes...</div>
+                                <div class="text-muted fst-italic">Listening for live log events from all cluster nodes...</div>
                             </div>
                         </div>
                     </div>
@@ -1026,7 +1026,7 @@
 
             function clearClusterDashboardLog() {
                 const $container = $('#log-viewer-cluster-dashboard');
-                $container.empty().append('<div class="text-muted italic">Log cleared. Listening for live log events...</div>');
+                $container.empty().append('<div class="text-muted fst-italic">Log cleared. Listening for live log events...</div>');
             }
 
             function toggleExpandClusterDashboardLog() {
@@ -1387,7 +1387,7 @@
                             </div>
                             <div id="log-viewer-${service.loggingGroup}" class="log-container" 
                                  onscroll="onLogScroll(this, '${service.loggingGroup}')">
-                                <div class="text-muted italic">Waiting for logs...</div>
+                                <div class="text-muted fst-italic">Waiting for logs...</div>
                             </div>
                         </div>`;
                     }
@@ -1494,7 +1494,7 @@
                 if ($container.find('.text-muted').length > 0) {
                     $container.empty();
                 }
-                $container.prepend('<div class="loading-logs text-info small italic py-2"><i class="bi bi-arrow-up-circle me-2"></i>Loading previous logs...</div>');
+                $container.prepend('<div class="loading-logs text-info small fst-italic py-2"><i class="bi bi-arrow-up-circle me-2"></i>Loading previous logs...</div>');
 
                 const request = {
                     header: "execute",
@@ -1511,7 +1511,7 @@
 
             function clearLog(loggingGroup) {
                 const $container = $(`#log-viewer-${loggingGroup}`);
-                $container.empty().append('<div class="text-muted italic">Log cleared.</div>');
+                $container.empty().append('<div class="text-muted fst-italic">Log cleared.</div>');
                 $container.data('no-more-logs', false);
                 $container.data('loading', false);
             }
