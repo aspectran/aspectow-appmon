@@ -17,6 +17,7 @@ package com.aspectran.aspectow.console.build.bridge;
 
 import com.aspectran.aspectow.console.build.manager.BuildExecutionInfo;
 import com.aspectran.aspectow.node.manager.NodeMessagePublisher;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,7 +116,7 @@ public class BuildDeployBroker {
     /**
      * Broadcasts a status change event to connected clients.
      */
-    public void broadcastStatusChanged(BuildExecutionInfo info) {
+    public void broadcastStatusChanged(@NonNull BuildExecutionInfo info) {
         BuildResponseParameters res = new BuildResponseParameters()
                 .setHeader("status")
                 .setExecutionId(info.getExecutionId())

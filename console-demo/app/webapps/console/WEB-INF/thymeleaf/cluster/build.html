@@ -333,6 +333,35 @@
             }
 
             let healthCheckTimer = null;
+            let executionStartTime = null;
+            let durationTicker = null;
+
+            function startDurationTicker() {
+                if (durationTicker) {
+                    clearInterval(durationTicker);
+                }
+                executionStartTime = Date.now();
+                $('#meta-duration').text('0.0s');
+                durationTicker = setInterval(() => {
+                    if (executionStartTime) {
+                        const elapsed = ((Date.now() - executionStartTime) / 1000).toFixed(1);
+                        $('#meta-duration').text(elapsed + 's');
+                    }
+                }, 100);
+            }
+
+            function stopDurationTicker(finalDurationMs) {
+                if (durationTicker) {
+                    clearInterval(durationTicker);
+                    durationTicker = null;
+                }
+                if (finalDurationMs !== undefined && finalDurationMs !== null && finalDurationMs > 0) {
+                    $('#meta-duration').text((finalDurationMs / 1000).toFixed(1) + 's');
+                } else if (executionStartTime) {
+                    const elapsed = ((Date.now() - executionStartTime) / 1000).toFixed(1);
+                    $('#meta-duration').text(elapsed + 's');
+                }
+            }
 
             function quickRun(scriptName) {
                 if (scriptName === 'daemon.sh' || scriptName === 'service.sh') {
@@ -361,22 +390,27 @@
                     fetch(basePath + `/cluster/build/health/${target}`)
                         .then(res => res.json())
                         .then(res => {
-                            if (res.status === 'success' && res.data && res.data.alive) {
+                            if (res.success && res.data && res.data.alive) {
                                 clearInterval(healthCheckTimer);
                                 healthCheckTimer = null;
-                                appendTerminalLine(`[HEALTH CHECK] Node '${target}' is successfully back ONLINE!`, 'success');
+                                const totalDurationMs = executionStartTime ? (Date.now() - executionStartTime) : (attempts * 2000);
+                                stopDurationTicker(totalDurationMs);
+                                appendTerminalLine(`[HEALTH CHECK] Node '${target}' is successfully back ONLINE! (${(totalDurationMs / 1000).toFixed(1)}s)`, 'success');
                                 $('#connection-indicator').text("CONNECTED").removeClass("bg-secondary bg-danger bg-warning").addClass("bg-success");
-                                updateStatusUI({ status: 'SUCCESS' });
+                                updateStatusUI({ status: 'SUCCESS', durationMs: totalDurationMs });
                             } else if (attempts >= maxAttempts) {
                                 clearInterval(healthCheckTimer);
                                 healthCheckTimer = null;
+                                stopDurationTicker();
                                 appendTerminalLine(`[HEALTH CHECK] Timeout waiting for node '${target}' to recover. Please check server logs manually.`, 'error');
+                                updateStatusUI({ status: 'TIMEOUT' });
                             }
                         })
                         .catch(err => {
                             if (attempts >= maxAttempts) {
                                 clearInterval(healthCheckTimer);
                                 healthCheckTimer = null;
+                                stopDurationTicker();
                             }
                         });
                 }, 2000);
@@ -394,6 +428,7 @@
                 }
 
                 clearTerminal();
+                startDurationTicker();
                 $('#meta-error-row').addClass('d-none');
                 $('#meta-error-summary').text('-');
                 appendTerminalLine(`[INIT] Requesting execution of ${scriptName} on ${targetNodeId || 'all nodes'}...`, 'info');
@@ -436,6 +471,7 @@
                         };
                         client.sendMessage(req);
                         appendTerminalLine(`[ABORT] Cancellation signal sent for ${currentExecutionId}...`, 'warn');
+                        stopDurationTicker();
                     }
                 }
             }
@@ -492,7 +528,9 @@
                 if (data.gitBranch) $('#meta-branch').text(data.gitBranch);
                 if (data.gitCommitBefore) $('#meta-commit-before').text(data.gitCommitBefore.substring(0, 8));
                 if (data.gitCommitAfter) $('#meta-commit-after').text(data.gitCommitAfter.substring(0, 8));
-                if (data.durationMs) $('#meta-duration').text((data.durationMs / 1000).toFixed(1) + 's');
+                if (data.durationMs !== undefined && data.durationMs !== null && data.durationMs > 0) {
+                    $('#meta-duration').text((data.durationMs / 1000).toFixed(1) + 's');
+                }
                 if (data.exitCode !== undefined && data.exitCode !== null) $('#meta-exit-code').text(data.exitCode);
 
                 const status = data.status || 'IDLE';
@@ -517,16 +555,21 @@
                     $('#btn-dispatch').prop('disabled', false);
                     $('#btn-cancel').prop('disabled', true);
                     $('#terminal-spinner').addClass('d-none');
+                    if (!healthCheckTimer) {
+                        stopDurationTicker(data.durationMs);
+                    }
                 } else if (status === 'FAILED' || status === 'TIMEOUT') {
                     $badge.addClass('bg-danger');
                     $('#btn-dispatch').prop('disabled', false);
                     $('#btn-cancel').prop('disabled', true);
                     $('#terminal-spinner').addClass('d-none');
+                    stopDurationTicker(data.durationMs);
                 } else if (status === 'CANCELLED') {
                     $badge.addClass('bg-warning');
                     $('#btn-dispatch').prop('disabled', false);
                     $('#btn-cancel').prop('disabled', true);
                     $('#terminal-spinner').addClass('d-none');
+                    stopDurationTicker(data.durationMs);
                 } else {
                     $badge.addClass('bg-secondary');
                     $('#btn-dispatch').prop('disabled', false);
@@ -581,7 +624,15 @@
                             if (message.error) {
                                 appendTerminalLine(`[ERROR] ${message.error}`, 'error');
                             }
-                            updateStatusUI(message);
+                            const isRestartScript = (message.scriptName === 'daemon.sh' || message.scriptName === 'daemon.bat' || message.scriptName === 'service.sh' ||
+                                                    $('#script-selector').val() === 'daemon.sh' || $('#script-selector').val() === 'service.sh');
+                            if (healthCheckTimer && isRestartScript) {
+                                const clone = Object.assign({}, message);
+                                delete clone.durationMs;
+                                updateStatusUI(clone);
+                            } else {
+                                updateStatusUI(message);
+                            }
                         } else if (header === 'subscribed' || header === 'joined') {
                             console.log('BuildDeploy WebSocket session active');
                         }

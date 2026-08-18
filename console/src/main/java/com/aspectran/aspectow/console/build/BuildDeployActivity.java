@@ -64,7 +64,7 @@ public class BuildDeployActivity {
     }
 
     /**
-     * Displays the build & deployment dashboard page.
+     * Displays the build &amp; deployment dashboard page.
      * @param nodeId the target node ID
      * @return a map of attributes for rendering the view
      */

@@ -26,7 +26,6 @@ import com.aspectran.core.component.bean.annotation.Dispatch;
 import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.core.component.bean.annotation.RequestToGet;
-import com.aspectran.utils.StringUtils;
 import com.aspectran.web.activity.response.RestResponse;
 import com.aspectran.web.support.rest.response.FailureResponse;
 import com.aspectran.web.support.rest.response.SuccessResponse;
@@ -38,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * BuildAuditActivity handles views and REST API endpoints for build & deployment compliance audit trail.
+ * BuildAuditActivity handles views and REST API endpoints for build &amp; deployment compliance audit trail.
  *
  * <p>Created: 2026-08-18</p>
  */

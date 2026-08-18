@@ -21,14 +21,14 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * Query criteria object for filtering and searching build & deployment audit history.
+ * Query criteria object for filtering and searching build &amp; deployment audit history.
  *
  * <p>Created: 2026-08-18</p>
  */
 public class BuildAuditQuery implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -1855769322127615562L;
 
     private String targetNodeId;
 

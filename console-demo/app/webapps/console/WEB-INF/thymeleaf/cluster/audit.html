@@ -258,7 +258,7 @@
                 fetch(BASE_PATH + `/cluster/build/audit/detail/${historyId}`)
                     .then(res => res.json())
                     .then(res => {
-                        if (res.status === 'success') {
+                        if (res.success) {
                             const h = res.data.history;
                             const verified = res.data.integrityVerified;
 
@@ -309,7 +309,7 @@
                 fetch(BASE_PATH + `/cluster/build/audit/log/${historyId}`)
                     .then(res => res.json())
                     .then(res => {
-                        if (res.status === 'success') {
+                        if (res.success) {
                             currentLoadedLogs = res.data || "No console log output recorded.";
                             $('#modal-log-content').text(currentLoadedLogs);
                         } else {

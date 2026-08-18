@@ -20,6 +20,7 @@ import com.aspectran.core.component.bean.aware.ActivityContextAware;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.utils.StringUtils;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +33,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -51,7 +52,7 @@ public class LocalScriptRunner implements ActivityContextAware {
 
     private static final Logger logger = LoggerFactory.getLogger(LocalScriptRunner.class);
 
-    private static final Set<String> ALLOWED_SCRIPTS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+    private static final Set<String> ALLOWED_SCRIPTS = Set.of(
             "1-pull.sh", "1-pull.bat",
             "2-build.sh", "2-build.bat",
             "3-deploy_config.sh", "3-deploy_config.bat",
@@ -63,7 +64,7 @@ public class LocalScriptRunner implements ActivityContextAware {
             "9-pull_deploy_config_webapps_only.sh", "9-pull_deploy_config_webapps_only.bat",
             "daemon.sh", "daemon.bat",
             "service.sh"
-    )));
+    );
 
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
 
@@ -92,11 +93,7 @@ public class LocalScriptRunner implements ActivityContextAware {
         }
         if (dir == null) {
             String sysBasePath = System.getProperty("aspectran.basePath");
-            if (sysBasePath != null) {
-                dir = new File(sysBasePath);
-            } else {
-                dir = new File(".");
-            }
+            dir = new File(Objects.requireNonNullElse(sysBasePath, "."));
         }
         // The deployment scripts and daemon.sh reside in the BASE_DIR, which is the parent of the 'app' directory
         if ("app".equals(dir.getName()) && dir.getParentFile() != null) {
@@ -207,7 +204,7 @@ public class LocalScriptRunner implements ActivityContextAware {
     /**
      * Executes the script synchronously on the current thread.
      */
-    public void run(BuildExecutionInfo info,
+    public void run(@NonNull BuildExecutionInfo info,
                     Consumer<String> logConsumer,
                     Consumer<BuildExecutionInfo> completionCallback) {
         String scriptName = info.getScriptName();
@@ -245,7 +242,7 @@ public class LocalScriptRunner implements ActivityContextAware {
         }
 
         // Special Handling for Daemon / Service Restart (Detached Execution)
-        if ("daemon.sh".equals(scriptName) || "service.sh".equals(scriptName)) {
+        if ("daemon.sh".equals(scriptName) || "daemon.bat".equals(scriptName) || "service.sh".equals(scriptName)) {
             String action = (info.getParameters() != null && info.getParameters().get("action") != null)
                     ? String.valueOf(info.getParameters().get("action"))
                     : "restart";
@@ -364,9 +361,9 @@ public class LocalScriptRunner implements ActivityContextAware {
         }
     }
 
-    private void appendLog(String executionId, List<String> buffer, String line, Consumer<String> consumer) {
+    private void appendLog(String executionId, @NonNull List<String> buffer, String line, Consumer<String> consumer) {
         if (buffer.size() >= MAX_LOG_BUFFER_SIZE) {
-            buffer.remove(0);
+            buffer.removeFirst();
         }
         buffer.add(line);
         if (consumer != null) {
@@ -378,6 +375,7 @@ public class LocalScriptRunner implements ActivityContextAware {
         }
     }
 
+    @NonNull
     private List<String> buildCommandLine(File scriptFile, Map<String, Object> params) {
         List<String> command = new ArrayList<>();
         if (IS_WINDOWS) {
@@ -413,11 +411,12 @@ public class LocalScriptRunner implements ActivityContextAware {
         }
     }
 
+    @Nullable
     private File resolveGitDir(File baseDir) {
         File dotBuild = new File(baseDir, ".build");
         if (dotBuild.isDirectory()) {
             File[] files = dotBuild.listFiles(File::isDirectory);
-            if (files != null && files.length > 0) {
+            if (files != null) {
                 for (File dir : files) {
                     if (new File(dir, ".git").exists()) {
                         return dir;
@@ -431,6 +430,7 @@ public class LocalScriptRunner implements ActivityContextAware {
         return null;
     }
 
+    @Nullable
     private String runGitCommand(File workingDir, String... args) {
         try {
             List<String> cmd = new ArrayList<>();

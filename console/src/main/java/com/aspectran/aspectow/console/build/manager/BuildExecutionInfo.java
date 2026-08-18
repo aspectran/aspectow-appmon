@@ -15,6 +15,7 @@
  */
 package com.aspectran.aspectow.console.build.manager;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Map;
@@ -27,7 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class BuildExecutionInfo implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = -6974843859535704263L;
 
     public enum Status {
         PENDING,

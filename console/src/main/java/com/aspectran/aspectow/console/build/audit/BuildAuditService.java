@@ -245,7 +245,8 @@ public class BuildAuditService extends InstantActivitySupport {
         return instantActivity(() -> {
             List<BuildHistory> list = buildHistoryMapper.searchBuildHistory(query);
             StringBuilder sb = new StringBuilder();
-            sb.append("History ID,Execution ID,Target Node,Script Name,Requester,Status,Exit Code,Started At,Finished At,Duration (ms),Git Branch,Before Commit,After Commit,Integrity Hash\n");
+            sb.append("History ID,Execution ID,Target Node,Script Name,Requester,Status,Exit Code,Started At,Finished ")
+                    .append("At,Duration (ms),Git Branch,Before Commit,After Commit,Integrity Hash\n");
 
             for (BuildHistory h : list) {
                 sb.append(escapeCsv(h.getHistoryId())).append(",")
@@ -270,7 +271,8 @@ public class BuildAuditService extends InstantActivitySupport {
     /**
      * Computes a deterministic SHA-256 hash combining the build metadata and the full raw log content.
      */
-    private String calculateIntegrityHash(BuildHistory history, String rawLogContent) {
+    @NonNull
+    private String calculateIntegrityHash(@NonNull BuildHistory history, String rawLogContent) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             String delimiter = "|";
@@ -298,9 +300,10 @@ public class BuildAuditService extends InstantActivitySupport {
         }
     }
 
+    @NonNull
     private String sha256Hex(String text) {
-        if (text == null || text.isEmpty()) {
-            return "";
+        if (StringUtils.isEmpty(text)) {
+            return StringUtils.EMPTY;
         }
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -311,7 +314,7 @@ public class BuildAuditService extends InstantActivitySupport {
             }
             return sb.toString();
         } catch (NoSuchAlgorithmException e) {
-            return "";
+            return StringUtils.EMPTY;
         }
     }
 
@@ -342,9 +345,10 @@ public class BuildAuditService extends InstantActivitySupport {
         }
     }
 
+    @NonNull
     private String escapeCsv(Object value) {
         if (value == null) {
-            return "";
+            return StringUtils.EMPTY;
         }
         String str = value.toString();
         if (str.contains(",") || str.contains("\"") || str.contains("\n")) {

@@ -40,6 +40,8 @@ public class DetachedRestartRunner {
     private static final boolean IS_WINDOWS = System.getProperty("os.name")
             .toLowerCase(Locale.ROOT).contains("win");
 
+    private static final File NULL_FILE = new File(IS_WINDOWS ? "NUL" : "/dev/null");
+
     /**
      * Executes a detached daemon control command (e.g. restart, stop).
      * @param baseDir the node base directory where daemon.sh / service.sh resides
@@ -75,10 +77,10 @@ public class DetachedRestartRunner {
             ProcessBuilder pb = new ProcessBuilder(command);
             pb.directory(baseDir);
 
-            // Redirect stdout/stderr to avoid holding open parent JVM descriptors
+            // Redirect stdout/stderr to DISCARD and stdin to null device
             pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
             pb.redirectError(ProcessBuilder.Redirect.DISCARD);
-            pb.redirectInput(ProcessBuilder.Redirect.DISCARD);
+            pb.redirectInput(ProcessBuilder.Redirect.from(NULL_FILE));
 
             Process process = pb.start();
             logger.info("Detached restart command successfully initiated with PID: {}", process.pid());
@@ -108,13 +110,12 @@ public class DetachedRestartRunner {
             command.add(scriptFile.getAbsolutePath());
             command.add(action);
         } else {
-            // Linux / Unix: Use setsid and nohup with a brief 1-second delay so that
+            // Linux / macOS / Unix: Use nohup with a brief 1-second delay so that
             // the WebSocket notification has time to flush to the client before JVM shuts down.
             command.add("nohup");
-            command.add("setsid");
-            command.add("bash");
+            command.add("sh");
             command.add("-c");
-            command.add(String.format("sleep 1 && %s %s > /dev/null 2>&1 &",
+            command.add(String.format("sleep 1 && exec \"%s\" %s",
                     scriptFile.getAbsolutePath(), action));
         }
         return command;
