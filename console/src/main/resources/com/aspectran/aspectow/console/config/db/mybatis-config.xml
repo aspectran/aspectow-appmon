@@ -39,6 +39,7 @@
         <mapper resource="com/aspectran/aspectow/appmon/config/db/mapper/EventCountMapper.xml"/>
         <mapper resource="com/aspectran/aspectow/console/config/db/mapper/AccountMapper.xml"/>
         <mapper resource="com/aspectran/aspectow/console/config/db/mapper/VaultMapper.xml"/>
+        <mapper resource="com/aspectran/aspectow/console/config/db/mapper/BuildHistoryMapper.xml"/>
     </mappers>
 
 </configuration>

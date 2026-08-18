@@ -30,6 +30,5 @@
     </aspect>
 
     <append file="/config/root-web-rules.xml"/>
-    <append file="/config/scheduler.xml"/>
 
 </aspectran>

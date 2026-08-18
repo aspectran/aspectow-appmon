@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{templates/default}">
+<head>
+    <style>
+        .audit-card {
+            background: var(--bs-body-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+        }
+        .filter-panel {
+            background: var(--bs-tertiary-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+        }
+        .table-audit th {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--bs-secondary-color);
+            font-weight: 600;
+        }
+        .table-audit td {
+            font-size: 0.85rem;
+            vertical-align: middle;
+        }
+        .status-pill {
+            font-size: 0.72rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .hash-code {
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.75rem;
+            background: rgba(125, 125, 125, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--bs-body-color);
+        }
+        .terminal-modal-body {
+            background: #181818;
+            color: #d4d4d4;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 500px;
+            overflow-y: auto;
+            border-radius: 8px;
+            padding: 15px;
+            line-height: 1.45;
+        }
+    </style>
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="fw-bold mb-0">Build &amp; Deployment Audit Trail</h2>
+                <p class="text-muted small mb-0">Immutable compliance execution logs, Git commit track records, and SHA-256 integrity proofs</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a th:href="@{/cluster/build/}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-play-circle"></i> Go to Build Console
+                </a>
+                <a th:href="@{/cluster/build/audit/export(nodeId=${page.targetNodeId}, status=${page.status}, q=${page.searchKeyword})}" class="btn btn-sm btn-success text-white">
+                    <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV Report
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter Panel -->
+        <div class="filter-panel">
+            <form method="get" th:action="@{/cluster/build/audit/}" class="row g-2 align-items-center">
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Target Node</label>
+                    <select name="nodeId" class="form-select form-select-sm">
+                        <option value="">All Nodes</option>
+                        <option th:each="n : ${page.nodes}"
+                                th:value="${n.id}"
+                                th:text="${n.title + ' (' + n.id + ')'}"
+                                th:selected="${n.id == page.targetNodeId}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1">Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">All Statuses</option>
+                        <option value="SUCCESS" th:selected="${page.status == 'SUCCESS'}">SUCCESS</option>
+                        <option value="FAILED" th:selected="${page.status == 'FAILED'}">FAILED</option>
+                        <option value="RUNNING" th:selected="${page.status == 'RUNNING'}">RUNNING</option>
+                        <option value="CANCELLED" th:selected="${page.status == 'CANCELLED'}">CANCELLED</option>
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label small text-muted mb-1">Keyword Search</label>
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="q" class="form-control" placeholder="Search execution ID, script, commit, requester..." th:value="${page.searchKeyword}">
+                        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Search</button>
+                    </div>
+                </div>
+                <div class="col-md-2 text-end pt-4">
+                    <a th:href="@{/cluster/build/audit/}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Audit Table Card -->
+        <div class="audit-card">
+            <div class="table-responsive">
+                <table class="table table-hover table-audit mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Execution ID</th>
+                            <th>Target Node</th>
+                            <th>Script Name</th>
+                            <th>Requester</th>
+                            <th>Status</th>
+                            <th>Git Changes</th>
+                            <th>Started At</th>
+                            <th>Duration</th>
+                            <th>Integrity</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(page.historyList)}">
+                            <td colspan="11" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-3 d-block mb-1"></i>
+                                No build &amp; deployment audit history records found.
+                            </td>
+                        </tr>
+                        <tr th:each="item : ${page.historyList}">
+                            <td class="text-muted" th:text="${item.historyId}">1</td>
+                            <td>
+                                <span class="hash-code text-primary fw-bold" th:text="${item.executionId}">bld_123</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary-subtle text-body" th:text="${item.targetNodeId}">node-1</span>
+                            </td>
+                            <td>
+                                <span class="fw-bold" th:text="${item.scriptName}">5-pull_build_deploy.sh</span>
+                            </td>
+                            <td th:text="${item.requester}">admin</td>
+                            <td>
+                                <span th:if="${item.status == 'SUCCESS'}" class="status-pill bg-success text-white">SUCCESS</span>
+                                <span th:if="${item.status == 'FAILED'}" class="status-pill bg-danger text-white">FAILED</span>
+                                <span th:if="${item.status == 'RUNNING'}" class="status-pill bg-primary text-white">RUNNING</span>
+                                <span th:if="${item.status == 'CANCELLED'}" class="status-pill bg-warning text-dark">CANCELLED</span>
+                            </td>
+                            <td>
+                                <div th:if="${item.gitCommitBefore != null || item.gitCommitAfter != null}">
+                                    <span class="hash-code text-muted" th:text="${item.gitCommitBefore != null ? #strings.substring(item.gitCommitBefore,0,7) : 'HEAD'}">abc</span>
+                                    <i class="bi bi-arrow-right text-muted small mx-1"></i>
+                                    <span class="hash-code text-success fw-bold" th:text="${item.gitCommitAfter != null ? #strings.substring(item.gitCommitAfter,0,7) : 'HEAD'}">def</span>
+                                    <div th:if="${item.gitBranch != null}" class="small text-muted" th:text="'(' + ${item.gitBranch} + ')'">main</div>
+                                </div>
+                                <span th:if="${item.gitCommitBefore == null && item.gitCommitAfter == null}" class="text-muted small">-</span>
+                            </td>
+                            <td class="small" th:text="${#temporals.format(item.startedAt, 'yyyy-MM-dd HH:mm:ss')}">2026-08-18 12:00:00</td>
+                            <td class="small" th:text="${item.durationMs != null ? (item.durationMs / 1000.0) + 's' : '-'}">12.4s</td>
+                            <td>
+                                <span th:if="${item.integrityHash != null}" class="badge bg-success-subtle text-success" title="SHA-256 Verified">
+                                    <i class="bi bi-shield-check"></i> SHA-256
+                                </span>
+                                <span th:if="${item.integrityHash == null}" class="badge bg-secondary-subtle text-muted">
+                                    Pending
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-xs btn-outline-primary" th:onclick="'viewDetail(' + ${item.historyId} + ')'" title="View Audit Details">
+                                    <i class="bi bi-eye"></i> Detail
+                                </button>
+                                <button class="btn btn-xs btn-outline-secondary" th:onclick="'viewLogs(' + ${item.historyId} + ')'" title="View Console Logs">
+                                    <i class="bi bi-terminal"></i> Logs
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${page.pageInfo != null && page.pageInfo.totalPages > 1}" class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                <span class="small text-muted" th:text="'Total ' + ${page.pageInfo.totalElements} + ' records (Page ' + ${page.pageInfo.number} + ' of ' + ${page.pageInfo.totalPages} + ')'"></span>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${page.pageInfo.number <= 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/cluster/build/audit/(page=${page.pageInfo.number - 1}, nodeId=${page.targetNodeId}, status=${page.status}, q=${page.searchKeyword})}">Previous</a>
+                    </li>
+                    <li class="page-item active">
+                        <span class="page-link" th:text="${page.pageInfo.number}">1</span>
+                    </li>
+                    <li class="page-item" th:classappend="${page.pageInfo.number >= page.pageInfo.totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{/cluster/build/audit/(page=${page.pageInfo.number + 1}, nodeId=${page.targetNodeId}, status=${page.status}, q=${page.searchKeyword})}">Next</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Detail Modal -->
+        <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold"><i class="bi bi-shield-check text-primary me-2"></i>Audit Verification Report</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="detail-modal-body">
+                        <!-- Dynamic content -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Viewer Modal -->
+        <div class="modal fade" id="logModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header bg-dark text-white">
+                        <h5 class="modal-title fw-bold"><i class="bi bi-terminal me-2"></i>Console Output Stream</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div id="modal-log-content" class="terminal-modal-body m-3">Loading logs...</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="downloadModalLogs()">
+                            <i class="bi bi-download"></i> Download Full Log
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block layout:fragment="script">
+        <script th:inline="javascript">
+            const BASE_PATH = [[@{/}]].replace(/\/$/, '');
+            let currentLoadedLogs = "";
+            let currentLogHistoryId = null;
+
+            function viewDetail(historyId) {
+                fetch(BASE_PATH + `/cluster/build/audit/detail/${historyId}`)
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.status === 'success') {
+                            const h = res.data.history;
+                            const verified = res.data.integrityVerified;
+
+                            const verifiedBadge = verified
+                                ? '<span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Cryptographically Valid &amp; Untampered</span>'
+                                : '<span class="badge bg-danger"><i class="bi bi-exclamation-triangle-fill"></i> Integrity Verification Failed!</span>';
+
+                            let html = `
+                                <div class="alert ${verified ? 'alert-success' : 'alert-danger'} d-flex justify-content-between align-items-center mb-3">
+                                    <div><strong>Integrity Check:</strong> ${verifiedBadge}</div>
+                                    <div class="small text-muted">Algorithm: SHA-256</div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-sm small">
+                                        <tbody>
+                                            <tr><th class="bg-light" style="width: 25%;">Execution ID</th><td><code>${h.executionId}</code></td></tr>
+                                            <tr><th class="bg-light">Target Node</th><td><strong>${h.targetNodeId}</strong></td></tr>
+                                            <tr><th class="bg-light">Script Executed</th><td>${h.scriptName}</td></tr>
+                                            <tr><th class="bg-light">Requester</th><td>${h.requester}</td></tr>
+                                            <tr><th class="bg-light">Execution Status</th><td><span class="badge bg-primary">${h.status}</span> (Exit Code: ${h.exitCode})</td></tr>
+                                            <tr><th class="bg-light">Started At</th><td>${h.startedAt || '-'}</td></tr>
+                                            <tr><th class="bg-light">Finished At</th><td>${h.finishedAt || '-'}</td></tr>
+                                            <tr><th class="bg-light">Duration</th><td>${h.durationMs ? (h.durationMs / 1000).toFixed(2) + ' seconds' : '-'}</td></tr>
+                                            <tr><th class="bg-light">Git Branch</th><td>${h.gitBranch || '-'}</td></tr>
+                                            <tr><th class="bg-light">Git Commit Before</th><td><code>${h.gitCommitBefore || '-'}</code></td></tr>
+                                            <tr><th class="bg-light">Git Commit After</th><td><code>${h.gitCommitAfter || '-'}</code></td></tr>
+                                            <tr><th class="bg-light">Git Commit Message</th><td>${h.gitCommitMsg || '-'}</td></tr>
+                                            <tr><th class="bg-light">SHA-256 Digest</th><td><small class="text-break font-monospace">${h.integrityHash || '-'}</small></td></tr>
+                                            ${h.errorSummary ? `<tr><th class="bg-light text-danger">Error Summary</th><td class="text-danger">${h.errorSummary}</td></tr>` : ''}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            `;
+                            $('#detail-modal-body').html(html);
+                            new bootstrap.Modal(document.getElementById('detailModal')).show();
+                        } else {
+                            alert('Failed to load audit detail: ' + (res.error || 'Unknown error'));
+                        }
+                    });
+            }
+
+            function viewLogs(historyId) {
+                currentLogHistoryId = historyId;
+                $('#modal-log-content').text('Fetching decompressed console stream from database...');
+                const modal = new bootstrap.Modal(document.getElementById('logModal'));
+                modal.show();
+
+                fetch(BASE_PATH + `/cluster/build/audit/log/${historyId}`)
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.status === 'success') {
+                            currentLoadedLogs = res.data || "No console log output recorded.";
+                            $('#modal-log-content').text(currentLoadedLogs);
+                        } else {
+                            $('#modal-log-content').text("Failed to load logs: " + (res.error || 'Unknown error'));
+                        }
+                    });
+            }
+
+            function downloadModalLogs() {
+                if (!currentLoadedLogs) {
+                    alert('No logs available to download.');
+                    return;
+                }
+                const blob = new Blob([currentLoadedLogs], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `build-audit-log-${currentLogHistoryId || 'export'}.log`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        </script>
+    </th:block>
+</body>
+</html>

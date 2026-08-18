@@ -9,6 +9,7 @@ context: {
         com.aspectran.aspectow.console.appmon
         com.aspectran.aspectow.console.auth
         com.aspectran.aspectow.console.cluster
+        com.aspectran.aspectow.console.build
         com.aspectran.aspectow.console.commands
         com.aspectran.aspectow.console.common
         com.aspectran.aspectow.console.framework

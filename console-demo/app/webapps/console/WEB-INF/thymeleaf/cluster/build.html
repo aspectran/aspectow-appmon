@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{templates/default}">
+<head>
+    <style>
+        .build-container {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 20px;
+            height: calc(100vh - 250px);
+            min-height: 650px;
+        }
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+        .terminal-panel {
+            background: #181818;
+            border: 1px solid #333;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .terminal-header {
+            background: #222;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+        .terminal-body {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.85rem;
+            color: #d4d4d4;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.45;
+        }
+        .terminal-line {
+            margin-bottom: 2px;
+        }
+        .terminal-line.info { color: #58a6ff; }
+        .terminal-line.success { color: #3fb950; font-weight: bold; }
+        .terminal-line.error { color: #f85149; font-weight: bold; }
+        .terminal-line.warn { color: #d29922; }
+        .status-pill {
+            font-size: 0.72rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .target-selector {
+            background: var(--bs-tertiary-bg);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            border: 1px solid var(--bs-border-color);
+        }
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .info-card {
+            background: var(--bs-body-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            margin-bottom: 6px;
+        }
+        .meta-label {
+            color: var(--bs-secondary-color);
+        }
+        .meta-value {
+            font-weight: 600;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="fw-bold mb-0">Build &amp; Deployment</h2>
+                <p class="text-muted small mb-0">Remote build script execution and automated continuous delivery</p>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <span class="text-muted small">Cluster Mode:</span>
+                <span class="badge bg-primary text-white" th:text="${page.clusterMode.toUpperCase()}">GATEWAY</span>
+            </div>
+        </div>
+
+        <div class="target-selector">
+            <div class="row align-items-center g-3">
+                <div class="col-auto">
+                    <label class="fw-bold small text-muted text-uppercase">Target Node</label>
+                </div>
+                <div class="col-md-3">
+                    <select id="target-type" class="form-select form-select-sm" onchange="onTargetTypeChange()">
+                        <option value="node" th:selected="${page.targetNodeId != null}">Individual Node</option>
+                        <option value="group">Specific Group</option>
+                        <option value="all" th:selected="${page.targetNodeId == null}">All Nodes in Cluster</option>
+                    </select>
+                </div>
+                <div class="col-md-4" id="target-value-container">
+                    <select id="target-value" class="form-select form-select-sm">
+                        <!-- Dynamic options -->
+                    </select>
+                </div>
+                <div class="col text-end">
+                    <span id="connection-indicator" class="status-pill bg-secondary text-white">CONNECTING...</span>
+                </div>
+            </div>
+
+            <!-- Quick Action Bar -->
+            <div class="quick-actions border-top pt-2 mt-3">
+                <span class="small text-muted align-self-center me-2"><i class="bi bi-lightning-charge-fill text-warning"></i> Quick:</span>
+                <button class="btn btn-sm btn-primary" onclick="quickRun('5-pull_build_deploy.sh')">
+                    <i class="bi bi-play-fill"></i> Full Build &amp; Deploy (5)
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('1-pull.sh')">
+                    <i class="bi bi-cloud-arrow-down"></i> Pull (1)
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('2-build.sh')">
+                    <i class="bi bi-gear"></i> Maven Build (2)
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('3-deploy_config.sh')">
+                    <i class="bi bi-sliders"></i> Config Deploy (3)
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('4-deploy_webapps.sh')">
+                    <i class="bi bi-window"></i> Webapps Deploy (4)
+                </button>
+                <button class="btn btn-sm btn-outline-danger ms-auto" onclick="quickRun('daemon.sh')">
+                    <i class="bi bi-arrow-repeat"></i> Restart Server
+                </button>
+            </div>
+        </div>
+
+        <div class="build-container">
+            <!-- Left: Control & Metadata Panel -->
+            <div class="control-panel">
+                <div class="info-card">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-terminal me-1"></i> Script Execution</h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Script File</label>
+                        <select id="script-selector" class="form-select form-select-sm">
+                            <option value="5-pull_build_deploy.sh" selected>5-pull_build_deploy.sh (Full Deploy)</option>
+                            <option value="1-pull.sh">1-pull.sh (Git Pull Only)</option>
+                            <option value="2-build.sh">2-build.sh (Maven Build Only)</option>
+                            <option value="3-deploy_config.sh">3-deploy_config.sh (Deploy Config)</option>
+                            <option value="4-deploy_webapps.sh">4-deploy_webapps.sh (Deploy Webapps)</option>
+                            <option value="6-pull_deploy.sh">6-pull_deploy.sh (Pull &amp; Deploy)</option>
+                            <option value="7-pull_deploy_config_only.sh">7-pull_deploy_config_only.sh</option>
+                            <option value="8-pull_deploy_webapps_only.sh">8-pull_deploy_webapps_only.sh</option>
+                            <option value="9-pull_deploy_config_webapps_only.sh">9-pull_deploy_config_webapps_only.sh</option>
+                            <option value="daemon.sh">daemon.sh (Daemon Control)</option>
+                            <option value="service.sh">service.sh (Service Control)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Git Branch / Tag (Optional)</label>
+                        <input type="text" id="param-branch" class="form-control form-control-sm" placeholder="e.g. main, release/v1.0">
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button id="btn-dispatch" class="btn btn-primary" onclick="dispatchBuild()">
+                            <i class="bi bi-play-circle-fill me-1"></i> Execute Script
+                        </button>
+                        <button id="btn-cancel" class="btn btn-outline-danger" onclick="cancelBuild()" disabled>
+                            <i class="bi bi-stop-circle-fill me-1"></i> Abort / Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Execution Status Summary Card -->
+                <div class="info-card flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0"><i class="bi bi-info-circle me-1"></i> Current Execution</h6>
+                        <span id="exec-status-badge" class="status-pill bg-secondary text-white">IDLE</span>
+                    </div>
+
+                    <div class="meta-row">
+                        <span class="meta-label">Execution ID:</span>
+                        <span id="meta-exec-id" class="meta-value text-truncate" style="max-width: 180px;">-</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Target Node:</span>
+                        <span id="meta-node-id" class="meta-value">-</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Git Branch:</span>
+                        <span id="meta-branch" class="meta-value">-</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Before Commit:</span>
+                        <span id="meta-commit-before" class="meta-value">-</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">After Commit:</span>
+                        <span id="meta-commit-after" class="meta-value">-</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Duration:</span>
+                        <span id="meta-duration" class="meta-value">-</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Exit Code:</span>
+                        <span id="meta-exit-code" class="meta-value">-</span>
+                    </div>
+                    <div id="meta-error-row" class="meta-row d-none">
+                        <span class="meta-label text-danger">Error:</span>
+                        <span id="meta-error-summary" class="meta-value text-danger text-break fw-bold small">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Real-time Terminal Panel -->
+            <div class="terminal-panel">
+                <div class="terminal-header">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-white small fw-bold"><i class="bi bi-terminal-fill me-1 text-primary"></i> Live Output Console</span>
+                        <span id="terminal-spinner" class="spinner-border spinner-border-sm text-primary d-none" role="status"></span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="form-check form-switch form-check-inline m-0 text-white small">
+                            <input class="form-check-input" type="checkbox" id="auto-scroll" checked>
+                            <label class="form-check-label" for="auto-scroll">Auto-scroll</label>
+                        </div>
+                        <button class="btn btn-xs btn-outline-secondary text-white-50" onclick="clearTerminal()" title="Clear Terminal">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        <button class="btn btn-xs btn-outline-secondary text-white-50" onclick="downloadLogs()" title="Download Logs">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="terminal-body" class="terminal-body">
+                    <div class="text-muted">Select a script and click 'Execute Script' to start real-time build &amp; deploy output stream...</div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block layout:fragment="script">
+        <script th:src="@{/assets/js/console-client.js}"></script>
+        <script th:inline="javascript">
+            const basePath = [[@{/}]].replace(/\/$/, '');
+            let nodes = [[${page.nodes}]];
+            const currentNodeId = [[${page.targetNodeId}]];
+            const myNodeId = [[${page.myNodeId}]];
+
+            let client = null;
+            let currentExecutionId = null;
+            let terminalLines = [];
+
+            function refreshNodeList() {
+                return fetch(basePath + "/cluster/build/list")
+                    .then(res => res.json())
+                    .then(res => {
+                        nodes = res.data || [];
+                        return nodes;
+                    });
+            }
+
+            function onTargetTypeChange(forceCheck = false) {
+                if (forceCheck) {
+                    refreshNodeList().then(() => doTargetTypeChange());
+                } else {
+                    doTargetTypeChange();
+                }
+            }
+
+            function doTargetTypeChange() {
+                const type = $('#target-type').val();
+                const $container = $('#target-value-container');
+                const $select = $('#target-value');
+                const prevValue = $select.val();
+                $select.empty();
+
+                if (type === 'all') {
+                    $container.hide();
+                    updateUrl(null);
+                } else if (type === 'group') {
+                    $container.show();
+                    const groups = [...new Set(nodes.map(n => n.group).filter(g => g))];
+                    groups.forEach(g => $select.append(new Option(g, g)));
+                } else {
+                    $container.show();
+                    nodes.forEach(n => {
+                        const option = new Option(n.title + ' (' + n.id + ')', n.id);
+                        if (n.status && n.status.toUpperCase() === 'DEAD') {
+                            $(option).addClass('text-danger');
+                            option.text += ' [DEAD]';
+                        }
+                        $select.append(option);
+                    });
+                    
+                    const targetNodeId = prevValue || currentNodeId || myNodeId || (nodes[0] ? nodes[0].id : '');
+                    if (targetNodeId) {
+                        $select.val(targetNodeId);
+                        updateUrl(targetNodeId);
+                    }
+                }
+            }
+
+            function updateUrl(nodeId) {
+                const url = new URL(window.location);
+                if (nodeId) {
+                    url.searchParams.set('nodeId', nodeId);
+                } else {
+                    url.searchParams.delete('nodeId');
+                }
+                window.history.replaceState({}, '', url);
+            }
+
+            let healthCheckTimer = null;
+
+            function quickRun(scriptName) {
+                if (scriptName === 'daemon.sh' || scriptName === 'service.sh') {
+                    if (!confirm('Are you sure you want to restart the server on the target node?\n\nThe server will temporarily go offline and reconnect automatically once restarted.')) {
+                        return;
+                    }
+                }
+                $('#script-selector').val(scriptName);
+                dispatchBuild();
+            }
+
+            function startHealthCheckPolling(targetNodeId) {
+                if (healthCheckTimer) {
+                    clearInterval(healthCheckTimer);
+                }
+
+                const target = targetNodeId || currentNodeId || myNodeId || 'gateway';
+                appendTerminalLine(`[HEALTH CHECK] Started monitoring node '${target}' recovery (2s interval)...`, 'warn');
+                $('#connection-indicator').text("RESTARTING...").removeClass("bg-success bg-danger").addClass("bg-warning");
+
+                let attempts = 0;
+                const maxAttempts = 30; // 60 seconds
+
+                healthCheckTimer = setInterval(() => {
+                    attempts++;
+                    fetch(basePath + `/cluster/build/health/${target}`)
+                        .then(res => res.json())
+                        .then(res => {
+                            if (res.status === 'success' && res.data && res.data.alive) {
+                                clearInterval(healthCheckTimer);
+                                healthCheckTimer = null;
+                                appendTerminalLine(`[HEALTH CHECK] Node '${target}' is successfully back ONLINE!`, 'success');
+                                $('#connection-indicator').text("CONNECTED").removeClass("bg-secondary bg-danger bg-warning").addClass("bg-success");
+                                updateStatusUI({ status: 'SUCCESS' });
+                            } else if (attempts >= maxAttempts) {
+                                clearInterval(healthCheckTimer);
+                                healthCheckTimer = null;
+                                appendTerminalLine(`[HEALTH CHECK] Timeout waiting for node '${target}' to recover. Please check server logs manually.`, 'error');
+                            }
+                        })
+                        .catch(err => {
+                            if (attempts >= maxAttempts) {
+                                clearInterval(healthCheckTimer);
+                                healthCheckTimer = null;
+                            }
+                        });
+                }, 2000);
+            }
+
+            function dispatchBuild() {
+                const scriptName = $('#script-selector').val();
+                const branch = $('#param-branch').val().trim();
+                const targetType = $('#target-type').val();
+                const targetNodeId = (targetType === 'all' ? '' : $('#target-value').val());
+
+                if (!scriptName) {
+                    alert('Please select a script to execute.');
+                    return;
+                }
+
+                clearTerminal();
+                $('#meta-error-row').addClass('d-none');
+                $('#meta-error-summary').text('-');
+                appendTerminalLine(`[INIT] Requesting execution of ${scriptName} on ${targetNodeId || 'all nodes'}...`, 'info');
+
+                if (scriptName === 'daemon.sh' || scriptName === 'service.sh') {
+                    // Trigger health check polling for restart scripts
+                    setTimeout(() => startHealthCheckPolling(targetNodeId), 3000);
+                }
+
+                if (client) {
+                    const req = {
+                        header: "execute",
+                        targetNodeId: targetNodeId,
+                        scriptName: scriptName,
+                        parameters: {}
+                    };
+                    if (branch) {
+                        req.parameters.branch = branch;
+                    }
+                    client.sendMessage(req);
+                    $('#btn-dispatch').prop('disabled', true);
+                    $('#btn-cancel').prop('disabled', false);
+                    $('#terminal-spinner').removeClass('d-none');
+                } else {
+                    alert('WebSocket connection is not established.');
+                }
+            }
+
+            function cancelBuild() {
+                if (!currentExecutionId) {
+                    return;
+                }
+                if (confirm('Are you sure you want to cancel the currently running execution?')) {
+                    if (client) {
+                        const targetNodeId = $('#target-value').val();
+                        const req = {
+                            header: "cancel",
+                            executionId: currentExecutionId,
+                            targetNodeId: targetNodeId
+                        };
+                        client.sendMessage(req);
+                        appendTerminalLine(`[ABORT] Cancellation signal sent for ${currentExecutionId}...`, 'warn');
+                    }
+                }
+            }
+
+            function appendTerminalLine(text, type = '') {
+                terminalLines.push(text);
+                const $body = $('#terminal-body');
+                if (terminalLines.length === 1) {
+                    $body.empty();
+                }
+
+                let lineClass = 'terminal-line';
+                if (type) lineClass += ' ' + type;
+                else if (text.includes('[INFO]') || text.includes('[BUILD STARTED]')) lineClass += ' info';
+                else if (text.includes('[SUCCESS]') || text.includes('BUILD SUCCESS')) lineClass += ' success';
+                else if (text.includes('[ERROR]') || text.includes('BUILD FAILURE') || text.includes('[FAILED]')) lineClass += ' error';
+                else if (text.includes('[WARN]') || text.includes('[WARNING]')) lineClass += ' warn';
+
+                const safeText = $('<div>').text(text).html();
+                $body.append(`<div class="${lineClass}">${safeText}</div>`);
+
+                if ($('#auto-scroll').is(':checked')) {
+                    $body.scrollTop($body[0].scrollHeight);
+                }
+            }
+
+            function clearTerminal() {
+                terminalLines = [];
+                $('#terminal-body').empty();
+            }
+
+            function downloadLogs() {
+                if (terminalLines.length === 0) {
+                    alert('No logs to download.');
+                    return;
+                }
+                const blob = new Blob([terminalLines.join('\n')], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `build-${currentExecutionId || 'log'}.log`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            function updateStatusUI(data) {
+                if (!data) return;
+
+                if (data.executionId) {
+                    currentExecutionId = data.executionId;
+                    $('#meta-exec-id').text(data.executionId);
+                }
+                if (data.nodeId) $('#meta-node-id').text(data.nodeId);
+                if (data.gitBranch) $('#meta-branch').text(data.gitBranch);
+                if (data.gitCommitBefore) $('#meta-commit-before').text(data.gitCommitBefore.substring(0, 8));
+                if (data.gitCommitAfter) $('#meta-commit-after').text(data.gitCommitAfter.substring(0, 8));
+                if (data.durationMs) $('#meta-duration').text((data.durationMs / 1000).toFixed(1) + 's');
+                if (data.exitCode !== undefined && data.exitCode !== null) $('#meta-exit-code').text(data.exitCode);
+
+                const status = data.status || 'IDLE';
+                const $badge = $('#exec-status-badge');
+                $badge.text(status);
+                $badge.removeClass('bg-secondary bg-primary bg-success bg-danger bg-warning');
+
+                if (data.error) {
+                    $('#meta-error-summary').text(data.error);
+                    $('#meta-error-row').removeClass('d-none');
+                } else if (status === 'RUNNING' || status === 'SUCCESS') {
+                    $('#meta-error-row').addClass('d-none');
+                }
+
+                if (status === 'RUNNING') {
+                    $badge.addClass('bg-primary');
+                    $('#btn-dispatch').prop('disabled', true);
+                    $('#btn-cancel').prop('disabled', false);
+                    $('#terminal-spinner').removeClass('d-none');
+                } else if (status === 'SUCCESS') {
+                    $badge.addClass('bg-success');
+                    $('#btn-dispatch').prop('disabled', false);
+                    $('#btn-cancel').prop('disabled', true);
+                    $('#terminal-spinner').addClass('d-none');
+                } else if (status === 'FAILED' || status === 'TIMEOUT') {
+                    $badge.addClass('bg-danger');
+                    $('#btn-dispatch').prop('disabled', false);
+                    $('#btn-cancel').prop('disabled', true);
+                    $('#terminal-spinner').addClass('d-none');
+                } else if (status === 'CANCELLED') {
+                    $badge.addClass('bg-warning');
+                    $('#btn-dispatch').prop('disabled', false);
+                    $('#btn-cancel').prop('disabled', true);
+                    $('#terminal-spinner').addClass('d-none');
+                } else {
+                    $badge.addClass('bg-secondary');
+                    $('#btn-dispatch').prop('disabled', false);
+                    $('#btn-cancel').prop('disabled', true);
+                    $('#terminal-spinner').addClass('d-none');
+                }
+            }
+
+            function initConsoleClient(token) {
+                const buildNode = {
+                    id: currentNodeId || myNodeId || 'gateway',
+                    endpoint: {
+                        path: basePath + "/build-deploy",
+                        token: token
+                    }
+                };
+
+                client = new ConsoleClient(buildNode, {
+                    token: token,
+                    onBeforeConnect: () => {
+                        return fetch(basePath + "/cluster/token", {
+                                headers: { 'Accept': 'application/json' }
+                            })
+                            .then(response => response.json())
+                            .then(res => res.success ? res.data : null)
+                            .catch(err => {
+                                console.error("Failed to fetch new token:", err);
+                                return null;
+                            });
+                    },
+                    onEstablished: () => {
+                        $('#connection-indicator').text("CONNECTED").removeClass("bg-secondary bg-danger bg-warning").addClass("bg-success");
+                    },
+                    onRetry: (count, max) => {
+                        $('#connection-indicator').text(`RECONNECTING (${count}/${max})...`).removeClass("bg-success bg-danger").addClass("bg-warning");
+                    },
+                    onClose: () => {
+                        $('#connection-indicator').text("DISCONNECTED").removeClass("bg-success bg-warning").addClass("bg-danger");
+                        $('#terminal-spinner').addClass('d-none');
+                    },
+                    onMessage: (message) => {
+                        const header = message.header;
+                        if (header === 'log') {
+                            if (message.line) {
+                                appendTerminalLine(message.line);
+                            }
+                        } else if (header === 'logBackfill') {
+                            if (message.lines && Array.isArray(message.lines)) {
+                                message.lines.forEach(l => appendTerminalLine(l));
+                            }
+                        } else if (header === 'status') {
+                            if (message.error) {
+                                appendTerminalLine(`[ERROR] ${message.error}`, 'error');
+                            }
+                            updateStatusUI(message);
+                        } else if (header === 'subscribed' || header === 'joined') {
+                            console.log('BuildDeploy WebSocket session active');
+                        }
+                    }
+                });
+
+                client.start('');
+            }
+
+            $(function() {
+                onTargetTypeChange();
+
+                fetch(basePath + "/cluster/token", {
+                        headers: { 'Accept': 'application/json' }
+                    })
+                    .then(response => response.json())
+                    .then(res => {
+                        const token = res.success ? res.data : null;
+                        initConsoleClient(token);
+                    })
+                    .catch(err => {
+                        console.error("Failed to fetch initial token:", err);
+                        initConsoleClient(null);
+                    });
+            });
+        </script>
+    </th:block>
+</body>
+</html>

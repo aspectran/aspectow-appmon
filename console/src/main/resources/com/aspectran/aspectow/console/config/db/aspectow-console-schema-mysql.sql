@@ -149,6 +149,42 @@ create table if not exists asc_audit_log (
     primary key (audit_id)
 ) comment = 'Security Audit Log';
 
+-- Build & Deployment Audit History Master
+create table if not exists asc_build_history (
+    history_id bigint not null auto_increment,
+    execution_id varchar(64) not null unique,
+    target_node_id varchar(100) not null,
+    script_name varchar(100) not null,
+    requester varchar(50) default 'SYSTEM' not null,
+    status varchar(20) default 'PENDING' not null, -- PENDING, RUNNING, SUCCESS, FAILED, CANCELLED, TIMEOUT
+    exit_code int,
+    started_at timestamp default current_timestamp not null,
+    finished_at timestamp,
+    duration_ms bigint,
+    git_branch varchar(100),
+    git_commit_before varchar(64),
+    git_commit_after varchar(64),
+    git_commit_msg varchar(500),
+    integrity_hash varchar(64),
+    error_summary varchar(1000),
+    created_at timestamp default current_timestamp not null,
+    primary key (history_id)
+) comment = 'Build and Deployment Audit History Master';
+
+-- Build Console Logs
+create table if not exists asc_build_log (
+    log_id bigint not null auto_increment,
+    history_id bigint not null,
+    execution_id varchar(64) not null,
+    log_content longtext,
+    compressed_yn char(1) default 'N' not null,
+    line_count int default 0 not null,
+    byte_size bigint default 0 not null,
+    created_at timestamp default current_timestamp not null,
+    primary key (log_id),
+    foreign key (history_id) references asc_build_history(history_id) on delete cascade
+) comment = 'Build and Deployment Console Output Logs';
+
 -- Initial data
 insert ignore into asc_role (role_name, description) values ('SUPER_ADMIN', 'Super administrator with full access');
 insert ignore into asc_role (role_name, description) values ('ADMIN', 'Administrator with limited management access');
@@ -160,13 +196,17 @@ insert ignore into asc_permission (perm_code, description) values ('MONITOR_CONT
 insert ignore into asc_permission (perm_code, description) values ('USER_MANAGE', 'Manage users and roles');
 insert ignore into asc_permission (perm_code, description) values ('NODE_MANAGE', 'Manage and restart cluster nodes');
 insert ignore into asc_permission (perm_code, description) values ('COMMAND_EXECUTE', 'Execute remote commands');
+insert ignore into asc_permission (perm_code, description) values ('BUILD_VIEW', 'View build and deployment status');
+insert ignore into asc_permission (perm_code, description) values ('BUILD_EXECUTE', 'Execute build and deployment scripts');
+insert ignore into asc_permission (perm_code, description) values ('AUDIT_VIEW', 'View compliance audit records');
+insert ignore into asc_permission (perm_code, description) values ('AUDIT_EXPORT', 'Export compliance audit reports');
 
 -- Map permissions to SUPER_ADMIN
 insert ignore into asc_role_permission (role_id, perm_id) select 1, perm_id from asc_permission;
 -- Map permissions to ADMIN
-insert ignore into asc_role_permission (role_id, perm_id) select 2, perm_id from asc_permission where perm_code in ('MONITOR_VIEW', 'COMMAND_EXECUTE', 'NODE_MANAGE');
+insert ignore into asc_role_permission (role_id, perm_id) select 2, perm_id from asc_permission where perm_code in ('MONITOR_VIEW', 'COMMAND_EXECUTE', 'NODE_MANAGE', 'BUILD_VIEW', 'BUILD_EXECUTE', 'AUDIT_VIEW', 'AUDIT_EXPORT');
 -- Map permissions to VIEWER
-insert ignore into asc_role_permission (role_id, perm_id) select 3, perm_id from asc_permission where perm_code = 'MONITOR_VIEW';
+insert ignore into asc_role_permission (role_id, perm_id) select 3, perm_id from asc_permission where perm_code in ('MONITOR_VIEW', 'BUILD_VIEW', 'AUDIT_VIEW');
 -- Map permissions to DEMO
 insert ignore into asc_role_permission (role_id, perm_id) select 4, perm_id from asc_permission;
 
