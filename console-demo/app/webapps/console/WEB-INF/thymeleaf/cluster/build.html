@@ -160,7 +160,7 @@
                 </div>
 
                 <!-- Quick Action Bar -->
-                <div class="quick-actions border-top pt-2 mt-3" th:if="${session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
+                <div class="quick-actions border-top pt-2 mt-3" th:if="${session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                     <span class="small text-muted align-self-center me-2"><i class="bi bi-lightning-charge-fill text-warning"></i> Quick:</span>
                     <button class="btn btn-sm btn-primary" onclick="quickRun('5-pull_build_deploy.sh')">
                         <i class="bi bi-play-fill"></i> Full Build &amp; Deploy (5)
@@ -224,7 +224,7 @@
 
                         <div class="d-grid gap-2 mt-4">
                             <button id="btn-dispatch" class="btn btn-primary" onclick="dispatchBuild()"
-                                    th:disabled="${!session.USER_INFO.hasPermission('BUILD_EXECUTE') and !session.USER_INFO.hasRole('SUPER_ADMIN')}">
+                                    th:disabled="${!session.USER_INFO.hasPermission('BUILD_EXECUTE') and !session.USER_INFO.hasRole('SUPER_ADMIN') and !session.USER_INFO.hasRole('DEMO')}">
                                 <i class="bi bi-play-circle-fill me-1"></i> Execute Script
                             </button>
                             <button id="btn-cancel" class="btn btn-outline-danger" onclick="cancelBuild()" disabled>

@@ -77,6 +77,8 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
         String token = session.getPathParameters().get("token");
         try {
             AppMonTokenIssuer.validateToken(token);
+            boolean isDemo = AppMonTokenIssuer.isDemoToken(token);
+            session.getUserProperties().put("isDemo", isDemo);
             return true;
         } catch (InvalidPBTokenException e) {
             logger.warn("WebSocket connection rejected: invalid or expired token");
@@ -150,6 +152,19 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
     }
 
     private void execute(Session session, @NonNull BuildRequestParameters params) {
+        Boolean isDemo = (Boolean) session.getUserProperties().get("isDemo");
+        if (isDemo != null && isDemo) {
+            logger.warn("Rejecting build execution request from DEMO user session: {}", session.getId());
+            BuildResponseParameters res = new BuildResponseParameters()
+                    .setHeader("status")
+                    .setExecutionId(params.getExecutionId() != null ? params.getExecutionId() : "bld_rejected")
+                    .setNodeId(params.getTargetNodeId() != null ? params.getTargetNodeId() : nodeManager.getNodeId())
+                    .setStatus("FAILED")
+                    .setError("Executing build scripts is not allowed in the demo environment.");
+            sendText(session, res.toString());
+            return;
+        }
+
         String scriptName = params.getScriptName();
         if (StringUtils.isEmpty(scriptName)) {
             sendText(session, "[ERROR] Script name is required");
@@ -167,6 +182,13 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
     }
 
     private void cancel(Session session, @NonNull BuildRequestParameters params) {
+        Boolean isDemo = (Boolean) session.getUserProperties().get("isDemo");
+        if (isDemo != null && isDemo) {
+            logger.warn("Rejecting build cancellation request from DEMO user session: {}", session.getId());
+            sendText(session, "[ERROR] Canceling build executions is not allowed in the demo environment.");
+            return;
+        }
+
         String executionId = params.getExecutionId();
         String targetNodeId = params.getTargetNodeId();
         if (StringUtils.isEmpty(executionId)) {

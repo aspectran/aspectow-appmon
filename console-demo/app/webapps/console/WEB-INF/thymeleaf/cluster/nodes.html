@@ -233,6 +233,7 @@
             const isDirectMode = (clusterMode !== 'gateway');
             const node = [[${page.node}]];
             let nodes = [[${page.nodes}]];
+            const isDemoUser = /*[[${session.USER_INFO.hasRole('DEMO')}]]*/ false;
 
             function openAppMon(nodeId) {
                 const url = basePath + "/appmon/dashboard/popup/?nodeId=" + nodeId;
@@ -246,7 +247,11 @@
                 }
             }
 
-             function restartNode(nodeId) {
+            function restartNode(nodeId) {
+                if (isDemoUser) {
+                    alert("Restarting nodes is not allowed in the demo environment.");
+                    return;
+                }
                 if (confirm("Are you sure you want to restart node '" + nodeId + "'?")) {
                     const url = basePath + "/cluster/nodes/" + nodeId + "/restart";
                     fetch(url, {
@@ -279,6 +284,10 @@
             }
 
             function pauseNode(nodeId) {
+                if (isDemoUser) {
+                    alert("Pausing nodes is not allowed in the demo environment.");
+                    return;
+                }
                 if (confirm("Are you sure you want to pause node '" + nodeId + "'?")) {
                     const url = basePath + "/cluster/nodes/" + nodeId + "/pause";
                     fetch(url, {
@@ -309,6 +318,10 @@
             }
 
             function resumeNode(nodeId) {
+                if (isDemoUser) {
+                    alert("Resuming nodes is not allowed in the demo environment.");
+                    return;
+                }
                 if (confirm("Are you sure you want to resume node '" + nodeId + "'?")) {
                     const url = basePath + "/cluster/nodes/" + nodeId + "/resume";
                     fetch(url, {
@@ -638,6 +651,11 @@
                 });
 
                 $('#execute-bulk-btn').on('click', function() {
+                    if (isDemoUser) {
+                        alert("Bulk node actions are not allowed in the demo environment.");
+                        return;
+                    }
+
                     const selectedNodes = [];
                     $('input[name="bulkNodes"]:checked').each(function() {
                         selectedNodes.push($(this).val());
