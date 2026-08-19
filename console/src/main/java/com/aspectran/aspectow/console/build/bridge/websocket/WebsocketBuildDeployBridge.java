@@ -156,27 +156,10 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
             return;
         }
 
-        String targetNodeId = params.getTargetNodeId();
-        if (StringUtils.isEmpty(targetNodeId)) {
-            targetNodeId = nodeManager.getNodeId();
-        }
-
-        BuildExecutionInfo info = new BuildExecutionInfo();
-        info.setExecutionId(params.getExecutionId());
-        info.setTargetNodeId(targetNodeId);
-        info.setScriptName(scriptName);
-        info.setTriggerType("MANUAL");
-
-        if (params.getParameters() != null) {
-            for (String pName : params.getParameters().getParameterNames()) {
-                info.getParameters().put(pName, params.getParameters().getString(pName));
-            }
-        }
-
         try {
-            remoteBuildDeployManager.dispatch(info);
-            logger.info("Build execution dispatched: id={}, target={}, script={}",
-                    info.getExecutionId(), targetNodeId, scriptName);
+            remoteBuildDeployManager.dispatch(params);
+            logger.info("Build execution dispatched: group={}, all={}, target={}, script={}",
+                    params.getTargetGroup(), params.isTargetAll(), params.getTargetNodeId(), scriptName);
         } catch (Exception e) {
             logger.error("Failed to dispatch build execution", e);
             sendText(session, "[ERROR] " + e.getMessage());

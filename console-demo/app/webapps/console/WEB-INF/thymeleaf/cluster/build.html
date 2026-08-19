@@ -549,11 +549,16 @@
 
             function quickRun(scriptName) {
                 const targetType = $('#target-type').val();
-                const targetNodeId = (targetType === 'all' ? 'ALL nodes in cluster' : ($('#target-value').val() || 'target node'));
+                const targetVal = $('#target-value').val();
+                let targetLabel = 'target node';
+                if (targetType === 'all') targetLabel = 'ALL nodes in cluster';
+                else if (targetType === 'group') targetLabel = `Group '${targetVal}'`;
+                else if (targetVal) targetLabel = `Node '${targetVal}'`;
+
                 const info = scriptPipelineMap[scriptName];
                 const title = info ? info.title : scriptName;
 
-                let confirmMsg = `Are you sure you want to execute [${title}] on ${targetNodeId}?`;
+                let confirmMsg = `Are you sure you want to execute [${title}] on ${targetLabel}?`;
                 if (scriptName === 'daemon.sh' || scriptName === 'service.sh') {
                     confirmMsg += `\n\nWarning: The server will temporarily go offline and reconnect automatically once restarted.`;
                 }
@@ -646,7 +651,23 @@
                 const scriptName = $('#script-selector').val();
                 const branch = $('#param-branch').val().trim();
                 const targetType = $('#target-type').val();
-                const targetNodeId = (targetType === 'all' ? '' : $('#target-value').val());
+                const targetVal = $('#target-value').val();
+
+                let targetNodeId = null;
+                let targetGroup = null;
+                let targetAll = false;
+                let targetLabel = 'all nodes';
+
+                if (targetType === 'all') {
+                    targetAll = true;
+                    targetLabel = 'ALL nodes in cluster';
+                } else if (targetType === 'group') {
+                    targetGroup = targetVal;
+                    targetLabel = `Group '${targetVal}'`;
+                } else {
+                    targetNodeId = targetVal || currentNodeId || myNodeId;
+                    targetLabel = `Node '${targetNodeId}'`;
+                }
 
                 if (!scriptName) {
                     alert('Please select a script to execute.');
@@ -657,17 +678,20 @@
                 startDurationTicker();
                 $('#meta-error-row').addClass('d-none');
                 $('#meta-error-summary').text('-');
-                appendTerminalLine(`[INIT] Requesting execution of ${scriptName} on ${targetNodeId || 'all nodes'}...`, 'info');
+                appendTerminalLine(`[INIT] Requesting execution of ${scriptName} on ${targetLabel}...`, 'info');
 
                 if (scriptName === 'daemon.sh' || scriptName === 'service.sh') {
                     // Trigger health check polling for restart scripts
-                    setTimeout(() => startHealthCheckPolling(targetNodeId), 3000);
+                    const pollTarget = targetNodeId || currentNodeId || myNodeId;
+                    setTimeout(() => startHealthCheckPolling(pollTarget), 3000);
                 }
 
                 if (client) {
                     const req = {
                         header: "execute",
                         targetNodeId: targetNodeId,
+                        targetGroup: targetGroup,
+                        targetAll: targetAll,
                         scriptName: scriptName,
                         parameters: {}
                     };

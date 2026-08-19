@@ -95,7 +95,15 @@ public class BuildDeployBroker {
                 .setExecutionId(executionId)
                 .setNodeId(targetNodeId != null ? targetNodeId : nodeId)
                 .setLine(line);
-        bridge(res.toString());
+        String data = res.toString();
+        bridge(data);
+        if (messagePublisher != null) {
+            try {
+                messagePublisher.publishRelay(CATEGORY_BUILD, data);
+            } catch (Exception e) {
+                logger.trace("Failed to publish build log line to Redis relay: {}", e.getMessage());
+            }
+        }
     }
 
     /**
@@ -129,7 +137,15 @@ public class BuildDeployBroker {
                 .setGitCommitAfter(info.getGitCommitAfter())
                 .setGitCommitMsg(info.getGitCommitMsg())
                 .setError(info.getErrorSummary());
-        bridge(res.toString());
+        String data = res.toString();
+        bridge(data);
+        if (messagePublisher != null) {
+            try {
+                messagePublisher.publishRelay(CATEGORY_BUILD, data);
+            } catch (Exception e) {
+                logger.trace("Failed to publish build status to Redis relay: {}", e.getMessage());
+            }
+        }
     }
 
 }

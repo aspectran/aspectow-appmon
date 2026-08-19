@@ -15,19 +15,24 @@
  */
 package com.aspectran.aspectow.console.build.manager;
 
+import com.aspectran.aspectow.console.build.audit.BuildAuditService;
 import com.aspectran.aspectow.console.build.bridge.BuildDeployBroker;
 import com.aspectran.aspectow.console.build.bridge.BuildRequestParameters;
 import com.aspectran.aspectow.console.build.bridge.redis.BuildMessageBridgeHandler;
+import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.aspectow.node.manager.NodeManager;
+import com.aspectran.aspectow.node.manager.NodeRegistry;
 import com.aspectran.core.component.bean.ablility.InitializableBean;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.apon.JsonToParameters;
+import com.aspectran.utils.apon.VariableParameters;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -96,6 +101,113 @@ public class RemoteBuildDeployManager implements InitializableBean {
     }
 
     /**
+     * Dispatches a build request based on parameters (supporting single node, group, or all nodes).
+     * @param params the request parameters
+     */
+    public void dispatch(@NonNull BuildRequestParameters params) {
+        String scriptName = params.getScriptName();
+        String targetNodeId = params.getTargetNodeId();
+        String targetGroup = params.getTargetGroup();
+        boolean targetAll = params.isTargetAll();
+
+        List<String> targetNodeIds = resolveTargetNodeIds(targetNodeId, targetGroup, targetAll);
+        if (targetNodeIds.isEmpty()) {
+            logger.warn("No target nodes found for dispatch: nodeId={}, group={}, all={}",
+                    targetNodeId, targetGroup, targetAll);
+            BuildExecutionInfo failed = new BuildExecutionInfo();
+            failed.setExecutionId(params.getExecutionId() != null ? params.getExecutionId() : "bld_unknown");
+            failed.setScriptName(scriptName);
+            failed.setStatus(BuildExecutionInfo.Status.FAILED);
+            failed.setErrorSummary("No target nodes found matching criteria (node=" + targetNodeId + ", group=" + targetGroup + ", all=" + targetAll + ")");
+            broker.broadcastStatusChanged(failed);
+            return;
+        }
+
+        for (String nodeId : targetNodeIds) {
+            BuildExecutionInfo info = new BuildExecutionInfo();
+            info.setExecutionId(params.getExecutionId() != null && targetNodeIds.size() == 1
+                    ? params.getExecutionId()
+                    : ("bld_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16)));
+            info.setTargetNodeId(nodeId);
+            info.setScriptName(scriptName);
+            info.setTriggerType("MANUAL");
+
+            if (params.getParameters() != null) {
+                for (String pName : params.getParameters().getParameterNames()) {
+                    info.getParameters().put(pName, params.getParameters().getString(pName));
+                }
+            }
+
+            dispatch(info);
+        }
+    }
+
+    /**
+     * Resolves the list of target node IDs based on node ID, group, or all flag.
+     * @param targetNodeId optional node ID
+     * @param targetGroup optional group ID
+     * @param targetAll true if all nodes in cluster
+     * @return list of node IDs
+     */
+    public List<String> resolveTargetNodeIds(String targetNodeId, String targetGroup, boolean targetAll) {
+        List<String> result = new ArrayList<>();
+        NodeRegistry registry = nodeManager.getNodeRegistry();
+
+        // 1. Group target
+        if (StringUtils.hasText(targetGroup)) {
+            if (registry != null) {
+                List<NodeInfo> groupNodes = registry.getNodesByGroup(targetGroup);
+                for (NodeInfo n : groupNodes) {
+                    if (n.getId() != null && !result.contains(n.getId())) {
+                        result.add(n.getId());
+                    }
+                }
+            }
+            if (result.isEmpty() && targetGroup.equals(nodeManager.getGroupId())) {
+                result.add(nodeManager.getNodeId());
+            }
+            return result;
+        }
+
+        // 2. All nodes target
+        if (targetAll) {
+            if (registry != null) {
+                List<NodeInfo> allNodes = registry.getNodes();
+                for (NodeInfo n : allNodes) {
+                    if (n.getId() != null && !result.contains(n.getId())) {
+                        result.add(n.getId());
+                    }
+                }
+            }
+            if (result.isEmpty()) {
+                result.add(nodeManager.getNodeId());
+            }
+            return result;
+        }
+
+        // 3. Specific Node target (or check if it was actually passed as a group name)
+        if (StringUtils.hasText(targetNodeId)) {
+            if (registry != null && !registry.isFound(targetNodeId)) {
+                List<NodeInfo> groupNodes = registry.getNodesByGroup(targetNodeId);
+                if (!groupNodes.isEmpty()) {
+                    for (NodeInfo n : groupNodes) {
+                        if (n.getId() != null && !result.contains(n.getId())) {
+                            result.add(n.getId());
+                        }
+                    }
+                    return result;
+                }
+            }
+            result.add(targetNodeId);
+            return result;
+        }
+
+        // Default to local node
+        result.add(nodeManager.getNodeId());
+        return result;
+    }
+
+    /**
      * Dispatches a build request to the target node or handles it locally.
      * @param info the execution metadata
      */
@@ -152,6 +264,16 @@ public class RemoteBuildDeployManager implements InitializableBean {
                             .setExecutionId(info.getExecutionId())
                             .setTargetNodeId(targetNodeId)
                             .setScriptName(info.getScriptName());
+
+                    if (info.getParameters() != null && !info.getParameters().isEmpty()) {
+                        VariableParameters varParams = new VariableParameters();
+                        for (Map.Entry<String, Object> entry : info.getParameters().entrySet()) {
+                            if (entry.getValue() != null) {
+                                varParams.putValue(entry.getKey(), entry.getValue().toString());
+                            }
+                        }
+                        req.setParameters(varParams);
+                    }
 
                     nodeManager.getNodeMessagePublisher().publishRelay(
                             BuildDeployBroker.CATEGORY_BUILD, targetNodeId, req.toString());
@@ -219,6 +341,11 @@ public class RemoteBuildDeployManager implements InitializableBean {
                     info.setExecutionId(req.getExecutionId());
                     info.setTargetNodeId(req.getTargetNodeId());
                     info.setScriptName(req.getScriptName());
+                    if (req.getParameters() != null) {
+                        for (String pName : req.getParameters().getParameterNames()) {
+                            info.getParameters().put(pName, req.getParameters().getString(pName));
+                        }
+                    }
                     dispatch(info);
                 }
             } else if (message.contains("header: cancel") || message.contains("\"header\":\"cancel\"")) {
