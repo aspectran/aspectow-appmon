@@ -130,11 +130,13 @@
         .log-header {
             background: #2d2d2d;
             color: #aaa;
-            padding: 5px 15px;
+            padding: 6px 14px;
             font-size: 0.75rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
         }
         .log-wrapper.expanded {
             position: fixed;
@@ -163,6 +165,18 @@
             border-radius: 0;
             border: none;
             font-size: 0.9rem;
+        }
+        @media (max-width: 575.98px) {
+            .log-header {
+                padding: 6px 10px;
+                gap: 4px;
+            }
+            .log-header .log-title {
+                font-size: 0.75rem;
+            }
+            .log-header .btn-xs {
+                font-size: 0.72rem;
+            }
         }
     </style>
 </head>
@@ -912,17 +926,17 @@
                     <div class="card shadow-sm overflow-hidden flex-grow-1 right-column-scroll">
                         <div id="log-wrapper-cluster-dashboard" class="log-wrapper h-100 d-flex flex-column">
                             <div class="log-header">
-                                <span><i class="bi bi-terminal-fill me-2 text-primary"></i>Live Cluster Logs (All Nodes)</span>
-                                <div class="d-flex align-items-center gap-3">
-                                    <button class="btn btn-link btn-xs text-secondary p-0 text-decoration-none" onclick="clearClusterDashboardLog()">
-                                        <i class="bi bi-trash3"></i> Clear
+                                <span class="log-title"><i class="bi bi-terminal-fill me-2 text-primary"></i>Live Cluster Logs <span class="d-none d-sm-inline">(All Nodes)</span></span>
+                                <div class="d-flex align-items-center gap-2 gap-sm-3 ms-auto">
+                                    <button class="btn btn-link btn-xs text-secondary p-0 text-decoration-none" onclick="clearClusterDashboardLog()" title="Clear Logs">
+                                        <i class="bi bi-trash3"></i> <span class="d-none d-sm-inline">Clear</span>
                                     </button>
-                                    <button class="btn btn-link btn-xs text-secondary p-0 text-decoration-none expand-btn" onclick="toggleExpandClusterDashboardLog()">
-                                        <i class="bi bi-arrows-angle-expand"></i> Expand
+                                    <button class="btn btn-link btn-xs text-secondary p-0 text-decoration-none expand-btn" onclick="toggleExpandClusterDashboardLog()" title="Toggle Fullscreen Expand">
+                                        <i class="bi bi-arrows-angle-expand"></i> <span class="d-none d-sm-inline">Expand</span>
                                     </button>
                                     <div class="form-check form-check-inline m-0 d-flex align-items-center">
-                                        <input class="form-check-input me-2" type="checkbox" id="auto-scroll-cluster-dashboard" checked style="cursor:pointer">
-                                        <label class="form-check-label text-secondary" for="auto-scroll-cluster-dashboard" style="cursor:pointer; font-size: 0.75rem;">Auto-scroll</label>
+                                        <input class="form-check-input me-1 me-sm-2" type="checkbox" id="auto-scroll-cluster-dashboard" checked style="cursor:pointer" title="Auto-scroll">
+                                        <label class="form-check-label text-secondary d-none d-md-inline" for="auto-scroll-cluster-dashboard" style="cursor:pointer; font-size: 0.75rem;">Auto-scroll</label>
                                     </div>
                                 </div>
                             </div>
@@ -1371,17 +1385,17 @@
                     if (service.schedules && service.schedules.length > 0) {
                         html += `<div id="log-wrapper-${service.loggingGroup}" class="log-wrapper">
                             <div class="log-header">
-                                <span><i class="bi bi-terminal me-2"></i>Live Scheduler Logs</span>
-                                <div class="d-flex align-items-center gap-3">
-                                    <button class="btn btn-link btn-xs text-secondary p-0 text-decoration-none" onclick="clearLog('${service.loggingGroup}')">
-                                        <i class="bi bi-trash3"></i> Clear
+                                <span class="log-title"><i class="bi bi-terminal me-2"></i>Live Scheduler Logs</span>
+                                <div class="d-flex align-items-center gap-2 gap-sm-3 ms-auto">
+                                    <button class="btn btn-link btn-xs text-secondary p-0 text-decoration-none" onclick="clearLog('${service.loggingGroup}')" title="Clear Logs">
+                                        <i class="bi bi-trash3"></i> <span class="d-none d-sm-inline">Clear</span>
                                     </button>
-                                    <button class="btn btn-link btn-xs text-secondary p-0 text-decoration-none expand-btn" onclick="toggleExpandLog('${service.loggingGroup}')">
-                                        <i class="bi bi-arrows-angle-expand"></i> Expand
+                                    <button class="btn btn-link btn-xs text-secondary p-0 text-decoration-none expand-btn" onclick="toggleExpandLog('${service.loggingGroup}')" title="Toggle Fullscreen Expand">
+                                        <i class="bi bi-arrows-angle-expand"></i> <span class="d-none d-sm-inline">Expand</span>
                                     </button>
                                     <div class="form-check form-check-inline m-0 d-flex align-items-center">
-                                        <input class="form-check-input me-2" type="checkbox" id="auto-scroll-${service.loggingGroup}" checked style="cursor:pointer">
-                                        <label class="form-check-label text-secondary" for="auto-scroll-${service.loggingGroup}" style="cursor:pointer; font-size: 0.75rem;">Auto-scroll</label>
+                                        <input class="form-check-input me-1 me-sm-2" type="checkbox" id="auto-scroll-${service.loggingGroup}" checked style="cursor:pointer" title="Auto-scroll">
+                                        <label class="form-check-label text-secondary d-none d-md-inline" for="auto-scroll-${service.loggingGroup}" style="cursor:pointer; font-size: 0.75rem;">Auto-scroll</label>
                                     </div>
                                 </div>
                             </div>

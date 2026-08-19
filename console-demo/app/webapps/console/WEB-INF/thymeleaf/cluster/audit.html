@@ -5,19 +5,11 @@
       layout:decorate="~{templates/__${page.layout}__}">
 <head>
     <style>
-        .audit-card {
-            background: var(--bs-body-bg);
-            border: 1px solid var(--bs-border-color);
-            border-radius: 12px;
-            padding: 0;
-            overflow-x: auto;
-        }
         .filter-panel {
-            background: var(--bs-tertiary-bg);
+            background: var(--bs-secondary-bg);
+            padding: 15px;
+            margin-bottom: 1rem;
             border: 1px solid var(--bs-border-color);
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
         }
         .table-audit th {
             font-size: 0.8rem;
@@ -74,21 +66,17 @@
             white-space: nowrap;
         }
         @media print {
+            html, body, [data-bs-theme="dark"] {
+                background-color: #fff !important;
+                color: #000 !important;
+                --bs-body-bg: #fff !important;
+                --bs-body-color: #000 !important;
+            }
+            p, h1, h2, h3, h4, h5, h6, span, td, th, .text-muted {
+                color: #000 !important;
+            }
             .sidebar, .navbar, .filter-panel, .pagination-container, .btn, .d-print-none {
                 display: none !important;
-            }
-            .audit-card {
-                border: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .main-content {
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            body, td {
-                background: #fff !important;
-                color: #000 !important;
             }
         }
     </style>
@@ -118,8 +106,8 @@
             </div>
 
             <!-- Filter Panel -->
-            <div class="filter-panel">
-                <form method="get" th:action="@{/cluster/build/audit/}" class="row g-2 align-items-center">
+            <div class="card filter-panel">
+                <form method="get" th:action="@{/cluster/build/audit/}" class="row g-2 align-items-end">
                     <div class="col-md-3">
                         <label class="form-label small text-muted mb-1">Target Node</label>
                         <select name="nodeId" class="form-select form-select-sm">
@@ -148,14 +136,14 @@
                             <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Search</button>
                         </div>
                     </div>
-                    <div class="col-md-2 text-end pt-4">
+                    <div class="col-md-2 text-end">
                         <a th:href="@{/cluster/build/audit/}" class="btn btn-sm btn-outline-secondary">Reset</a>
                     </div>
                 </form>
             </div>
 
             <!-- Audit Table Card -->
-            <div class="audit-card">
+            <div class="card shadow-sm overflow-hidden">
                 <div class="table-responsive">
                     <table class="table table-hover table-audit mb-0">
                         <thead>
@@ -304,24 +292,13 @@
 
             function formatDateTime(dateVal) {
                 if (!dateVal) return '-';
-                let date;
-                if (dateVal instanceof Date) {
-                    date = dateVal;
-                } else if (typeof dateVal === 'object' && dateVal.epochSecond !== undefined) {
-                    date = new Date(dateVal.epochSecond * 1000);
-                } else if (typeof dateVal === 'number') {
-                    date = new Date(dateVal);
+                let d;
+                if (typeof dateVal === 'object' && dateVal !== null && dateVal.epochSecond !== undefined) {
+                    d = dayjs.unix(dateVal.epochSecond);
                 } else {
-                    date = new Date(dateVal);
+                    d = dayjs(dateVal);
                 }
-                if (isNaN(date.getTime())) return String(dateVal);
-                const Y = date.getFullYear();
-                const M = String(date.getMonth() + 1).padStart(2, '0');
-                const D = String(date.getDate()).padStart(2, '0');
-                const h = String(date.getHours()).padStart(2, '0');
-                const m = String(date.getMinutes()).padStart(2, '0');
-                const s = String(date.getSeconds()).padStart(2, '0');
-                return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+                return d.isValid() ? d.format('YYYY-MM-DD HH:mm:ss') : String(dateVal);
             }
 
             function viewDetail(historyId) {

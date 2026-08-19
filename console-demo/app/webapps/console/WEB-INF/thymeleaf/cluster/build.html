@@ -29,10 +29,12 @@
         }
         .terminal-header {
             background: #222;
-            padding: 10px 16px;
+            padding: 8px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
             border-bottom: 1px solid #333;
         }
         .terminal-body {
@@ -47,6 +49,7 @@
             line-height: 1.45;
         }
         .terminal-line {
+            white-space: pre;
             margin-bottom: 2px;
         }
         .terminal-line.info { color: #58a6ff; }
@@ -112,6 +115,19 @@
                 margin-left: 0 !important;
             }
         }
+        @media (max-width: 575.98px) {
+            .terminal-header {
+                padding: 6px 10px;
+                gap: 6px;
+            }
+            .terminal-header .terminal-title {
+                font-size: 0.8rem;
+            }
+            .terminal-header .btn-xs {
+                padding: 2px 6px;
+                font-size: 0.75rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -138,7 +154,7 @@
             </div>
 
             <div class="card target-selector">
-                <div class="row align-items-center g-3">
+                <div class="row align-items-center gy-1">
                     <div class="col-auto">
                         <label class="fw-bold small text-muted text-uppercase">Target Node</label>
                     </div>
@@ -278,23 +294,23 @@
                 <!-- Right: Real-time Terminal Panel -->
                 <div class="terminal-panel">
                     <div class="terminal-header">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="text-white small fw-bold"><i class="bi bi-terminal-fill me-1 text-primary"></i> Live Output Console</span>
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                            <span class="text-white small fw-bold terminal-title"><i class="bi bi-terminal-fill me-1 text-primary"></i> Live Output Console</span>
                             <span id="terminal-spinner" class="spinner-border spinner-border-sm text-primary d-none" role="status"></span>
                         </div>
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-1 gap-sm-2 flex-wrap ms-auto">
                             <div class="dropdown">
                                 <button class="btn btn-xs btn-outline-secondary text-white-50 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="View Daemon Logs">
-                                    <i class="bi bi-file-earmark-text me-1"></i>Daemon Logs
+                                    <i class="bi bi-file-earmark-text me-sm-1"></i><span class="d-none d-sm-inline">Daemon Logs</span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-sm">
                                     <li><a class="dropdown-item small" href="javascript:void(0)" onclick="fetchDaemonLog('stderr')"><i class="bi bi-exclamation-triangle text-danger me-2"></i>daemon-stderr.log</a></li>
                                     <li><a class="dropdown-item small" href="javascript:void(0)" onclick="fetchDaemonLog('stdout')"><i class="bi bi-file-text text-info me-2"></i>daemon-stdout.log</a></li>
                                 </ul>
                             </div>
-                            <div class="form-check form-switch form-check-inline m-0 text-white small">
-                                <input class="form-check-input" type="checkbox" id="auto-scroll" checked>
-                                <label class="form-check-label" for="auto-scroll">Auto-scroll</label>
+                            <div class="form-check form-switch form-check-inline m-0 text-white small d-flex align-items-center gap-1 ps-4 pe-1">
+                                <input class="form-check-input ms-0 me-1" type="checkbox" id="auto-scroll" checked title="Toggle Auto-scroll">
+                                <label class="form-check-label d-none d-md-inline" for="auto-scroll">Auto-scroll</label>
                             </div>
                             <button class="btn btn-xs btn-outline-secondary text-white-50" onclick="clearTerminal()" title="Clear Terminal">
                                 <i class="bi bi-trash"></i>
@@ -392,7 +408,7 @@
 
             function openAuditPopup(e) {
                 if (e) e.preventDefault();
-                const width = Math.min(1400, window.screen.width * 0.9);
+                const width = Math.min(1450, window.screen.width * 0.9);
                 const height = Math.min(950, window.screen.height * 0.85);
                 const left = (window.screen.width - width) / 2;
                 const top = (window.screen.height - height) / 2;
@@ -705,8 +721,16 @@
                 }
 
                 clearTerminal();
-                startDurationTicker();
+                $('#meta-exec-id').text('Pending...');
+                $('#meta-node-id').text(targetLabel);
+                $('#meta-branch').text(branch || '-');
+                $('#meta-commit-before').text('-');
+                $('#meta-commit-after').text('-');
                 $('#meta-started-at').text(formatDateTime(new Date()));
+                $('#meta-duration').text('0.0s');
+                $('#meta-exit-code').text('-');
+                $('#exec-status-badge').attr('class', 'status-pill bg-warning text-dark').text('PENDING');
+                startDurationTicker();
                 lastHandledErrorKey = null;
                 if (healthCheckStartTimeout) {
                     clearTimeout(healthCheckStartTimeout);
@@ -891,7 +915,7 @@
                 else if (cleanText.includes('[WARN]') || cleanText.includes('[WARNING]')) lineClass += ' warn';
 
                 const renderedHtml = ansiToHtml(text);
-                $body.append(`<div class="${lineClass}">${renderedHtml}</div>`);
+                $body.append(`<p class="${lineClass}">${renderedHtml}</p>`);
 
                 if ($('#auto-scroll').is(':checked')) {
                     $body.scrollTop($body[0].scrollHeight);
@@ -988,59 +1012,79 @@
 
             function formatDateTime(dateVal) {
                 if (!dateVal) return '-';
-                let date;
-                if (dateVal instanceof Date) {
-                    date = dateVal;
-                } else if (typeof dateVal === 'object' && dateVal.epochSecond !== undefined) {
-                    date = new Date(dateVal.epochSecond * 1000);
-                } else if (typeof dateVal === 'number') {
-                    date = new Date(dateVal);
+                let d;
+                if (typeof dateVal === 'object' && dateVal !== null && dateVal.epochSecond !== undefined) {
+                    d = dayjs.unix(dateVal.epochSecond);
                 } else {
-                    date = new Date(dateVal);
+                    d = dayjs(dateVal);
                 }
-                if (isNaN(date.getTime())) return String(dateVal);
-                const Y = date.getFullYear();
-                const M = String(date.getMonth() + 1).padStart(2, '0');
-                const D = String(date.getDate()).padStart(2, '0');
-                const h = String(date.getHours()).padStart(2, '0');
-                const m = String(date.getMinutes()).padStart(2, '0');
-                const s = String(date.getSeconds()).padStart(2, '0');
-                return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+                return d.isValid() ? d.format('YYYY-MM-DD HH:mm:ss') : String(dateVal);
             }
 
             function updateStatusUI(data) {
                 if (!data) return;
 
+                const isNewExecution = (data.executionId && currentExecutionId && data.executionId !== currentExecutionId);
                 if (data.executionId) {
                     currentExecutionId = data.executionId;
-                    $('#meta-exec-id').text(data.executionId);
                 }
-                if (data.nodeId || data.targetNodeId) {
-                    $('#meta-node-id').text(data.nodeId || data.targetNodeId);
+
+                $('#meta-exec-id').text(data.executionId || '-');
+                $('#meta-node-id').text(data.nodeId || data.targetNodeId || '-');
+                $('#meta-branch').text(data.gitBranch || '-');
+
+                if (data.gitCommitBefore) {
+                    $('#meta-commit-before').text(String(data.gitCommitBefore).substring(0, 8));
+                } else if (isNewExecution || data.status === 'PENDING' || data.status === 'RUNNING') {
+                    $('#meta-commit-before').text('-');
                 }
-                if (data.gitBranch) $('#meta-branch').text(data.gitBranch);
-                if (data.gitCommitBefore) $('#meta-commit-before').text(String(data.gitCommitBefore).substring(0, 8));
-                if (data.gitCommitAfter) $('#meta-commit-after').text(String(data.gitCommitAfter).substring(0, 8));
+
+                if (data.gitCommitAfter) {
+                    $('#meta-commit-after').text(String(data.gitCommitAfter).substring(0, 8));
+                } else if (isNewExecution || data.status === 'PENDING' || data.status === 'RUNNING') {
+                    $('#meta-commit-after').text('-');
+                }
+
                 if (data.startedAt) {
                     $('#meta-started-at').text(formatDateTime(data.startedAt));
+                } else if (isNewExecution) {
+                    $('#meta-started-at').text('-');
                 }
+
                 if (data.durationMs !== undefined && data.durationMs !== null && data.durationMs >= 0) {
                     $('#meta-duration').text((data.durationMs / 1000).toFixed(1) + 's');
+                } else if (isNewExecution || data.status === 'PENDING' || data.status === 'RUNNING') {
+                    if (!durationTicker) {
+                        $('#meta-duration').text('0.0s');
+                    }
                 }
-                if (data.exitCode !== undefined && data.exitCode !== null) $('#meta-exit-code').text(data.exitCode);
+
+                if (data.exitCode !== undefined && data.exitCode !== null) {
+                    $('#meta-exit-code').text(data.exitCode);
+                } else if (isNewExecution || data.status === 'PENDING' || data.status === 'RUNNING') {
+                    $('#meta-exit-code').text('-');
+                }
 
                 const status = data.status || 'IDLE';
                 const $badge = $('#exec-status-badge');
                 $badge.text(status);
-                $badge.removeClass('bg-secondary bg-primary bg-success bg-danger bg-warning');
+                $badge.removeClass('bg-secondary bg-primary bg-success bg-danger bg-warning text-dark text-white');
 
                 if (status === 'RUNNING') {
-                    $badge.addClass('bg-primary');
+                    $badge.addClass('bg-primary text-white');
+                    $('#btn-dispatch').prop('disabled', true);
+                    $('#btn-cancel').prop('disabled', false);
+                    $('#terminal-spinner').removeClass('d-none');
+                    if (data.startedAt && !durationTicker) {
+                        startDurationTicker(data.startedAt);
+                    }
+                } else if (status === 'PENDING') {
+                    $badge.addClass('bg-warning text-dark');
                     $('#btn-dispatch').prop('disabled', true);
                     $('#btn-cancel').prop('disabled', false);
                     $('#terminal-spinner').removeClass('d-none');
                 } else if (status === 'SUCCESS') {
-                    $badge.addClass('bg-success');
+                    $badge.addClass('bg-success text-white');
                     $('#btn-dispatch').prop('disabled', false);
                     $('#btn-cancel').prop('disabled', true);
                     $('#terminal-spinner').addClass('d-none');
@@ -1048,19 +1092,19 @@
                         stopDurationTicker(data.durationMs);
                     }
                 } else if (status === 'FAILED' || status === 'TIMEOUT') {
-                    $badge.addClass('bg-danger');
+                    $badge.addClass('bg-danger text-white');
                     $('#btn-dispatch').prop('disabled', false);
                     $('#btn-cancel').prop('disabled', true);
                     $('#terminal-spinner').addClass('d-none');
                     stopDurationTicker(data.durationMs);
                 } else if (status === 'CANCELLED') {
-                    $badge.addClass('bg-warning');
+                    $badge.addClass('bg-warning text-dark');
                     $('#btn-dispatch').prop('disabled', false);
                     $('#btn-cancel').prop('disabled', true);
                     $('#terminal-spinner').addClass('d-none');
                     stopDurationTicker(data.durationMs);
                 } else {
-                    $badge.addClass('bg-secondary');
+                    $badge.addClass('bg-secondary text-white');
                     $('#btn-dispatch').prop('disabled', false);
                     $('#btn-cancel').prop('disabled', true);
                     $('#terminal-spinner').addClass('d-none');

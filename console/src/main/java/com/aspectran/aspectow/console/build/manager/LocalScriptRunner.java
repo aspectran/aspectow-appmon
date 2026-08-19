@@ -194,21 +194,36 @@ public class LocalScriptRunner implements ActivityContextAware {
     /**
      * Runs a script asynchronously.
      * @param info the execution metadata
+     * @param startedCallback callback called when execution starts running
+     * @param logConsumer callback for real-time log lines
+     * @param completionCallback callback called when execution completes
+     */
+    public void runAsync(BuildExecutionInfo info,
+                         Consumer<BuildExecutionInfo> startedCallback,
+                         Consumer<String> logConsumer,
+                         Consumer<BuildExecutionInfo> completionCallback) {
+        Thread.ofVirtual().start(() -> {
+            run(info, startedCallback, logConsumer, completionCallback);
+        });
+    }
+
+    /**
+     * Runs a script asynchronously without a started callback.
+     * @param info the execution metadata
      * @param logConsumer callback for real-time log lines
      * @param completionCallback callback called when execution completes
      */
     public void runAsync(BuildExecutionInfo info,
                          Consumer<String> logConsumer,
                          Consumer<BuildExecutionInfo> completionCallback) {
-        Thread.ofVirtual().start(() -> {
-            run(info, logConsumer, completionCallback);
-        });
+        runAsync(info, null, logConsumer, completionCallback);
     }
 
     /**
      * Executes the script synchronously on the current thread.
      */
     public void run(@NonNull BuildExecutionInfo info,
+                    Consumer<BuildExecutionInfo> startedCallback,
                     Consumer<String> logConsumer,
                     Consumer<BuildExecutionInfo> completionCallback) {
         String scriptName = info.getScriptName();
@@ -265,6 +280,9 @@ public class LocalScriptRunner implements ActivityContextAware {
 
             info.setStatus(BuildExecutionInfo.Status.RUNNING);
             info.setStartedAt(Instant.now());
+            if (startedCallback != null) {
+                startedCallback.accept(info);
+            }
 
             List<String> logBuffer = Collections.synchronizedList(new ArrayList<>());
             logRingBuffers.put(info.getExecutionId(), logBuffer);
@@ -291,6 +309,9 @@ public class LocalScriptRunner implements ActivityContextAware {
 
         info.setStatus(BuildExecutionInfo.Status.RUNNING);
         info.setStartedAt(Instant.now());
+        if (startedCallback != null) {
+            startedCallback.accept(info);
+        }
 
         // Capture Git information before execution
         captureGitInfoBefore(baseDir, info);

@@ -278,6 +278,10 @@ public class RemoteBuildDeployManager implements InitializableBean {
             broker.broadcastStatusChanged(info);
 
             localScriptRunner.runAsync(info,
+                    startedInfo -> {
+                        logger.info("Local build execution [{}] started running", startedInfo.getExecutionId());
+                        broker.broadcastStatusChanged(startedInfo);
+                    },
                     line -> {
                         broker.broadcastLogLine(info.getExecutionId(), info.getTargetNodeId(), line);
                     },
