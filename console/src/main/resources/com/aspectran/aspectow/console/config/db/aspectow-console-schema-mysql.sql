@@ -188,6 +188,7 @@ create table if not exists asc_build_log (
 -- Initial data
 insert ignore into asc_role (role_name, description) values ('SUPER_ADMIN', 'Super administrator with full access');
 insert ignore into asc_role (role_name, description) values ('ADMIN', 'Administrator with limited management access');
+insert ignore into asc_role (role_name, description) values ('BUILDER', 'Build and deployment engineer');
 insert ignore into asc_role (role_name, description) values ('VIEWER', 'User with read-only access');
 insert ignore into asc_role (role_name, description) values ('DEMO', 'Demo user with simulation access');
 
@@ -200,14 +201,29 @@ insert ignore into asc_permission (perm_code, description) values ('BUILD_VIEW',
 insert ignore into asc_permission (perm_code, description) values ('BUILD_EXECUTE', 'Execute build and deployment scripts');
 
 -- Map permissions to SUPER_ADMIN
-insert ignore into asc_role_permission (role_id, perm_id) select 1, perm_id from asc_permission;
+insert ignore into asc_role_permission (role_id, perm_id)
+select r.role_id, p.perm_id from asc_role r cross join asc_permission p where r.role_name = 'SUPER_ADMIN';
+
 -- Map permissions to ADMIN
-insert ignore into asc_role_permission (role_id, perm_id) select 2, perm_id from asc_permission where perm_code in ('MONITOR_VIEW', 'COMMAND_EXECUTE', 'NODE_MANAGE', 'BUILD_VIEW', 'BUILD_EXECUTE');
+insert ignore into asc_role_permission (role_id, perm_id)
+select r.role_id, p.perm_id from asc_role r cross join asc_permission p
+ where r.role_name = 'ADMIN' and p.perm_code in ('MONITOR_VIEW', 'COMMAND_EXECUTE', 'NODE_MANAGE', 'BUILD_VIEW', 'BUILD_EXECUTE');
+
+-- Map permissions to BUILDER
+insert ignore into asc_role_permission (role_id, perm_id)
+select r.role_id, p.perm_id from asc_role r cross join asc_permission p
+ where r.role_name = 'BUILDER' and p.perm_code in ('BUILD_VIEW', 'BUILD_EXECUTE');
+
 -- Map permissions to VIEWER
-insert ignore into asc_role_permission (role_id, perm_id) select 3, perm_id from asc_permission where perm_code in ('MONITOR_VIEW');
+insert ignore into asc_role_permission (role_id, perm_id)
+select r.role_id, p.perm_id from asc_role r cross join asc_permission p
+ where r.role_name = 'VIEWER' and p.perm_code in ('MONITOR_VIEW', 'BUILD_VIEW');
+
 -- Map permissions to DEMO
-insert ignore into asc_role_permission (role_id, perm_id) select 4, perm_id from asc_permission;
+insert ignore into asc_role_permission (role_id, perm_id)
+select r.role_id, p.perm_id from asc_role r cross join asc_permission p where r.role_name = 'DEMO';
 
 -- Initial Super Admin user (password: admin123)
 insert ignore into asc_user (username, password, nickname, email) values ('admin', 'admin123', 'Super Admin', 'admin@aspectow.com');
-insert ignore into asc_user_role (user_id, role_id) values (1, 1);
+insert ignore into asc_user_role (user_id, role_id)
+select u.user_id, r.role_id from asc_user u, asc_role r where u.username = 'admin' and r.role_name = 'SUPER_ADMIN';

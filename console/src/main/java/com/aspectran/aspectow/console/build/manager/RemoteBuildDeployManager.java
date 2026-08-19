@@ -80,6 +80,10 @@ public class RemoteBuildDeployManager implements InitializableBean {
         }
     }
 
+    public String getNodeId() {
+        return nodeManager.getNodeId();
+    }
+
     public BuildDeployBroker getBroker() {
         return broker;
     }
@@ -89,6 +93,40 @@ public class RemoteBuildDeployManager implements InitializableBean {
     }
 
     public BuildExecutionInfo getLastExecution() {
+        if (lastExecution == null && buildAuditService != null) {
+            try {
+                com.aspectran.aspectow.console.build.audit.BuildAuditQuery query =
+                        new com.aspectran.aspectow.console.build.audit.BuildAuditQuery();
+                query.setPageInfo(com.aspectran.aspectow.console.common.pagination.PageInfo.of(1, 1));
+                List<com.aspectran.aspectow.console.build.audit.BuildHistory> list = buildAuditService.searchHistory(query);
+                if (list != null && !list.isEmpty()) {
+                    com.aspectran.aspectow.console.build.audit.BuildHistory h = list.getFirst();
+                    BuildExecutionInfo info = new BuildExecutionInfo();
+                    info.setExecutionId(h.getExecutionId());
+                    info.setTargetNodeId(h.getTargetNodeId());
+                    info.setScriptName(h.getScriptName());
+                    if (h.getStatus() != null) {
+                        try {
+                            info.setStatus(BuildExecutionInfo.Status.valueOf(h.getStatus()));
+                        } catch (Exception ignored) {
+                            info.setStatus(BuildExecutionInfo.Status.FAILED);
+                        }
+                    }
+                    info.setExitCode(h.getExitCode());
+                    info.setStartedAt(h.getStartedAt());
+                    info.setFinishedAt(h.getFinishedAt());
+                    info.setDurationMs(h.getDurationMs());
+                    info.setGitBranch(h.getGitBranch());
+                    info.setGitCommitBefore(h.getGitCommitBefore());
+                    info.setGitCommitAfter(h.getGitCommitAfter());
+                    info.setGitCommitMsg(h.getGitCommitMsg());
+                    info.setErrorSummary(h.getErrorSummary());
+                    lastExecution = info;
+                }
+            } catch (Exception e) {
+                logger.trace("Failed to load last build execution from DB audit history", e);
+            }
+        }
         return lastExecution;
     }
 

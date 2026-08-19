@@ -41,6 +41,7 @@ public class BuildResponseParameters extends DefaultParameters {
     public static final ParameterKey gitCommitBefore;
     public static final ParameterKey gitCommitAfter;
     public static final ParameterKey gitCommitMsg;
+    public static final ParameterKey startedAt;
     public static final ParameterKey error;
 
     private static final ParameterKey[] parameterKeys;
@@ -58,6 +59,7 @@ public class BuildResponseParameters extends DefaultParameters {
         gitCommitBefore = new ParameterKey("gitCommitBefore", ValueType.STRING);
         gitCommitAfter = new ParameterKey("gitCommitAfter", ValueType.STRING);
         gitCommitMsg = new ParameterKey("gitCommitMsg", ValueType.STRING);
+        startedAt = new ParameterKey("startedAt", ValueType.STRING);
         error = new ParameterKey("error", ValueType.STRING);
 
         parameterKeys = new ParameterKey[] {
@@ -73,6 +75,7 @@ public class BuildResponseParameters extends DefaultParameters {
                 gitCommitBefore,
                 gitCommitAfter,
                 gitCommitMsg,
+                startedAt,
                 error
         };
     }
@@ -186,6 +189,15 @@ public class BuildResponseParameters extends DefaultParameters {
 
     public BuildResponseParameters setGitCommitMsg(String value) {
         putValue(gitCommitMsg, value);
+        return this;
+    }
+
+    public String getStartedAt() {
+        return getString(startedAt);
+    }
+
+    public BuildResponseParameters setStartedAt(String value) {
+        putValue(startedAt, value);
         return this;
     }
 

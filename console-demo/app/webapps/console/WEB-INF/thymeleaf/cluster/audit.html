@@ -59,6 +59,20 @@
             padding: 15px;
             line-height: 1.45;
         }
+        .table-detail-container {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .table-detail-container .table {
+            margin-bottom: 0;
+            border: none;
+        }
+        .table-detail-container th {
+            background-color: var(--bs-tertiary-bg) !important;
+            color: var(--bs-secondary-color);
+            font-weight: 600;
+            white-space: nowrap;
+        }
         @media print {
             .sidebar, .navbar, .filter-panel, .pagination-container, .btn, .d-print-none {
                 display: none !important;
@@ -81,193 +95,204 @@
 </head>
 <body>
     <th:block layout:fragment="content">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-3">
-            <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <h3 class="fw-bold mb-0">Build &amp; Deployment Audit Trail</h3>
-                </div>
-                <p class="text-muted mb-0">Immutable compliance execution logs, Git commit track records, and SHA-256 integrity proofs</p>
-            </div>
-            <div class="d-flex flex-wrap align-items-center justify-content-md-end gap-2">
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()">
-                    <i class="bi bi-printer"></i> Print Report
-                </button>
-                <a th:href="@{/cluster/build/}" class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-play-circle"></i> Go to Build Console
-                </a>
-                <a th:href="@{/cluster/build/audit/export(nodeId=${page.targetNodeId}, status=${page.status}, q=${page.searchKeyword})}" class="btn btn-sm btn-success text-white">
-                    <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV Report
-                </a>
-            </div>
-        </div>
-
-        <!-- Filter Panel -->
-        <div class="filter-panel">
-            <form method="get" th:action="@{/cluster/build/audit/}" class="row g-2 align-items-center">
-                <div class="col-md-3">
-                    <label class="form-label small text-muted mb-1">Target Node</label>
-                    <select name="nodeId" class="form-select form-select-sm">
-                        <option value="">All Nodes</option>
-                        <option th:each="n : ${page.nodes}"
-                                th:value="${n.id}"
-                                th:text="${n.title + ' (' + n.id + ')'}"
-                                th:selected="${n.id == page.targetNodeId}">
-                        </option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small text-muted mb-1">Status</label>
-                    <select name="status" class="form-select form-select-sm">
-                        <option value="">All Statuses</option>
-                        <option value="SUCCESS" th:selected="${page.status == 'SUCCESS'}">SUCCESS</option>
-                        <option value="FAILED" th:selected="${page.status == 'FAILED'}">FAILED</option>
-                        <option value="RUNNING" th:selected="${page.status == 'RUNNING'}">RUNNING</option>
-                        <option value="CANCELLED" th:selected="${page.status == 'CANCELLED'}">CANCELLED</option>
-                    </select>
-                </div>
-                <div class="col-md-5">
-                    <label class="form-label small text-muted mb-1">Keyword Search</label>
-                    <div class="input-group input-group-sm">
-                        <input type="text" name="q" class="form-control" placeholder="Search execution ID, script, commit, requester..." th:value="${page.searchKeyword}">
-                        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Search</button>
+        <th:block th:if="${session.USER_INFO.hasPermission('BUILD_VIEW') || session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h3 class="fw-bold mb-0">Build &amp; Deployment Audit Trail</h3>
                     </div>
+                    <p class="text-muted mb-0">Immutable compliance execution logs, Git commit track records, and SHA-256 integrity proofs</p>
                 </div>
-                <div class="col-md-2 text-end pt-4">
-                    <a th:href="@{/cluster/build/audit/}" class="btn btn-sm btn-outline-secondary">Reset</a>
-                </div>
-            </form>
-        </div>
-
-        <!-- Audit Table Card -->
-        <div class="audit-card">
-            <div class="table-responsive">
-                <table class="table table-hover table-audit mb-0">
-                    <thead>
-                        <tr>
-                            <th class="ps-3">ID</th>
-                            <th>Execution ID</th>
-                            <th>Target Node</th>
-                            <th>Script Name</th>
-                            <th>Requester</th>
-                            <th>Status</th>
-                            <th>Git Changes</th>
-                            <th>Started At</th>
-                            <th>Duration</th>
-                            <th>Integrity</th>
-                            <th class="text-end pe-3">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:if="${#lists.isEmpty(page.historyList)}">
-                            <td colspan="11" class="text-center py-4 text-muted">
-                                <i class="bi bi-inbox fs-3 d-block mb-1"></i>
-                                No build &amp; deployment audit history records found.
-                            </td>
-                        </tr>
-                        <tr th:each="item : ${page.historyList}">
-                            <td class="text-muted ps-3" th:text="${item.historyId}">1</td>
-                            <td>
-                                <span class="hash-code text-primary fw-bold" th:text="${item.executionId}">bld_123</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-secondary-subtle text-body" th:text="${item.targetNodeId}">node-1</span>
-                            </td>
-                            <td>
-                                <span class="fw-bold" th:text="${item.scriptName}">5-pull_build_deploy.sh</span>
-                            </td>
-                            <td th:text="${item.requester}">admin</td>
-                            <td>
-                                <span th:if="${item.status == 'SUCCESS'}" class="status-pill bg-success text-white">SUCCESS</span>
-                                <span th:if="${item.status == 'FAILED'}" class="status-pill bg-danger text-white">FAILED</span>
-                                <span th:if="${item.status == 'RUNNING'}" class="status-pill bg-primary text-white">RUNNING</span>
-                                <span th:if="${item.status == 'CANCELLED'}" class="status-pill bg-warning text-dark">CANCELLED</span>
-                            </td>
-                            <td>
-                                <div th:if="${item.gitCommitBefore != null || item.gitCommitAfter != null}">
-                                    <span class="hash-code text-muted" th:text="${item.gitCommitBefore != null ? #strings.substring(item.gitCommitBefore,0,7) : 'HEAD'}">abc</span>
-                                    <i class="bi bi-arrow-right text-muted small mx-1"></i>
-                                    <span class="hash-code text-success fw-bold" th:text="${item.gitCommitAfter != null ? #strings.substring(item.gitCommitAfter,0,7) : 'HEAD'}">def</span>
-                                    <div th:if="${item.gitBranch != null}" class="small text-muted" th:text="'(' + ${item.gitBranch} + ')'">main</div>
-                                </div>
-                                <span th:if="${item.gitCommitBefore == null && item.gitCommitAfter == null}" class="text-muted small">-</span>
-                            </td>
-                            <td class="small" th:text="${#temporals.format(item.startedAt, 'yyyy-MM-dd HH:mm:ss')}">2026-08-18 12:00:00</td>
-                            <td class="small" th:text="${item.durationMs != null ? (item.durationMs / 1000.0) + 's' : '-'}">12.4s</td>
-                            <td>
-                                <span th:if="${item.integrityHash != null}" class="badge bg-success-subtle text-success" title="SHA-256 Verified">
-                                    <i class="bi bi-shield-check"></i> SHA-256
-                                </span>
-                                <span th:if="${item.integrityHash == null}" class="badge bg-secondary-subtle text-muted">
-                                    Pending
-                                </span>
-                            </td>
-                            <td class="text-end pe-2">
-                                <button class="btn btn-xs btn-outline-primary" th:onclick="'viewDetail(' + ${item.historyId} + ')'" title="View Audit Details">
-                                    <i class="bi bi-eye"></i> Detail
-                                </button>
-                                <button class="btn btn-xs btn-outline-secondary" th:onclick="'viewLogs(' + ${item.historyId} + ')'" title="View Console Logs">
-                                    <i class="bi bi-terminal"></i> Logs
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Pagination -->
-        <div th:if="${page.pageInfo != null && page.pageInfo.totalPages > 1}" class="d-flex justify-content-between align-items-center mt-3">
-            <span class="small text-muted" th:text="'Total ' + ${page.pageInfo.totalElements} + ' records (Page ' + ${page.pageInfo.number} + ' of ' + ${page.pageInfo.totalPages} + ')'"></span>
-            <ul class="pagination pagination-sm mb-0">
-                <li class="page-item" th:classappend="${page.pageInfo.number <= 1} ? 'disabled'">
-                    <a class="page-link" th:href="@{/cluster/build/audit/(page=${page.pageInfo.number - 1}, nodeId=${page.targetNodeId}, status=${page.status}, q=${page.searchKeyword})}">Previous</a>
-                </li>
-                <li class="page-item active">
-                    <span class="page-link" th:text="${page.pageInfo.number}">1</span>
-                </li>
-                <li class="page-item" th:classappend="${page.pageInfo.number >= page.pageInfo.totalPages} ? 'disabled'">
-                    <a class="page-link" th:href="@{/cluster/build/audit/(page=${page.pageInfo.number + 1}, nodeId=${page.targetNodeId}, status=${page.status}, q=${page.searchKeyword})}">Next</a>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Detail Modal -->
-        <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold"><i class="bi bi-shield-check text-primary me-2"></i>Audit Verification Report</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body" id="detail-modal-body">
-                        <!-- Dynamic content -->
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                    </div>
+                <div class="d-flex flex-wrap align-items-center justify-content-md-end gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+                        <i class="bi bi-printer"></i> Print Report
+                    </button>
+                    <a th:href="@{/cluster/build/}" class="btn btn-sm btn-outline-primary" th:if="${page.layout != 'popup'}">
+                        <i class="bi bi-play-circle"></i> Go to Build Console
+                    </a>
+                    <a th:href="@{/cluster/build/audit/export(nodeId=${page.targetNodeId}, status=${page.status}, q=${page.searchKeyword})}" class="btn btn-sm btn-success text-white">
+                        <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV Report
+                    </a>
+                    <button type="button" class="btn-close d-none d-md-inline-block ms-1" onclick="window.close()" aria-label="Close" title="Close" th:if="${page.layout == 'popup'}"></button>
                 </div>
             </div>
-        </div>
 
-        <!-- Log Viewer Modal -->
-        <div class="modal fade" id="logModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header bg-dark text-white">
-                        <h5 class="modal-title fw-bold"><i class="bi bi-terminal me-2"></i>Console Output Stream</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <!-- Filter Panel -->
+            <div class="filter-panel">
+                <form method="get" th:action="@{/cluster/build/audit/}" class="row g-2 align-items-center">
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted mb-1">Target Node</label>
+                        <select name="nodeId" class="form-select form-select-sm">
+                            <option value="">All Nodes</option>
+                            <option th:each="n : ${page.nodes}"
+                                    th:value="${n.id}"
+                                    th:text="${n.title + ' (' + n.id + ')'}"
+                                    th:selected="${n.id == page.targetNodeId}">
+                            </option>
+                        </select>
                     </div>
-                    <div class="modal-body p-0">
-                        <div id="modal-log-content" class="terminal-modal-body m-3">Loading logs...</div>
+                    <div class="col-md-2">
+                        <label class="form-label small text-muted mb-1">Status</label>
+                        <select name="status" class="form-select form-select-sm">
+                            <option value="">All Statuses</option>
+                            <option value="SUCCESS" th:selected="${page.status == 'SUCCESS'}">SUCCESS</option>
+                            <option value="FAILED" th:selected="${page.status == 'FAILED'}">FAILED</option>
+                            <option value="RUNNING" th:selected="${page.status == 'RUNNING'}">RUNNING</option>
+                            <option value="CANCELLED" th:selected="${page.status == 'CANCELLED'}">CANCELLED</option>
+                        </select>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="downloadModalLogs()">
-                            <i class="bi bi-download"></i> Download Full Log
-                        </button>
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <div class="col-md-5">
+                        <label class="form-label small text-muted mb-1">Keyword Search</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="q" class="form-control" placeholder="Search execution ID, script, commit, requester..." th:value="${page.searchKeyword}">
+                            <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Search</button>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-end pt-4">
+                        <a th:href="@{/cluster/build/audit/}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Audit Table Card -->
+            <div class="audit-card">
+                <div class="table-responsive">
+                    <table class="table table-hover table-audit mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-3">ID</th>
+                                <th>Execution ID</th>
+                                <th>Target Node</th>
+                                <th>Script Name</th>
+                                <th>Requester</th>
+                                <th>Status</th>
+                                <th>Git Changes</th>
+                                <th>Started At</th>
+                                <th>Duration</th>
+                                <th>Integrity</th>
+                                <th class="text-end pe-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(page.historyList)}">
+                                <td colspan="11" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox fs-3 d-block mb-1"></i>
+                                    No build &amp; deployment audit history records found.
+                                </td>
+                            </tr>
+                            <tr th:each="item : ${page.historyList}">
+                                <td class="text-muted ps-3" th:text="${item.historyId}">1</td>
+                                <td>
+                                    <span class="hash-code text-primary fw-bold" th:text="${item.executionId}">bld_123</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-body" th:text="${item.targetNodeId}">node-1</span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold" th:text="${item.scriptName}">5-pull_build_deploy.sh</span>
+                                </td>
+                                <td th:text="${item.requester}">admin</td>
+                                <td>
+                                    <span th:if="${item.status == 'SUCCESS'}" class="status-pill bg-success text-white">SUCCESS</span>
+                                    <span th:if="${item.status == 'FAILED'}" class="status-pill bg-danger text-white">FAILED</span>
+                                    <span th:if="${item.status == 'RUNNING'}" class="status-pill bg-primary text-white">RUNNING</span>
+                                    <span th:if="${item.status == 'CANCELLED'}" class="status-pill bg-warning text-dark">CANCELLED</span>
+                                </td>
+                                <td>
+                                    <div th:if="${item.gitCommitBefore != null || item.gitCommitAfter != null}">
+                                        <span class="hash-code text-muted" th:text="${item.gitCommitBefore != null ? #strings.substring(item.gitCommitBefore,0,7) : 'HEAD'}">abc</span>
+                                        <i class="bi bi-arrow-right text-muted small mx-1"></i>
+                                        <span class="hash-code text-success fw-bold" th:text="${item.gitCommitAfter != null ? #strings.substring(item.gitCommitAfter,0,7) : 'HEAD'}">def</span>
+                                        <div th:if="${item.gitBranch != null}" class="small text-muted" th:text="'(' + ${item.gitBranch} + ')'">main</div>
+                                    </div>
+                                    <span th:if="${item.gitCommitBefore == null && item.gitCommitAfter == null}" class="text-muted small">-</span>
+                                </td>
+                                <td class="small" th:text="${#temporals.format(item.startedAt, 'yyyy-MM-dd HH:mm:ss')}">2026-08-18 12:00:00</td>
+                                <td class="small" th:text="${item.durationMs != null ? (item.durationMs / 1000.0) + 's' : '-'}">12.4s</td>
+                                <td>
+                                    <span th:if="${item.integrityHash != null}" class="badge bg-success-subtle text-success" title="SHA-256 Verified">
+                                        <i class="bi bi-shield-check"></i> SHA-256
+                                    </span>
+                                    <span th:if="${item.integrityHash == null}" class="badge bg-secondary-subtle text-muted">
+                                        Pending
+                                    </span>
+                                </td>
+                                <td class="text-end pe-2">
+                                    <button class="btn btn-xs btn-outline-primary" th:onclick="'viewDetail(' + ${item.historyId} + ')'" title="View Audit Details">
+                                        <i class="bi bi-eye"></i> Detail
+                                    </button>
+                                    <button class="btn btn-xs btn-outline-secondary" th:onclick="'viewLogs(' + ${item.historyId} + ')'" title="View Console Logs">
+                                        <i class="bi bi-terminal"></i> Logs
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${page.pageInfo != null && page.pageInfo.totalPages > 1}" class="d-flex justify-content-between align-items-center mt-3">
+                <span class="small text-muted" th:text="'Total ' + ${page.pageInfo.totalElements} + ' records (Page ' + ${page.pageInfo.number} + ' of ' + ${page.pageInfo.totalPages} + ')'"></span>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${page.pageInfo.number <= 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/cluster/build/audit/(page=${page.pageInfo.number - 1}, nodeId=${page.targetNodeId}, status=${page.status}, q=${page.searchKeyword})}">Previous</a>
+                    </li>
+                    <li class="page-item active">
+                        <span class="page-link" th:text="${page.pageInfo.number}">1</span>
+                    </li>
+                    <li class="page-item" th:classappend="${page.pageInfo.number >= page.pageInfo.totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{/cluster/build/audit/(page=${page.pageInfo.number + 1}, nodeId=${page.targetNodeId}, status=${page.status}, q=${page.searchKeyword})}">Next</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div th:if="${page.layout == 'popup'}" class="d-flex justify-content-end mt-4 pt-3 border-top d-print-none">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="window.close()">Close</button>
+            </div>
+
+            <!-- Detail Modal -->
+            <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold"><i class="bi bi-shield-check text-primary me-2"></i>Audit Verification Report</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="detail-modal-body">
+                            <!-- Dynamic content -->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Log Viewer Modal -->
+            <div class="modal fade" id="logModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header bg-dark text-white">
+                            <h5 class="modal-title fw-bold"><i class="bi bi-terminal me-2"></i>Console Output Stream</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <div id="modal-log-content" class="terminal-modal-body m-3">Loading logs...</div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="downloadModalLogs()">
+                                <i class="bi bi-download"></i> Download Full Log
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+        <div th:unless="${session.USER_INFO.hasPermission('BUILD_VIEW') || session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}" class="alert alert-danger my-4">
+            <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Access Denied</h4>
+            <p class="mb-0">You do not have permission to access this page.</p>
         </div>
     </th:block>
 
@@ -276,6 +301,28 @@
             const BASE_PATH = [[@{/}]].replace(/\/$/, '');
             let currentLoadedLogs = "";
             let currentLogHistoryId = null;
+
+            function formatDateTime(dateVal) {
+                if (!dateVal) return '-';
+                let date;
+                if (dateVal instanceof Date) {
+                    date = dateVal;
+                } else if (typeof dateVal === 'object' && dateVal.epochSecond !== undefined) {
+                    date = new Date(dateVal.epochSecond * 1000);
+                } else if (typeof dateVal === 'number') {
+                    date = new Date(dateVal);
+                } else {
+                    date = new Date(dateVal);
+                }
+                if (isNaN(date.getTime())) return String(dateVal);
+                const Y = date.getFullYear();
+                const M = String(date.getMonth() + 1).padStart(2, '0');
+                const D = String(date.getDate()).padStart(2, '0');
+                const h = String(date.getHours()).padStart(2, '0');
+                const m = String(date.getMinutes()).padStart(2, '0');
+                const s = String(date.getSeconds()).padStart(2, '0');
+                return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+            }
 
             function viewDetail(historyId) {
                 fetch(BASE_PATH + `/cluster/build/audit/detail/${historyId}`)
@@ -294,23 +341,23 @@
                                     <div><strong>Integrity Check:</strong> ${verifiedBadge}</div>
                                     <div class="small text-muted">Algorithm: SHA-256</div>
                                 </div>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-sm small">
+                                <div class="card shadow-sm overflow-hidden">
+                                    <table class="table table-sm small mb-0">
                                         <tbody>
-                                            <tr><th class="bg-light" style="width: 25%;">Execution ID</th><td><code>${h.executionId}</code></td></tr>
-                                            <tr><th class="bg-light">Target Node</th><td><strong>${h.targetNodeId}</strong></td></tr>
-                                            <tr><th class="bg-light">Script Executed</th><td>${h.scriptName}</td></tr>
-                                            <tr><th class="bg-light">Requester</th><td>${h.requester}</td></tr>
-                                            <tr><th class="bg-light">Execution Status</th><td><span class="badge bg-primary">${h.status}</span> (Exit Code: ${h.exitCode})</td></tr>
-                                            <tr><th class="bg-light">Started At</th><td>${h.startedAt || '-'}</td></tr>
-                                            <tr><th class="bg-light">Finished At</th><td>${h.finishedAt || '-'}</td></tr>
-                                            <tr><th class="bg-light">Duration</th><td>${h.durationMs ? (h.durationMs / 1000).toFixed(2) + ' seconds' : '-'}</td></tr>
-                                            <tr><th class="bg-light">Git Branch</th><td>${h.gitBranch || '-'}</td></tr>
-                                            <tr><th class="bg-light">Git Commit Before</th><td><code>${h.gitCommitBefore || '-'}</code></td></tr>
-                                            <tr><th class="bg-light">Git Commit After</th><td><code>${h.gitCommitAfter || '-'}</code></td></tr>
-                                            <tr><th class="bg-light">Git Commit Message</th><td>${h.gitCommitMsg || '-'}</td></tr>
-                                            <tr><th class="bg-light">SHA-256 Digest</th><td><small class="text-break font-monospace">${h.integrityHash || '-'}</small></td></tr>
-                                            ${h.errorSummary ? `<tr><th class="bg-light text-danger">Error Summary</th><td class="text-danger">${h.errorSummary}</td></tr>` : ''}
+                                            <tr><th class="bg-body-tertiary text-body-secondary" style="width: 25%;">Execution ID</th><td><code>${h.executionId}</code></td></tr>
+                                            <tr><th class="bg-body-tertiary text-body-secondary">Target Node</th><td><strong>${h.targetNodeId}</strong></td></tr>
+                                            <tr><th class="bg-body-tertiary text-body-secondary">Script Executed</th><td>${h.scriptName}</td></tr>
+                                            <tr><th class="bg-body-tertiary text-body-secondary">Requester</th><td>${h.requester}</td></tr>
+                                            <tr><th class="bg-body-tertiary text-body-secondary">Execution Status</th><td><span class="badge bg-primary">${h.status}</span> (Exit Code: ${h.exitCode})</td></tr>
+                                            <tr><th class="bg-body-tertiary text-body-secondary">Started At</th><td>${formatDateTime(h.startedAt)}</td></tr>
+                                            <tr><th class="bg-body-tertiary text-body-secondary">Finished At</th><td>${formatDateTime(h.finishedAt)}</td></tr>
+                                            <tr><th class="bg-body-tertiary text-body-secondary">Duration</th><td>${h.durationMs ? (h.durationMs / 1000).toFixed(2) + ' seconds' : '-'}</td></tr>
+                                            <tr><th class="bg-body-tertiary text-body-secondary">Git Branch</th><td>${h.gitBranch || '-'}</td></tr>
+                                            <tr><th class="bg-body-tertiary text-body-secondary">Git Commit Before</th><td><code>${h.gitCommitBefore || '-'}</code></td></tr>
+                                            <tr><th class="bg-body-tertiary text-body-secondary">Git Commit After</th><td><code>${h.gitCommitAfter || '-'}</code></td></tr>
+                                            <tr><th class="bg-body-tertiary text-body-secondary">Git Commit Message</th><td>${h.gitCommitMsg || '-'}</td></tr>
+                                            <tr><th class="bg-body-tertiary text-body-secondary">SHA-256 Digest</th><td><small class="text-break font-monospace">${h.integrityHash || '-'}</small></td></tr>
+                                            ${h.errorSummary ? `<tr><th class="bg-body-tertiary text-danger">Error Summary</th><td class="text-danger">${h.errorSummary}</td></tr>` : ''}
                                         </tbody>
                                     </table>
                                 </div>

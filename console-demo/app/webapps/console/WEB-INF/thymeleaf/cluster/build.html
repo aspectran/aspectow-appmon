@@ -116,194 +116,201 @@
 </head>
 <body>
     <th:block layout:fragment="content">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-3">
-            <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <h3 class="fw-bold mb-0">Build &amp; Deployment</h3>
+        <th:block th:if="${session.USER_INFO.hasPermission('BUILD_VIEW') || session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h3 class="fw-bold mb-0">Build &amp; Deployment</h3>
+                    </div>
+                    <p class="text-muted mb-0">Remote build script execution and automated continuous delivery</p>
                 </div>
-                <p class="text-muted mb-0">Remote build script execution and automated continuous delivery</p>
-            </div>
-            <div class="d-flex flex-wrap align-items-center justify-content-between justify-content-md-end gap-2">
-                <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openAuditPopup()">
-                        <i class="bi bi-clock-history me-1"></i> Audit Trail
-                    </button>
-                </div>
-                <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap">
-                    <span class="text-muted small ms-2">Cluster Mode:</span>
-                    <span class="fw-bold text-primary" th:text="${page.clusterMode.toUpperCase()}">GATEWAY</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="card target-selector">
-            <div class="row align-items-center g-3">
-                <div class="col-auto">
-                    <label class="fw-bold small text-muted text-uppercase">Target Node</label>
-                </div>
-                <div class="col-md-3">
-                    <select id="target-type" class="form-select form-select-sm" onchange="onTargetTypeChange()">
-                        <option value="node" th:selected="${page.targetNodeId != null}">Individual Node</option>
-                        <option value="group">Specific Group</option>
-                        <option value="all" th:selected="${page.targetNodeId == null}">All Nodes in Cluster</option>
-                    </select>
-                </div>
-                <div class="col-md-5" id="target-value-container">
-                    <select id="target-value" class="form-select form-select-sm">
-                        <!-- Dynamic options -->
-                    </select>
-                </div>
-                <div class="col text-end">
-                    <span id="connection-indicator" class="status-pill bg-secondary text-white">CONNECTING...</span>
+                <div class="d-flex flex-wrap align-items-center justify-content-between justify-content-md-end gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openAuditPopup()">
+                            <i class="bi bi-clock-history me-1"></i> Audit Trail
+                        </button>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap">
+                        <span class="text-muted small ms-2">Cluster Mode:</span>
+                        <span class="fw-bold text-primary" th:text="${page.clusterMode.toUpperCase()}">GATEWAY</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Quick Action Bar -->
-            <div class="quick-actions border-top pt-2 mt-3">
-                <span class="small text-muted align-self-center me-2"><i class="bi bi-lightning-charge-fill text-warning"></i> Quick:</span>
-                <button class="btn btn-sm btn-primary" onclick="quickRun('5-pull_build_deploy.sh')">
-                    <i class="bi bi-play-fill"></i> Full Build &amp; Deploy (5)
-                </button>
-                <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('1-pull.sh')">
-                    <i class="bi bi-cloud-arrow-down"></i> Pull (1)
-                </button>
-                <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('2-build.sh')">
-                    <i class="bi bi-gear"></i> Maven Build (2)
-                </button>
-                <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('3-deploy_config.sh')">
-                    <i class="bi bi-sliders"></i> Config Deploy (3)
-                </button>
-                <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('4-deploy_webapps.sh')">
-                    <i class="bi bi-window"></i> Webapps Deploy (4)
-                </button>
-                <button class="btn btn-sm btn-outline-danger ms-auto" onclick="quickRun('daemon.sh')">
-                    <i class="bi bi-arrow-repeat"></i> Restart Server
-                </button>
-            </div>
-        </div>
-
-        <div class="build-container">
-            <!-- Left: Control & Metadata Panel -->
-            <div class="control-panel">
-                <div class="info-card">
-                    <h6 class="fw-bold mb-3"><i class="bi bi-terminal me-1"></i> Script Execution</h6>
-                    
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">Execution Action / Script</label>
-                        <select id="script-selector" class="form-select form-select-sm" onchange="onScriptChange()">
-                            <optgroup label="🚀 Standard Deploy (Recommended)">
-                                <option value="5-pull_build_deploy.sh" selected>Full Build &amp; Deploy (Git Pull + Build + Deploy All)</option>
-                                <option value="6-pull_deploy.sh">Fast Deploy (Git Pull + Deploy, No Rebuild)</option>
-                            </optgroup>
-                            <optgroup label="⚙️ Single Step (Pipeline Execution)">
-                                <option value="1-pull.sh">1. Git Pull Only (Fetch Source)</option>
-                                <option value="2-build.sh">2. Maven Build Only (Compile &amp; Package)</option>
-                                <option value="3-deploy_config.sh">3. Deploy Config Only</option>
-                                <option value="4-deploy_webapps.sh">4. Deploy Webapps Only</option>
-                            </optgroup>
-                            <optgroup label="🛠️ Selective Deploy (Advanced)">
-                                <option value="7-pull_deploy_config_only.sh">Pull &amp; Deploy Config Only</option>
-                                <option value="8-pull_deploy_webapps_only.sh">Pull &amp; Deploy Webapps Only</option>
-                                <option value="9-pull_deploy_config_webapps_only.sh">Pull &amp; Deploy Config &amp; Webapps</option>
-                            </optgroup>
-                            <optgroup label="🔄 Server Control">
-                                <option value="daemon.sh">Restart Daemon Server (daemon.sh)</option>
-                                <option value="service.sh">Restart System Service (service.sh)</option>
-                            </optgroup>
+            <div class="card target-selector">
+                <div class="row align-items-center g-3">
+                    <div class="col-auto">
+                        <label class="fw-bold small text-muted text-uppercase">Target Node</label>
+                    </div>
+                    <div class="col-md-3">
+                        <select id="target-type" class="form-select form-select-sm" onchange="onTargetTypeChange()">
+                            <option value="node" th:selected="${page.targetNodeId != null}">Individual Node</option>
+                            <option value="group">Specific Group</option>
+                            <option value="all" th:selected="${page.targetNodeId == null}">All Nodes in Cluster</option>
                         </select>
                     </div>
-
-                    <!-- Pipeline Flow Preview Card -->
-                    <div id="pipeline-preview" class="p-2 mb-3 rounded bg-body-tertiary border" style="display: none;"></div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">Git Branch / Tag (Optional)</label>
-                        <input type="text" id="param-branch" class="form-control form-control-sm" placeholder="e.g. main, release/v1.0">
+                    <div class="col-md-5" id="target-value-container">
+                        <select id="target-value" class="form-select form-select-sm">
+                            <!-- Dynamic options -->
+                        </select>
                     </div>
-
-                    <div class="d-grid gap-2 mt-4">
-                        <button id="btn-dispatch" class="btn btn-primary" onclick="dispatchBuild()">
-                            <i class="bi bi-play-circle-fill me-1"></i> Execute Script
-                        </button>
-                        <button id="btn-cancel" class="btn btn-outline-danger" onclick="cancelBuild()" disabled>
-                            <i class="bi bi-stop-circle-fill me-1"></i> Abort / Cancel
-                        </button>
+                    <div class="col text-end">
+                        <span id="connection-indicator" class="status-pill bg-secondary text-white">CONNECTING...</span>
                     </div>
                 </div>
 
-                <!-- Execution Status Summary Card -->
-                <div class="info-card flex-grow-1">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold mb-0"><i class="bi bi-info-circle me-1"></i> Current Execution</h6>
-                        <span id="exec-status-badge" class="status-pill bg-secondary text-white">IDLE</span>
-                    </div>
-
-                    <div class="meta-row">
-                        <span class="meta-label">Execution ID:</span>
-                        <span id="meta-exec-id" class="meta-value text-truncate" style="max-width: 180px;">-</span>
-                    </div>
-                    <div class="meta-row">
-                        <span class="meta-label">Target Node:</span>
-                        <span id="meta-node-id" class="meta-value">-</span>
-                    </div>
-                    <div class="meta-row">
-                        <span class="meta-label">Git Branch:</span>
-                        <span id="meta-branch" class="meta-value">-</span>
-                    </div>
-                    <div class="meta-row">
-                        <span class="meta-label">Before Commit:</span>
-                        <span id="meta-commit-before" class="meta-value">-</span>
-                    </div>
-                    <div class="meta-row">
-                        <span class="meta-label">After Commit:</span>
-                        <span id="meta-commit-after" class="meta-value">-</span>
-                    </div>
-                    <div class="meta-row">
-                        <span class="meta-label">Duration:</span>
-                        <span id="meta-duration" class="meta-value">-</span>
-                    </div>
-                    <div class="meta-row">
-                        <span class="meta-label">Exit Code:</span>
-                        <span id="meta-exit-code" class="meta-value">-</span>
-                    </div>
-                    <div id="meta-error-row" class="meta-row d-none">
-                        <span class="meta-label text-danger">Error:</span>
-                        <span id="meta-error-summary" class="meta-value text-danger text-break fw-bold small">-</span>
-                    </div>
+                <!-- Quick Action Bar -->
+                <div class="quick-actions border-top pt-2 mt-3" th:if="${session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
+                    <span class="small text-muted align-self-center me-2"><i class="bi bi-lightning-charge-fill text-warning"></i> Quick:</span>
+                    <button class="btn btn-sm btn-primary" onclick="quickRun('5-pull_build_deploy.sh')">
+                        <i class="bi bi-play-fill"></i> Full Build &amp; Deploy (5)
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('1-pull.sh')">
+                        <i class="bi bi-cloud-arrow-down"></i> Pull (1)
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('2-build.sh')">
+                        <i class="bi bi-gear"></i> Maven Build (2)
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('3-deploy_config.sh')">
+                        <i class="bi bi-sliders"></i> Config Deploy (3)
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('4-deploy_webapps.sh')">
+                        <i class="bi bi-window"></i> Webapps Deploy (4)
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger ms-auto" onclick="quickRun('daemon.sh')">
+                        <i class="bi bi-arrow-repeat"></i> Restart Server
+                    </button>
                 </div>
             </div>
 
-            <!-- Right: Real-time Terminal Panel -->
-            <div class="terminal-panel">
-                <div class="terminal-header">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="text-white small fw-bold"><i class="bi bi-terminal-fill me-1 text-primary"></i> Live Output Console</span>
-                        <span id="terminal-spinner" class="spinner-border spinner-border-sm text-primary d-none" role="status"></span>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="dropdown">
-                            <button class="btn btn-xs btn-outline-secondary text-white-50 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="View Daemon Logs">
-                                <i class="bi bi-file-earmark-text me-1"></i>Daemon Logs
+            <div class="build-container">
+                <!-- Left: Control & Metadata Panel -->
+                <div class="control-panel">
+                    <div class="info-card">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-terminal me-1"></i> Script Execution</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Execution Action / Script</label>
+                            <select id="script-selector" class="form-select form-select-sm" onchange="onScriptChange()">
+                                <optgroup label="🚀 Standard Deploy (Recommended)">
+                                    <option value="5-pull_build_deploy.sh" selected>Full Build &amp; Deploy (Git Pull + Build + Deploy All)</option>
+                                    <option value="6-pull_deploy.sh">Fast Deploy (Git Pull + Deploy, No Rebuild)</option>
+                                </optgroup>
+                                <optgroup label="⚙️ Single Step (Pipeline Execution)">
+                                    <option value="1-pull.sh">1. Git Pull Only (Fetch Source)</option>
+                                    <option value="2-build.sh">2. Maven Build Only (Compile &amp; Package)</option>
+                                    <option value="3-deploy_config.sh">3. Deploy Config Only</option>
+                                    <option value="4-deploy_webapps.sh">4. Deploy Webapps Only</option>
+                                </optgroup>
+                                <optgroup label="🛠️ Selective Deploy (Advanced)">
+                                    <option value="7-pull_deploy_config_only.sh">Pull &amp; Deploy Config Only</option>
+                                    <option value="8-pull_deploy_webapps_only.sh">Pull &amp; Deploy Webapps Only</option>
+                                    <option value="9-pull_deploy_config_webapps_only.sh">Pull &amp; Deploy Config &amp; Webapps</option>
+                                </optgroup>
+                                <optgroup label="🔄 Server Control">
+                                    <option value="daemon.sh">Restart Daemon Server (daemon.sh)</option>
+                                    <option value="service.sh">Restart System Service (service.sh)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <!-- Pipeline Flow Preview Card -->
+                        <div id="pipeline-preview" class="p-2 mb-3 rounded bg-body-tertiary border" style="display: none;"></div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Git Branch / Tag (Optional)</label>
+                            <input type="text" id="param-branch" class="form-control form-control-sm" placeholder="e.g. main, release/v1.0">
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button id="btn-dispatch" class="btn btn-primary" onclick="dispatchBuild()"
+                                    th:disabled="${!session.USER_INFO.hasPermission('BUILD_EXECUTE') and !session.USER_INFO.hasRole('SUPER_ADMIN')}">
+                                <i class="bi bi-play-circle-fill me-1"></i> Execute Script
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-sm">
-                                <li><a class="dropdown-item small" href="javascript:void(0)" onclick="fetchDaemonLog('stderr')"><i class="bi bi-exclamation-triangle text-danger me-2"></i>daemon-stderr.log</a></li>
-                                <li><a class="dropdown-item small" href="javascript:void(0)" onclick="fetchDaemonLog('stdout')"><i class="bi bi-file-text text-info me-2"></i>daemon-stdout.log</a></li>
-                            </ul>
+                            <button id="btn-cancel" class="btn btn-outline-danger" onclick="cancelBuild()" disabled>
+                                <i class="bi bi-stop-circle-fill me-1"></i> Abort / Cancel
+                            </button>
                         </div>
-                        <div class="form-check form-switch form-check-inline m-0 text-white small">
-                            <input class="form-check-input" type="checkbox" id="auto-scroll" checked>
-                            <label class="form-check-label" for="auto-scroll">Auto-scroll</label>
+                    </div>
+
+                    <!-- Execution Status Summary Card -->
+                    <div class="info-card flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0"><i class="bi bi-info-circle me-1"></i> Current Execution</h6>
+                            <span id="exec-status-badge" class="status-pill bg-secondary text-white">IDLE</span>
                         </div>
-                        <button class="btn btn-xs btn-outline-secondary text-white-50" onclick="clearTerminal()" title="Clear Terminal">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                        <button class="btn btn-xs btn-outline-secondary text-white-50" onclick="downloadLogs()" title="Download Logs">
-                            <i class="bi bi-download"></i>
-                        </button>
+
+                        <div class="meta-row">
+                            <span class="meta-label">Execution ID:</span>
+                            <span id="meta-exec-id" class="meta-value text-truncate" style="max-width: 180px;">-</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">Target Node:</span>
+                            <span id="meta-node-id" class="meta-value">-</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">Git Branch:</span>
+                            <span id="meta-branch" class="meta-value">-</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">Before Commit:</span>
+                            <span id="meta-commit-before" class="meta-value">-</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">After Commit:</span>
+                            <span id="meta-commit-after" class="meta-value">-</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">Started At:</span>
+                            <span id="meta-started-at" class="meta-value">-</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">Duration:</span>
+                            <span id="meta-duration" class="meta-value">-</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">Exit Code:</span>
+                            <span id="meta-exit-code" class="meta-value">-</span>
+                        </div>
                     </div>
                 </div>
-                <div id="terminal-body" class="terminal-body"><div class="text-muted fst-italic">Select a script and click 'Execute Script' to start real-time build &amp; deploy output stream...</div></div>
+
+                <!-- Right: Real-time Terminal Panel -->
+                <div class="terminal-panel">
+                    <div class="terminal-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-white small fw-bold"><i class="bi bi-terminal-fill me-1 text-primary"></i> Live Output Console</span>
+                            <span id="terminal-spinner" class="spinner-border spinner-border-sm text-primary d-none" role="status"></span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="dropdown">
+                                <button class="btn btn-xs btn-outline-secondary text-white-50 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="View Daemon Logs">
+                                    <i class="bi bi-file-earmark-text me-1"></i>Daemon Logs
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-sm">
+                                    <li><a class="dropdown-item small" href="javascript:void(0)" onclick="fetchDaemonLog('stderr')"><i class="bi bi-exclamation-triangle text-danger me-2"></i>daemon-stderr.log</a></li>
+                                    <li><a class="dropdown-item small" href="javascript:void(0)" onclick="fetchDaemonLog('stdout')"><i class="bi bi-file-text text-info me-2"></i>daemon-stdout.log</a></li>
+                                </ul>
+                            </div>
+                            <div class="form-check form-switch form-check-inline m-0 text-white small">
+                                <input class="form-check-input" type="checkbox" id="auto-scroll" checked>
+                                <label class="form-check-label" for="auto-scroll">Auto-scroll</label>
+                            </div>
+                            <button class="btn btn-xs btn-outline-secondary text-white-50" onclick="clearTerminal()" title="Clear Terminal">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <button class="btn btn-xs btn-outline-secondary text-white-50" onclick="downloadLogs()" title="Download Logs">
+                                <i class="bi bi-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="terminal-body" class="terminal-body"><div class="text-muted fst-italic">Select a script and click 'Execute Script' to start real-time build &amp; deploy output stream...</div></div>
+                </div>
             </div>
+        </th:block>
+        <div th:unless="${session.USER_INFO.hasPermission('BUILD_VIEW') || session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}" class="alert alert-danger my-4">
+            <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Access Denied</h4>
+            <p class="mb-0">You do not have permission to access this page.</p>
         </div>
     </th:block>
 
@@ -314,6 +321,9 @@
             let nodes = [[${page.nodes}]];
             const currentNodeId = [[${page.targetNodeId}]];
             const myNodeId = [[${page.myNodeId}]];
+            const initialLastExecution = /*[[${page.lastExecution}]]*/ null;
+            const canExecute = /*[[${session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}]]*/ false;
+            const isDemoUser = /*[[${session.USER_INFO.hasRole('DEMO')}]]*/ false;
         </script>
         <script>
             let client = null;
@@ -517,6 +527,8 @@
             }
 
             let healthCheckTimer = null;
+            let healthCheckStartTimeout = null;
+            let lastHandledErrorKey = null;
             let executionStartTime = null;
             let durationTicker = null;
 
@@ -548,6 +560,15 @@
             }
 
             function quickRun(scriptName) {
+                if (!canExecute) {
+                    alert('You do not have permission to execute build scripts.');
+                    return;
+                }
+                if (isDemoUser) {
+                    alert('Executing build scripts is not allowed in the demo environment.');
+                    return;
+                }
+
                 const targetType = $('#target-type').val();
                 const targetVal = $('#target-value').val();
                 let targetLabel = 'target node';
@@ -648,6 +669,15 @@
             }
 
             function dispatchBuild() {
+                if (!canExecute) {
+                    alert('You do not have permission to execute build scripts.');
+                    return;
+                }
+                if (isDemoUser) {
+                    alert('Executing build scripts is not allowed in the demo environment.');
+                    return;
+                }
+
                 const scriptName = $('#script-selector').val();
                 const branch = $('#param-branch').val().trim();
                 const targetType = $('#target-type').val();
@@ -676,14 +706,25 @@
 
                 clearTerminal();
                 startDurationTicker();
-                $('#meta-error-row').addClass('d-none');
-                $('#meta-error-summary').text('-');
+                $('#meta-started-at').text(formatDateTime(new Date()));
+                lastHandledErrorKey = null;
+                if (healthCheckStartTimeout) {
+                    clearTimeout(healthCheckStartTimeout);
+                    healthCheckStartTimeout = null;
+                }
+                if (healthCheckTimer) {
+                    clearTimeout(healthCheckTimer);
+                    healthCheckTimer = null;
+                }
                 appendTerminalLine(`[INIT] Requesting execution of ${scriptName} on ${targetLabel}...`, 'info');
 
                 if (scriptName === 'daemon.sh' || scriptName === 'service.sh') {
                     // Trigger health check polling for restart scripts
                     const pollTarget = targetNodeId || currentNodeId || myNodeId;
-                    setTimeout(() => startHealthCheckPolling(pollTarget), 3000);
+                    healthCheckStartTimeout = setTimeout(() => {
+                        healthCheckStartTimeout = null;
+                        startHealthCheckPolling(pollTarget);
+                    }, 3000);
                 }
 
                 if (client) {
@@ -708,6 +749,15 @@
             }
 
             function cancelBuild() {
+                if (!canExecute) {
+                    alert('You do not have permission to cancel build executions.');
+                    return;
+                }
+                if (isDemoUser) {
+                    alert('Canceling build executions is not allowed in the demo environment.');
+                    return;
+                }
+
                 if (!currentExecutionId) {
                     return;
                 }
@@ -936,6 +986,28 @@
                     });
             }
 
+            function formatDateTime(dateVal) {
+                if (!dateVal) return '-';
+                let date;
+                if (dateVal instanceof Date) {
+                    date = dateVal;
+                } else if (typeof dateVal === 'object' && dateVal.epochSecond !== undefined) {
+                    date = new Date(dateVal.epochSecond * 1000);
+                } else if (typeof dateVal === 'number') {
+                    date = new Date(dateVal);
+                } else {
+                    date = new Date(dateVal);
+                }
+                if (isNaN(date.getTime())) return String(dateVal);
+                const Y = date.getFullYear();
+                const M = String(date.getMonth() + 1).padStart(2, '0');
+                const D = String(date.getDate()).padStart(2, '0');
+                const h = String(date.getHours()).padStart(2, '0');
+                const m = String(date.getMinutes()).padStart(2, '0');
+                const s = String(date.getSeconds()).padStart(2, '0');
+                return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+            }
+
             function updateStatusUI(data) {
                 if (!data) return;
 
@@ -943,11 +1015,16 @@
                     currentExecutionId = data.executionId;
                     $('#meta-exec-id').text(data.executionId);
                 }
-                if (data.nodeId) $('#meta-node-id').text(data.nodeId);
+                if (data.nodeId || data.targetNodeId) {
+                    $('#meta-node-id').text(data.nodeId || data.targetNodeId);
+                }
                 if (data.gitBranch) $('#meta-branch').text(data.gitBranch);
-                if (data.gitCommitBefore) $('#meta-commit-before').text(data.gitCommitBefore.substring(0, 8));
-                if (data.gitCommitAfter) $('#meta-commit-after').text(data.gitCommitAfter.substring(0, 8));
-                if (data.durationMs !== undefined && data.durationMs !== null && data.durationMs > 0) {
+                if (data.gitCommitBefore) $('#meta-commit-before').text(String(data.gitCommitBefore).substring(0, 8));
+                if (data.gitCommitAfter) $('#meta-commit-after').text(String(data.gitCommitAfter).substring(0, 8));
+                if (data.startedAt) {
+                    $('#meta-started-at').text(formatDateTime(data.startedAt));
+                }
+                if (data.durationMs !== undefined && data.durationMs !== null && data.durationMs >= 0) {
                     $('#meta-duration').text((data.durationMs / 1000).toFixed(1) + 's');
                 }
                 if (data.exitCode !== undefined && data.exitCode !== null) $('#meta-exit-code').text(data.exitCode);
@@ -956,13 +1033,6 @@
                 const $badge = $('#exec-status-badge');
                 $badge.text(status);
                 $badge.removeClass('bg-secondary bg-primary bg-success bg-danger bg-warning');
-
-                if (data.error) {
-                    $('#meta-error-summary').text(data.error);
-                    $('#meta-error-row').removeClass('d-none');
-                } else if (status === 'RUNNING' || status === 'SUCCESS') {
-                    $('#meta-error-row').addClass('d-none');
-                }
 
                 if (status === 'RUNNING') {
                     $badge.addClass('bg-primary');
@@ -1040,8 +1110,22 @@
                                 message.lines.forEach(l => appendTerminalLine(l));
                             }
                         } else if (header === 'status') {
+                            if (message.status === 'FAILED' || message.status === 'CANCELLED') {
+                                if (healthCheckStartTimeout) {
+                                    clearTimeout(healthCheckStartTimeout);
+                                    healthCheckStartTimeout = null;
+                                }
+                                if (healthCheckTimer) {
+                                    clearTimeout(healthCheckTimer);
+                                    healthCheckTimer = null;
+                                }
+                            }
                             if (message.error) {
-                                appendTerminalLine(`[ERROR] ${message.error}`, 'error');
+                                const errorKey = (message.executionId || '') + ':' + message.error;
+                                if (lastHandledErrorKey !== errorKey) {
+                                    lastHandledErrorKey = errorKey;
+                                    appendTerminalLine(`[ERROR] ${message.error}`, 'error');
+                                }
                             }
                             const isRestartScript = (message.scriptName === 'daemon.sh' || message.scriptName === 'daemon.bat' || message.scriptName === 'service.sh' ||
                                                     $('#script-selector').val() === 'daemon.sh' || $('#script-selector').val() === 'service.sh');
@@ -1064,6 +1148,10 @@
             $(function() {
                 onTargetTypeChange();
                 onScriptChange();
+
+                if (initialLastExecution) {
+                    updateStatusUI(initialLastExecution);
+                }
 
                 fetch(basePath + "/cluster/token", {
                         headers: { 'Accept': 'application/json' }

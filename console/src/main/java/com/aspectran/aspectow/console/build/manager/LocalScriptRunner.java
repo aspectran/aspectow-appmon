@@ -215,7 +215,11 @@ public class LocalScriptRunner implements ActivityContextAware {
         if (!isScriptAllowed(scriptName)) {
             info.setStatus(BuildExecutionInfo.Status.FAILED);
             info.setErrorSummary("Script not allowed: " + scriptName);
+            if (info.getStartedAt() == null) {
+                info.setStartedAt(Instant.now());
+            }
             info.setFinishedAt(Instant.now());
+            info.setDurationMs(Duration.between(info.getStartedAt(), info.getFinishedAt()).toMillis());
             if (completionCallback != null) {
                 completionCallback.accept(info);
             }
@@ -225,7 +229,11 @@ public class LocalScriptRunner implements ActivityContextAware {
         if (!buildLock.tryLock()) {
             info.setStatus(BuildExecutionInfo.Status.FAILED);
             info.setErrorSummary("Another build or deployment is already running on this node");
+            if (info.getStartedAt() == null) {
+                info.setStartedAt(Instant.now());
+            }
             info.setFinishedAt(Instant.now());
+            info.setDurationMs(Duration.between(info.getStartedAt(), info.getFinishedAt()).toMillis());
             if (completionCallback != null) {
                 completionCallback.accept(info);
             }
@@ -238,7 +246,11 @@ public class LocalScriptRunner implements ActivityContextAware {
             buildLock.unlock();
             info.setStatus(BuildExecutionInfo.Status.FAILED);
             info.setErrorSummary("Script file not found: " + scriptFile.getAbsolutePath());
+            if (info.getStartedAt() == null) {
+                info.setStartedAt(Instant.now());
+            }
             info.setFinishedAt(Instant.now());
+            info.setDurationMs(Duration.between(info.getStartedAt(), info.getFinishedAt()).toMillis());
             if (completionCallback != null) {
                 completionCallback.accept(info);
             }

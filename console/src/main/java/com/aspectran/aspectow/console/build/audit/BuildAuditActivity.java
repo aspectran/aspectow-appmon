@@ -70,6 +70,7 @@ public class BuildAuditActivity {
     @Request("/")
     @Dispatch("cluster/audit")
     @Action("page")
+    @Hint(type = "layout", value = "layout: popup")
     public Map<String, Object> auditPage(@NonNull Translet translet) {
         String clusterMode = nodeManager.getClusterConfig().getMode();
         List<Map<String, Object>> nodes = nodeConsoleHelper.getNodes(true);

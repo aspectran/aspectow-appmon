@@ -91,6 +91,15 @@ public class AccessControlAspect {
         } else if (requestName.startsWith("/cluster/nodes/") &&
                 (requestName.endsWith("/restart") || requestName.endsWith("/pause") || requestName.endsWith("/resume"))) {
             hasAccess = ((userInfo.hasPermission("NODE_MANAGE") && !userInfo.hasRole("DEMO")) || userInfo.hasRole("SUPER_ADMIN"));
+        } else if (requestName.startsWith("/cluster/build/execute") ||
+                requestName.startsWith("/cluster/build/cancel")) {
+            hasAccess = ((userInfo.hasPermission("BUILD_EXECUTE") && !userInfo.hasRole("DEMO")) || userInfo.hasRole("SUPER_ADMIN"));
+        } else if (requestName.startsWith("/cluster/build")) {
+            hasAccess = (userInfo.hasPermission("BUILD_VIEW") ||
+                    userInfo.hasPermission("BUILD_EXECUTE") ||
+                    userInfo.hasRole("SUPER_ADMIN") ||
+                    userInfo.hasRole("ADMIN") ||
+                    userInfo.hasRole("DEMO"));
         } else if (requestName.startsWith("/cluster") ||
                 requestName.startsWith("/scheduler") ||
                 requestName.startsWith("/vault")) {

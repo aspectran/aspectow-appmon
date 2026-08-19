@@ -136,6 +136,7 @@ public class BuildDeployBroker {
                 .setGitCommitBefore(info.getGitCommitBefore())
                 .setGitCommitAfter(info.getGitCommitAfter())
                 .setGitCommitMsg(info.getGitCommitMsg())
+                .setStartedAt(info.getStartedAt() != null ? info.getStartedAt().toString() : null)
                 .setError(info.getErrorSummary());
         String data = res.toString();
         bridge(data);

@@ -186,6 +186,7 @@ COMMENT ON TABLE asc_audit_log IS 'Security Audit Log';
 -- Initial data
 MERGE INTO asc_role a USING (SELECT 'SUPER_ADMIN' role_name, 'Super administrator with full access' description FROM dual) b ON (a.role_name = b.role_name) WHEN NOT MATCHED THEN INSERT (role_name, description) VALUES (b.role_name, b.description);
 MERGE INTO asc_role a USING (SELECT 'ADMIN' role_name, 'Administrator with limited management access' description FROM dual) b ON (a.role_name = b.role_name) WHEN NOT MATCHED THEN INSERT (role_name, description) VALUES (b.role_name, b.description);
+MERGE INTO asc_role a USING (SELECT 'BUILDER' role_name, 'Build and deployment engineer' description FROM dual) b ON (a.role_name = b.role_name) WHEN NOT MATCHED THEN INSERT (role_name, description) VALUES (b.role_name, b.description);
 MERGE INTO asc_role a USING (SELECT 'VIEWER' role_name, 'User with read-only access' description FROM dual) b ON (a.role_name = b.role_name) WHEN NOT MATCHED THEN INSERT (role_name, description) VALUES (b.role_name, b.description);
 MERGE INTO asc_role a USING (SELECT 'DEMO' role_name, 'Demo user with simulation access' description FROM dual) b ON (a.role_name = b.role_name) WHEN NOT MATCHED THEN INSERT (role_name, description) VALUES (b.role_name, b.description);
 
@@ -194,27 +195,57 @@ MERGE INTO asc_permission a USING (SELECT 'MONITOR_CONTROL' perm_code, 'Control 
 MERGE INTO asc_permission a USING (SELECT 'USER_MANAGE' perm_code, 'Manage users and roles' description FROM dual) b ON (a.perm_code = b.perm_code) WHEN NOT MATCHED THEN INSERT (perm_code, description) VALUES (b.perm_code, b.description);
 MERGE INTO asc_permission a USING (SELECT 'NODE_MANAGE' perm_code, 'Manage and restart cluster nodes' description FROM dual) b ON (a.perm_code = b.perm_code) WHEN NOT MATCHED THEN INSERT (perm_code, description) VALUES (b.perm_code, b.description);
 MERGE INTO asc_permission a USING (SELECT 'COMMAND_EXECUTE' perm_code, 'Execute remote commands' description FROM dual) b ON (a.perm_code = b.perm_code) WHEN NOT MATCHED THEN INSERT (perm_code, description) VALUES (b.perm_code, b.description);
+MERGE INTO asc_permission a USING (SELECT 'BUILD_VIEW' perm_code, 'View build and deployment status' description FROM dual) b ON (a.perm_code = b.perm_code) WHEN NOT MATCHED THEN INSERT (perm_code, description) VALUES (b.perm_code, b.description);
+MERGE INTO asc_permission a USING (SELECT 'BUILD_EXECUTE' perm_code, 'Execute build and deployment scripts' description FROM dual) b ON (a.perm_code = b.perm_code) WHEN NOT MATCHED THEN INSERT (perm_code, description) VALUES (b.perm_code, b.description);
 
 -- Map permissions to SUPER_ADMIN
 MERGE INTO asc_role_permission a USING (
-    SELECT 1 role_id, perm_id FROM asc_permission
+    SELECT r.role_id, p.perm_id
+      FROM asc_role r
+     CROSS JOIN asc_permission p
+     WHERE r.role_name = 'SUPER_ADMIN'
 ) b ON (a.role_id = b.role_id AND a.perm_id = b.perm_id) WHEN NOT MATCHED THEN INSERT (role_id, perm_id) VALUES (b.role_id, b.perm_id);
 
 -- Map permissions to ADMIN
 MERGE INTO asc_role_permission a USING (
-    SELECT 2 role_id, perm_id FROM asc_permission WHERE perm_code IN ('MONITOR_VIEW', 'COMMAND_EXECUTE', 'NODE_MANAGE')
+    SELECT r.role_id, p.perm_id
+      FROM asc_role r
+     CROSS JOIN asc_permission p
+     WHERE r.role_name = 'ADMIN'
+       AND p.perm_code IN ('MONITOR_VIEW', 'COMMAND_EXECUTE', 'NODE_MANAGE', 'BUILD_VIEW', 'BUILD_EXECUTE')
+) b ON (a.role_id = b.role_id AND a.perm_id = b.perm_id) WHEN NOT MATCHED THEN INSERT (role_id, perm_id) VALUES (b.role_id, b.perm_id);
+
+-- Map permissions to BUILDER
+MERGE INTO asc_role_permission a USING (
+    SELECT r.role_id, p.perm_id
+      FROM asc_role r
+     CROSS JOIN asc_permission p
+     WHERE r.role_name = 'BUILDER'
+       AND p.perm_code IN ('BUILD_VIEW', 'BUILD_EXECUTE')
 ) b ON (a.role_id = b.role_id AND a.perm_id = b.perm_id) WHEN NOT MATCHED THEN INSERT (role_id, perm_id) VALUES (b.role_id, b.perm_id);
 
 -- Map permissions to VIEWER
 MERGE INTO asc_role_permission a USING (
-    SELECT 3 role_id, perm_id FROM asc_permission WHERE perm_code = 'MONITOR_VIEW'
+    SELECT r.role_id, p.perm_id
+      FROM asc_role r
+     CROSS JOIN asc_permission p
+     WHERE r.role_name = 'VIEWER'
+       AND p.perm_code IN ('MONITOR_VIEW', 'BUILD_VIEW')
 ) b ON (a.role_id = b.role_id AND a.perm_id = b.perm_id) WHEN NOT MATCHED THEN INSERT (role_id, perm_id) VALUES (b.role_id, b.perm_id);
 
 -- Map permissions to DEMO
 MERGE INTO asc_role_permission a USING (
-    SELECT 4 role_id, perm_id FROM asc_permission
+    SELECT r.role_id, p.perm_id
+      FROM asc_role r
+     CROSS JOIN asc_permission p
+     WHERE r.role_name = 'DEMO'
 ) b ON (a.role_id = b.role_id AND a.perm_id = b.perm_id) WHEN NOT MATCHED THEN INSERT (role_id, perm_id) VALUES (b.role_id, b.perm_id);
 
 -- Initial Super Admin user (password: admin123)
 MERGE INTO asc_user a USING (SELECT 'admin' username, 'admin123' password, 'Super Admin' nickname, 'admin@aspectow.com' email FROM dual) b ON (a.username = b.username) WHEN NOT MATCHED THEN INSERT (username, password, nickname, email) VALUES (b.username, b.password, b.nickname, b.email);
-MERGE INTO asc_user_role a USING (SELECT 1 user_id, 1 role_id FROM dual) b ON (a.user_id = b.user_id AND a.role_id = b.role_id) WHEN NOT MATCHED THEN INSERT (user_id, role_id) VALUES (b.user_id, b.role_id);
+MERGE INTO asc_user_role a USING (
+    SELECT u.user_id, r.role_id
+      FROM asc_user u
+     CROSS JOIN asc_role r
+     WHERE u.username = 'admin' AND r.role_name = 'SUPER_ADMIN'
+) b ON (a.user_id = b.user_id AND a.role_id = b.role_id) WHEN NOT MATCHED THEN INSERT (user_id, role_id) VALUES (b.user_id, b.role_id);

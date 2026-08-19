@@ -282,11 +282,11 @@ public class BuildAuditService extends InstantActivitySupport {
                     (history.getRequester() != null ? history.getRequester() : "") + delimiter +
                     (history.getStatus() != null ? history.getStatus() : "") + delimiter +
                     (history.getExitCode() != null ? history.getExitCode() : "") + delimiter +
-                    (history.getStartedAt() != null ? history.getStartedAt().toString() : "") + delimiter +
-                    (history.getFinishedAt() != null ? history.getFinishedAt().toString() : "") + delimiter +
+                    (history.getStartedAt() != null ? String.valueOf(history.getStartedAt().getEpochSecond()) : "") + delimiter +
+                    (history.getFinishedAt() != null ? String.valueOf(history.getFinishedAt().getEpochSecond()) : "") + delimiter +
                     (history.getGitCommitBefore() != null ? history.getGitCommitBefore() : "") + delimiter +
                     (history.getGitCommitAfter() != null ? history.getGitCommitAfter() : "") + delimiter +
-                    sha256Hex(rawLogContent);
+                    sha256Hex(rawLogContent != null ? rawLogContent : "");
 
             byte[] hashBytes = digest.digest(rawPayload.getBytes(StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder();

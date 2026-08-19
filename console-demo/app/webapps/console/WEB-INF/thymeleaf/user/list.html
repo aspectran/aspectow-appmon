@@ -28,7 +28,7 @@
                     <option value="100">100 / page</option>
                 </select>
             </div>
-            <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap" th:if="${session.USER_INFO.hasPermission('USER_MANAGE')}">
+            <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap" th:if="${session.USER_INFO.hasPermission('USER_MANAGE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
                 <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" onclick="openRoleModal()">
                     <i class="bi bi-shield-lock"></i> Role Permissions
                 </button>
@@ -52,7 +52,7 @@
                         <th class="text-muted small text-uppercase">Roles</th>
                         <th class="text-muted small text-uppercase">Status</th>
                         <th class="text-muted small text-uppercase">Last Login</th>
-                        <th th:if="${session.USER_INFO.hasPermission('USER_MANAGE')}" class="text-end pe-3 text-muted small text-uppercase">Actions</th>
+                        <th th:if="${session.USER_INFO.hasPermission('USER_MANAGE') || session.USER_INFO.hasRole('SUPER_ADMIN')}" class="text-end pe-3 text-muted small text-uppercase">Actions</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -71,7 +71,7 @@
                                   th:text="${user.status}">NORMAL</span>
                         </td>
                         <td class="small text-muted" th:text="${user.lastLoginAt != null ? #temporals.format(user.lastLoginAt, 'yyyy-MM-dd HH:mm:ss') : '-'}">2023-10-01</td>
-                        <td th:if="${session.USER_INFO.hasPermission('USER_MANAGE')}" class="text-end pe-3">
+                        <td th:if="${session.USER_INFO.hasPermission('USER_MANAGE') || session.USER_INFO.hasRole('SUPER_ADMIN')}" class="text-end pe-3">
                             <div class="d-flex justify-content-end flex-wrap gap-1">
                                 <button class="btn btn-sm btn-outline-secondary"
                                         th:onclick="openUserModal([[${user.userId}]], [[${user.username}]], [[${user.nickname}]], [[${user.email}]], [[${user.status}]], [[${user.roles != null ? user.roles.![roleId] : null}]], [[${user.allowedIps}]])">
@@ -84,7 +84,7 @@
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(page.userList)}">
-                        <td th:colspan="${session.USER_INFO.hasPermission('USER_MANAGE') ? 8 : 7}" class="text-center py-4 text-muted">No users found.</td>
+                        <td th:colspan="${session.USER_INFO.hasPermission('USER_MANAGE') || session.USER_INFO.hasRole('SUPER_ADMIN') ? 8 : 7}" class="text-center py-4 text-muted">No users found.</td>
                     </tr>
                     </tbody>
                 </table>
@@ -229,9 +229,9 @@
                         <div class="mb-3">
                             <label class="form-label">Roles</label>
                             <div>
-                                <div class="form-check form-check-inline" th:each="role : ${page.roleList}">
+                                <div class="form-check form-check-inline mb-1" th:each="role : ${page.roleList}">
                                     <input class="form-check-input role-checkbox" type="checkbox" name="roleIds" th:value="${role.roleId}" th:id="'role_' + ${role.roleId}">
-                                    <label class="form-check-label" th:for="'role_' + ${role.roleId}" th:text="${role.roleName}">ADMIN</label>
+                                    <label class="form-check-label" th:for="'role_' + ${role.roleId}" th:text="${role.roleName}" th:title="${role.description}">ADMIN</label>
                                 </div>
                             </div>
                         </div>
