@@ -293,6 +293,12 @@ public class LocalScriptRunner implements ActivityContextAware {
             // Optional environment setup
             Map<String, String> env = pb.environment();
             env.put("BASE_DIR", baseDir.getAbsolutePath());
+            String mavenArgs = env.get("MAVEN_ARGS");
+            if (mavenArgs == null || mavenArgs.isBlank()) {
+                env.put("MAVEN_ARGS", "-B -ntp");
+            } else if (!mavenArgs.contains("-ntp") && !mavenArgs.contains("--no-transfer-progress")) {
+                env.put("MAVEN_ARGS", mavenArgs + " -ntp");
+            }
             if (info.getParameters() != null) {
                 for (Map.Entry<String, Object> entry : info.getParameters().entrySet()) {
                     if (entry.getValue() != null) {
@@ -312,6 +318,15 @@ public class LocalScriptRunner implements ActivityContextAware {
                     new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    if (line.isEmpty() && logBuffer.isEmpty()) {
+                        continue;
+                    }
+                    if (line.length() > 0 && line.trim().isEmpty() && !logBuffer.isEmpty()) {
+                        String last = logBuffer.getLast();
+                        if (last != null && (last.startsWith("Progress (") || last.startsWith("Downloading") || last.startsWith("Downloaded"))) {
+                            continue;
+                        }
+                    }
                     appendLog(info.getExecutionId(), logBuffer, line, logConsumer);
                 }
             }

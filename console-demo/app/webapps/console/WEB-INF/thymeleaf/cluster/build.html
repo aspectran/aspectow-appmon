@@ -701,22 +701,122 @@
                 }
             }
 
+            function ansiToHtml(text) {
+                if (!text) return '';
+
+                let str = text
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+
+                let openSpans = 0;
+                const ansiColorRegex = /\u001b\[([0-9;]*)m/g;
+
+                str = str.replace(ansiColorRegex, (match, codeStr) => {
+                    let tags = '';
+                    if (!codeStr || codeStr === '0' || codeStr === '') {
+                        if (openSpans > 0) {
+                            tags += '</span>'.repeat(openSpans);
+                            openSpans = 0;
+                        }
+                        return tags;
+                    }
+
+                    let styles = [];
+                    const codes = codeStr.split(';');
+                    for (let code of codes) {
+                        if (code === '0') {
+                            if (openSpans > 0) {
+                                tags += '</span>'.repeat(openSpans);
+                                openSpans = 0;
+                            }
+                        } else if (code === '1') {
+                            styles.push('font-weight:bold');
+                        } else if (code === '2') {
+                            styles.push('opacity:0.8');
+                        } else if (code === '3') {
+                            styles.push('font-style:italic');
+                        } else if (code === '4') {
+                            styles.push('text-decoration:underline');
+                        } else if (code === '30') {
+                            styles.push('color:#6e7681');
+                        } else if (code === '31') {
+                            styles.push('color:#f85149');
+                        } else if (code === '32') {
+                            styles.push('color:#3fb950');
+                        } else if (code === '33') {
+                            styles.push('color:#d29922');
+                        } else if (code === '34') {
+                            styles.push('color:#58a6ff');
+                        } else if (code === '35') {
+                            styles.push('color:#bc8cff');
+                        } else if (code === '36') {
+                            styles.push('color:#39c5cf');
+                        } else if (code === '37') {
+                            styles.push('color:#e6edf3');
+                        } else if (code === '90') {
+                            styles.push('color:#8b949e');
+                        } else if (code === '91') {
+                            styles.push('color:#ff7b72');
+                        } else if (code === '92') {
+                            styles.push('color:#56d364');
+                        } else if (code === '93') {
+                            styles.push('color:#e3b341');
+                        } else if (code === '94') {
+                            styles.push('color:#79c0ff');
+                        } else if (code === '95') {
+                            styles.push('color:#d2a8ff');
+                        } else if (code === '96') {
+                            styles.push('color:#56d4dd');
+                        } else if (code === '97') {
+                            styles.push('color:#ffffff');
+                        }
+                    }
+
+                    if (styles.length > 0) {
+                        openSpans++;
+                        tags += `<span style="${styles.join(';')};">`;
+                    }
+                    return tags;
+                });
+
+                if (openSpans > 0) {
+                    str += '</span>'.repeat(openSpans);
+                }
+
+                str = str.replace(/\u001b\[[0-9;?]*[a-zA-Z]/g, '');
+                return str;
+            }
+
             function appendTerminalLine(text, type = '') {
+                if (text === null || text === undefined) return;
+
+                text = String(text).replace(/\r/g, '');
+
+                if (text.length > 0 && text.trim().length === 0 && terminalLines.length > 0) {
+                    const lastLine = terminalLines[terminalLines.length - 1];
+                    if (lastLine && (lastLine.includes('Progress (') || lastLine.includes('Downloading') || lastLine.includes('Downloaded'))) {
+                        return;
+                    }
+                }
+
                 terminalLines.push(text);
                 const $body = $('#terminal-body');
                 if (terminalLines.length === 1) {
                     $body.empty();
                 }
 
+                const cleanText = text.replace(/\u001b\[[0-9;?]*[a-zA-Z]/g, '');
+
                 let lineClass = 'terminal-line';
                 if (type) lineClass += ' ' + type;
-                else if (text.includes('[INFO]') || text.includes('[BUILD STARTED]')) lineClass += ' info';
-                else if (text.includes('[SUCCESS]') || text.includes('BUILD SUCCESS')) lineClass += ' success';
-                else if (text.includes('[ERROR]') || text.includes('BUILD FAILURE') || text.includes('[FAILED]')) lineClass += ' error';
-                else if (text.includes('[WARN]') || text.includes('[WARNING]')) lineClass += ' warn';
+                else if (cleanText.includes('[INFO]') || cleanText.includes('[BUILD STARTED]')) lineClass += ' info';
+                else if (cleanText.includes('[SUCCESS]') || cleanText.includes('BUILD SUCCESS')) lineClass += ' success';
+                else if (cleanText.includes('[ERROR]') || cleanText.includes('BUILD FAILURE') || cleanText.includes('[FAILED]')) lineClass += ' error';
+                else if (cleanText.includes('[WARN]') || cleanText.includes('[WARNING]')) lineClass += ' warn';
 
-                const safeText = $('<div>').text(text).html();
-                $body.append(`<div class="${lineClass}">${safeText}</div>`);
+                const renderedHtml = ansiToHtml(text);
+                $body.append(`<div class="${lineClass}">${renderedHtml}</div>`);
 
                 if ($('#auto-scroll').is(':checked')) {
                     $body.scrollTop($body[0].scrollHeight);
@@ -733,7 +833,8 @@
                     alert('No logs to download.');
                     return;
                 }
-                const blob = new Blob([terminalLines.join('\n')], { type: 'text/plain;charset=utf-8' });
+                const cleanLogs = terminalLines.map(l => l.replace(/\u001b\[[0-9;?]*[a-zA-Z]/g, ''));
+                const blob = new Blob([cleanLogs.join('\n')], { type: 'text/plain;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
