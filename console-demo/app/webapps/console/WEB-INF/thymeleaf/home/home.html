@@ -55,8 +55,9 @@
                     </div>
                     <h5 class="card-title text-success">Live Monitoring</h5>
                     <p class="card-desc">Monitor real-time system performance, cluster node health, and traffic metrics.</p>
-                    <div class="mt-3">
+                    <div class="d-flex flex-column flex-xl-row gap-2 mt-3">
                         <a th:href="@{/appmon/dashboard/}" class="btn btn-sm btn-outline-success">Open Dashboard <i class="bi bi-arrow-right"></i></a>
+                        <a th:href="@{/cluster/scheduler/}" class="btn btn-sm btn-outline-success">Scheduler Manager <i class="bi bi-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
@@ -69,8 +70,9 @@
                     </div>
                     <h5 class="card-title text-primary">Cluster Nodes</h5>
                     <p class="card-desc">Monitor cluster topology, manage active node instances, and inspect health status.</p>
-                    <div class="mt-3">
+                    <div class="d-flex flex-column flex-xl-row gap-2 mt-3">
                         <a th:href="@{/cluster/nodes/}" class="btn btn-sm btn-outline-primary">Manage Nodes <i class="bi bi-arrow-right"></i></a>
+                        <a th:href="@{/cluster/build/}" class="btn btn-sm btn-outline-primary">Build &amp; Deployment <i class="bi bi-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
