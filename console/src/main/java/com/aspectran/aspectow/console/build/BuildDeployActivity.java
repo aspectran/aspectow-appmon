@@ -165,7 +165,7 @@ public class BuildDeployActivity {
      * @return execution result
      */
     @RequestToPost("/execute")
-    public Map<String, Object> executeBuild(@NonNull Translet translet) throws Exception {
+    public Map<String, Object> executeBuild(@NonNull Translet translet) {
         String targetNodeId = translet.getParameter("nodeId");
         String scriptName = translet.getParameter("scriptName");
         String branch = translet.getParameter("branch");
@@ -240,6 +240,25 @@ public class BuildDeployActivity {
             data.put("nodeId", nodeId);
             data.put("alive", live);
             data.put("status", live ? "LIVE" : "DEAD");
+            data.put("timestamp", System.currentTimeMillis());
+            return new SuccessResponse(data).ok();
+        } catch (Exception e) {
+            return new FailureResponse().setError("error", e.getMessage());
+        }
+    }
+
+    /**
+     * Retrieves daemon output or error logs (daemon-stderr.log, daemon-stdout.log).
+     * @param type "stderr" or "stdout" (default is "stderr")
+     * @param lines optional max number of lines (default 200)
+     * @return REST response containing log content and metadata
+     */
+    @Request("/daemon-log")
+    public RestResponse getDaemonLog(String type, Integer lines) {
+        try {
+            String logType = (StringUtils.hasText(type) ? type : "stderr");
+            int maxLines = (lines != null && lines > 0 ? lines : 200);
+            Map<String, Object> data = remoteBuildDeployManager.getLocalScriptRunner().getDaemonLogInfo(logType, maxLines);
             data.put("timestamp", System.currentTimeMillis());
             return new SuccessResponse(data).ok();
         } catch (Exception e) {

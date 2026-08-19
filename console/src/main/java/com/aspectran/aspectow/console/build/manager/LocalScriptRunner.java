@@ -18,6 +18,7 @@ package com.aspectran.aspectow.console.build.manager;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.aware.ActivityContextAware;
 import com.aspectran.core.context.ActivityContext;
+import com.aspectran.core.context.config.AspectranConfig;
 import com.aspectran.utils.StringUtils;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -28,11 +29,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -92,7 +96,7 @@ public class LocalScriptRunner implements ActivityContextAware {
             }
         }
         if (dir == null) {
-            String sysBasePath = System.getProperty("aspectran.basePath");
+            String sysBasePath = System.getProperty(AspectranConfig.BASE_PATH_PROPERTY);
             dir = new File(Objects.requireNonNullElse(sysBasePath, "."));
         }
         // The deployment scripts and daemon.sh reside in the BASE_DIR, which is the parent of the 'app' directory
@@ -448,6 +452,101 @@ public class LocalScriptRunner implements ActivityContextAware {
             logger.debug("Failed to run git command {}: {}", Arrays.toString(args), e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Resolves the daemon log file (stderr or stdout).
+     * @param type "stderr" or "stdout"
+     * @return the resolved log file, or null if not found
+     */
+    @Nullable
+    public File resolveDaemonLogFile(String type) {
+        String filename = "daemon-" + ("stdout".equalsIgnoreCase(type) ? "stdout.log" : "stderr.log");
+
+        String logsDir = System.getProperty(AspectranConfig.LOGS_DIR_PROPERTY);
+        if (StringUtils.hasText(logsDir)) {
+            File f = new File(logsDir, filename);
+            if (f.exists()) {
+                return f;
+            }
+        }
+
+        File baseDir = getBaseDir();
+        File f = new File(new File(baseDir, "app/logs"), filename);
+        if (f.exists()) {
+            return f;
+        }
+
+        f = new File(new File(baseDir, "logs"), filename);
+        if (f.exists()) {
+            return f;
+        }
+
+        if (activityContext != null && activityContext.getApplicationAdapter() != null) {
+            java.nio.file.Path basePath = activityContext.getApplicationAdapter().getBasePath();
+            if (basePath != null) {
+                f = new File(basePath.toFile(), "logs/" + filename);
+                if (f.exists()) {
+                    return f;
+                }
+            }
+        }
+
+        return f;
+    }
+
+    /**
+     * Retrieves detailed information and content for the daemon log file.
+     * @param type "stderr" or "stdout"
+     * @param maxLines maximum number of recent lines to read
+     * @return map containing metadata and content
+     */
+    @NonNull
+    public Map<String, Object> getDaemonLogInfo(String type, int maxLines) {
+        String logType = (StringUtils.hasText(type) ? type.toLowerCase() : "stderr");
+        File file = resolveDaemonLogFile(logType);
+        Map<String, Object> info = new HashMap<>();
+        info.put("type", logType);
+        info.put("fileName", file != null ? file.getName() : ("daemon-" + logType + ".log"));
+
+        if (file == null || !file.exists() || !file.isFile()) {
+            info.put("exists", false);
+            info.put("content", null);
+            info.put("hasContent", false);
+            info.put("size", 0L);
+            info.put("lastModified", null);
+            return info;
+        }
+
+        info.put("exists", true);
+        info.put("size", file.length());
+        long lastModifiedMillis = file.lastModified();
+        info.put("lastModified", lastModifiedMillis > 0 ? Instant.ofEpochMilli(lastModifiedMillis).toString() : null);
+
+        try {
+            BasicFileAttributes attrs = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+            if (attrs.creationTime() != null) {
+                info.put("creationTime", attrs.creationTime().toInstant().toString());
+            }
+        } catch (Exception ignored) {
+        }
+
+        try {
+            List<String> lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+            if (maxLines > 0 && lines.size() > maxLines) {
+                lines = lines.subList(lines.size() - maxLines, lines.size());
+            }
+            String content = String.join("\n", lines);
+            info.put("content", content);
+            info.put("hasContent", StringUtils.hasText(content));
+        } catch (Exception e) {
+            logger.warn("Failed to read daemon log file: {}", file.getAbsolutePath(), e);
+            info.put("content", null);
+            info.put("hasContent", false);
+            info.put("error", e.getMessage());
+        }
+
+        return info;
     }
 
 }
