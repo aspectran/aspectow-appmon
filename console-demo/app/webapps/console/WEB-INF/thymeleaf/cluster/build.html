@@ -314,7 +314,8 @@
             let nodes = [[${page.nodes}]];
             const currentNodeId = [[${page.targetNodeId}]];
             const myNodeId = [[${page.myNodeId}]];
-
+        </script>
+        <script>
             let client = null;
             let currentExecutionId = null;
             let terminalLines = [];
@@ -710,7 +711,7 @@
                     .replace(/>/g, '&gt;');
 
                 let openSpans = 0;
-                const ansiColorRegex = /\u001b\[([0-9;]*)m/g;
+                const ansiColorRegex = new RegExp('\\u001b\\[([0-9;]*)m', 'g');
 
                 str = str.replace(ansiColorRegex, (match, codeStr) => {
                     let tags = '';
@@ -784,7 +785,7 @@
                     str += '</span>'.repeat(openSpans);
                 }
 
-                str = str.replace(/\u001b\[[0-9;?]*[a-zA-Z]/g, '');
+                str = str.replace(new RegExp('\\u001b\\[[0-9;?]*[a-zA-Z]', 'g'), '');
                 return str;
             }
 
@@ -806,7 +807,7 @@
                     $body.empty();
                 }
 
-                const cleanText = text.replace(/\u001b\[[0-9;?]*[a-zA-Z]/g, '');
+                const cleanText = text.replace(new RegExp('\\u001b\\[[0-9;?]*[a-zA-Z]', 'g'), '');
 
                 let lineClass = 'terminal-line';
                 if (type) lineClass += ' ' + type;
@@ -833,7 +834,7 @@
                     alert('No logs to download.');
                     return;
                 }
-                const cleanLogs = terminalLines.map(l => l.replace(/\u001b\[[0-9;?]*[a-zA-Z]/g, ''));
+                const cleanLogs = terminalLines.map(l => l.replace(new RegExp('\\u001b\\[[0-9;?]*[a-zA-Z]', 'g'), ''));
                 const blob = new Blob([cleanLogs.join('\n')], { type: 'text/plain;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
