@@ -115,33 +115,6 @@
                                 <include>**/*.xml.apon</include>
                             </includes>
                         </fileset>
-                        <fileset>
-                            <directory>app/work</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>app/work1</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>app/work2</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>app/logs</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>app/logs1</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>app/logs2</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>app/temp</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>app/temp1</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>app/temp2</directory>
-                        </fileset>
                     </filesets>
                 </configuration>
             </plugin>
