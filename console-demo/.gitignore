@@ -1,13 +1,34 @@
+# Eclipse project files
 /.classpath
 /.settings
 /.project
+
+# IntelliJ IDEA project files and directories
 /*.iml
 /*.ipr
 /*.iws
 /.idea
+
+# Maven and deployment build outputs
 /target
 /.build
-app/.lock
-app/*.pid
-app/bin/jdk-*
-app/**/*.xml.apon
+
+# Application runtime directories
+/app/lib/
+/app/logs*/
+/app/temp*/
+/app/work*/
+
+# Daemon command processing queues
+/app/cmd*/completed/
+/app/cmd*/failed/
+/app/cmd*/incoming/
+/app/cmd*/queued/
+
+# Runtime locks, PIDs, and local binaries
+/app/.lock
+/app/*.pid
+/app/bin/jdk-*
+
+# Auto-generated configuration files
+/app/**/*.xml.apon

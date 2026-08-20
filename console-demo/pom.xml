@@ -108,12 +108,6 @@
                         </fileset>
                         <fileset>
                             <directory>app/lib</directory>
-                            <includes>
-                                <include>**</include>
-                            </includes>
-                            <excludes>
-                                <exclude>.gitignore</exclude>
-                            </excludes>
                         </fileset>
                         <fileset>
                             <directory>app/config</directory>
@@ -123,61 +117,30 @@
                         </fileset>
                         <fileset>
                             <directory>app/work</directory>
-                            <includes>
-                                <include>_resource_*/</include>
-                                <include>_webroot/</include>
-                                <include>_webapps/</include>
-                            </includes>
-                            <excludes>
-                                <exclude>.gitignore</exclude>
-                            </excludes>
+                        </fileset>
+                        <fileset>
+                            <directory>app/work1</directory>
                         </fileset>
                         <fileset>
                             <directory>app/work2</directory>
-                            <includes>
-                                <include>_resource_*/</include>
-                                <include>_webroot/</include>
-                                <include>_webapps/</include>
-                            </includes>
-                            <excludes>
-                                <exclude>.gitignore</exclude>
-                            </excludes>
                         </fileset>
                         <fileset>
                             <directory>app/logs</directory>
-                            <includes>
-                                <include>**</include>
-                            </includes>
-                            <excludes>
-                                <exclude>.gitignore</exclude>
-                            </excludes>
+                        </fileset>
+                        <fileset>
+                            <directory>app/logs1</directory>
                         </fileset>
                         <fileset>
                             <directory>app/logs2</directory>
-                            <includes>
-                                <include>**</include>
-                            </includes>
-                            <excludes>
-                                <exclude>.gitignore</exclude>
-                            </excludes>
                         </fileset>
                         <fileset>
                             <directory>app/temp</directory>
-                            <includes>
-                                <include>**</include>
-                            </includes>
-                            <excludes>
-                                <exclude>.gitignore</exclude>
-                            </excludes>
+                        </fileset>
+                        <fileset>
+                            <directory>app/temp1</directory>
                         </fileset>
                         <fileset>
                             <directory>app/temp2</directory>
-                            <includes>
-                                <include>**</include>
-                            </includes>
-                            <excludes>
-                                <exclude>.gitignore</exclude>
-                            </excludes>
                         </fileset>
                     </filesets>
                 </configuration>
