@@ -24,13 +24,41 @@ if "%DEV_MODE%"=="true" (
   exit /b 0
 )
 
+set "TARGET_REPO_DIR=%REPO_DIR%"
+if "%DEV_MODE%"=="true" set "TARGET_REPO_DIR=%~dp0"
+set "LOCK_DIR=%TARGET_REPO_DIR%\.pull.lock"
+
+set /a WAIT_COUNT=0
+:ACQUIRE_LOCK
+mkdir "%LOCK_DIR%" 2>nul
+if %errorlevel% neq 0 (
+    if exist "%LOCK_DIR%\success" (
+        echo [PULL LOCK] Git pull was successfully completed by another node in the shared directory.
+        echo [PULL LOCK] Skipping redundant git pull.
+        exit /b 0
+    )
+    if %WAIT_COUNT% equ 0 (
+        echo [PULL LOCK] Another node is currently pulling in this directory.
+        echo [PULL LOCK] Waiting for active pull to complete...
+    )
+    set /a WAIT_COUNT+=1
+    timeout /t 1 /nobreak >nul
+    goto :ACQUIRE_LOCK
+)
+
 if not exist "%REPO_DIR%" (
-  if not exist "%BUILD_DIR%" mkdir "%BUILD_DIR%"
-  pushd "%BUILD_DIR%"
-  git clone "%REPO_URL%" "%APP_NAME%"
-  popd
+    if not exist "%BUILD_DIR%" mkdir "%BUILD_DIR%"
+    pushd "%BUILD_DIR%"
+    git clone "%REPO_URL%" "%APP_NAME%"
+    popd
+    type nul > "%LOCK_DIR%\success"
+    timeout /t 1 /nobreak >nul
+    rmdir /s /q "%LOCK_DIR%" 2>nul
 ) else (
-  pushd "%REPO_DIR%"
-  git pull
-  popd
+    pushd "%REPO_DIR%"
+    git pull
+    popd
+    type nul > "%LOCK_DIR%\success"
+    timeout /t 1 /nobreak >nul
+    rmdir /s /q "%LOCK_DIR%" 2>nul
 )

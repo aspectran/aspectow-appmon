@@ -21,11 +21,91 @@ if [ "$DEV_MODE" = "true" ]; then
   exit 0
 fi
 
+TARGET_REPO_DIR="$REPO_DIR"
+[ "$DEV_MODE" = "true" ] && TARGET_REPO_DIR="$SCRIPT_DIR"
+
+LOCK_DIR="$TARGET_REPO_DIR/.pull.lock"
+SUCCESS_MARKER="$TARGET_REPO_DIR/.pull.success"
+PULL_TTL_SECONDS=30
+
+is_recent_pull_available() {
+  if [ -f "$SUCCESS_MARKER" ]; then
+    local now last_time elapsed
+    now=$(date +%s)
+    last_time=$(cat "$SUCCESS_MARKER" 2>/dev/null || echo 0)
+    elapsed=$((now - last_time))
+    if [ "$elapsed" -ge 0 ] && [ "$elapsed" -le "$PULL_TTL_SECONDS" ]; then
+      echo "[PULL LOCK] Recent git pull was completed by another node in the shared directory (${elapsed}s ago)."
+      echo "[PULL LOCK] Skipping redundant git pull."
+      return 0
+    fi
+  fi
+  return 1
+}
+
+acquire_lock_or_wait() {
+  local wait_count=0
+
+  if is_recent_pull_available; then
+    return 1
+  fi
+
+  while ! mkdir "$LOCK_DIR" 2>/dev/null; do
+    local pid_file="$LOCK_DIR/pid"
+    if [ -f "$pid_file" ]; then
+      local lock_pid
+      lock_pid=$(cat "$pid_file" 2>/dev/null || true)
+      if [ -n "$lock_pid" ] && ! kill -0 "$lock_pid" 2>/dev/null; then
+        echo "[PULL LOCK] Detected stale lock from terminated process (PID: $lock_pid). Cleaning up..."
+        rm -rf "$LOCK_DIR"
+        continue
+      fi
+      if [ "$wait_count" -eq 0 ]; then
+        echo "[PULL LOCK] Another node (PID: $lock_pid) is currently pulling in this directory."
+        echo "[PULL LOCK] Waiting for active pull to complete..."
+      fi
+    else
+      [ "$wait_count" -eq 0 ] && echo "[PULL LOCK] Another node is initializing git pull. Waiting..."
+    fi
+
+    wait_count=$((wait_count + 1))
+    sleep 0.5
+
+    if is_recent_pull_available; then
+      return 1
+    fi
+  done
+
+  if is_recent_pull_available; then
+    rm -rf "$LOCK_DIR"
+    return 1
+  fi
+
+  echo $$ > "$LOCK_DIR/pid"
+  return 0
+}
+
+release_lock() {
+  rm -rf "$LOCK_DIR"
+}
+
+mark_pull_success() {
+  date +%s > "$SUCCESS_MARKER"
+}
+
+trap release_lock EXIT INT TERM
+
+if ! acquire_lock_or_wait; then
+  exit 0
+fi
+
 if [ ! -d "$REPO_DIR" ]; then
   [ ! -d "$BUILD_DIR" ] && mkdir -p "$BUILD_DIR"
   cd "$BUILD_DIR"
   git clone "$REPO_URL" "$APP_NAME"
+  mark_pull_success
 else
   cd "$REPO_DIR"
   git pull
+  mark_pull_success
 fi
