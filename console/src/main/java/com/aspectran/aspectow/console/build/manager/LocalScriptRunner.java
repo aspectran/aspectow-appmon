@@ -106,28 +106,101 @@ public class LocalScriptRunner implements ActivityContextAware {
         return dir;
     }
 
+    @Nullable
+    public String getCurrentNodeId() {
+        if (activityContext != null && activityContext.getBeanRegistry() != null
+                && activityContext.getBeanRegistry().containsBean(com.aspectran.aspectow.node.manager.NodeManager.class)) {
+            try {
+                com.aspectran.aspectow.node.manager.NodeManager nodeManager =
+                        activityContext.getBeanRegistry().getBean(com.aspectran.aspectow.node.manager.NodeManager.class);
+                if (nodeManager != null && StringUtils.hasText(nodeManager.getNodeId())) {
+                    return nodeManager.getNodeId();
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        String prop = System.getProperty(com.aspectran.aspectow.node.manager.NodeManagerBuilder.MY_NODE_ID_PROPERTY);
+        if (StringUtils.hasText(prop)) {
+            return prop;
+        }
+        return null;
+    }
+
     /**
      * Resolves the script file by checking BASE_DIR and fallback locations.
      * @param scriptName the name of the script
      * @return the resolved script File, or null if not found
      */
     public File resolveScriptFile(String scriptName) {
+        return resolveScriptFile(scriptName, null);
+    }
+
+    /**
+     * Resolves the script file by checking BASE_DIR, respecting target node ID for node-specific scripts.
+     * @param scriptName the name of the script
+     * @param targetNodeId optional target node ID
+     * @return the resolved script File, or null if not found
+     */
+    public File resolveScriptFile(String scriptName, String targetNodeId) {
         File baseDir = getBaseDir();
-        File scriptFile = new File(baseDir, scriptName);
-        if (scriptFile.exists()) {
-            return scriptFile;
+        String nodeId = targetNodeId;
+        if (StringUtils.isEmpty(nodeId)) {
+            nodeId = getCurrentNodeId();
         }
-        if (baseDir.getParentFile() != null) {
-            File parentScript = new File(baseDir.getParentFile(), scriptName);
-            if (parentScript.exists()) {
-                return parentScript;
+
+        // If generic daemon/service script requested and a node-specific script exists, prefer the node-specific one.
+        // e.g. scriptName = "daemon.sh", nodeId = "node1" -> look for "daemon-node1.sh"
+        if (StringUtils.hasText(nodeId) && ("daemon.sh".equals(scriptName) || "daemon.bat".equals(scriptName)
+                || "service.sh".equals(scriptName))) {
+            int dotIdx = scriptName.lastIndexOf('.');
+            String ext = (dotIdx >= 0 ? scriptName.substring(dotIdx) : "");
+            String prefix = (dotIdx >= 0 ? scriptName.substring(0, dotIdx) : scriptName);
+            String nodeScriptName = prefix + "-" + nodeId + ext;
+            File nodeScriptFile = findFile(baseDir, nodeScriptName);
+            if (nodeScriptFile != null && nodeScriptFile.exists()) {
+                return nodeScriptFile;
             }
         }
-        return scriptFile;
+
+        File scriptFile = findFile(baseDir, scriptName);
+        if (scriptFile != null) {
+            return scriptFile;
+        }
+        return new File(baseDir, scriptName);
+    }
+
+    @Nullable
+    private File findFile(File baseDir, String filename) {
+        File f = new File(baseDir, filename);
+        if (f.exists()) {
+            return f;
+        }
+        if (baseDir.getParentFile() != null) {
+            File parentF = new File(baseDir.getParentFile(), filename);
+            if (parentF.exists()) {
+                return parentF;
+            }
+        }
+        return null;
     }
 
     public Set<String> getAllowedScripts() {
-        return ALLOWED_SCRIPTS;
+        Set<String> scripts = new java.util.LinkedHashSet<>(ALLOWED_SCRIPTS);
+        try {
+            File baseDir = getBaseDir();
+            if (baseDir.isDirectory()) {
+                File[] files = baseDir.listFiles((dir, name) ->
+                        name.matches("^(daemon|service)-[a-zA-Z0-9_.-]+\\.(sh|bat)$"));
+                if (files != null) {
+                    for (File f : files) {
+                        scripts.add(f.getName());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.trace("Error discovering node-specific scripts in BASE_DIR", e);
+        }
+        return scripts;
     }
 
     public boolean isBusy() {
@@ -144,7 +217,27 @@ public class LocalScriptRunner implements ActivityContextAware {
             return false;
         }
         String simpleName = new File(scriptName).getName();
-        return ALLOWED_SCRIPTS.contains(simpleName);
+        if (ALLOWED_SCRIPTS.contains(simpleName)) {
+            return true;
+        }
+        // Allow node-specific daemon/service scripts (e.g. daemon-node1.sh, daemon-node2.bat, service-node1.sh)
+        return simpleName.matches("^(daemon|service)-[a-zA-Z0-9_.-]+\\.(sh|bat)$");
+    }
+
+    /**
+     * Checks if the script is a restart/stop daemon or service control script.
+     * @param scriptName the script file name
+     * @return true if it is a restart script
+     */
+    public boolean isRestartScript(String scriptName) {
+        if (StringUtils.isEmpty(scriptName)) {
+            return false;
+        }
+        String simpleName = new File(scriptName).getName();
+        return simpleName.equals("daemon.sh")
+                || simpleName.equals("daemon.bat")
+                || simpleName.equals("service.sh")
+                || simpleName.matches("^(daemon|service)-[a-zA-Z0-9_.-]+\\.(sh|bat)$");
     }
 
     /**
@@ -255,7 +348,7 @@ public class LocalScriptRunner implements ActivityContextAware {
             return;
         }
 
-        File scriptFile = resolveScriptFile(scriptName);
+        File scriptFile = resolveScriptFile(scriptName, info.getTargetNodeId());
         File baseDir = (scriptFile.getParentFile() != null ? scriptFile.getParentFile() : getBaseDir());
         if (!scriptFile.exists()) {
             buildLock.unlock();
@@ -273,7 +366,7 @@ public class LocalScriptRunner implements ActivityContextAware {
         }
 
         // Special Handling for Daemon / Service Restart (Detached Execution)
-        if ("daemon.sh".equals(scriptName) || "daemon.bat".equals(scriptName) || "service.sh".equals(scriptName)) {
+        if (isRestartScript(scriptName) || isRestartScript(scriptFile.getName())) {
             String action = (info.getParameters() != null && info.getParameters().get("action") != null)
                     ? String.valueOf(info.getParameters().get("action"))
                     : "restart";
@@ -288,7 +381,7 @@ public class LocalScriptRunner implements ActivityContextAware {
             logRingBuffers.put(info.getExecutionId(), logBuffer);
 
             DetachedRestartRunner restartRunner = new DetachedRestartRunner();
-            boolean success = restartRunner.executeDetached(baseDir, scriptName, action, line -> {
+            boolean success = restartRunner.executeDetached(baseDir, scriptFile.getName(), action, line -> {
                 appendLog(info.getExecutionId(), logBuffer, line, logConsumer);
             });
 
@@ -329,6 +422,9 @@ public class LocalScriptRunner implements ActivityContextAware {
             String mavenArgs = env.get("MAVEN_ARGS");
             if (mavenArgs == null || mavenArgs.isBlank()) {
                 env.put("MAVEN_ARGS", "-B");
+            }
+            if (StringUtils.hasText(info.getTargetNodeId())) {
+                env.put("PARAM_TARGET_NODE_ID", info.getTargetNodeId());
             }
             if (info.getParameters() != null) {
                 for (Map.Entry<String, Object> entry : info.getParameters().entrySet()) {

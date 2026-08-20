@@ -193,9 +193,6 @@
                     <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('4-deploy_webapps.sh')">
                         <i class="bi bi-window"></i> Webapps Deploy (4)
                     </button>
-                    <button class="btn btn-sm btn-outline-danger ms-auto" onclick="quickRun('daemon.sh')">
-                        <i class="bi bi-arrow-repeat"></i> Restart Server
-                    </button>
                 </div>
             </div>
 
@@ -222,10 +219,6 @@
                                     <option value="7-pull_deploy_config_only.sh">Pull &amp; Deploy Config Only</option>
                                     <option value="8-pull_deploy_webapps_only.sh">Pull &amp; Deploy Webapps Only</option>
                                     <option value="9-pull_deploy_config_webapps_only.sh">Pull &amp; Deploy Config &amp; Webapps</option>
-                                </optgroup>
-                                <optgroup label="🔄 Server Control">
-                                    <option value="daemon.sh">Restart Daemon Server (daemon.sh)</option>
-                                    <option value="service.sh">Restart System Service (service.sh)</option>
                                 </optgroup>
                             </select>
                         </div>
@@ -494,24 +487,6 @@
                         { icon: 'bi-sliders', name: '3. Config Deploy' },
                         { icon: 'bi-window-desktop', name: '4. Webapps Deploy' }
                     ]
-                },
-                'daemon.sh': {
-                    title: 'Restart Daemon Server',
-                    desc: 'Gracefully shutdown and restart daemon process in detached OS session.',
-                    steps: [
-                        { icon: 'bi-stop-circle', name: 'Daemon Stop' },
-                        { icon: 'bi-play-circle-fill', name: 'Daemon Start' },
-                        { icon: 'bi-heart-pulse-fill', name: 'Health Check' }
-                    ]
-                },
-                'service.sh': {
-                    title: 'Restart System Service',
-                    desc: 'Restart background system service process with automated health check.',
-                    steps: [
-                        { icon: 'bi-stop-circle', name: 'Service Stop' },
-                        { icon: 'bi-play-circle-fill', name: 'Service Start' },
-                        { icon: 'bi-heart-pulse-fill', name: 'Health Check' }
-                    ]
                 }
             };
 
@@ -596,9 +571,6 @@
                 const title = info ? info.title : scriptName;
 
                 let confirmMsg = `Are you sure you want to execute [${title}] on ${targetLabel}?`;
-                if (scriptName === 'daemon.sh' || scriptName === 'service.sh') {
-                    confirmMsg += `\n\nWarning: The server will temporarily go offline and reconnect automatically once restarted.`;
-                }
 
                 if (!confirm(confirmMsg)) {
                     return;
@@ -741,15 +713,6 @@
                     healthCheckTimer = null;
                 }
                 appendTerminalLine(`[INIT] Requesting execution of ${scriptName} on ${targetLabel}...`, 'info');
-
-                if (scriptName === 'daemon.sh' || scriptName === 'service.sh') {
-                    // Trigger health check polling for restart scripts
-                    const pollTarget = targetNodeId || currentNodeId || myNodeId;
-                    healthCheckStartTimeout = setTimeout(() => {
-                        healthCheckStartTimeout = null;
-                        startHealthCheckPolling(pollTarget);
-                    }, 3000);
-                }
 
                 if (client) {
                     const req = {

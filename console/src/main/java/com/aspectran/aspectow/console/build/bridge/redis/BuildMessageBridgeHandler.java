@@ -40,9 +40,6 @@ public class BuildMessageBridgeHandler implements NodeMessageListener {
 
     @Override
     public void onRelayMessage(String nodeId, String message) {
-        if (nodeId != null && nodeId.equals(remoteBuildDeployManager.getNodeId())) {
-            return;
-        }
         remoteBuildDeployManager.process(message);
     }
 

@@ -17,6 +17,8 @@ package com.aspectran.aspectow.console.cluster;
 
 import com.aspectran.aspectow.appmon.common.auth.AppMonTokenIssuer;
 import com.aspectran.aspectow.console.auth.UserInfo;
+import com.aspectran.aspectow.console.build.manager.BuildExecutionInfo;
+import com.aspectran.aspectow.console.build.manager.RemoteBuildDeployManager;
 import com.aspectran.aspectow.node.config.GroupInfo;
 import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.aspectow.node.management.commands.CommandRequestParameters;
@@ -56,18 +58,25 @@ public class ClusterActivity {
 
     private final RemoteCommandManager remoteCommandManager;
 
+    private final RemoteBuildDeployManager remoteBuildDeployManager;
+
     /**
      * Constructs a new {@code ClusterActivity} with the specified node manager,
-     * node console helper, and remote command manager.
+     * node console helper, remote command manager, and remote build deploy manager.
      * @param nodeManager the node manager
      * @param nodeConsoleHelper the node console helper
      * @param remoteCommandManager the remote command manager
+     * @param remoteBuildDeployManager the remote build deploy manager
      */
     @Autowired
-    public ClusterActivity(NodeManager nodeManager, NodeConsoleHelper nodeConsoleHelper, RemoteCommandManager remoteCommandManager) {
+    public ClusterActivity(NodeManager nodeManager,
+                           NodeConsoleHelper nodeConsoleHelper,
+                           RemoteCommandManager remoteCommandManager,
+                           RemoteBuildDeployManager remoteBuildDeployManager) {
         this.nodeManager = nodeManager;
         this.nodeConsoleHelper = nodeConsoleHelper;
         this.remoteCommandManager = remoteCommandManager;
+        this.remoteBuildDeployManager = remoteBuildDeployManager;
     }
 
     /**
@@ -138,7 +147,8 @@ public class ClusterActivity {
     }
 
     /**
-     * Dispatches a restart command to a specific node using RemoteCommandManager.
+     * Dispatches an in-JVM service restart command to a specific node using RemoteCommandManager.
+     * Recreates the ActivityContext and reloads classes without stopping the JVM process.
      * @param translet the active translet
      * @return the REST response indicating success or failure
      */
@@ -156,9 +166,34 @@ public class ClusterActivity {
                 commandRequest.setCommand(commandParams);
 
                 remoteCommandManager.process(commandRequest);
-                return new SuccessResponse("Restart command dispatched to " + nodeId).ok();
+                return new SuccessResponse("Service restart command dispatched to " + nodeId).ok();
             } catch (Exception e) {
-                return new FailureResponse().setError("error", "Failed to dispatch restart command: " + e.getMessage());
+                return new FailureResponse().setError("error", "Failed to dispatch service restart command: " + e.getMessage());
+            }
+        } else {
+            return new FailureResponse().setError("error", "Missing nodeId parameter");
+        }
+    }
+
+    /**
+     * Dispatches a full OS process/daemon restart command to a specific node.
+     * @param translet the active translet
+     * @return the REST response indicating success or failure
+     */
+    @Request("/nodes/${nodeId}/restart-server")
+    public RestResponse restartServer(@NonNull Translet translet) {
+        String nodeId = translet.getParameter("nodeId");
+        if (nodeId != null) {
+            try {
+                BuildExecutionInfo info = new BuildExecutionInfo();
+                info.setTargetNodeId(nodeId);
+                info.setScriptName("daemon.sh");
+                info.getParameters().put("action", "restart");
+
+                remoteBuildDeployManager.dispatch(info);
+                return new SuccessResponse("Server restart command dispatched to " + nodeId).ok();
+            } catch (Exception e) {
+                return new FailureResponse().setError("error", "Failed to dispatch server restart command: " + e.getMessage());
             }
         } else {
             return new FailureResponse().setError("error", "Missing nodeId parameter");

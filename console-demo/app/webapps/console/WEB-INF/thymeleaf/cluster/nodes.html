@@ -159,8 +159,13 @@
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item text-danger animate-color" href="javascript:void(0)" th:onclick="restartNode([[${nodeInfo.id}]])">
-                                        <i class="bi bi-power me-1"></i> Restart Node
+                                    <a class="dropdown-item text-primary animate-color" href="javascript:void(0)" th:onclick="restartNode([[${nodeInfo.id}]])" title="Gracefully recreate ActivityContext and reload classes">
+                                        <i class="bi bi-arrow-clockwise me-1"></i> Restart Service <span class="badge bg-primary-subtle text-primary border border-primary-subtle small ms-1">Hot</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger animate-color" href="javascript:void(0)" th:onclick="restartServer([[${nodeInfo.id}]])" title="Fully restart the OS daemon/service process and JVM">
+                                        <i class="bi bi-power me-1"></i> Restart Server <span class="badge bg-danger-subtle text-danger border border-danger-subtle small ms-1">Cold</span>
                                     </a>
                                 </li>
                             </ul>
@@ -203,7 +208,11 @@
                                         </div>
                                         <div class="form-check form-check-inline">
                                             <input class="form-check-input" type="radio" name="bulkAction" id="bulkActionRestart" value="restart">
-                                            <label class="form-check-label text-danger fw-bold" for="bulkActionRestart">RESTART</label>
+                                            <label class="form-check-label text-primary fw-bold" for="bulkActionRestart">RESTART SERVICE</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="bulkAction" id="bulkActionRestartServer" value="restart-server">
+                                            <label class="form-check-label text-danger fw-bold" for="bulkActionRestartServer">RESTART SERVER</label>
                                         </div>
                                     </div>
                                 </div>
@@ -249,10 +258,10 @@
 
             function restartNode(nodeId) {
                 if (isDemoUser) {
-                    alert("Restarting nodes is not allowed in the demo environment.");
+                    alert("Restarting service is not allowed in the demo environment.");
                     return;
                 }
-                if (confirm("Are you sure you want to restart node '" + nodeId + "'?")) {
+                if (confirm("Are you sure you want to restart the service on node '" + nodeId + "'?\n\nThis will recreate the ActivityContext and reload classes without stopping the JVM process.")) {
                     const url = basePath + "/cluster/nodes/" + nodeId + "/restart";
                     fetch(url, {
                         method: 'POST',
@@ -262,7 +271,7 @@
                     })
                     .then(response => {
                         if (response.status === 403) {
-                            throw new Error("Access Denied: Demo users are not allowed to restart nodes.");
+                            throw new Error("Access Denied: Demo users are not allowed to restart service.");
                         }
                         if (!response.ok) {
                             throw new Error("HTTP error " + response.status);
@@ -273,14 +282,76 @@
                         if (res.success) {
                             updateNodeStatus({ id: nodeId, status: 'stopping' });
                         } else {
-                            alert("Failed to dispatch restart command: " + (res.error ? res.error.message : "Unknown error"));
+                            alert("Failed to dispatch service restart command: " + (res.error ? res.error.message : "Unknown error"));
                         }
                     })
                     .catch(err => {
-                        console.error("Error dispatching restart command:", err);
+                        console.error("Error dispatching service restart command:", err);
                         alert(err.message || "Error communicating with the server.");
                     });
                 }
+            }
+
+            function restartServer(nodeId) {
+                if (isDemoUser) {
+                    alert("Restarting server is not allowed in the demo environment.");
+                    return;
+                }
+                if (confirm("Are you sure you want to reboot the server process on node '" + nodeId + "'?\n\nWarning: This will terminate the OS daemon process and restart the JVM. The node will be temporarily offline until JVM reboot completes.")) {
+                    const url = basePath + "/cluster/nodes/" + nodeId + "/restart-server";
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (response.status === 403) {
+                            throw new Error("Access Denied: Demo users are not allowed to restart server.");
+                        }
+                        if (!response.ok) {
+                            throw new Error("HTTP error " + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(res => {
+                        if (res.success) {
+                            updateNodeStatus({ id: nodeId, status: 'stopping' });
+                            pollNodeRecovery(nodeId);
+                        } else {
+                            alert("Failed to dispatch server restart command: " + (res.error ? res.error.message : "Unknown error"));
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error dispatching server restart command:", err);
+                        alert(err.message || "Error communicating with the server.");
+                    });
+                }
+            }
+
+            function pollNodeRecovery(nodeId) {
+                let attempts = 0;
+                const maxAttempts = 40; // 80 seconds
+                const pollInterval = setInterval(() => {
+                    attempts++;
+                    fetch(basePath + "/cluster/build/health/" + nodeId, {
+                        headers: { 'Accept': 'application/json' }
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.success && res.data && res.data.alive) {
+                            clearInterval(pollInterval);
+                            updateNodeStatus({ id: nodeId, status: 'live' });
+                        } else if (attempts >= maxAttempts) {
+                            clearInterval(pollInterval);
+                        }
+                    })
+                    .catch(() => {
+                        if (attempts >= maxAttempts) {
+                            clearInterval(pollInterval);
+                        }
+                    });
+                }, 2000);
             }
 
             function pauseNode(nodeId) {
@@ -667,7 +738,7 @@
                     }
 
                     const action = $('input[name="bulkAction"]:checked').val();
-                    const actionName = action.toUpperCase();
+                    const actionName = (action === 'restart' ? 'RESTART SERVICE' : (action === 'restart-server' ? 'RESTART SERVER' : action.toUpperCase()));
 
                     if (!confirm(`Are you sure you want to execute '${actionName}' on ${selectedNodes.length} selected node(s)?`)) {
                         return;
@@ -703,8 +774,11 @@
 
                         results.forEach(r => {
                             if (r.success) {
-                                if (action === 'restart') {
+                                if (action === 'restart' || action === 'restart-server') {
                                     updateNodeStatus({ id: r.nodeId, status: 'stopping' });
+                                    if (action === 'restart-server') {
+                                        pollNodeRecovery(r.nodeId);
+                                    }
                                 } else if (action === 'pause') {
                                     updateNodeStatus({ id: r.nodeId, status: 'paused' });
                                 } else if (action === 'resume') {
