@@ -150,8 +150,7 @@ public class RemoteBuildDeployManager implements InitializableBean {
 
         List<String> targetNodeIds = resolveTargetNodeIds(targetNodeId, targetGroup, targetAll);
         if (targetNodeIds.isEmpty()) {
-            logger.warn("No target nodes found for dispatch: nodeId={}, group={}, all={}",
-                    targetNodeId, targetGroup, targetAll);
+            logger.warn("No target nodes found for dispatch: nodeId={}, group={}, all={}", targetNodeId, targetGroup, targetAll);
             BuildExecutionInfo failed = new BuildExecutionInfo();
             failed.setExecutionId(params.getExecutionId() != null ? params.getExecutionId() : "bld_unknown");
             failed.setScriptName(scriptName);

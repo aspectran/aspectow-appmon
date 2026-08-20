@@ -151,7 +151,7 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
         sendText(session, res.toString());
     }
 
-    private void execute(Session session, @NonNull BuildRequestParameters params) {
+    private void execute(@NonNull Session session, @NonNull BuildRequestParameters params) {
         Boolean isDemo = (Boolean) session.getUserProperties().get("isDemo");
         if (isDemo != null && isDemo) {
             logger.warn("Rejecting build execution request from DEMO user session: {}", session.getId());
@@ -181,7 +181,7 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
         }
     }
 
-    private void cancel(Session session, @NonNull BuildRequestParameters params) {
+    private void cancel(@NonNull Session session, @NonNull BuildRequestParameters params) {
         Boolean isDemo = (Boolean) session.getUserProperties().get("isDemo");
         if (isDemo != null && isDemo) {
             logger.warn("Rejecting build cancellation request from DEMO user session: {}", session.getId());
