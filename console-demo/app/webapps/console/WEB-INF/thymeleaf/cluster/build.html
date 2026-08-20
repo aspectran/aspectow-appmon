@@ -25,6 +25,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            height: 100%;
             min-height: 550px;
         }
         .terminal-header {
@@ -36,9 +37,11 @@
             flex-wrap: wrap;
             gap: 8px;
             border-bottom: 1px solid #333;
+            flex-shrink: 0;
         }
         .terminal-body {
-            flex-grow: 1;
+            flex: 1 1 0;
+            min-height: 0;
             padding: 15px;
             overflow-y: auto;
             font-family: var(--bs-font-monospace);
@@ -94,6 +97,78 @@
         .meta-value {
             font-weight: 600;
             font-family: monospace;
+        }
+
+        .node-tabs-bar {
+            display: flex;
+            align-items: center;
+            background: #1c1c1c;
+            border-bottom: 1px solid #333;
+            padding: 4px 6px 0 6px;
+            gap: 4px;
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+        .node-tab {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            background: #262626;
+            color: #8b949e;
+            border: 1px solid #333;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.15s ease;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .node-tab:hover {
+            background: #303030;
+            color: #e6edf3;
+        }
+        .node-tab.active {
+            background: #181818;
+            color: #58a6ff;
+            border-color: #444 #444 #181818 #444;
+            font-weight: 700;
+        }
+        .node-tab-badge {
+            font-size: 0.65rem;
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .node-summary-card {
+            border: 1px solid var(--bs-border-color);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            background: var(--bs-secondary-bg);
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+        .node-summary-card:hover {
+            border-color: var(--bs-primary);
+        }
+        .node-summary-card.active {
+            border-color: var(--bs-primary);
+            background: var(--bs-primary-bg-subtle);
+        }
+        .node-tag {
+            display: inline-block;
+            padding: 1px 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            border-radius: 4px;
+            margin-right: 6px;
+            background: #2d333b;
+            color: #58a6ff;
+            border: 1px solid #444c56;
         }
 
         /* Mobile & Tablet Responsive Layout */
@@ -181,16 +256,16 @@
                     <button class="btn btn-sm btn-primary" onclick="quickRun('5-pull_build_deploy.sh')">
                         <i class="bi bi-play-fill"></i> Full Build &amp; Deploy (5)
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('1-pull.sh')">
+                    <button class="btn btn-sm btn-outline-primary" onclick="quickRun('1-pull.sh')">
                         <i class="bi bi-cloud-arrow-down"></i> Pull (1)
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('2-build.sh')">
+                    <button class="btn btn-sm btn-outline-primary" onclick="quickRun('2-build.sh')">
                         <i class="bi bi-gear"></i> Maven Build (2)
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('3-deploy_config.sh')">
+                    <button class="btn btn-sm btn-outline-primary" onclick="quickRun('3-deploy_config.sh')">
                         <i class="bi bi-sliders"></i> Config Deploy (3)
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="quickRun('4-deploy_webapps.sh')">
+                    <button class="btn btn-sm btn-outline-primary" onclick="quickRun('4-deploy_webapps.sh')">
                         <i class="bi bi-window"></i> Webapps Deploy (4)
                     </button>
                 </div>
@@ -245,50 +320,64 @@
                     <!-- Execution Status Summary Card -->
                     <div class="info-card flex-grow-1">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="fw-bold mb-0"><i class="bi bi-info-circle me-1"></i> Current Execution</h6>
+                            <h6 class="fw-bold mb-0"><i class="bi bi-info-circle me-1"></i> <span id="meta-view-title">Current Execution</span></h6>
                             <span id="exec-status-badge" class="status-pill bg-secondary text-white">IDLE</span>
                         </div>
 
-                        <div class="meta-row">
-                            <span class="meta-label">Execution ID:</span>
-                            <span id="meta-exec-id" class="meta-value text-truncate" style="max-width: 180px;">-</span>
+                        <!-- Single Node Detailed View -->
+                        <div id="meta-single-view">
+                            <div class="meta-row">
+                                <span class="meta-label">Execution ID:</span>
+                                <span id="meta-exec-id" class="meta-value text-truncate" style="max-width: 180px;">-</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Target Node:</span>
+                                <span id="meta-node-id" class="meta-value">-</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Git Branch:</span>
+                                <span id="meta-branch" class="meta-value">-</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Before Commit:</span>
+                                <span id="meta-commit-before" class="meta-value">-</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">After Commit:</span>
+                                <span id="meta-commit-after" class="meta-value">-</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Started At:</span>
+                                <span id="meta-started-at" class="meta-value">-</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Duration:</span>
+                                <span id="meta-duration" class="meta-value">-</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Exit Code:</span>
+                                <span id="meta-exit-code" class="meta-value">-</span>
+                            </div>
                         </div>
-                        <div class="meta-row">
-                            <span class="meta-label">Target Node:</span>
-                            <span id="meta-node-id" class="meta-value">-</span>
-                        </div>
-                        <div class="meta-row">
-                            <span class="meta-label">Git Branch:</span>
-                            <span id="meta-branch" class="meta-value">-</span>
-                        </div>
-                        <div class="meta-row">
-                            <span class="meta-label">Before Commit:</span>
-                            <span id="meta-commit-before" class="meta-value">-</span>
-                        </div>
-                        <div class="meta-row">
-                            <span class="meta-label">After Commit:</span>
-                            <span id="meta-commit-after" class="meta-value">-</span>
-                        </div>
-                        <div class="meta-row">
-                            <span class="meta-label">Started At:</span>
-                            <span id="meta-started-at" class="meta-value">-</span>
-                        </div>
-                        <div class="meta-row">
-                            <span class="meta-label">Duration:</span>
-                            <span id="meta-duration" class="meta-value">-</span>
-                        </div>
-                        <div class="meta-row">
-                            <span class="meta-label">Exit Code:</span>
-                            <span id="meta-exit-code" class="meta-value">-</span>
+
+                        <!-- All Nodes Summary List View -->
+                        <div id="meta-all-view" style="display: none;">
+                            <div class="small text-muted mb-2">Click any node below or use tabs above to view specific output:</div>
+                            <div id="meta-nodes-list" class="d-flex flex-column gap-1"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Right: Real-time Terminal Panel -->
                 <div class="terminal-panel">
+                    <!-- Top: Dynamic Node Tabs Bar -->
+                    <div class="node-tabs-bar" id="node-tabs-bar">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+
                     <div class="terminal-header">
                         <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                            <span class="text-white small fw-bold terminal-title"><i class="bi bi-terminal-fill me-1 text-primary"></i> Live Output Console</span>
+                            <span id="active-tab-title" class="text-white small fw-bold terminal-title"><i class="bi bi-terminal-fill me-1 text-primary"></i> Live Output Console</span>
                             <span id="terminal-spinner" class="spinner-border spinner-border-sm text-primary d-none" role="status"></span>
                         </div>
                         <div class="d-flex align-items-center gap-1 gap-sm-2 flex-wrap ms-auto">
@@ -305,10 +394,10 @@
                                 <input class="form-check-input ms-0 me-1" type="checkbox" id="auto-scroll" checked title="Toggle Auto-scroll">
                                 <label class="form-check-label d-none d-md-inline" for="auto-scroll">Auto-scroll</label>
                             </div>
-                            <button class="btn btn-xs btn-outline-secondary text-white-50" onclick="clearTerminal()" title="Clear Terminal">
+                            <button class="btn btn-xs btn-outline-secondary text-white-50" onclick="clearTerminal()" title="Clear Current Tab Terminal">
                                 <i class="bi bi-trash"></i>
                             </button>
-                            <button class="btn btn-xs btn-outline-secondary text-white-50" onclick="downloadLogs()" title="Download Logs">
+                            <button class="btn btn-xs btn-outline-secondary text-white-50" onclick="downloadLogs()" title="Download Current Tab Logs">
                                 <i class="bi bi-download"></i>
                             </button>
                         </div>
@@ -337,7 +426,30 @@
         <script>
             let client = null;
             let currentExecutionId = null;
-            let terminalLines = [];
+            let activeTab = '__all__';
+            let activeTargetNodes = [];
+            let nodeExecutions = {};
+            let allLogs = [];
+
+            function ensureNode(nodeId) {
+                if (!nodeId) nodeId = 'unknown';
+                if (!nodeExecutions[nodeId]) {
+                    nodeExecutions[nodeId] = {
+                        nodeId: nodeId,
+                        executionId: null,
+                        status: 'IDLE',
+                        gitBranch: '-',
+                        gitCommitBefore: '-',
+                        gitCommitAfter: '-',
+                        startedAt: null,
+                        durationMs: null,
+                        exitCode: null,
+                        error: null,
+                        logs: []
+                    };
+                }
+                return nodeExecutions[nodeId];
+            }
 
             function refreshNodeList() {
                 return fetch(basePath + "/cluster/build/list")
@@ -366,10 +478,13 @@
                 if (type === 'all') {
                     $container.hide();
                     updateUrl(null);
+                    activeTargetNodes = nodes.map(n => n.id);
                 } else if (type === 'group') {
                     $container.show();
                     const groups = [...new Set(nodes.map(n => n.group).filter(g => g))];
                     groups.forEach(g => $select.append(new Option(g, g)));
+                    const selectedGroup = $select.val();
+                    activeTargetNodes = nodes.filter(n => n.group === selectedGroup).map(n => n.id);
                 } else {
                     $container.show();
                     nodes.forEach(n => {
@@ -385,8 +500,10 @@
                     if (targetNodeId) {
                         $select.val(targetNodeId);
                         updateUrl(targetNodeId);
+                        activeTargetNodes = [targetNodeId];
                     }
                 }
+                initTabs();
             }
 
             function updateUrl(nodeId) {
@@ -550,6 +667,211 @@
                 }
             }
 
+            /* --- Tab & View Management --- */
+
+            function initTabs() {
+                const $bar = $('#node-tabs-bar');
+                $bar.empty();
+
+                const nodeIds = activeTargetNodes.length > 0 ? activeTargetNodes : (nodes.map(n => n.id));
+                const isMulti = nodeIds.length > 1;
+
+                if (isMulti) {
+                    $bar.append(`
+                        <div class="node-tab ${activeTab === '__all__' ? 'active' : ''}" onclick="selectTab('__all__')">
+                            <i class="bi bi-globe2 me-1"></i>All Nodes
+                        </div>
+                    `);
+                } else if (activeTab === '__all__' && nodeIds.length === 1) {
+                    activeTab = nodeIds[0];
+                }
+
+                nodeIds.forEach(nid => {
+                    const exec = nodeExecutions[nid];
+                    const status = exec ? exec.status : 'IDLE';
+                    const badgeClass = getBadgeClass(status);
+                    $bar.append(`
+                        <div id="tab-${nid}" class="node-tab ${activeTab === nid ? 'active' : ''}" onclick="selectTab('${nid}')">
+                            <i class="bi bi-hdd-network me-1"></i>${nid}
+                            <span id="tab-badge-${nid}" class="node-tab-badge ${badgeClass}">${status}</span>
+                        </div>
+                    `);
+                });
+
+                if (isMulti && activeTab !== '__all__' && !nodeIds.includes(activeTab)) {
+                    activeTab = '__all__';
+                }
+
+                renderActiveTab();
+            }
+
+            function selectTab(tabId) {
+                activeTab = tabId;
+                $('.node-tab').removeClass('active');
+                if (tabId === '__all__') {
+                    $('.node-tab:first-child').addClass('active');
+                } else {
+                    $(`#tab-${tabId}`).addClass('active');
+                }
+                renderActiveTab();
+            }
+
+            function getBadgeClass(status) {
+                switch (status) {
+                    case 'RUNNING': return 'bg-primary text-white';
+                    case 'PENDING': return 'bg-warning text-dark';
+                    case 'SUCCESS': return 'bg-success text-white';
+                    case 'FAILED':
+                    case 'TIMEOUT': return 'bg-danger text-white';
+                    case 'CANCELLED': return 'bg-warning text-dark';
+                    default: return 'bg-secondary text-white';
+                }
+            }
+
+            function renderActiveTab() {
+                // Update terminal title
+                if (activeTab === '__all__') {
+                    $('#active-tab-title').html('<i class="bi bi-globe2 me-1 text-primary"></i> All Nodes Live Output');
+                } else {
+                    $('#active-tab-title').html(`<i class="bi bi-hdd-network-fill me-1 text-primary"></i> Node <code>${activeTab}</code> Live Output`);
+                }
+
+                // Render terminal content
+                const $body = $('#terminal-body');
+                $body.empty();
+
+                if (activeTab === '__all__') {
+                    if (allLogs.length === 0) {
+                        $body.html('<div class="text-muted fst-italic">Waiting for output stream...</div>');
+                    } else {
+                        allLogs.forEach(item => appendLineToDOM($body, item.text, item.type, item.nodeId));
+                    }
+                } else {
+                    const exec = nodeExecutions[activeTab];
+                    const logs = exec ? exec.logs : [];
+                    if (logs.length === 0) {
+                        $body.html('<div class="text-muted fst-italic">Waiting for output stream...</div>');
+                    } else {
+                        logs.forEach(item => appendLineToDOM($body, item.text, item.type, null));
+                    }
+                }
+
+                if ($('#auto-scroll').is(':checked')) {
+                    $body.scrollTop($body[0].scrollHeight);
+                }
+
+                // Render left metadata view
+                renderMetaView();
+            }
+
+            function renderMetaView() {
+                if (activeTab === '__all__') {
+                    $('#meta-view-title').text('Cluster Execution Summary');
+                    $('#meta-single-view').hide();
+                    $('#meta-all-view').show();
+
+                    const $list = $('#meta-nodes-list');
+                    $list.empty();
+
+                    const nodeIds = activeTargetNodes.length > 0 ? activeTargetNodes : Object.keys(nodeExecutions);
+                    let overallStatus = 'IDLE';
+                    let hasRunning = false;
+                    let hasFailed = false;
+                    let allSuccess = (nodeIds.length > 0);
+
+                    nodeIds.forEach(nid => {
+                        const exec = nodeExecutions[nid] || { status: 'IDLE', durationMs: null, exitCode: null };
+                        const st = exec.status || 'IDLE';
+                        if (st === 'RUNNING' || st === 'PENDING') hasRunning = true;
+                        if (st === 'FAILED' || st === 'TIMEOUT') hasFailed = true;
+                        if (st !== 'SUCCESS') allSuccess = false;
+
+                        const durationStr = (exec.durationMs !== null && exec.durationMs !== undefined) ? ((exec.durationMs / 1000).toFixed(1) + 's') : '-';
+                        const badgeClass = getBadgeClass(st);
+
+                        $list.append(`
+                            <div class="node-summary-card d-flex justify-content-between align-items-center" onclick="selectTab('${nid}')">
+                                <div>
+                                    <span class="fw-bold"><i class="bi bi-hdd-network me-1"></i>${nid}</span>
+                                    <small class="text-muted ms-2">${durationStr}</small>
+                                </div>
+                                <span class="status-pill ${badgeClass}">${st}</span>
+                            </div>
+                        `);
+                    });
+
+                    if (hasRunning) overallStatus = 'RUNNING';
+                    else if (hasFailed) overallStatus = 'FAILED';
+                    else if (allSuccess) overallStatus = 'SUCCESS';
+
+                    const $badge = $('#exec-status-badge');
+                    $badge.attr('class', 'status-pill ' + getBadgeClass(overallStatus)).text(overallStatus);
+
+                } else {
+                    $('#meta-view-title').text('Current Execution');
+                    $('#meta-all-view').hide();
+                    $('#meta-single-view').show();
+
+                    const exec = nodeExecutions[activeTab] || {};
+                    $('#meta-exec-id').text(exec.executionId || '-');
+                    $('#meta-node-id').text(activeTab);
+                    $('#meta-branch').text(exec.gitBranch || '-');
+                    $('#meta-commit-before').text(exec.gitCommitBefore ? String(exec.gitCommitBefore).substring(0, 8) : '-');
+                    $('#meta-commit-after').text(exec.gitCommitAfter ? String(exec.gitCommitAfter).substring(0, 8) : '-');
+                    $('#meta-started-at').text(exec.startedAt ? formatDateTime(exec.startedAt) : '-');
+                    $('#meta-duration').text(exec.durationMs !== null && exec.durationMs !== undefined ? ((exec.durationMs / 1000).toFixed(1) + 's') : '-');
+                    $('#meta-exit-code').text(exec.exitCode !== null && exec.exitCode !== undefined ? exec.exitCode : '-');
+
+                    const status = exec.status || 'IDLE';
+                    $('#exec-status-badge').attr('class', 'status-pill ' + getBadgeClass(status)).text(status);
+                }
+            }
+
+            function updateNodeStatusUI(data) {
+                if (!data) return;
+                const nodeId = data.nodeId || data.targetNodeId || 'unknown';
+                const exec = ensureNode(nodeId);
+                Object.assign(exec, data);
+
+                if (data.executionId) {
+                    currentExecutionId = data.executionId;
+                }
+
+                // Update tab badge
+                const $badge = $(`#tab-badge-${nodeId}`);
+                if ($badge.length) {
+                    const st = exec.status || 'IDLE';
+                    $badge.attr('class', 'node-tab-badge ' + getBadgeClass(st)).text(st);
+                }
+
+                // Check overall execution status to toggle buttons
+                checkOverallExecutionStatus();
+                renderMetaView();
+            }
+
+            function checkOverallExecutionStatus() {
+                const nodeIds = activeTargetNodes.length > 0 ? activeTargetNodes : Object.keys(nodeExecutions);
+                let anyActive = false;
+
+                nodeIds.forEach(nid => {
+                    const exec = nodeExecutions[nid];
+                    if (exec && (exec.status === 'RUNNING' || exec.status === 'PENDING')) {
+                        anyActive = true;
+                    }
+                });
+
+                if (anyActive) {
+                    $('#btn-dispatch').prop('disabled', true);
+                    $('#btn-cancel').prop('disabled', false);
+                    $('#terminal-spinner').removeClass('d-none');
+                } else {
+                    $('#btn-dispatch').prop('disabled', false);
+                    $('#btn-cancel').prop('disabled', true);
+                    $('#terminal-spinner').addClass('d-none');
+                    stopDurationTicker();
+                }
+            }
+
             function quickRun(scriptName) {
                 if (!canExecute) {
                     alert('You do not have permission to execute build scripts.');
@@ -581,81 +903,6 @@
                 dispatchBuild();
             }
 
-            function startHealthCheckPolling(targetNodeId) {
-                if (healthCheckTimer) {
-                    clearTimeout(healthCheckTimer);
-                    healthCheckTimer = null;
-                }
-
-                const target = targetNodeId || currentNodeId || myNodeId || 'gateway';
-                appendTerminalLine(`[HEALTH CHECK] Started monitoring node '${target}' recovery (2s interval)...`, 'warn');
-                $('#connection-indicator').text("RESTARTING...").removeClass("bg-success bg-danger").addClass("bg-warning");
-
-                let attempts = 0;
-                const maxAttempts = 45; // 90 seconds
-                let isPollingCompleted = false;
-
-                function poll() {
-                    if (isPollingCompleted) return;
-
-                    attempts++;
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 2500);
-
-                    fetch(basePath + `/cluster/build/health/${target}`, { signal: controller.signal })
-                        .then(res => res.json())
-                        .then(res => {
-                            clearTimeout(timeoutId);
-                            if (isPollingCompleted) return;
-
-                            if (res.success && res.data && res.data.alive) {
-                                isPollingCompleted = true;
-                                if (healthCheckTimer) {
-                                    clearTimeout(healthCheckTimer);
-                                    healthCheckTimer = null;
-                                }
-                                const totalDurationMs = executionStartTime ? (Date.now() - executionStartTime) : (attempts * 2000);
-                                stopDurationTicker(totalDurationMs);
-                                appendTerminalLine(`[HEALTH CHECK] Node '${target}' is successfully back ONLINE! (${(totalDurationMs / 1000).toFixed(1)}s)`, 'success');
-                                $('#connection-indicator').text("CONNECTED").removeClass("bg-secondary bg-danger bg-warning").addClass("bg-success");
-                                updateStatusUI({ status: 'SUCCESS', durationMs: totalDurationMs });
-                                checkDaemonStartupOutput('stdout');
-                            } else if (attempts >= maxAttempts) {
-                                isPollingCompleted = true;
-                                if (healthCheckTimer) {
-                                    clearTimeout(healthCheckTimer);
-                                    healthCheckTimer = null;
-                                }
-                                stopDurationTicker();
-                                appendTerminalLine(`[HEALTH CHECK] Timeout waiting for node '${target}' to recover. Please check server logs manually.`, 'error');
-                                updateStatusUI({ status: 'TIMEOUT' });
-                                checkDaemonStderrOutput();
-                            } else {
-                                healthCheckTimer = setTimeout(poll, 2000);
-                            }
-                        })
-                        .catch(err => {
-                            clearTimeout(timeoutId);
-                            if (isPollingCompleted) return;
-
-                            if (attempts >= maxAttempts) {
-                                isPollingCompleted = true;
-                                if (healthCheckTimer) {
-                                    clearTimeout(healthCheckTimer);
-                                    healthCheckTimer = null;
-                                }
-                                stopDurationTicker();
-                                appendTerminalLine(`[HEALTH CHECK] Timeout waiting for node '${target}' to recover. Please check server logs manually.`, 'error');
-                                updateStatusUI({ status: 'TIMEOUT' });
-                            } else {
-                                healthCheckTimer = setTimeout(poll, 2000);
-                            }
-                        });
-                }
-
-                healthCheckTimer = setTimeout(poll, 2000);
-            }
-
             function dispatchBuild() {
                 if (!canExecute) {
                     alert('You do not have permission to execute build scripts.');
@@ -679,12 +926,15 @@
                 if (targetType === 'all') {
                     targetAll = true;
                     targetLabel = 'ALL nodes in cluster';
+                    activeTargetNodes = nodes.map(n => n.id);
                 } else if (targetType === 'group') {
                     targetGroup = targetVal;
                     targetLabel = `Group '${targetVal}'`;
+                    activeTargetNodes = nodes.filter(n => n.group === targetVal).map(n => n.id);
                 } else {
                     targetNodeId = targetVal || currentNodeId || myNodeId;
                     targetLabel = `Node '${targetNodeId}'`;
+                    activeTargetNodes = [targetNodeId];
                 }
 
                 if (!scriptName) {
@@ -692,16 +942,18 @@
                     return;
                 }
 
-                clearTerminal();
-                $('#meta-exec-id').text('Pending...');
-                $('#meta-node-id').text(targetLabel);
-                $('#meta-branch').text(branch || '-');
-                $('#meta-commit-before').text('-');
-                $('#meta-commit-after').text('-');
-                $('#meta-started-at').text(formatDateTime(new Date()));
-                $('#meta-duration').text('0.0s');
-                $('#meta-exit-code').text('-');
-                $('#exec-status-badge').attr('class', 'status-pill bg-warning text-dark').text('PENDING');
+                // Reset logs and executions
+                allLogs = [];
+                nodeExecutions = {};
+                activeTargetNodes.forEach(nid => {
+                    const exec = ensureNode(nid);
+                    exec.status = 'PENDING';
+                    exec.startedAt = new Date().toISOString();
+                });
+
+                activeTab = activeTargetNodes.length > 1 ? '__all__' : activeTargetNodes[0];
+                initTabs();
+
                 startDurationTicker();
                 lastHandledErrorKey = null;
                 if (healthCheckStartTimeout) {
@@ -712,7 +964,13 @@
                     clearTimeout(healthCheckTimer);
                     healthCheckTimer = null;
                 }
-                appendTerminalLine(`[INIT] Requesting execution of ${scriptName} on ${targetLabel}...`, 'info');
+
+                const initMsg = `[INIT] Requesting execution of ${scriptName} on ${targetLabel}...`;
+                allLogs.push({ nodeId: 'cluster', text: initMsg, type: 'info' });
+                activeTargetNodes.forEach(nid => {
+                    if (nodeExecutions[nid]) nodeExecutions[nid].logs.push({ text: initMsg, type: 'info' });
+                });
+                renderActiveTab();
 
                 if (client) {
                     const req = {
@@ -745,19 +1003,18 @@
                     return;
                 }
 
-                if (!currentExecutionId) {
-                    return;
-                }
                 if (confirm('Are you sure you want to cancel the currently running execution?')) {
                     if (client) {
-                        const targetNodeId = $('#target-value').val();
+                        const targetType = $('#target-type').val();
+                        const targetVal = $('#target-value').val();
+                        const targetNodeId = (targetType === 'node') ? (targetVal || currentNodeId || myNodeId) : null;
                         const req = {
                             header: "cancel",
                             executionId: currentExecutionId,
                             targetNodeId: targetNodeId
                         };
                         client.sendMessage(req);
-                        appendTerminalLine(`[ABORT] Cancellation signal sent for ${currentExecutionId}...`, 'warn');
+                        appendTerminalLineToAll(`[ABORT] Cancellation signal sent for ${currentExecutionId || 'active executions'}...`, 'warn');
                         stopDurationTicker();
                     }
                 }
@@ -850,23 +1107,9 @@
                 return str;
             }
 
-            function appendTerminalLine(text, type = '') {
+            function appendLineToDOM($container, text, type = '', nodeId = null) {
                 if (text === null || text === undefined) return;
-
                 text = String(text).replace(/\r/g, '');
-
-                if (text.length > 0 && text.trim().length === 0 && terminalLines.length > 0) {
-                    const lastLine = terminalLines[terminalLines.length - 1];
-                    if (lastLine && (lastLine.includes('Progress (') || lastLine.includes('Downloading') || lastLine.includes('Downloaded'))) {
-                        return;
-                    }
-                }
-
-                terminalLines.push(text);
-                const $body = $('#terminal-body');
-                if (terminalLines.length === 1) {
-                    $body.empty();
-                }
 
                 const cleanText = text.replace(new RegExp('\\u001b\\[[0-9;?]*[a-zA-Z]', 'g'), '');
 
@@ -875,32 +1118,86 @@
                 else if (cleanText.includes('[INFO]') || cleanText.includes('[BUILD STARTED]')) lineClass += ' info';
                 else if (cleanText.includes('[SUCCESS]') || cleanText.includes('BUILD SUCCESS')) lineClass += ' success';
                 else if (cleanText.includes('[ERROR]') || cleanText.includes('BUILD FAILURE') || cleanText.includes('[FAILED]')) lineClass += ' error';
-                else if (cleanText.includes('[WARN]') || cleanText.includes('[WARNING]')) lineClass += ' warn';
+                else if (cleanText.includes('[WARN]') || cleanText.includes('[WARNING]') || cleanText.includes('[BUILD LOCK]')) lineClass += ' warn';
 
-                const renderedHtml = ansiToHtml(text);
-                $body.append(`<p class="${lineClass}">${renderedHtml}</p>`);
+                let renderedHtml = ansiToHtml(text);
+                let tagPrefix = '';
+                if (nodeId && nodeId !== 'unknown') {
+                    tagPrefix = `<span class="node-tag">${nodeId}</span>`;
+                }
 
+                $container.append(`<p class="${lineClass}">${tagPrefix}${renderedHtml}</p>`);
+            }
+
+            function appendLogLine(nodeId, line, type = '') {
+                if (line === null || line === undefined) return;
+                const exec = ensureNode(nodeId);
+                const logItem = { text: line, type: type };
+                exec.logs.push(logItem);
+
+                const allItem = { nodeId: nodeId, text: line, type: type };
+                allLogs.push(allItem);
+
+                const $body = $('#terminal-body');
+                if (activeTab === '__all__') {
+                    if (allLogs.length === 1) $body.empty();
+                    appendLineToDOM($body, line, type, nodeId);
+                    if ($('#auto-scroll').is(':checked')) {
+                        $body.scrollTop($body[0].scrollHeight);
+                    }
+                } else if (activeTab === nodeId) {
+                    if (exec.logs.length === 1) $body.empty();
+                    appendLineToDOM($body, line, type, null);
+                    if ($('#auto-scroll').is(':checked')) {
+                        $body.scrollTop($body[0].scrollHeight);
+                    }
+                }
+            }
+
+            function appendTerminalLineToAll(line, type = 'info') {
+                allLogs.push({ nodeId: 'cluster', text: line, type: type });
+                Object.keys(nodeExecutions).forEach(nid => {
+                    nodeExecutions[nid].logs.push({ text: line, type: type });
+                });
+                const $body = $('#terminal-body');
+                appendLineToDOM($body, line, type, activeTab === '__all__' ? 'cluster' : null);
                 if ($('#auto-scroll').is(':checked')) {
                     $body.scrollTop($body[0].scrollHeight);
                 }
             }
 
             function clearTerminal() {
-                terminalLines = [];
+                if (activeTab === '__all__') {
+                    allLogs = [];
+                } else if (nodeExecutions[activeTab]) {
+                    nodeExecutions[activeTab].logs = [];
+                }
                 $('#terminal-body').empty();
             }
 
             function downloadLogs() {
-                if (terminalLines.length === 0) {
-                    alert('No logs to download.');
+                let textLogs = [];
+                if (activeTab === '__all__') {
+                    textLogs = allLogs.map(item => {
+                        const clean = String(item.text).replace(new RegExp('\\u001b\\[[0-9;?]*[a-zA-Z]', 'g'), '');
+                        return `[${item.nodeId || 'cluster'}] ${clean}`;
+                    });
+                } else if (nodeExecutions[activeTab]) {
+                    textLogs = nodeExecutions[activeTab].logs.map(item => {
+                        return String(item.text).replace(new RegExp('\\u001b\\[[0-9;?]*[a-zA-Z]', 'g'), '');
+                    });
+                }
+
+                if (textLogs.length === 0) {
+                    alert('No logs to download for the current tab.');
                     return;
                 }
-                const cleanLogs = terminalLines.map(l => l.replace(new RegExp('\\u001b\\[[0-9;?]*[a-zA-Z]', 'g'), ''));
-                const blob = new Blob([cleanLogs.join('\n')], { type: 'text/plain;charset=utf-8' });
+
+                const blob = new Blob([textLogs.join('\n')], { type: 'text/plain;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `build-${currentExecutionId || 'log'}.log`;
+                a.download = `build-${activeTab}-${currentExecutionId || 'log'}.log`;
                 a.click();
                 URL.revokeObjectURL(url);
             }
@@ -917,37 +1214,11 @@
                 }
             }
 
-            function checkDaemonStartupOutput(type = 'stdout') {
-                fetch(basePath + `/cluster/build/daemon-log?type=${type}`)
-                    .then(res => res.json())
-                    .then(res => {
-                        if (res.success && res.data && res.data.content && res.data.content.trim().length > 0) {
-                            const lines = res.data.content.trim().split('\n');
-                            lines.forEach(l => appendTerminalLine(l, 'info'));
-                        }
-                    })
-                    .catch(err => console.debug(`Could not check daemon-${type}.log:`, err));
-            }
-
-            function checkDaemonStderrOutput() {
-                fetch(basePath + `/cluster/build/daemon-log?type=stderr`)
-                    .then(res => res.json())
-                    .then(res => {
-                        if (res.success && res.data && res.data.content && res.data.content.trim().length > 0) {
-                            const timeStr = formatLogTimestamp(res.data.lastModified || res.data.creationTime);
-                            const headerInfo = timeStr ? ` (Modified: ${timeStr})` : '';
-                            appendTerminalLine(`[DAEMON STDERR] Output captured in ${res.data.fileName || 'daemon-stderr.log'}${headerInfo}:`, 'warn');
-                            const lines = res.data.content.trim().split('\n');
-                            lines.forEach(l => appendTerminalLine(l, 'warn'));
-                        }
-                    })
-                    .catch(err => console.debug('Could not check daemon-stderr.log:', err));
-            }
-
             function fetchDaemonLog(type = 'stderr') {
                 const defaultName = `daemon-${type}.log`;
-                appendTerminalLine(`[DAEMON LOG] Fetching latest ${defaultName}...`, 'info');
-                fetch(basePath + `/cluster/build/daemon-log?type=${type}&lines=200`)
+                const target = (activeTab !== '__all__' ? activeTab : (currentNodeId || myNodeId || 'gateway'));
+                appendTerminalLineToAll(`[DAEMON LOG] Fetching latest ${defaultName} from '${target}'...`, 'info');
+                fetch(basePath + `/cluster/build/daemon-log?type=${type}&nodeId=${target}&lines=200`)
                     .then(res => res.json())
                     .then(res => {
                         if (res.success && res.data) {
@@ -957,19 +1228,19 @@
                             const meta = timeStr ? ` | Date: ${timeStr}` : '';
 
                             if (res.data.content && res.data.content.trim().length > 0) {
-                                appendTerminalLine(`--- [ ${filename}${meta}${sizeStr} ] ---`, type === 'stderr' ? 'warn' : 'info');
+                                appendTerminalLineToAll(`--- [ ${filename}${meta}${sizeStr} ] ---`, type === 'stderr' ? 'warn' : 'info');
                                 const lines = res.data.content.trim().split('\n');
-                                lines.forEach(l => appendTerminalLine(l, type === 'stderr' ? 'warn' : ''));
-                                appendTerminalLine(`--- [ End of ${filename} ] ---`, type === 'stderr' ? 'warn' : 'info');
+                                lines.forEach(l => appendTerminalLineToAll(l, type === 'stderr' ? 'warn' : ''));
+                                appendTerminalLineToAll(`--- [ End of ${filename} ] ---`, type === 'stderr' ? 'warn' : 'info');
                             } else {
-                                appendTerminalLine(`[DAEMON LOG] ${filename}${meta} is currently empty.`, 'info');
+                                appendTerminalLineToAll(`[DAEMON LOG] ${filename}${meta} is currently empty.`, 'info');
                             }
                         } else {
-                            appendTerminalLine(`[DAEMON LOG] Failed to fetch ${defaultName}: ` + (res.error || 'Unknown error'), 'error');
+                            appendTerminalLineToAll(`[DAEMON LOG] Failed to fetch ${defaultName}: ` + (res.error || 'Unknown error'), 'error');
                         }
                     })
                     .catch(err => {
-                        appendTerminalLine(`[DAEMON LOG] Network error while fetching ${defaultName}: ` + err.message, 'error');
+                        appendTerminalLineToAll(`[DAEMON LOG] Network error while fetching ${defaultName}: ` + err.message, 'error');
                     });
             }
 
@@ -982,96 +1253,6 @@
                     d = dayjs(dateVal);
                 }
                 return d.isValid() ? d.format('YYYY-MM-DD HH:mm:ss') : String(dateVal);
-            }
-
-            function updateStatusUI(data) {
-                if (!data) return;
-
-                const isNewExecution = (data.executionId && currentExecutionId && data.executionId !== currentExecutionId);
-                if (data.executionId) {
-                    currentExecutionId = data.executionId;
-                }
-
-                $('#meta-exec-id').text(data.executionId || '-');
-                $('#meta-node-id').text(data.nodeId || data.targetNodeId || '-');
-                $('#meta-branch').text(data.gitBranch || '-');
-
-                if (data.gitCommitBefore) {
-                    $('#meta-commit-before').text(String(data.gitCommitBefore).substring(0, 8));
-                } else if (isNewExecution || data.status === 'PENDING' || data.status === 'RUNNING') {
-                    $('#meta-commit-before').text('-');
-                }
-
-                if (data.gitCommitAfter) {
-                    $('#meta-commit-after').text(String(data.gitCommitAfter).substring(0, 8));
-                } else if (isNewExecution || data.status === 'PENDING' || data.status === 'RUNNING') {
-                    $('#meta-commit-after').text('-');
-                }
-
-                if (data.startedAt) {
-                    $('#meta-started-at').text(formatDateTime(data.startedAt));
-                } else if (isNewExecution) {
-                    $('#meta-started-at').text('-');
-                }
-
-                if (data.durationMs !== undefined && data.durationMs !== null && data.durationMs >= 0) {
-                    $('#meta-duration').text((data.durationMs / 1000).toFixed(1) + 's');
-                } else if (isNewExecution || data.status === 'PENDING' || data.status === 'RUNNING') {
-                    if (!durationTicker) {
-                        $('#meta-duration').text('0.0s');
-                    }
-                }
-
-                if (data.exitCode !== undefined && data.exitCode !== null) {
-                    $('#meta-exit-code').text(data.exitCode);
-                } else if (isNewExecution || data.status === 'PENDING' || data.status === 'RUNNING') {
-                    $('#meta-exit-code').text('-');
-                }
-
-                const status = data.status || 'IDLE';
-                const $badge = $('#exec-status-badge');
-                $badge.text(status);
-                $badge.removeClass('bg-secondary bg-primary bg-success bg-danger bg-warning text-dark text-white');
-
-                if (status === 'RUNNING') {
-                    $badge.addClass('bg-primary text-white');
-                    $('#btn-dispatch').prop('disabled', true);
-                    $('#btn-cancel').prop('disabled', false);
-                    $('#terminal-spinner').removeClass('d-none');
-                    if (data.startedAt && !durationTicker) {
-                        startDurationTicker(data.startedAt);
-                    }
-                } else if (status === 'PENDING') {
-                    $badge.addClass('bg-warning text-dark');
-                    $('#btn-dispatch').prop('disabled', true);
-                    $('#btn-cancel').prop('disabled', false);
-                    $('#terminal-spinner').removeClass('d-none');
-                } else if (status === 'SUCCESS') {
-                    $badge.addClass('bg-success text-white');
-                    $('#btn-dispatch').prop('disabled', false);
-                    $('#btn-cancel').prop('disabled', true);
-                    $('#terminal-spinner').addClass('d-none');
-                    if (!healthCheckTimer) {
-                        stopDurationTicker(data.durationMs);
-                    }
-                } else if (status === 'FAILED' || status === 'TIMEOUT') {
-                    $badge.addClass('bg-danger text-white');
-                    $('#btn-dispatch').prop('disabled', false);
-                    $('#btn-cancel').prop('disabled', true);
-                    $('#terminal-spinner').addClass('d-none');
-                    stopDurationTicker(data.durationMs);
-                } else if (status === 'CANCELLED') {
-                    $badge.addClass('bg-warning text-dark');
-                    $('#btn-dispatch').prop('disabled', false);
-                    $('#btn-cancel').prop('disabled', true);
-                    $('#terminal-spinner').addClass('d-none');
-                    stopDurationTicker(data.durationMs);
-                } else {
-                    $badge.addClass('bg-secondary text-white');
-                    $('#btn-dispatch').prop('disabled', false);
-                    $('#btn-cancel').prop('disabled', true);
-                    $('#terminal-spinner').addClass('d-none');
-                }
             }
 
             function initConsoleClient(token) {
@@ -1108,41 +1289,25 @@
                     },
                     onMessage: (message) => {
                         const header = message.header;
+                        const nodeId = message.nodeId || message.targetNodeId || 'unknown';
+
                         if (header === 'log') {
                             if (message.line) {
-                                appendTerminalLine(message.line);
+                                appendLogLine(nodeId, message.line);
                             }
                         } else if (header === 'logBackfill') {
                             if (message.lines && Array.isArray(message.lines)) {
-                                message.lines.forEach(l => appendTerminalLine(l));
+                                message.lines.forEach(l => appendLogLine(nodeId, l));
                             }
                         } else if (header === 'status') {
-                            if (message.status === 'FAILED' || message.status === 'CANCELLED') {
-                                if (healthCheckStartTimeout) {
-                                    clearTimeout(healthCheckStartTimeout);
-                                    healthCheckStartTimeout = null;
-                                }
-                                if (healthCheckTimer) {
-                                    clearTimeout(healthCheckTimer);
-                                    healthCheckTimer = null;
-                                }
-                            }
                             if (message.error) {
                                 const errorKey = (message.executionId || '') + ':' + message.error;
                                 if (lastHandledErrorKey !== errorKey) {
                                     lastHandledErrorKey = errorKey;
-                                    appendTerminalLine(`[ERROR] ${message.error}`, 'error');
+                                    appendLogLine(nodeId, `[ERROR] ${message.error}`, 'error');
                                 }
                             }
-                            const isRestartScript = (message.scriptName === 'daemon.sh' || message.scriptName === 'daemon.bat' || message.scriptName === 'service.sh' ||
-                                                    $('#script-selector').val() === 'daemon.sh' || $('#script-selector').val() === 'service.sh');
-                            if (healthCheckTimer && isRestartScript) {
-                                const clone = Object.assign({}, message);
-                                delete clone.durationMs;
-                                updateStatusUI(clone);
-                            } else {
-                                updateStatusUI(message);
-                            }
+                            updateNodeStatusUI(message);
                         } else if (header === 'subscribed' || header === 'joined') {
                             console.log('BuildDeploy WebSocket session active');
                         }
@@ -1157,7 +1322,10 @@
                 onScriptChange();
 
                 if (initialLastExecution) {
-                    updateStatusUI(initialLastExecution);
+                    const nid = initialLastExecution.nodeId || initialLastExecution.targetNodeId || myNodeId;
+                    ensureNode(nid);
+                    Object.assign(nodeExecutions[nid], initialLastExecution);
+                    updateNodeStatusUI(initialLastExecution);
                 }
 
                 fetch(basePath + "/cluster/token", {

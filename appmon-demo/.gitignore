@@ -10,3 +10,7 @@ app/.lock
 app/jsvc_daemon.pid
 app/bin/jdk-*
 app/**/*.xml.apon
+.build.lock/
+.pull.lock/
+.build.success
+.pull.success

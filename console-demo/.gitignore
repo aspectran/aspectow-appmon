@@ -29,6 +29,10 @@
 /app/.lock
 /app/*.pid
 /app/bin/jdk-*
+/.build.lock/
+/.pull.lock/
+/.build.success
+/.pull.success
 
 # Auto-generated configuration files
 /app/**/*.xml.apon
