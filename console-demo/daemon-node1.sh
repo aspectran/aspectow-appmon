@@ -9,6 +9,8 @@ SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 NODE_ID="node1"
 PORT="8091"
 
+[ -d "$DEPLOY_DIR" ] && DEPLOY_DIR="$(cd "$DEPLOY_DIR" && pwd)"
+
 PROC_NAME="${APP_NAME}-${NODE_ID}"
 WORK_DIR="$DEPLOY_DIR/work1"
 TEMP_DIR="$DEPLOY_DIR/temp1"
