@@ -152,7 +152,7 @@ public class ClusterActivity {
      * @param translet the active translet
      * @return the REST response indicating success or failure
      */
-    @Request("/nodes/${nodeId}/restart")
+    @Request("/nodes/${nodeId}/restart-service")
     public RestResponse restartNode(@NonNull Translet translet) {
         String nodeId = translet.getParameter("nodeId");
         if (nodeId != null) {

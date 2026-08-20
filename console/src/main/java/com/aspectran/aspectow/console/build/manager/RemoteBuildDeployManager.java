@@ -15,7 +15,6 @@
  */
 package com.aspectran.aspectow.console.build.manager;
 
-import com.aspectran.aspectow.console.build.audit.BuildAuditService;
 import com.aspectran.aspectow.console.build.bridge.BuildDeployBroker;
 import com.aspectran.aspectow.console.build.bridge.BuildRequestParameters;
 import com.aspectran.aspectow.console.build.bridge.redis.BuildMessageBridgeHandler;
@@ -27,6 +26,7 @@ import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.apon.JsonToParameters;
+import com.aspectran.utils.apon.Parameters;
 import com.aspectran.utils.apon.VariableParameters;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -66,7 +66,7 @@ public class RemoteBuildDeployManager implements InitializableBean {
                                    com.aspectran.aspectow.console.build.audit.BuildAuditService buildAuditService) {
         this.nodeManager = nodeManager;
         this.localScriptRunner = localScriptRunner;
-        this.broker = new BuildDeployBroker(nodeManager.getNodeId(), nodeManager.getNodeMessagePublisher());
+        this.broker = new BuildDeployBroker(nodeManager.getNodeId(), nodeManager.getNodeMessagePublisher(), nodeManager.getNodeRegistry());
         this.buildAuditService = buildAuditService;
     }
 
@@ -375,7 +375,10 @@ public class RemoteBuildDeployManager implements InitializableBean {
         }
 
         try {
-            if (message.contains("header: execute") || message.contains("\"header\":\"execute\"")) {
+            Parameters params = JsonToParameters.from(message);
+            String header = params.getString("header");
+
+            if ("execute".equals(header)) {
                 BuildRequestParameters req = JsonToParameters.from(message, BuildRequestParameters.class);
                 if (nodeManager.getNodeId().equals(req.getTargetNodeId())) {
                     BuildExecutionInfo info = new BuildExecutionInfo();
@@ -389,14 +392,16 @@ public class RemoteBuildDeployManager implements InitializableBean {
                     }
                     dispatch(info);
                 }
-            } else if (message.contains("header: cancel") || message.contains("\"header\":\"cancel\"")) {
+            } else if ("cancel".equals(header)) {
                 BuildRequestParameters req = JsonToParameters.from(message, BuildRequestParameters.class);
                 if (nodeManager.getNodeId().equals(req.getTargetNodeId())) {
                     cancel(req.getExecutionId(), req.getTargetNodeId());
                 }
-            } else {
-                // Relay log or status event to local connected WebSocket clients
-                broker.bridge(message);
+            } else if ("log".equals(header) || "status".equals(header)) {
+                String nodeId = params.getString("nodeId");
+                if (!nodeManager.getNodeId().equals(nodeId)) {
+                    broker.bridge(message);
+                }
             }
         } catch (Exception e) {
             logger.error("Error processing incoming build relay message: {}", message, e);

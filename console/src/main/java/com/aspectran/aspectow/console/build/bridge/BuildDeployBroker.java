@@ -16,7 +16,9 @@
 package com.aspectran.aspectow.console.build.bridge;
 
 import com.aspectran.aspectow.console.build.manager.BuildExecutionInfo;
+import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.aspectow.node.manager.NodeMessagePublisher;
+import com.aspectran.aspectow.node.manager.NodeRegistry;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,11 +43,18 @@ public class BuildDeployBroker {
 
     private final NodeMessagePublisher messagePublisher;
 
+    private final NodeRegistry nodeRegistry;
+
     private final Set<BuildDeployBridge> bridges = new CopyOnWriteArraySet<>();
 
     public BuildDeployBroker(String nodeId, NodeMessagePublisher messagePublisher) {
+        this(nodeId, messagePublisher, null);
+    }
+
+    public BuildDeployBroker(String nodeId, NodeMessagePublisher messagePublisher, NodeRegistry nodeRegistry) {
         this.nodeId = nodeId;
         this.messagePublisher = messagePublisher;
+        this.nodeRegistry = nodeRegistry;
     }
 
     public String getNodeId() {
@@ -54,6 +63,10 @@ public class BuildDeployBroker {
 
     public NodeMessagePublisher getMessagePublisher() {
         return messagePublisher;
+    }
+
+    public NodeRegistry getNodeRegistry() {
+        return nodeRegistry;
     }
 
     public void addBridge(BuildDeployBridge bridge) {
@@ -97,13 +110,7 @@ public class BuildDeployBroker {
                 .setLine(line);
         String data = res.toString();
         bridge(data);
-        if (messagePublisher != null) {
-            try {
-                messagePublisher.publishRelay(CATEGORY_BUILD, data);
-            } catch (Exception e) {
-                logger.trace("Failed to publish build log line to Redis relay: {}", e.getMessage());
-            }
-        }
+        publishRelay(data);
     }
 
     /**
@@ -140,11 +147,20 @@ public class BuildDeployBroker {
                 .setError(info.getErrorSummary());
         String data = res.toString();
         bridge(data);
-        if (messagePublisher != null) {
-            try {
-                messagePublisher.publishRelay(CATEGORY_BUILD, data);
-            } catch (Exception e) {
-                logger.trace("Failed to publish build status to Redis relay: {}", e.getMessage());
+        publishRelay(data);
+    }
+
+    private void publishRelay(String data) {
+        if (messagePublisher != null && nodeRegistry != null) {
+            for (NodeInfo nodeInfo : nodeRegistry.getNodes()) {
+                if (nodeInfo.getId() != null && !nodeId.equals(nodeInfo.getId())) {
+                    try {
+                        messagePublisher.publishRelay(CATEGORY_BUILD, nodeInfo.getId(), data);
+                    } catch (Exception e) {
+                        logger.trace("Failed to publish build event to Redis relay for node {}: {}",
+                                nodeInfo.getId(), e.getMessage());
+                    }
+                }
             }
         }
     }
