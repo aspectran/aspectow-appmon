@@ -262,7 +262,7 @@
                     return;
                 }
                 if (confirm("Are you sure you want to restart the service on node '" + nodeId + "'?\n\nThis will recreate the ActivityContext and reload classes without stopping the JVM process.")) {
-                    const url = basePath + "/cluster/nodes/" + nodeId + "/restart";
+                    const url = basePath + "/cluster/nodes/" + nodeId + "/restart-service";
                     fetch(url, {
                         method: 'POST',
                         headers: {
