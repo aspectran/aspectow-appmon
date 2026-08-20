@@ -6,25 +6,34 @@ set -e
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 . "$SCRIPT_DIR/app.conf"
 
-PROC_NAME="${APP_NAME}-node1"
+NODE_ID="node1"
+PORT="8091"
+
+PROC_NAME="${APP_NAME}-${NODE_ID}"
+WORK_DIR="$DEPLOY_DIR/work1"
+TEMP_DIR="$DEPLOY_DIR/temp1"
+COMMANDS_DIR="$DEPLOY_DIR/cmd1"
+LOGS_DIR="$DEPLOY_DIR/logs1"
 
 ASPECTRAN_OPTS="
 -Duser.timezone=UTC
 -Daspectran.profiles.active=dev,gateway,console.ui
 -Daspectran.profiles.base.console=dev,h2,console.custom-ui
--Daspectran.workPath=$DEPLOY_DIR/work1
--Daspectran.tempPath=$DEPLOY_DIR/temp1
--Daspectran.commandsPath=$DEPLOY_DIR/cmd1
--Daspectran.logsDir=$DEPLOY_DIR/logs1
--Daspectow.node.id=node1
--Djava.io.tmpdir=$DEPLOY_DIR/temp1
--Dtow.server.listener.http.port=8091
--Dtow.context.root.session.cookieName=JSESSIONID-8091
--Dtow.context.console.session.cookieName=JSESSIONID-8091
--Daspectow.console.config.db.h2.path_explicit=~/aspectow-console-demo-node1
+-Daspectran.workPath=$WORK_DIR
+-Daspectran.tempPath=$TEMP_DIR
+-Daspectran.commandsPath=$COMMANDS_DIR
+-Daspectran.logsDir=$LOGS_DIR
+-Daspectow.node.id=$NODE_ID
+-Djava.io.tmpdir=$TEMP_DIR
+-Dtow.server.listener.http.port=$PORT
+-Dtow.context.root.session.cookieName=JSESSIONID-$PORT
+-Dtow.context.console.session.cookieName=JSESSIONID-$PORT
+-Daspectow.console.config.db.h2.path_explicit=~/aspectow-console-demo-${NODE_ID}
 "
 
 "$DEPLOY_DIR/bin/jsvc-daemon.sh" \
   --proc-name "$PROC_NAME" \
+  --logs-dir "$LOGS_DIR" \
+  --temp-dir "$TEMP_DIR" \
   --user "$DAEMON_USER" \
   "$@"
