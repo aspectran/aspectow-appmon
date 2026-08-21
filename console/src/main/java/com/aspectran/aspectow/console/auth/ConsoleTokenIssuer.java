@@ -38,7 +38,7 @@ public final class ConsoleTokenIssuer {
 
     private static final int DEFAULT_MAX_AGE = 1800; // 30 minutes
 
-    private ConsoleTokenIssuer() {
+    public ConsoleTokenIssuer() {
     }
 
     /**
