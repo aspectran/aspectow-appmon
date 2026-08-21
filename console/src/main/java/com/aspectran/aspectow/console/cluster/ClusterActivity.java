@@ -29,9 +29,11 @@ import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
+import com.aspectran.core.component.bean.annotation.Hint;
 import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
 import com.aspectran.daemon.command.CommandParameters;
+import com.aspectran.utils.StringUtils;
 import com.aspectran.web.activity.response.RestResponse;
 import com.aspectran.web.support.rest.response.FailureResponse;
 import com.aspectran.web.support.rest.response.SuccessResponse;
@@ -81,12 +83,39 @@ public class ClusterActivity {
 
     /**
      * Displays the cluster nodes list page.
+     * @param translet the current translet
      * @return a map of attributes for rendering the view
      */
     @Request("/nodes/")
     @Dispatch("cluster/nodes")
     @Action("page")
     public Map<String, Object> listNodes(@NonNull Translet translet) {
+        String layout = translet.getParameter("layout");
+        if (!StringUtils.hasText(layout)) {
+            layout = "default";
+        }
+        return createNodesModel(translet, layout);
+    }
+
+    /**
+     * Displays the cluster nodes list page as a popup.
+     * @param translet the current translet
+     * @return a map of attributes for rendering the view
+     */
+    @Request("/nodes/popup/")
+    @Dispatch("cluster/nodes")
+    @Action("page")
+    @Hint(type = "layout", value = "layout: popup")
+    public Map<String, Object> listNodesPopup(@NonNull Translet translet) {
+        String layout = translet.getParameter("layout");
+        if (!StringUtils.hasText(layout)) {
+            layout = "popup";
+        }
+        return createNodesModel(translet, layout);
+    }
+
+    @NonNull
+    private Map<String, Object> createNodesModel(@NonNull Translet translet, String layout) {
         String clusterMode = nodeManager.getClusterConfig().getMode();
         List<Map<String, Object>> nodes = nodeConsoleHelper.getNodes(true);
         NodeInfo nodeInfo = nodeManager.getNodeInfoHolder().getNodeInfo(nodeManager.getNodeId());
@@ -94,6 +123,7 @@ public class ClusterActivity {
         Map<String, Object> model = new HashMap<>();
         model.put("title", "Cluster Nodes");
         model.put("style", "nodes-page");
+        model.put("layout", layout);
         model.put("group", "cluster-menu");
         model.put("clusterMode", clusterMode);
         model.put("nodes", nodes);

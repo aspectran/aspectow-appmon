@@ -217,6 +217,9 @@
                 </div>
                 <div class="d-flex flex-wrap align-items-center justify-content-between justify-content-md-end gap-2">
                     <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openNodesPopup()">
+                            <i class="bi bi-hdd-network me-1"></i> Manage Nodes
+                        </button>
                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openAuditPopup()">
                             <i class="bi bi-clock-history me-1"></i> Audit Trail
                         </button>
@@ -514,6 +517,22 @@
                     url.searchParams.delete('nodeId');
                 }
                 window.history.replaceState({}, '', url);
+            }
+
+            function openNodesPopup(e) {
+                if (e) e.preventDefault();
+                const width = Math.min(1500, window.screen.width * 0.9);
+                const height = Math.min(950, window.screen.height * 0.85);
+                const left = (window.screen.width - width) / 2;
+                const top = (window.screen.height - height) / 2;
+                const popup = window.open(
+                    basePath + '/cluster/nodes/popup/',
+                    'clusterNodesPopup',
+                    `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes`
+                );
+                if (popup) {
+                    popup.focus();
+                }
             }
 
             function openAuditPopup(e) {

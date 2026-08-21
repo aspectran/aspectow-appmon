@@ -2,7 +2,7 @@
 <html lang="en"
       xmlns:th="https://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{templates/default}">
+      layout:decorate="~{templates/__${page.layout}__}">
 <head>
     <style>
         .node-card {
@@ -50,6 +50,7 @@
                         <button class="btn btn-outline-primary btn-sm text-nowrap" onclick="location.reload()">
                             <i class="bi bi-arrow-clockwise"></i> Refresh
                         </button>
+                        <button type="button" class="btn-close d-none d-md-inline-block ms-1" onclick="window.close()" aria-label="Close" title="Close" th:if="${page.layout == 'popup'}"></button>
                     </div>
                 </div>
             </div>
@@ -224,6 +225,10 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div th:if="${page.layout == 'popup'}" class="d-flex justify-content-end mt-4 pt-3 border-top d-print-none">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="window.close()">Close</button>
             </div>
         </th:block>
         <div th:unless="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}" class="alert alert-danger my-4">
