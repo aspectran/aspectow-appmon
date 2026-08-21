@@ -762,7 +762,7 @@
 
                 if (activeTab === '__all__') {
                     if (allLogs.length === 0) {
-                        $body.html('<div class="text-muted fst-italic">Waiting for output stream...</div>');
+                        $body.html('<div class="fst-italic">Waiting for output stream...</div>');
                     } else {
                         allLogs.forEach(item => appendLineToDOM($body, item.text, item.type, item.nodeId));
                     }
@@ -770,7 +770,7 @@
                     const exec = nodeExecutions[activeTab];
                     const logs = exec ? exec.logs : [];
                     if (logs.length === 0) {
-                        $body.html('<div class="text-muted fst-italic">Waiting for output stream...</div>');
+                        $body.html('<div class="fst-italic">Waiting for output stream...</div>');
                     } else {
                         logs.forEach(item => appendLineToDOM($body, item.text, item.type, null));
                     }
