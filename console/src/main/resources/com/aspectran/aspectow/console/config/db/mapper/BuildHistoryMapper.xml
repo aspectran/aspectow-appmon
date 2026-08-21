@@ -95,6 +95,24 @@
         select * from asc_build_history where execution_id = #{executionId}
     </select>
 
+    <select id="getLatestBuildHistoryByNodeId" parameterType="string" resultMap="BuildHistoryResultMap">
+        select * from asc_build_history
+        where target_node_id = #{targetNodeId}
+        order by history_id desc
+        limit 1
+    </select>
+
+    <select id="getLatestBuildHistories" resultMap="BuildHistorySummaryMap">
+        select h.*
+        from asc_build_history h
+        inner join (
+            select target_node_id, max(history_id) as max_history_id
+            from asc_build_history
+            group by target_node_id
+        ) latest on h.history_id = latest.max_history_id
+        order by h.history_id desc
+    </select>
+
     <sql id="searchCriteria">
         <where>
             <if test="targetNodeId != null and targetNodeId != ''">

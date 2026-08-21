@@ -15,13 +15,10 @@
         .control-panel {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 1rem;
             overflow-y: auto;
         }
         .terminal-panel {
-            background: #181818;
-            border: 1px solid #333;
-            border-radius: 12px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -42,11 +39,12 @@
         .terminal-body {
             flex: 1 1 0;
             min-height: 0;
-            padding: 15px;
             overflow-y: auto;
             font-family: var(--bs-font-monospace);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            padding: 0.6rem;
             color: #d4d4d4;
+            background: #181818;
             white-space: pre-wrap;
             word-break: break-all;
             line-height: 1.45;
@@ -80,10 +78,12 @@
             margin-top: 10px;
         }
         .info-card {
-            background: var(--bs-body-bg);
+            background: var(--bs-tertiary-bg);
             border: 1px solid var(--bs-border-color);
-            border-radius: 12px;
-            padding: 16px;
+            padding: 1rem;
+        }
+        .info-card.metadata {
+            background: var(--bs-body-bg);
         }
         .meta-row {
             display: flex;
@@ -215,18 +215,18 @@
                     </div>
                     <p class="text-muted mb-0">Remote build script execution and automated continuous delivery</p>
                 </div>
-                <div class="d-flex flex-wrap align-items-center justify-content-between justify-content-md-end gap-2">
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                <div class="d-flex flex-row flex-md-column flex-wrap align-items-end justify-content-between justify-content-md-end gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap">
+                        <span class="text-muted small">Cluster Mode:</span>
+                        <span class="fw-bold text-primary" th:text="${page.clusterMode.toUpperCase()}">GATEWAY</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openNodesPopup()">
                             <i class="bi bi-hdd-network me-1"></i> Manage Nodes
                         </button>
                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openAuditPopup()">
                             <i class="bi bi-clock-history me-1"></i> Audit Trail
                         </button>
-                    </div>
-                    <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap">
-                        <span class="text-muted small ms-2">Cluster Mode:</span>
-                        <span class="fw-bold text-primary" th:text="${page.clusterMode.toUpperCase()}">GATEWAY</span>
                     </div>
                 </div>
             </div>
@@ -277,7 +277,7 @@
             <div class="build-container">
                 <!-- Left: Control & Metadata Panel -->
                 <div class="control-panel">
-                    <div class="info-card">
+                    <div class="card info-card">
                         <h6 class="fw-bold mb-3"><i class="bi bi-terminal me-1"></i> Script Execution</h6>
                         
                         <div class="mb-3">
@@ -302,14 +302,14 @@
                         </div>
 
                         <!-- Pipeline Flow Preview Card -->
-                        <div id="pipeline-preview" class="p-2 mb-3 rounded bg-body-tertiary border" style="display: none;"></div>
+                        <div id="pipeline-preview" class="card p-2 mb-3" style="display: none;"></div>
 
-                        <div class="mb-3">
+                        <div>
                             <label class="form-label small fw-bold text-muted">Git Branch / Tag (Optional)</label>
                             <input type="text" id="param-branch" class="form-control form-control-sm" placeholder="e.g. main, release/v1.0">
                         </div>
 
-                        <div class="d-grid gap-2 mt-4">
+                        <div class="d-grid gap-2 mt-3">
                             <button id="btn-dispatch" class="btn btn-primary" onclick="dispatchBuild()"
                                     th:disabled="${!session.USER_INFO.hasPermission('BUILD_EXECUTE') and !session.USER_INFO.hasRole('SUPER_ADMIN') and !session.USER_INFO.hasRole('DEMO')}">
                                 <i class="bi bi-play-circle-fill me-1"></i> Execute Script
@@ -321,7 +321,7 @@
                     </div>
 
                     <!-- Execution Status Summary Card -->
-                    <div class="info-card flex-grow-1">
+                    <div class="card info-card metadata flex-grow-1">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="fw-bold mb-0"><i class="bi bi-info-circle me-1"></i> <span id="meta-view-title">Current Execution</span></h6>
                             <span id="exec-status-badge" class="status-pill bg-secondary text-white">IDLE</span>
@@ -372,7 +372,7 @@
                 </div>
 
                 <!-- Right: Real-time Terminal Panel -->
-                <div class="terminal-panel">
+                <div class="card terminal-panel">
                     <!-- Top: Dynamic Node Tabs Bar -->
                     <div class="node-tabs-bar" id="node-tabs-bar">
                         <!-- Populated dynamically via JS -->
@@ -423,6 +423,7 @@
             const currentNodeId = [[${page.targetNodeId}]];
             const myNodeId = [[${page.myNodeId}]];
             const initialLastExecution = /*[[${page.lastExecution}]]*/ null;
+            const initialLastExecutions = /*[[${page.lastExecutions}]]*/ null;
             const canExecute = /*[[${session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}]]*/ false;
             const isDemoUser = /*[[${session.USER_INFO.hasRole('DEMO')}]]*/ false;
         </script>
@@ -1024,16 +1025,29 @@
 
                 if (confirm('Are you sure you want to cancel the currently running execution?')) {
                     if (client) {
-                        const targetType = $('#target-type').val();
-                        const targetVal = $('#target-value').val();
-                        const targetNodeId = (targetType === 'node') ? (targetVal || currentNodeId || myNodeId) : null;
-                        const req = {
-                            header: "cancel",
-                            executionId: currentExecutionId,
-                            targetNodeId: targetNodeId
-                        };
-                        client.sendMessage(req);
-                        appendTerminalLineToAll(`[ABORT] Cancellation signal sent for ${currentExecutionId || 'active executions'}...`, 'warn');
+                        let sent = 0;
+                        Object.keys(nodeExecutions).forEach(nid => {
+                            const exec = nodeExecutions[nid];
+                            if (exec && (exec.status === 'RUNNING' || exec.status === 'PENDING') && exec.executionId) {
+                                client.sendMessage({
+                                    header: "cancel",
+                                    executionId: exec.executionId,
+                                    targetNodeId: nid
+                                });
+                                sent++;
+                            }
+                        });
+                        if (sent === 0 && currentExecutionId) {
+                            const targetType = $('#target-type').val();
+                            const targetVal = $('#target-value').val();
+                            const targetNodeId = (targetType === 'node') ? (targetVal || currentNodeId || myNodeId) : null;
+                            client.sendMessage({
+                                header: "cancel",
+                                executionId: currentExecutionId,
+                                targetNodeId: targetNodeId
+                            });
+                        }
+                        appendTerminalLineToAll(`[ABORT] Cancellation signal sent for active executions...`, 'warn');
                         stopDurationTicker();
                     }
                 }
@@ -1145,7 +1159,7 @@
                     tagPrefix = `<span class="node-tag">${nodeId}</span>`;
                 }
 
-                $container.append(`<p class="${lineClass}">${tagPrefix}${renderedHtml}</p>`);
+                $container.append(`<div class="${lineClass}">${tagPrefix}${renderedHtml}</div>`);
             }
 
             function appendLogLine(nodeId, line, type = '') {
@@ -1340,12 +1354,23 @@
                 onTargetTypeChange();
                 onScriptChange();
 
-                if (initialLastExecution) {
+                if (initialLastExecutions && typeof initialLastExecutions === 'object') {
+                    Object.keys(initialLastExecutions).forEach(nid => {
+                        const execData = initialLastExecutions[nid];
+                        if (execData) {
+                            ensureNode(nid);
+                            Object.assign(nodeExecutions[nid], execData);
+                            updateNodeStatusUI(execData);
+                        }
+                    });
+                } else if (initialLastExecution) {
                     const nid = initialLastExecution.nodeId || initialLastExecution.targetNodeId || myNodeId;
                     ensureNode(nid);
                     Object.assign(nodeExecutions[nid], initialLastExecution);
                     updateNodeStatusUI(initialLastExecution);
                 }
+
+                initTabs();
 
                 fetch(basePath + "/cluster/token", {
                         headers: { 'Accept': 'application/json' }

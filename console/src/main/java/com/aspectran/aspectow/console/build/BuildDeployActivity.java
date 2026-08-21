@@ -93,7 +93,14 @@ public class BuildDeployActivity {
             model.put("targetNodeId", targetNodeId);
         }
 
-        BuildExecutionInfo lastExec = remoteBuildDeployManager.getLastExecution();
+        Map<String, BuildExecutionInfo> lastExecutions = remoteBuildDeployManager.getLastExecutions();
+        if (lastExecutions != null && !lastExecutions.isEmpty()) {
+            model.put("lastExecutions", lastExecutions);
+        }
+
+        BuildExecutionInfo lastExec = (targetNodeId != null
+                ? remoteBuildDeployManager.getLastExecution(targetNodeId)
+                : remoteBuildDeployManager.getLastExecution());
         if (lastExec != null) {
             model.put("lastExecution", lastExec);
         }
@@ -127,13 +134,16 @@ public class BuildDeployActivity {
     /**
      * Returns current build execution status.
      * @param executionId optional execution ID
+     * @param nodeId optional node ID
      * @return execution status map
      */
     @Request("/status")
-    public Map<String, Object> getStatus(String executionId) {
+    public Map<String, Object> getStatus(String executionId, String nodeId) {
         BuildExecutionInfo info;
         if (StringUtils.hasText(executionId)) {
             info = remoteBuildDeployManager.getActiveExecution(executionId);
+        } else if (StringUtils.hasText(nodeId)) {
+            info = remoteBuildDeployManager.getLastExecution(nodeId);
         } else {
             info = remoteBuildDeployManager.getLastExecution();
         }
@@ -183,6 +193,13 @@ public class BuildDeployActivity {
         if (StringUtils.hasText(branch)) {
             info.getParameters().put("branch", branch);
         }
+
+        com.aspectran.aspectow.console.auth.UserInfo userInfo =
+                translet.getSessionAdapter().getAttribute(com.aspectran.aspectow.console.auth.UserInfo.USERINFO_KEY);
+        String requester = (userInfo != null && StringUtils.hasText(userInfo.getUsername()))
+                ? userInfo.getUsername()
+                : "SYSTEM";
+        info.getParameters().put("requester", requester);
 
         remoteBuildDeployManager.dispatch(info);
 

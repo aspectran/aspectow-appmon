@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.console.build.bridge.websocket;
 
-import com.aspectran.aspectow.appmon.common.auth.AppMonTokenIssuer;
+import com.aspectran.aspectow.console.auth.ConsoleTokenIssuer;
 import com.aspectran.aspectow.console.build.bridge.BuildDeployBridge;
 import com.aspectran.aspectow.console.build.bridge.BuildDeploySession;
 import com.aspectran.aspectow.console.build.bridge.BuildRequestParameters;
@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * WebsocketBuildDeployBridge provides a WebSocket endpoint for real-time
@@ -76,9 +77,13 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
     protected boolean checkAuthorized(@NonNull Session session) {
         String token = session.getPathParameters().get("token");
         try {
-            AppMonTokenIssuer.validateToken(token);
-            boolean isDemo = AppMonTokenIssuer.isDemoToken(token);
+            ConsoleTokenIssuer.validateToken(token);
+            boolean isDemo = ConsoleTokenIssuer.isDemoToken(token);
             session.getUserProperties().put("isDemo", isDemo);
+            String username = ConsoleTokenIssuer.getUsername(token);
+            if (StringUtils.hasText(username)) {
+                session.getUserProperties().put("username", username);
+            }
             return true;
         } catch (InvalidPBTokenException e) {
             logger.warn("WebSocket connection rejected: invalid or expired token");
@@ -132,14 +137,18 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
             sendText(session, res.toString());
             logger.debug("BuildDeploy ConsoleClient joined/subscribed: session {}", session.getId());
 
-            // If there's an ongoing or recent execution, backfill logs
-            BuildExecutionInfo lastExecution = remoteBuildDeployManager.getLastExecution();
-            if (lastExecution != null) {
-                remoteBuildDeployManager.getBroker().broadcastStatusChanged(lastExecution);
-                List<String> logs = remoteBuildDeployManager.getRecentLogs(lastExecution.getExecutionId());
-                if (!logs.isEmpty()) {
-                    remoteBuildDeployManager.getBroker().sendLogBackfill(
-                            buildSession, lastExecution.getExecutionId(), lastExecution.getTargetNodeId(), logs);
+            // If there are ongoing or recent executions across nodes, backfill status and logs
+            Map<String, BuildExecutionInfo> lastExecutions = remoteBuildDeployManager.getLastExecutions();
+            if (lastExecutions != null && !lastExecutions.isEmpty()) {
+                for (BuildExecutionInfo exec : lastExecutions.values()) {
+                    if (exec != null) {
+                        remoteBuildDeployManager.getBroker().broadcastStatusChanged(exec);
+                        List<String> logs = remoteBuildDeployManager.getRecentLogs(exec.getExecutionId());
+                        if (logs != null && !logs.isEmpty()) {
+                            remoteBuildDeployManager.getBroker().sendLogBackfill(
+                                    buildSession, exec.getExecutionId(), exec.getTargetNodeId(), logs);
+                        }
+                    }
                 }
             }
         }
@@ -167,8 +176,22 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
 
         String scriptName = params.getScriptName();
         if (StringUtils.isEmpty(scriptName)) {
-            sendText(session, "[ERROR] Script name is required");
+            BuildResponseParameters res = new BuildResponseParameters()
+                    .setHeader("status")
+                    .setExecutionId(params.getExecutionId() != null ? params.getExecutionId() : "bld_error")
+                    .setNodeId(params.getTargetNodeId() != null ? params.getTargetNodeId() : nodeManager.getNodeId())
+                    .setStatus("FAILED")
+                    .setError("Script name is required");
+            sendText(session, res.toString());
             return;
+        }
+
+        String username = (String) session.getUserProperties().get("username");
+        if (params.getParameters() == null) {
+            params.setParameters(new com.aspectran.utils.apon.VariableParameters());
+        }
+        if (!params.getParameters().hasParameter("requester")) {
+            params.getParameters().putValue("requester", StringUtils.hasText(username) ? username : "SYSTEM");
         }
 
         try {
@@ -177,7 +200,13 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
                     params.getTargetGroup(), params.isTargetAll(), params.getTargetNodeId(), scriptName);
         } catch (Exception e) {
             logger.error("Failed to dispatch build execution", e);
-            sendText(session, "[ERROR] " + e.getMessage());
+            BuildResponseParameters res = new BuildResponseParameters()
+                    .setHeader("status")
+                    .setExecutionId(params.getExecutionId() != null ? params.getExecutionId() : "bld_error")
+                    .setNodeId(params.getTargetNodeId() != null ? params.getTargetNodeId() : nodeManager.getNodeId())
+                    .setStatus("FAILED")
+                    .setError("Failed to dispatch build: " + e.getMessage());
+            sendText(session, res.toString());
         }
     }
 
@@ -185,14 +214,23 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
         Boolean isDemo = (Boolean) session.getUserProperties().get("isDemo");
         if (isDemo != null && isDemo) {
             logger.warn("Rejecting build cancellation request from DEMO user session: {}", session.getId());
-            sendText(session, "[ERROR] Canceling build executions is not allowed in the demo environment.");
+            BuildResponseParameters res = new BuildResponseParameters()
+                    .setHeader("status")
+                    .setExecutionId(params.getExecutionId() != null ? params.getExecutionId() : "bld_rejected")
+                    .setNodeId(params.getTargetNodeId() != null ? params.getTargetNodeId() : nodeManager.getNodeId())
+                    .setError("Canceling build executions is not allowed in the demo environment.");
+            sendText(session, res.toString());
             return;
         }
 
         String executionId = params.getExecutionId();
         String targetNodeId = params.getTargetNodeId();
         if (StringUtils.isEmpty(executionId)) {
-            sendText(session, "[ERROR] Execution ID is required for cancellation");
+            BuildResponseParameters res = new BuildResponseParameters()
+                    .setHeader("status")
+                    .setNodeId(targetNodeId != null ? targetNodeId : nodeManager.getNodeId())
+                    .setError("Execution ID is required for cancellation");
+            sendText(session, res.toString());
             return;
         }
 
@@ -200,7 +238,13 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
         if (cancelled) {
             logger.info("Build execution cancelled: id={}", executionId);
         } else {
-            sendText(session, "[WARN] Could not cancel execution: " + executionId);
+            logger.warn("Could not cancel execution (already finished or not found): id={}", executionId);
+            BuildResponseParameters res = new BuildResponseParameters()
+                    .setHeader("log")
+                    .setExecutionId(executionId)
+                    .setNodeId(targetNodeId != null ? targetNodeId : nodeManager.getNodeId())
+                    .setLine("[WARN] Could not cancel execution (already finished or not found): " + executionId);
+            sendText(session, res.toString());
         }
     }
 

@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.console.scheduler.bridge.polling;
 
-import com.aspectran.aspectow.appmon.common.auth.AppMonTokenIssuer;
+import com.aspectran.aspectow.console.auth.ConsoleTokenIssuer;
 import com.aspectran.aspectow.node.management.scheduler.RemoteSchedulerManager;
 import com.aspectran.aspectow.node.management.scheduler.SchedulerRequestParameters;
 import com.aspectran.aspectow.node.management.scheduler.bridge.SchedulerBridge;
@@ -101,7 +101,7 @@ public class PollingSchedulerBridge extends AbstractComponent implements Schedul
     public RestResponse subscribe(@NonNull Translet translet) {
         String token = translet.getParameter("token");
         try {
-            AppMonTokenIssuer.validateToken(token);
+            ConsoleTokenIssuer.validateToken(token);
         } catch (Exception e) {
             return new FailureResponse().forbidden();
         }

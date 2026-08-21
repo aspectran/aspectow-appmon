@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.console.scheduler;
 
-import com.aspectran.aspectow.appmon.common.auth.AppMonTokenIssuer;
+import com.aspectran.aspectow.console.auth.ConsoleTokenIssuer;
 import com.aspectran.aspectow.console.auth.UserInfo;
 import com.aspectran.aspectow.console.cluster.NodeConsoleHelper;
 import com.aspectran.aspectow.node.config.NodeInfo;
@@ -77,9 +77,6 @@ public class SchedulerActivity {
             nodeInfo = nodeManager.getNodeInfoHolder().getNodeInfo(nodeManager.getNodeId());
         }
 
-        UserInfo userInfo = translet.getSessionAdapter().getAttribute(UserInfo.USERINFO_KEY);
-        boolean isDemo = (userInfo != null && userInfo.hasRole("DEMO"));
-
         return Map.of(
                 "title", "Scheduler Manager",
                 "style", "scheduler-page",
@@ -88,7 +85,7 @@ public class SchedulerActivity {
                 "myNodeId", nodeManager.getNodeId(),
                 "nodes", nodes,
                 "node", nodeConsoleHelper.createNodeMap(nodeInfo, true, true),
-                "token", AppMonTokenIssuer.issueToken(30, isDemo),
+                "token", ConsoleTokenIssuer.issueToken(30, translet),
                 "hasJobLockProvider", (CoreServiceHolder.getJobLockProvider() != null)
         );
     }

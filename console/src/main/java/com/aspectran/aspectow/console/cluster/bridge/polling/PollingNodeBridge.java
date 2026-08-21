@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.console.cluster.bridge.polling;
 
-import com.aspectran.aspectow.appmon.common.auth.AppMonTokenIssuer;
+import com.aspectran.aspectow.console.auth.ConsoleTokenIssuer;
 import com.aspectran.aspectow.node.management.nodes.RemoteNodeManager;
 import com.aspectran.aspectow.node.management.nodes.bridge.NodeBridge;
 import com.aspectran.aspectow.node.management.nodes.bridge.NodeBroker;
@@ -91,7 +91,7 @@ public class PollingNodeBridge extends AbstractComponent implements NodeBridge {
     public RestResponse subscribe(@NonNull Translet translet) {
         String token = translet.getParameter("token");
         try {
-            AppMonTokenIssuer.validateToken(token);
+            ConsoleTokenIssuer.validateToken(token);
         } catch (Exception e) {
             return new FailureResponse().forbidden();
         }

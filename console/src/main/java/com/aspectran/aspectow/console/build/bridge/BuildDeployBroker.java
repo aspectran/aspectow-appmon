@@ -136,6 +136,7 @@ public class BuildDeployBroker {
                 .setHeader("status")
                 .setExecutionId(info.getExecutionId())
                 .setNodeId(info.getTargetNodeId() != null ? info.getTargetNodeId() : nodeId)
+                .setScriptName(info.getScriptName())
                 .setStatus(info.getStatus().name())
                 .setExitCode(info.getExitCode())
                 .setDurationMs(info.getDurationMs())

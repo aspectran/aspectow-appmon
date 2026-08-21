@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.console.scheduler.bridge.websocket;
 
-import com.aspectran.aspectow.appmon.common.auth.AppMonTokenIssuer;
+import com.aspectran.aspectow.console.auth.ConsoleTokenIssuer;
 import com.aspectran.aspectow.node.management.scheduler.RemoteSchedulerManager;
 import com.aspectran.aspectow.node.management.scheduler.SchedulerRequestParameters;
 import com.aspectran.aspectow.node.management.scheduler.SchedulerResponseParameters;
@@ -70,7 +70,7 @@ public class WebsocketSchedulerBridge extends SimplifiedEndpoint implements Sche
     protected boolean checkAuthorized(@NonNull Session session) {
         String token = session.getPathParameters().get("token");
         try {
-            AppMonTokenIssuer.validateToken(token);
+            ConsoleTokenIssuer.validateToken(token);
             return true;
         } catch (InvalidPBTokenException e) {
             logger.warn("Scheduler WebSocket connection rejected: invalid or expired token");

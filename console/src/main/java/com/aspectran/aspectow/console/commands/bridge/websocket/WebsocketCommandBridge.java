@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.console.commands.bridge.websocket;
 
-import com.aspectran.aspectow.appmon.common.auth.AppMonTokenIssuer;
+import com.aspectran.aspectow.console.auth.ConsoleTokenIssuer;
 import com.aspectran.aspectow.node.management.commands.CommandRequestParameters;
 import com.aspectran.aspectow.node.management.commands.CommandResponseParameters;
 import com.aspectran.aspectow.node.management.commands.RemoteCommandManager;
@@ -74,9 +74,13 @@ public class WebsocketCommandBridge extends SimplifiedEndpoint implements Comman
     protected boolean checkAuthorized(@NonNull Session session) {
         String token = session.getPathParameters().get("token");
         try {
-            AppMonTokenIssuer.validateToken(token);
-            boolean isDemo = AppMonTokenIssuer.isDemoToken(token);
+            ConsoleTokenIssuer.validateToken(token);
+            boolean isDemo = ConsoleTokenIssuer.isDemoToken(token);
             session.getUserProperties().put("isDemo", isDemo);
+            String username = ConsoleTokenIssuer.getUsername(token);
+            if (StringUtils.hasText(username)) {
+                session.getUserProperties().put("username", username);
+            }
             return true;
         } catch (InvalidPBTokenException e) {
             logger.warn("WebSocket connection rejected: invalid or expired token");

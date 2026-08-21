@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.console.cluster.bridge.websocket;
 
-import com.aspectran.aspectow.appmon.common.auth.AppMonTokenIssuer;
+import com.aspectran.aspectow.console.auth.ConsoleTokenIssuer;
 import com.aspectran.aspectow.node.management.nodes.NodeRequestParameters;
 import com.aspectran.aspectow.node.management.nodes.NodeResponseParameters;
 import com.aspectran.aspectow.node.management.nodes.RemoteNodeManager;
@@ -70,7 +70,7 @@ public class WebsocketNodeBridge extends SimplifiedEndpoint implements NodeBridg
     protected boolean checkAuthorized(@NonNull Session session) {
         String token = session.getPathParameters().get("token");
         try {
-            AppMonTokenIssuer.validateToken(token);
+            ConsoleTokenIssuer.validateToken(token);
         } catch (InvalidPBTokenException e) {
             logger.error("Invalid token: {}", token);
             return false;

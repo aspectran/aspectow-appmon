@@ -78,6 +78,8 @@ public class LocalScriptRunner implements ActivityContextAware {
 
     private final Map<String, Process> activeProcesses = new ConcurrentHashMap<>();
 
+    private final Set<String> cancelledExecutions = ConcurrentHashMap.newKeySet();
+
     private final Map<String, List<String>> logRingBuffers = new ConcurrentHashMap<>();
 
     private static final int MAX_LOG_BUFFER_SIZE = 10000;
@@ -259,6 +261,7 @@ public class LocalScriptRunner implements ActivityContextAware {
         Process process = activeProcesses.get(executionId);
         if (process != null && process.isAlive()) {
             logger.info("Cancelling build execution: {}", executionId);
+            cancelledExecutions.add(executionId);
             destroyProcessTree(process);
             return true;
         }
@@ -462,7 +465,17 @@ public class LocalScriptRunner implements ActivityContextAware {
             info.setFinishedAt(Instant.now());
             info.setDurationMs(Duration.between(info.getStartedAt(), info.getFinishedAt()).toMillis());
 
-            if (!finished) {
+            boolean wasCancelled = cancelledExecutions.remove(info.getExecutionId())
+                    || info.getStatus() == BuildExecutionInfo.Status.CANCELLED;
+
+            if (wasCancelled) {
+                int exitCode = (process.isAlive() ? -1 : process.exitValue());
+                info.setExitCode(exitCode);
+                info.setStatus(BuildExecutionInfo.Status.CANCELLED);
+                info.setErrorSummary("Execution cancelled by user");
+                appendLog(info.getExecutionId(), logBuffer,
+                        "[BUILD CANCELLED] Execution cancelled by user", logConsumer);
+            } else if (!finished) {
                 destroyProcessTree(process);
                 info.setStatus(BuildExecutionInfo.Status.TIMEOUT);
                 info.setErrorSummary("Execution timed out after 30 minutes");
@@ -499,6 +512,7 @@ public class LocalScriptRunner implements ActivityContextAware {
             info.setErrorSummary(e.getMessage());
             appendLog(info.getExecutionId(), logBuffer, "[BUILD ERROR] " + e.getMessage(), logConsumer);
         } finally {
+            cancelledExecutions.remove(info.getExecutionId());
             activeProcesses.remove(info.getExecutionId());
             buildLock.unlock();
             if (completionCallback != null) {

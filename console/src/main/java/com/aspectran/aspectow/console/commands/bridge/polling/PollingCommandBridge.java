@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.console.commands.bridge.polling;
 
-import com.aspectran.aspectow.appmon.common.auth.AppMonTokenIssuer;
+import com.aspectran.aspectow.console.auth.ConsoleTokenIssuer;
 import com.aspectran.aspectow.console.auth.UserInfo;
 import com.aspectran.aspectow.node.management.commands.CommandRequestParameters;
 import com.aspectran.aspectow.node.management.commands.RemoteCommandManager;
@@ -104,7 +104,7 @@ public class PollingCommandBridge extends AbstractComponent implements CommandBr
     public RestResponse subscribe(@NonNull Translet translet) {
         String token = translet.getParameter("token");
         try {
-            AppMonTokenIssuer.validateToken(token);
+            ConsoleTokenIssuer.validateToken(token);
         } catch (Exception e) {
             return new FailureResponse().forbidden();
         }

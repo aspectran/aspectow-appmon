@@ -30,7 +30,7 @@ ASPECTRAN_OPTS="
 -Dtow.server.listener.http.port=$PORT
 -Dtow.context.root.session.cookieName=JSESSIONID-$PORT
 -Dtow.context.console.session.cookieName=JSESSIONID-$PORT
--Daspectow.console.config.db.h2.path_explicit=~/aspectow-console-demo-${NODE_ID}
+-Daspectow.console.config.db.h2.path_explicit=~/aspectow-console-demo;AUTO_SERVER=TRUE
 "
 
 "$DEPLOY_DIR/bin/jsvc-daemon.sh" \

@@ -62,6 +62,19 @@ public interface BuildHistoryMapper {
     BuildHistory getBuildHistoryByExecutionId(@Param("executionId") String executionId);
 
     /**
+     * Retrieves the latest build history record for a specific target node ID.
+     * @param targetNodeId the target node ID
+     * @return the latest build history entity, or null if not found
+     */
+    BuildHistory getLatestBuildHistoryByNodeId(@Param("targetNodeId") String targetNodeId);
+
+    /**
+     * Retrieves the latest build history record for each target node in the cluster.
+     * @return list of latest build history entities per node
+     */
+    List<BuildHistory> getLatestBuildHistories();
+
+    /**
      * Searches build history records matching the given criteria with pagination.
      * @param query the search and pagination criteria
      * @return list of matching build history records
@@ -138,6 +151,16 @@ public interface BuildHistoryMapper {
         @Override
         public BuildHistory getBuildHistoryByExecutionId(String executionId) {
             return mapper().getBuildHistoryByExecutionId(executionId);
+        }
+
+        @Override
+        public BuildHistory getLatestBuildHistoryByNodeId(String targetNodeId) {
+            return mapper().getLatestBuildHistoryByNodeId(targetNodeId);
+        }
+
+        @Override
+        public List<BuildHistory> getLatestBuildHistories() {
+            return mapper().getLatestBuildHistories();
         }
 
         @Override

@@ -15,7 +15,7 @@
  */
 package com.aspectran.aspectow.console.cluster;
 
-import com.aspectran.aspectow.appmon.common.auth.AppMonTokenIssuer;
+import com.aspectran.aspectow.console.auth.ConsoleTokenIssuer;
 import com.aspectran.aspectow.console.auth.UserInfo;
 import com.aspectran.aspectow.console.build.manager.BuildExecutionInfo;
 import com.aspectran.aspectow.console.build.manager.RemoteBuildDeployManager;
@@ -129,9 +129,7 @@ public class ClusterActivity {
         model.put("nodes", nodes);
         model.put("node", nodeConsoleHelper.createNodeMap(nodeInfo, true, true));
 
-        UserInfo userInfo = translet.getSessionAdapter().getAttribute(UserInfo.USERINFO_KEY);
-        boolean isDemo = (userInfo != null && userInfo.hasRole("DEMO"));
-        model.put("token", AppMonTokenIssuer.issueToken(30, isDemo));
+        model.put("token", ConsoleTokenIssuer.issueToken(30, translet));
 
         if (nodeManager.getClusterConfig().isGatewayMode()) {
             List<GroupInfo> groupInfos = nodeManager.getGroupInfoList();
@@ -161,9 +159,7 @@ public class ClusterActivity {
      */
     @Request("/token")
     public RestResponse refreshToken(@NonNull Translet translet) {
-        UserInfo userInfo = translet.getSessionAdapter().getAttribute(UserInfo.USERINFO_KEY);
-        boolean isDemo = (userInfo != null && userInfo.hasRole("DEMO"));
-        return new SuccessResponse(AppMonTokenIssuer.issueToken(30, isDemo)).ok();
+        return new SuccessResponse(ConsoleTokenIssuer.issueToken(30, translet)).ok();
     }
 
     /**

@@ -141,16 +141,18 @@ public class BuildAuditService extends InstantActivitySupport {
 
                 buildHistoryMapper.updateBuildHistory(history);
 
-                // Insert build log
-                BuildLog buildLog = new BuildLog();
-                buildLog.setHistoryId(history.getHistoryId());
-                buildLog.setExecutionId(history.getExecutionId());
-                buildLog.setLogContent(storedLogContent);
-                buildLog.setCompressedYn(compressedYn);
-                buildLog.setLineCount(lineCount);
-                buildLog.setByteSize(byteSize);
-
-                buildHistoryMapper.insertBuildLog(buildLog);
+                // Insert build log if not present
+                BuildLog existingLog = buildHistoryMapper.getBuildLogByHistoryId(history.getHistoryId());
+                if (existingLog == null) {
+                    BuildLog buildLog = new BuildLog();
+                    buildLog.setHistoryId(history.getHistoryId());
+                    buildLog.setExecutionId(history.getExecutionId());
+                    buildLog.setLogContent(storedLogContent);
+                    buildLog.setCompressedYn(compressedYn);
+                    buildLog.setLineCount(lineCount);
+                    buildLog.setByteSize(byteSize);
+                    buildHistoryMapper.insertBuildLog(buildLog);
+                }
 
                 logger.info("Build audit record completed: historyId={}, executionId={}, status={}, lines={}, integrityHash={}",
                         history.getHistoryId(), history.getExecutionId(), history.getStatus(), lineCount, integrityHash);
@@ -204,12 +206,44 @@ public class BuildAuditService extends InstantActivitySupport {
     }
 
     /**
-     * Retrieves detailed build history including logs.
+     * Retrieves detailed build history including logs by history ID.
      * @param historyId the history ID
      * @return the build history entity
      */
     public BuildHistory getHistoryDetail(Long historyId) {
         return instantActivity(() -> buildHistoryMapper.getBuildHistoryById(historyId));
+    }
+
+    /**
+     * Retrieves the latest build history record for a specific node ID.
+     * @param targetNodeId the target node ID
+     * @return the latest build history entity
+     */
+    public BuildHistory getLatestBuildHistory(String targetNodeId) {
+        if (StringUtils.isEmpty(targetNodeId)) {
+            return null;
+        }
+        return instantActivity(() -> buildHistoryMapper.getLatestBuildHistoryByNodeId(targetNodeId));
+    }
+
+    /**
+     * Retrieves the latest build history record for each target node.
+     * @return list of latest build history entities per node
+     */
+    public List<BuildHistory> getLatestBuildHistories() {
+        return instantActivity(() -> buildHistoryMapper.getLatestBuildHistories());
+    }
+
+    /**
+     * Retrieves detailed build history by execution ID.
+     * @param executionId the execution ID
+     * @return the build history entity
+     */
+    public BuildHistory getHistoryDetailByExecutionId(String executionId) {
+        if (StringUtils.isEmpty(executionId)) {
+            return null;
+        }
+        return instantActivity(() -> buildHistoryMapper.getBuildHistoryByExecutionId(executionId));
     }
 
     /**
@@ -228,6 +262,33 @@ public class BuildAuditService extends InstantActivitySupport {
                     return decompressGzip(buildLog.getLogContent());
                 } catch (Exception e) {
                     logger.error("Failed to decompress GZIP log for history ID {}", historyId, e);
+                    return "[Error decompressing log: " + e.getMessage() + "]";
+                }
+            } else {
+                return buildLog.getLogContent();
+            }
+        });
+    }
+
+    /**
+     * Retrieves and decompresses the console logs for an execution ID.
+     * @param executionId the execution ID
+     * @return raw log string
+     */
+    public String getDecompressedLogsByExecutionId(String executionId) {
+        if (StringUtils.isEmpty(executionId)) {
+            return "";
+        }
+        return instantActivity(() -> {
+            BuildLog buildLog = buildHistoryMapper.getBuildLogByExecutionId(executionId);
+            if (buildLog == null || buildLog.getLogContent() == null) {
+                return "";
+            }
+            if ("Y".equalsIgnoreCase(buildLog.getCompressedYn())) {
+                try {
+                    return decompressGzip(buildLog.getLogContent());
+                } catch (Exception e) {
+                    logger.error("Failed to decompress GZIP log for execution ID {}", executionId, e);
                     return "[Error decompressing log: " + e.getMessage() + "]";
                 }
             } else {
