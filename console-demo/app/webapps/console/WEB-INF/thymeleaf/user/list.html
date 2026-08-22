@@ -42,7 +42,7 @@
     <div class="card shadow-sm overflow-hidden">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover table-striped mb-0 align-middle">
+                <table class="table table-hover table-striped text-nowrap align-middle mb-0">
                     <thead>
                     <tr>
                         <th class="ps-3 text-muted small text-uppercase" style="width: 60px;">ID</th>
@@ -72,15 +72,13 @@
                         </td>
                         <td class="small text-muted" th:text="${user.lastLoginAt != null ? #temporals.format(user.lastLoginAt, 'yyyy-MM-dd HH:mm:ss') : '-'}">2023-10-01</td>
                         <td th:if="${session.USER_INFO.hasPermission('USER_MANAGE') || session.USER_INFO.hasRole('SUPER_ADMIN')}" class="text-end pe-3">
-                            <div class="d-flex justify-content-end flex-wrap gap-1">
-                                <button class="btn btn-sm btn-outline-secondary"
-                                        th:onclick="openUserModal([[${user.userId}]], [[${user.username}]], [[${user.nickname}]], [[${user.email}]], [[${user.status}]], [[${user.roles != null ? user.roles.![roleId] : null}]], [[${user.allowedIps}]])">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" th:onclick="deleteUser([[${user.userId}]])" th:disabled="${user.username == 'admin'}">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    th:onclick="openUserModal([[${user.userId}]], [[${user.username}]], [[${user.nickname}]], [[${user.email}]], [[${user.status}]], [[${user.roles != null ? user.roles.![roleId] : null}]], [[${user.allowedIps}]])">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" th:onclick="deleteUser([[${user.userId}]])" th:disabled="${user.username == 'admin'}">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(page.userList)}">

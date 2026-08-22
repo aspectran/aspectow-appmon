@@ -63,7 +63,6 @@
             border-radius: 12px;
             text-transform: uppercase;
             font-weight: 700;
-            letter-spacing: 0.5px;
         }
         .target-selector {
             background: var(--bs-secondary-bg);
@@ -147,7 +146,6 @@
             border: 1px solid var(--bs-border-color);
             border-radius: 8px;
             padding: 8px 12px;
-            margin-bottom: 8px;
             background: var(--bs-secondary-bg);
             cursor: pointer;
             transition: border-color 0.15s;
@@ -165,14 +163,13 @@
             font-size: 0.72rem;
             font-weight: 700;
             border-radius: 4px;
-            margin-right: 6px;
             background: #2d333b;
             color: #58a6ff;
             border: 1px solid #444c56;
         }
 
         /* Mobile & Tablet Responsive Layout */
-        @media (max-width: 991.98px) {
+        @media (max-width: 992px) {
             .build-container {
                 grid-template-columns: 1fr;
                 height: auto;
@@ -190,7 +187,7 @@
                 margin-left: 0 !important;
             }
         }
-        @media (max-width: 575.98px) {
+        @media (max-width: 576px) {
             .terminal-header {
                 padding: 6px 10px;
                 gap: 6px;
@@ -366,7 +363,7 @@
                         <!-- All Nodes Summary List View -->
                         <div id="meta-all-view" style="display: none;">
                             <div class="small text-muted mb-2">Click any node below or use tabs above to view specific output:</div>
-                            <div id="meta-nodes-list" class="d-flex flex-column gap-1"></div>
+                            <div id="meta-nodes-list" class="d-flex flex-column gap-2"></div>
                         </div>
                     </div>
                 </div>
@@ -810,7 +807,7 @@
                         const badgeClass = getBadgeClass(st);
 
                         $list.append(`
-                            <div class="node-summary-card d-flex justify-content-between align-items-center" onclick="selectTab('${nid}')">
+                            <div class="card node-summary-card d-flex flex-row justify-content-between align-items-center p-2" onclick="selectTab('${nid}')">
                                 <div>
                                     <span class="fw-bold"><i class="bi bi-hdd-network me-1"></i>${nid}</span>
                                     <small class="text-muted ms-2">${durationStr}</small>
@@ -1156,7 +1153,7 @@
                 let renderedHtml = ansiToHtml(text);
                 let tagPrefix = '';
                 if (nodeId && nodeId !== 'unknown') {
-                    tagPrefix = `<span class="node-tag">${nodeId}</span>`;
+                    tagPrefix = `<span class="node-tag">${nodeId}</span> `;
                 }
 
                 $container.append(`<div class="${lineClass}">${tagPrefix}${renderedHtml}</div>`);

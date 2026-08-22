@@ -30,27 +30,31 @@
     <th:block layout:fragment="content">
         <th:block th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-3">
-                <div>
-                    <div class="d-flex align-items-center gap-2 mb-1">
-                        <h3 class="fw-bold mb-0">Cluster Nodes</h3>
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <h3 class="fw-bold mb-0">Cluster Nodes</h3>
+                        </div>
+                        <p class="text-muted mb-0">Monitor and manage all active instances in the cluster.</p>
                     </div>
-                    <p class="text-muted mb-0">Monitor and manage all active instances in the cluster.</p>
+                    <button type="button" class="btn-close d-md-none ms-2" onclick="window.close()" aria-label="Close" title="Close" th:if="${page.layout == 'popup'}"></button>
                 </div>
-                <div class="d-flex flex-wrap align-items-center justify-content-between justify-content-md-end gap-2">
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                <div class="d-flex flex-row flex-md-column flex-wrap align-items-end justify-content-between justify-content-md-end gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap">
+                        <span class="text-muted small">Cluster Mode:</span>
+                        <span class="fw-bold text-primary" th:text="${page.clusterMode.toUpperCase()}">GATEWAY</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
                         <div class="input-group input-group-sm" style="max-width: 260px;">
                             <span class="input-group-text"><i class="bi bi-search"></i></span>
                             <input type="text" id="node-search" class="form-control" placeholder="Search nodes...">
                         </div>
-                    </div>
-                    <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap">
                         <button id="bulk-ctrl-btn" class="btn btn-outline-warning btn-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#bulkControlModal" th:if="${session.USER_INFO.hasPermission('NODE_MANAGE') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                             <i class="bi bi-sliders me-1"></i> Bulk Control
                         </button>
                         <button class="btn btn-outline-primary btn-sm text-nowrap" onclick="location.reload()">
                             <i class="bi bi-arrow-clockwise"></i> Refresh
                         </button>
-                        <button type="button" class="btn-close d-none d-md-inline-block ms-1" onclick="window.close()" aria-label="Close" title="Close" th:if="${page.layout == 'popup'}"></button>
                     </div>
                 </div>
             </div>
@@ -227,7 +231,7 @@
                 </div>
             </div>
 
-            <div th:if="${page.layout == 'popup'}" class="d-flex justify-content-end mt-4 pt-3 border-top d-print-none">
+            <div th:if="${page.layout == 'popup'}" class="d-flex justify-content-end mt-3 pt-3 border-top d-print-none">
                 <button type="button" class="btn btn-secondary btn-sm" onclick="window.close()">Close</button>
             </div>
         </th:block>
