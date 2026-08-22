@@ -33,6 +33,7 @@ public class CommandRequestParameters extends DefaultParameters {
     public static final ParameterKey targetNodeId;
     public static final ParameterKey targetGroup;
     public static final ParameterKey targetAll;
+    public static final ParameterKey targetServices;
     public static final ParameterKey command;
 
     private static final ParameterKey[] parameterKeys;
@@ -45,6 +46,7 @@ public class CommandRequestParameters extends DefaultParameters {
         targetNodeId = new ParameterKey("targetNodeId", ValueType.STRING);
         targetGroup = new ParameterKey("targetGroup", ValueType.STRING);
         targetAll = new ParameterKey("targetAll", ValueType.BOOLEAN);
+        targetServices = new ParameterKey("targetServices", ValueType.BOOLEAN);
         command = new ParameterKey("command", CommandParameters.class);
 
         parameterKeys = new ParameterKey[] {
@@ -55,6 +57,7 @@ public class CommandRequestParameters extends DefaultParameters {
                 targetNodeId,
                 targetGroup,
                 targetAll,
+                targetServices,
                 command
         };
     }
@@ -176,6 +179,22 @@ public class CommandRequestParameters extends DefaultParameters {
      */
     public void setTargetAll(boolean targetAll) {
         putValue(CommandRequestParameters.targetAll, targetAll);
+    }
+
+    /**
+     * Returns whether the command is targeted at all service nodes in the cluster.
+     * @return true if target is all service nodes, false otherwise
+     */
+    public boolean isTargetServices() {
+        return getBoolean(targetServices, false);
+    }
+
+    /**
+     * Sets whether the command is targeted at all service nodes in the cluster.
+     * @param targetServices true if target is all service nodes, false otherwise
+     */
+    public void setTargetServices(boolean targetServices) {
+        putValue(CommandRequestParameters.targetServices, targetServices);
     }
 
     /**

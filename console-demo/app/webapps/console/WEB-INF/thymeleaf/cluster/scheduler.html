@@ -125,6 +125,20 @@
             margin-bottom: 1rem;
             border: 1px solid var(--bs-border-color);
         }
+        .action-card {
+            transition: all 0.15s ease-in-out;
+            background: var(--bs-body-bg);
+            cursor: pointer;
+            border-color: var(--bs-border-color);
+        }
+        .action-card:hover {
+            border-color: var(--bs-primary) !important;
+            background: var(--bs-tertiary-bg);
+        }
+        .action-card:has(input:checked) {
+            border-color: var(--bs-primary) !important;
+            background-color: var(--bs-primary-subtle) !important;
+        }
         .log-container {
             border-top: 1px solid #333;
             background: #1e1e1e;
@@ -320,7 +334,7 @@
 
             <!-- Bulk Control Modal -->
             <div class="modal fade" id="bulkControlModal" tabindex="-1" aria-labelledby="bulkControlModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
+                <div class="modal-dialog modal-lg">
                     <div class="modal-content text-start">
                         <div class="modal-header">
                             <h5 class="modal-title fw-bold" id="bulkControlModalLabel"><i class="bi bi-sliders text-warning me-2"></i>Cluster Bulk Control</h5>
@@ -331,46 +345,79 @@
                                 <div class="mb-3">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <label class="form-label fw-semibold small text-muted text-uppercase mb-0">1. Select Target Nodes</label>
-                                        <div>
-                                            <button type="button" class="btn btn-link btn-xs text-decoration-none p-0 me-2" id="bulk-select-all">Select All</button>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="form-check form-check-inline mb-0 small" id="bulk-exclude-console-wrapper">
+                                                <input class="form-check-input" type="checkbox" id="bulk-exclude-console" checked>
+                                                <label class="form-check-label small fw-medium text-secondary" for="bulk-exclude-console">
+                                                    Exclude Console
+                                                </label>
+                                            </div>
+                                            <button type="button" class="btn btn-link btn-xs text-decoration-none p-0" id="bulk-select-all">Select All</button>
                                             <button type="button" class="btn btn-link btn-xs text-decoration-none p-0 text-secondary" id="bulk-deselect-all">Deselect All</button>
                                         </div>
                                     </div>
-                                    <div class="border rounded p-2 bg-body-tertiary" id="bulk-node-list" style="max-height: 180px; overflow-y: auto;">
+                                    <div class="border rounded p-2 bg-body-tertiary" id="bulk-node-list" style="max-height: 200px; overflow-y: auto;">
                                         <!-- Dynamic Group & Node checkboxes -->
                                     </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="bulk-service-name" class="form-label fw-semibold small text-muted text-uppercase">2. Service Name <span class="fw-normal text-lowercase text-muted">(optional)</span></label>
-                                    <input type="text" id="bulk-service-name" class="form-control form-control-sm" placeholder="Leave empty to match across all services">
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-6">
+                                        <label for="bulk-service-name" class="form-label fw-semibold small text-muted text-uppercase">2. Service Name <span class="fw-normal text-lowercase text-muted">(optional)</span></label>
+                                        <input type="text" id="bulk-service-name" class="form-control form-control-sm" placeholder="Leave empty to match across all services">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="bulk-target-id" class="form-label fw-semibold small text-muted text-uppercase" id="bulk-target-id-label">3. Schedule ID</label>
+                                        <input type="text" id="bulk-target-id" class="form-control form-control-sm" placeholder="e.g. SyncBackupSchedule" required>
+                                    </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold small text-muted text-uppercase">3. Target Type</label>
-                                    <div>
-                                        <div class="form-check form-check-inline">
+                                    <label class="form-label fw-semibold small text-muted text-uppercase mb-1">Target Item Type</label>
+                                    <div class="d-flex gap-3">
+                                        <div class="form-check">
                                             <input class="form-check-input" type="radio" name="bulkTargetType" id="bulkTypeSchedule" value="schedule" checked>
-                                            <label class="form-check-label" for="bulkTypeSchedule">Schedule</label>
+                                            <label class="form-check-label small fw-medium" for="bulkTypeSchedule">Schedule</label>
                                         </div>
-                                        <div class="form-check form-check-inline">
+                                        <div class="form-check">
                                             <input class="form-check-input" type="radio" name="bulkTargetType" id="bulkTypeJob" value="job">
-                                            <label class="form-check-label" for="bulkTypeJob">Job</label>
+                                            <label class="form-check-label small fw-medium" for="bulkTypeJob">Job (Translet)</label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="bulk-target-id" class="form-label fw-semibold small text-muted text-uppercase" id="bulk-target-id-label">Schedule ID</label>
-                                    <input type="text" id="bulk-target-id" class="form-control form-control-sm" placeholder="e.g. SyncBackupSchedule" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold small text-muted text-uppercase">4. Action</label>
-                                    <div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="bulkAction" id="bulkActionEnable" value="bulkEnable" checked>
-                                            <label class="form-check-label text-success fw-bold" for="bulkActionEnable">ENABLE</label>
+                                    <label class="form-label fw-semibold small text-muted text-uppercase mb-2">4. Action</label>
+                                    <div class="row g-2">
+                                        <!-- ENABLE -->
+                                        <div class="col-sm-6">
+                                            <label class="card h-100 p-2.5 p-2 action-card rounded-3 shadow-none" for="bulkActionEnable">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <input class="form-check-input mt-1 flex-shrink-0" type="radio" name="bulkAction" id="bulkActionEnable" value="bulkEnable" checked>
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-bold text-success small d-flex align-items-center gap-1 mb-1">
+                                                            <i class="bi bi-play-circle-fill"></i> ENABLE
+                                                        </div>
+                                                        <div class="text-muted" style="font-size: 0.75rem; line-height: 1.35;">
+                                                            Enable and resume triggers or jobs across selected target nodes.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </label>
                                         </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="bulkAction" id="bulkActionDisable" value="bulkDisable">
-                                            <label class="form-check-label text-danger fw-bold" for="bulkActionDisable">DISABLE</label>
+
+                                        <!-- DISABLE -->
+                                        <div class="col-sm-6">
+                                            <label class="card h-100 p-2.5 p-2 action-card rounded-3 shadow-none" for="bulkActionDisable">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <input class="form-check-input mt-1 flex-shrink-0" type="radio" name="bulkAction" id="bulkActionDisable" value="bulkDisable">
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-bold text-danger small d-flex align-items-center gap-1 mb-1">
+                                                            <i class="bi bi-pause-circle-fill"></i> DISABLE
+                                                        </div>
+                                                        <div class="text-muted" style="font-size: 0.75rem; line-height: 1.35;">
+                                                            Pause and temporarily stop triggers or jobs from firing on target nodes.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
@@ -480,7 +527,10 @@
                     groups.forEach(group => {
                         const $optgroup = $('<optgroup>').attr('label', group);
                         nodes.filter(n => n.group === group).forEach(n => {
-                            const title = (n.title && n.title !== n.id) ? (n.title + ' (' + n.id + ')') : n.id;
+                            let title = (n.title && n.title !== n.id) ? (n.title + ' (' + n.id + ')') : n.id;
+                            if (n.console) {
+                                title += ' [Console]';
+                            }
                             const option = new Option(title, n.id);
                             if (n.status && n.status.toUpperCase() === 'DEAD') {
                                 $(option).addClass('text-danger');
@@ -496,7 +546,10 @@
                     const nogroup = nodes.filter(n => !n.group);
                     if (nogroup.length > 0) {
                         nogroup.forEach(n => {
-                            const title = (n.title && n.title !== n.id) ? (n.title + ' (' + n.id + ')') : n.id;
+                            let title = (n.title && n.title !== n.id) ? (n.title + ' (' + n.id + ')') : n.id;
+                            if (n.console) {
+                                title += ' [Console]';
+                            }
                             const option = new Option(title, n.id);
                             if (n.status && n.status.toUpperCase() === 'DEAD') {
                                 $(option).addClass('text-danger');
@@ -510,7 +563,10 @@
                     }
                 } else {
                     nodes.forEach(n => {
-                        const title = (n.title && n.title !== n.id) ? (n.title + ' (' + n.id + ')') : n.id;
+                        let title = (n.title && n.title !== n.id) ? (n.title + ' (' + n.id + ')') : n.id;
+                        if (n.console) {
+                            title += ' [Console]';
+                        }
                         const option = new Option(title, n.id);
                         if (n.status && n.status.toUpperCase() === 'DEAD') {
                             $(option).addClass('text-danger');
@@ -1329,7 +1385,7 @@
                             </div>
                         </div>
                         <div class="table-responsive">
-                            <table class="table mb-0 align-middle">
+                            <table class="table text-nowrap align-middle mb-0">
                                 <thead>
                                     <tr>
                                         <th style="width: 50px;"></th>
@@ -1678,29 +1734,64 @@
                     }
                 });
 
+                function updateBulkConsoleState() {
+                    const $excludeConsole = $('#bulk-exclude-console');
+                    const exclude = $excludeConsole.is(':checked');
+
+                    $('.bulk-node-chk').each(function() {
+                        const isConsole = $(this).data('console') === true || $(this).data('console') === 'true';
+                        const noScheduler = $(this).data('no-scheduler') === true || $(this).data('no-scheduler') === 'true';
+                        const $row = $(this).closest('.bulk-node-row');
+                        const $notice = $row.find('.console-notice');
+
+                        if (noScheduler || (isConsole && exclude)) {
+                            $(this).prop('checked', false).prop('disabled', true);
+                            $row.addClass('opacity-50');
+                            $notice.show();
+                        } else {
+                            $(this).prop('disabled', false);
+                            $row.removeClass('opacity-50');
+                            $notice.hide();
+                        }
+                    });
+
+                    syncGroupCheckboxes();
+                }
+
+                function syncGroupCheckboxes() {
+                    $('.bulk-group-chk').each(function() {
+                        const groupKey = $(this).data('group');
+                        const $activeNodes = $(`.group-node-${groupKey}:not(:disabled)`);
+                        const $checkedNodes = $(`.group-node-${groupKey}:not(:disabled):checked`);
+                        if ($activeNodes.length > 0 && $activeNodes.length === $checkedNodes.length) {
+                            $(this).prop('checked', true);
+                        } else {
+                            $(this).prop('checked', false);
+                        }
+                    });
+                }
+
                 $('#bulk-select-all').on('click', function() {
-                    $('#bulk-node-list input[type="checkbox"]').prop('checked', true);
+                    $('#bulk-node-list input.bulk-node-chk:not(:disabled)').prop('checked', true);
+                    syncGroupCheckboxes();
                 });
 
                 $('#bulk-deselect-all').on('click', function() {
                     $('#bulk-node-list input[type="checkbox"]').prop('checked', false);
                 });
 
+                $('#bulk-exclude-console').on('change', function() {
+                    updateBulkConsoleState();
+                });
+
                 $('#bulk-node-list').on('change', '.bulk-group-chk', function() {
                     const groupKey = $(this).data('group');
                     const isChecked = $(this).is(':checked');
-                    $(`.group-node-${groupKey}`).prop('checked', isChecked);
+                    $(`.group-node-${groupKey}:not(:disabled)`).prop('checked', isChecked);
                 });
 
                 $('#bulk-node-list').on('change', '.bulk-node-chk', function() {
-                    const classList = $(this).attr('class').split(/\s+/);
-                    const groupClass = classList.find(c => c.startsWith('group-node-'));
-                    if (groupClass) {
-                        const groupKey = groupClass.replace('group-node-', '');
-                        const totalInGroup = $(`.group-node-${groupKey}`).length;
-                        const checkedInGroup = $(`.group-node-${groupKey}:checked`).length;
-                        $(`#chk-group-${groupKey}`).prop('checked', totalInGroup === checkedInGroup);
-                    }
+                    syncGroupCheckboxes();
                 });
 
                 $('#bulkControlModal').on('show.bs.modal', function () {
@@ -1710,8 +1801,12 @@
                     const liveNodes = nodes.filter(n => !(n.status && n.status.toUpperCase() === 'DEAD'));
                     if (liveNodes.length === 0) {
                         $list.html('<div class="text-muted small p-2">No live nodes available.</div>');
+                        $('#bulk-exclude-console-wrapper').hide();
                         return;
                     }
+
+                    const hasConsoleNodes = liveNodes.some(n => n.console);
+                    $('#bulk-exclude-console-wrapper').toggle(hasConsoleNodes);
 
                     const groups = {};
                     liveNodes.forEach(n => {
@@ -1732,11 +1827,21 @@
                             <div class="ms-2">`;
                         
                         groups[gName].forEach(n => {
+                            const isConsole = Boolean(n.console);
+                            const hasNoScheduler = (n.hasSchedulerManager === false);
+                            const consoleBadge = isConsole ? '<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle ms-1">Console</span>' : '';
+                            const noSchedulerBadge = hasNoScheduler ? '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle ms-1">NO SCHEDULER</span>' : '';
+                            const noticeText = hasNoScheduler ? '(No Scheduler Manager)' : (isConsole ? '(Console Node)' : '');
+                            const consoleNotice = (isConsole || hasNoScheduler) ? `<span class="console-notice text-muted ms-1 small" style="font-size:0.75rem; display:none;">${noticeText}</span>` : '';
+
                             gHtml += `
-                                <div class="form-check text-start ps-4 py-1">
-                                    <input class="form-check-input bulk-node-chk group-node-${safeGName}" type="checkbox" name="bulkNodes" value="${n.id}" id="chk-${n.id}">
+                                <div class="form-check text-start ps-4 py-1 bulk-node-row">
+                                    <input class="form-check-input bulk-node-chk group-node-${safeGName}" type="checkbox" name="bulkNodes" value="${n.id}" id="chk-${n.id}" data-console="${isConsole}" data-no-scheduler="${hasNoScheduler}">
                                     <label class="form-check-label small" for="chk-${n.id}">
                                         ${n.title ? n.title + ' (' + n.id + ')' : n.id}
+                                        ${consoleBadge}
+                                        ${noSchedulerBadge}
+                                        ${consoleNotice}
                                     </label>
                                 </div>`;
                         });
@@ -1744,11 +1849,13 @@
                         gHtml += `</div></div>`;
                         $list.append(gHtml);
                     });
+
+                    updateBulkConsoleState();
                 });
 
                 $('#execute-bulk-btn').on('click', function() {
                     const selectedNodes = [];
-                    $('input[name="bulkNodes"]:checked').each(function() {
+                    $('input[name="bulkNodes"]:checked:not(:disabled)').each(function() {
                         selectedNodes.push($(this).val());
                     });
 

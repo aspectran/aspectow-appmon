@@ -141,7 +141,8 @@
                     </div>
                     <div class="col-12 col-md-3">
                         <select id="target-type" class="form-select form-select-sm" onchange="onTargetTypeChange()">
-                            <option value="all" th:selected="${page.targetNodeId == null}">All Nodes in Cluster</option>
+                            <option value="services" th:selected="${page.targetNodeId == null}">All Service Nodes</option>
+                            <option value="all">All Nodes in Cluster</option>
                             <option value="group" th:if="${page.clusterMode == 'gateway'}">Specific Group</option>
                             <option value="node" th:selected="${page.targetNodeId != null}">Individual Node</option>
                         </select>
@@ -272,12 +273,29 @@ arguments: {
                 const prevValue = $select.val();
                 $select.empty();
 
-                if (type === 'all') {
+                if (type === 'services') {
                     $container.hide();
                     const url = new URL(window.location);
                     url.searchParams.delete('nodeId');
                     window.history.replaceState({}, '', url);
-                    resetDeadStatus();
+                    const serviceNodes = nodes.filter(n => !n.console);
+                    const hasAnyCommandManager = serviceNodes.some(n => n.hasCommandManager !== false && n.status?.toUpperCase() !== 'DEAD');
+                    if (!hasAnyCommandManager) {
+                        renderUnsupportedGroupError('Service Nodes');
+                    } else {
+                        resetDeadStatus();
+                    }
+                } else if (type === 'all') {
+                    $container.hide();
+                    const url = new URL(window.location);
+                    url.searchParams.delete('nodeId');
+                    window.history.replaceState({}, '', url);
+                    const hasAnyCommandManager = nodes.some(n => n.hasCommandManager !== false && n.status?.toUpperCase() !== 'DEAD');
+                    if (!hasAnyCommandManager) {
+                        renderUnsupportedGroupError('Cluster');
+                    } else {
+                        resetDeadStatus();
+                    }
                 } else if (type === 'group') {
                     $container.show();
                     const groups = [...new Set(nodes.map(n => n.group).filter(g => g))];
@@ -305,7 +323,10 @@ arguments: {
                             const countText = groupNodes.length === 1 ? '1 Node' : groupNodes.length + ' Nodes';
                             const $optgroup = $('<optgroup>').attr('label', `${group} (${countText})`);
                             groupNodes.forEach(n => {
-                                const title = (n.title && n.title !== n.id) ? (n.title + ' (' + n.id + ')') : n.id;
+                                let title = (n.title && n.title !== n.id) ? (n.title + ' (' + n.id + ')') : n.id;
+                                if (n.console) {
+                                    title += ' [Console]';
+                                }
                                 const option = new Option(title, n.id);
                                 if (n.status && n.status.toUpperCase() === 'DEAD') {
                                     $(option).addClass('text-danger');
@@ -321,7 +342,10 @@ arguments: {
                         const nogroup = nodes.filter(n => !n.group);
                         if (nogroup.length > 0) {
                             nogroup.forEach(n => {
-                                const title = (n.title && n.title !== n.id) ? (n.title + ' (' + n.id + ')') : n.id;
+                                let title = (n.title && n.title !== n.id) ? (n.title + ' (' + n.id + ')') : n.id;
+                                if (n.console) {
+                                    title += ' [Console]';
+                                }
                                 const option = new Option(title, n.id);
                                 if (n.status && n.status.toUpperCase() === 'DEAD') {
                                     $(option).addClass('text-danger');
@@ -335,7 +359,10 @@ arguments: {
                         }
                     } else {
                         nodes.forEach(n => {
-                            const title = (n.title && n.title !== n.id) ? (n.title + ' (' + n.id + ')') : n.id;
+                            let title = (n.title && n.title !== n.id) ? (n.title + ' (' + n.id + ')') : n.id;
+                            if (n.console) {
+                                title += ' [Console]';
+                            }
                             const option = new Option(title, n.id);
                             if (n.status && n.status.toUpperCase() === 'DEAD') {
                                 $(option).addClass('text-danger');
@@ -512,6 +539,14 @@ arguments: {
                 if (targetType === 'group' && !checkSelectedGroupStatus(targetValue)) {
                     return;
                 }
+                if (targetType === 'services') {
+                    const serviceNodes = nodes.filter(n => !n.console);
+                    const hasAnyCommandManager = serviceNodes.some(n => n.hasCommandManager !== false && n.status?.toUpperCase() !== 'DEAD');
+                    if (!hasAnyCommandManager) {
+                        renderUnsupportedGroupError('Service Nodes');
+                        return;
+                    }
+                }
                 if (targetType === 'all') {
                     const hasAnyCommandManager = nodes.some(n => n.hasCommandManager !== false && n.status?.toUpperCase() !== 'DEAD');
                     if (!hasAnyCommandManager) {
@@ -520,7 +555,8 @@ arguments: {
                     }
                 }
 
-                let targetDisplay = 'All Nodes';
+                let targetDisplay = 'All Service Nodes';
+                if (targetType === 'all') targetDisplay = 'All Nodes in Cluster';
                 if (targetType === 'group') targetDisplay = 'Group: ' + targetValue;
                 if (targetType === 'node') targetDisplay = 'Node: ' + targetValue;
 
@@ -545,6 +581,7 @@ arguments: {
                 if (targetType === 'node') message.targetNodeId = targetValue;
                 if (targetType === 'group') message.targetGroup = targetValue;
                 if (targetType === 'all') message.targetAll = true;
+                if (targetType === 'services') message.targetServices = true;
 
                 if (isGatewayMode) {
                     if (consoleClient) {
@@ -556,6 +593,8 @@ arguments: {
                         targetsToSend.push(targetValue);
                     } else if (targetType === 'group') {
                         targetsToSend = nodes.filter(n => n.group === targetValue).map(n => n.id);
+                    } else if (targetType === 'services') {
+                        targetsToSend = nodes.filter(n => !n.console).map(n => n.id);
                     } else {
                         targetsToSend = nodes.map(n => n.id);
                     }

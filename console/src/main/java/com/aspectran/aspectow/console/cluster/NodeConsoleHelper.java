@@ -145,10 +145,10 @@ public class NodeConsoleHelper {
             status = "live";
         }
         map.put("status", status);
-        map.put("console", info.isConsole(false));
-        map.put("hasNodeManager", info.hasNodeManager(false));
-        map.put("hasSchedulerManager", info.hasSchedulerManager(false));
-        map.put("hasCommandManager", info.hasCommandManager(false));
+        map.put("console", info.isConsole());
+        map.put("hasNodeManager", info.hasNodeManager());
+        map.put("hasSchedulerManager", info.hasSchedulerManager());
+        map.put("hasCommandManager", info.hasCommandManager());
         return map;
     }
 

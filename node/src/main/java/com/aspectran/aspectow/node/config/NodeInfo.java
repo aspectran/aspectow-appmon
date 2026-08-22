@@ -132,28 +132,27 @@ public class NodeInfo extends DefaultParameters {
     }
 
     /**
-     * Returns whether this node is a console-dedicated node.
-     * @return true if console node, false otherwise
+     * Returns whether this node is a console-dedicated node as a Boolean object.
+     * @return the console flag as a Boolean, or null if not set
      */
-    public Boolean isConsole() {
+    public Boolean getConsole() {
         return getBoolean(console);
     }
 
     /**
-     * Returns whether this node is a console-dedicated node with a fallback default.
-     * @param defaultValue the default value
+     * Returns whether this node is a console-dedicated node.
      * @return true if console node, false otherwise
      */
-    public boolean isConsole(boolean defaultValue) {
-        return getBoolean(console, defaultValue);
+    public boolean isConsole() {
+        return getBoolean(console, false);
     }
 
     /**
      * Sets whether this node is a console-dedicated node.
-     * @param isConsole true if console node, false otherwise
+     * @param console true if console node, false otherwise
      */
-    public void setConsole(Boolean isConsole) {
-        putValue(NodeInfo.console, isConsole);
+    public void setConsole(Boolean console) {
+        putValue(NodeInfo.console, console);
     }
 
     /**
@@ -286,78 +285,75 @@ public class NodeInfo extends DefaultParameters {
     }
 
     /**
-     * Returns whether the node has node management capability.
-     * @return true if enabled, false otherwise
+     * Returns whether the node has node management capability as a Boolean object.
+     * @return the capability as a Boolean, or null if not set
      */
-    public Boolean hasNodeManager() {
+    public Boolean getHasNodeManager() {
         return getBoolean(hasNodeManager);
     }
 
     /**
-     * Returns whether the node has node management capability with a fallback.
-     * @param defaultValue the default value
+     * Returns whether the node has node management capability.
      * @return true if enabled, false otherwise
      */
-    public boolean hasNodeManager(boolean defaultValue) {
-        return getBoolean(hasNodeManager, defaultValue);
+    public boolean hasNodeManager() {
+        return getBoolean(hasNodeManager, false);
     }
 
     /**
      * Sets whether the node has node management capability.
-     * @param value true if enabled, false otherwise
+     * @param hasNodeManager true if enabled, false otherwise
      */
-    public void setHasNodeManager(Boolean value) {
-        putValue(NodeInfo.hasNodeManager, value);
+    public void setHasNodeManager(Boolean hasNodeManager) {
+        putValue(NodeInfo.hasNodeManager, hasNodeManager);
+    }
+
+    /**
+     * Returns whether the node has scheduler management capability as a Boolean object.
+     * @return the capability as a Boolean, or null if not set
+     */
+    public Boolean getHasSchedulerManager() {
+        return getBoolean(hasSchedulerManager);
     }
 
     /**
      * Returns whether the node has scheduler management capability.
      * @return true if enabled, false otherwise
      */
-    public Boolean hasSchedulerManager() {
-        return getBoolean(hasSchedulerManager);
-    }
-
-    /**
-     * Returns whether the node has scheduler management capability with a fallback.
-     * @param defaultValue the default value
-     * @return true if enabled, false otherwise
-     */
-    public boolean hasSchedulerManager(boolean defaultValue) {
-        return getBoolean(hasSchedulerManager, defaultValue);
+    public boolean hasSchedulerManager() {
+        return getBoolean(hasSchedulerManager, false);
     }
 
     /**
      * Sets whether the node has scheduler management capability.
-     * @param value true if enabled, false otherwise
+     * @param hasSchedulerManager true if enabled, false otherwise
      */
-    public void setHasSchedulerManager(Boolean value) {
-        putValue(NodeInfo.hasSchedulerManager, value);
+    public void setHasSchedulerManager(Boolean hasSchedulerManager) {
+        putValue(NodeInfo.hasSchedulerManager, hasSchedulerManager);
+    }
+
+    /**
+     * Returns whether the node has command management capability as a Boolean object.
+     * @return the capability as a Boolean, or null if not set
+     */
+    public Boolean getHasCommandManager() {
+        return getBoolean(hasCommandManager);
     }
 
     /**
      * Returns whether the node has command management capability.
      * @return true if enabled, false otherwise
      */
-    public Boolean hasCommandManager() {
-        return getBoolean(hasCommandManager);
-    }
-
-    /**
-     * Returns whether the node has command management capability with a fallback.
-     * @param defaultValue the default value
-     * @return true if enabled, false otherwise
-     */
-    public boolean hasCommandManager(boolean defaultValue) {
-        return getBoolean(hasCommandManager, defaultValue);
+    public boolean hasCommandManager() {
+        return getBoolean(hasCommandManager, false);
     }
 
     /**
      * Sets whether the node has command management capability.
-     * @param value true if enabled, false otherwise
+     * @param hasCommandManager true if enabled, false otherwise
      */
-    public void setHasCommandManager(Boolean value) {
-        putValue(NodeInfo.hasCommandManager, value);
+    public void setHasCommandManager(Boolean hasCommandManager) {
+        putValue(NodeInfo.hasCommandManager, hasCommandManager);
     }
 
     /**
@@ -372,7 +368,7 @@ public class NodeInfo extends DefaultParameters {
         newInfo.setId(getId());
         newInfo.setGroup(getGroup());
         newInfo.setTitle(getTitle());
-        newInfo.setConsole(nodeInfo.isConsole() != null ? nodeInfo.isConsole() : isConsole());
+        newInfo.setConsole(nodeInfo.getConsole() != null ? nodeInfo.getConsole() : getConsole());
 
         // update dynamic state
         newInfo.setHost(nodeInfo.getHost());

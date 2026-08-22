@@ -339,14 +339,14 @@ public class RemoteBuildDeployManager implements InitializableBean {
             if (registry != null) {
                 List<NodeInfo> allNodes = registry.getNodes();
                 for (NodeInfo n : allNodes) {
-                    if (n.getId() != null && !n.isConsole(false) && !result.contains(n.getId())) {
+                    if (n.getId() != null && !n.isConsole() && !result.contains(n.getId())) {
                         result.add(n.getId());
                     }
                 }
             }
             if (result.isEmpty()) {
                 NodeInfo localNode = nodeManager.getNodeInfoHolder().getNodeInfo(nodeManager.getNodeId());
-                if (localNode == null || !localNode.isConsole(false)) {
+                if (localNode == null || !localNode.isConsole()) {
                     result.add(nodeManager.getNodeId());
                 }
             }

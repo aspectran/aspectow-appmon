@@ -158,7 +158,13 @@ public class RemoteCommandManager implements InitializableBean, DisposableBean, 
      * @param request the command request parameters
      */
     public void process(@NonNull CommandRequestParameters request) {
-        if (request.isTargetAll()) {
+        if (request.isTargetServices()) {
+            for (NodeInfo nodeInfo : nodeManager.getNodeInfoList()) {
+                if (!nodeInfo.isConsole()) {
+                    process(nodeInfo.getId(), request.copy());
+                }
+            }
+        } else if (request.isTargetAll()) {
             for (NodeInfo nodeInfo : nodeManager.getNodeInfoList()) {
                 process(nodeInfo.getId(), request.copy());
             }
