@@ -133,13 +133,13 @@
                         <div>
                             <h5 class="fw-bold mb-0" th:text="${nodeInfo.title}">Node Title</h5>
                             <span class="badge bg-secondary node-id-badge mt-1" th:text="${nodeInfo.id}">node-id</span>
-                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle mt-1 ms-1" th:if="${nodeInfo.console}">Console</span>
                         </div>
                         <div class="d-flex flex-column align-items-end">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="status-dot" th:classappend="${nodeInfo.status == 'live' ? 'bg-success' : (nodeInfo.status == 'paused' ? 'bg-warning' : (nodeInfo.status == 'stopping' ? 'bg-warning' : 'bg-danger'))}"></span>
                                 <span class="small fw-bold text-uppercase" th:classappend="${nodeInfo.status == 'live' ? 'text-success' : (nodeInfo.status == 'paused' ? 'text-warning' : (nodeInfo.status == 'stopping' ? 'text-warning' : 'text-danger'))}" th:text="${nodeInfo.status}">LIVE</span>
                             </div>
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle mt-1 ms-1" th:if="${nodeInfo.console}">Console</span>
                         </div>
                     </div>
                     <div class="border-top pt-3">
