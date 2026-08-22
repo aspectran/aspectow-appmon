@@ -136,6 +136,9 @@
             line-height: 1.45;
             overflow-y: auto;
         }
+        .log-container .text-muted {
+            color: #8c8c8c !important;
+        }
         .log-line {
             white-space: pre;
             margin-bottom: 0;
@@ -151,6 +154,12 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 6px;
+        }
+        .log-header .text-secondary {
+            color: #aaa !important;
+        }
+        .log-header .text-secondary:hover {
+            color: #fff !important;
         }
         .log-wrapper.expanded {
             position: fixed;
@@ -1432,7 +1441,7 @@
                             </div>
                             <div id="log-viewer-${service.loggingGroup}" class="log-container" 
                                  onscroll="onLogScroll(this, '${service.loggingGroup}')">
-                                <div class="fst-italic">Waiting for logs...</div>
+                                <div class="text-muted fst-italic">Waiting for logs...</div>
                             </div>
                         </div>`;
                     }
@@ -1458,9 +1467,7 @@
                 // Stop auto-scroll if currently loading previous logs
                 if ($container.data('loading')) return;
 
-                if ($container.find('.text-muted').length > 0) {
-                    $container.empty();
-                }
+                $container.children(':not(.log-line, .loading-logs)').remove();
 
                 const $line = $('<p class="log-line"></p>').text(logLine);
                 $container.append($line);
@@ -1493,9 +1500,7 @@
                         return;
                     }
 
-                    if ($container.find('.text-muted').length > 0) {
-                        $container.empty();
-                    }
+                    $container.children(':not(.log-line, .loading-logs)').remove();
 
                     const scrollHeightBefore = $container[0].scrollHeight;
                     
@@ -1536,9 +1541,7 @@
                 const loadedCount = $container.children('.log-line').length;
 
                 $container.data('loading', true);
-                if ($container.find('.text-muted').length > 0) {
-                    $container.empty();
-                }
+                $container.find('.loading-logs').remove();
                 $container.prepend('<div class="loading-logs text-info small fst-italic py-2"><i class="bi bi-arrow-up-circle me-2"></i>Loading previous logs...</div>');
 
                 const request = {
