@@ -216,6 +216,31 @@ public class RemoteBuildDeployManager implements InitializableBean {
         return activeExecutions.get(executionId);
     }
 
+    public List<String> getRecentLogs(BuildExecutionInfo exec) {
+        if (exec == null) {
+            return Collections.emptyList();
+        }
+        List<String> logs = localScriptRunner.getLogBuffer(exec.getExecutionId());
+        if (logs != null && !logs.isEmpty()) {
+            return logs;
+        }
+        if (buildAuditService != null && exec.getExecutionId() != null) {
+            try {
+                BuildHistory history = (exec.getTargetNodeId() != null)
+                        ? buildAuditService.getHistoryDetailByExecutionIdAndNodeId(exec.getExecutionId(), exec.getTargetNodeId())
+                        : buildAuditService.getHistoryDetailByExecutionId(exec.getExecutionId());
+                if (history != null && history.getHistoryId() != null) {
+                    String rawLog = buildAuditService.getDecompressedLogs(history.getHistoryId());
+                    if (StringUtils.hasText(rawLog)) {
+                        return Arrays.asList(rawLog.split("\n"));
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return Collections.emptyList();
+    }
+
     public List<String> getRecentLogs(String executionId) {
         if (executionId == null) {
             return Collections.emptyList();

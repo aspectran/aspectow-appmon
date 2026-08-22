@@ -99,7 +99,12 @@ public class BuildAuditService extends InstantActivitySupport {
     public void completeAudit(@NonNull BuildExecutionInfo info, List<String> logLines) {
         try {
             instantActivity(() -> {
-                BuildHistory history = buildHistoryMapper.getBuildHistoryByExecutionId(info.getExecutionId());
+                BuildHistory history = null;
+                if (info.getTargetNodeId() != null) {
+                    history = buildHistoryMapper.getBuildHistoryByExecutionIdAndNodeId(info.getExecutionId(), info.getTargetNodeId());
+                } else {
+                    history = buildHistoryMapper.getBuildHistoryByExecutionId(info.getExecutionId());
+                }
                 if (history == null) {
                     history = new BuildHistory();
                     history.setExecutionId(info.getExecutionId());
@@ -237,6 +242,19 @@ public class BuildAuditService extends InstantActivitySupport {
             return Collections.emptyList();
         }
         return instantActivity(() -> buildHistoryMapper.getLatestBuildHistories(targetNodeIds));
+    }
+
+    /**
+     * Retrieves detailed build history by execution ID and target node ID.
+     * @param executionId the execution ID
+     * @param targetNodeId the target node ID
+     * @return the build history entity
+     */
+    public BuildHistory getHistoryDetailByExecutionIdAndNodeId(String executionId, String targetNodeId) {
+        if (StringUtils.isEmpty(executionId)) {
+            return null;
+        }
+        return instantActivity(() -> buildHistoryMapper.getBuildHistoryByExecutionIdAndNodeId(executionId, targetNodeId));
     }
 
     /**

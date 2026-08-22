@@ -144,7 +144,7 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
                 for (BuildExecutionInfo exec : lastExecutions.values()) {
                     if (exec != null) {
                         remoteBuildDeployManager.getBroker().broadcastStatusChanged(exec);
-                        List<String> logs = remoteBuildDeployManager.getRecentLogs(exec.getExecutionId());
+                        List<String> logs = remoteBuildDeployManager.getRecentLogs(exec);
                         if (logs != null && !logs.isEmpty()) {
                             remoteBuildDeployManager.getBroker().sendLogBackfill(
                                     buildSession, exec.getExecutionId(), exec.getTargetNodeId(), logs);

@@ -6,7 +6,7 @@ set -e
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 . "$SCRIPT_DIR/app.conf"
 
-NODE_ID="node2"
+NODE_ID="dev-node2"
 PORT="8092"
 
 [ -d "$DEPLOY_DIR" ] && DEPLOY_DIR="$(cd "$DEPLOY_DIR" && pwd)"

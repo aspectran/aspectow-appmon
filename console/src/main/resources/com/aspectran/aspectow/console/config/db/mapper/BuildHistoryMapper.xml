@@ -89,6 +89,16 @@
         select * from asc_build_history where history_id = #{historyId}
     </select>
 
+    <select id="getBuildHistoryByExecutionIdAndNodeId" resultMap="BuildHistoryResultMap" flushCache="true" useCache="false">
+        select * from asc_build_history
+        where execution_id = #{executionId}
+          and target_node_id = #{targetNodeId}
+    </select>
+
+    <select id="getBuildHistoriesByExecutionId" parameterType="string" resultMap="BuildHistoryResultMap" flushCache="true" useCache="false">
+        select * from asc_build_history where execution_id = #{executionId} order by history_id asc
+    </select>
+
     <select id="getBuildHistoryByExecutionId" parameterType="string" resultMap="BuildHistoryResultMap" flushCache="true" useCache="false">
         select * from asc_build_history where execution_id = #{executionId}
     </select>

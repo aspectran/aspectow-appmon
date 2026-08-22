@@ -106,7 +106,7 @@ comment on table asc_audit_log is 'Security Audit Log';
 -- Build & Deployment Audit History Master
 create table if not exists asc_build_history (
     history_id bigint not null auto_increment,
-    execution_id varchar(64) not null unique,
+    execution_id varchar(64) not null,
     target_node_id varchar(100) not null,
     script_name varchar(100) not null,
     requester varchar(50) default 'SYSTEM' not null,
@@ -124,6 +124,8 @@ create table if not exists asc_build_history (
     created_at timestamp default current_timestamp not null,
     primary key (history_id)
 );
+
+create index if not exists idx_asc_build_hist_exec on asc_build_history (execution_id, target_node_id);
 
 comment on table asc_build_history is 'Build and Deployment Audit History Master';
 

@@ -41,7 +41,7 @@ public class AspectowConsoleDemoNode2 {
             File workDir = new File(root, "work2");
             File cmdDir = new File(root, "cmd2");
 
-            System.setProperty(MY_NODE_ID_PROPERTY, "node2");
+            System.setProperty(MY_NODE_ID_PROPERTY, "dev-node2");
             System.setProperty(BASE_PATH_PROPERTY, root.getCanonicalPath()); // for logging configuration
             System.setProperty(LOGS_DIR_PROPERTY, logsDir.getCanonicalPath()); // for logging configuration
             System.setProperty(WORK_PATH_PROPERTY, workDir.getCanonicalPath());

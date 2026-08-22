@@ -56,6 +56,21 @@ public interface BuildHistoryMapper {
     BuildHistory getBuildHistoryById(@Param("historyId") Long historyId);
 
     /**
+     * Retrieves a single build history master record by its execution ID and target node ID.
+     * @param executionId the unique execution ID
+     * @param targetNodeId the target node ID
+     * @return the build history entity, or null if not found
+     */
+    BuildHistory getBuildHistoryByExecutionIdAndNodeId(@Param("executionId") String executionId, @Param("targetNodeId") String targetNodeId);
+
+    /**
+     * Retrieves all build history master records by execution ID.
+     * @param executionId the execution ID
+     * @return list of build history entities for the execution
+     */
+    List<BuildHistory> getBuildHistoriesByExecutionId(@Param("executionId") String executionId);
+
+    /**
      * Retrieves a single build history master record by its execution ID.
      * @param executionId the unique execution ID
      * @return the build history entity, or null if not found
@@ -148,6 +163,16 @@ public interface BuildHistoryMapper {
         @Override
         public BuildHistory getBuildHistoryById(Long historyId) {
             return mapper().getBuildHistoryById(historyId);
+        }
+
+        @Override
+        public BuildHistory getBuildHistoryByExecutionIdAndNodeId(String executionId, String targetNodeId) {
+            return mapper().getBuildHistoryByExecutionIdAndNodeId(executionId, targetNodeId);
+        }
+
+        @Override
+        public List<BuildHistory> getBuildHistoriesByExecutionId(String executionId) {
+            return mapper().getBuildHistoriesByExecutionId(executionId);
         }
 
         @Override

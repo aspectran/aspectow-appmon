@@ -152,7 +152,7 @@ create table if not exists asc_audit_log (
 -- Build & Deployment Audit History Master
 create table if not exists asc_build_history (
     history_id bigint not null auto_increment,
-    execution_id varchar(64) not null unique,
+    execution_id varchar(64) not null,
     target_node_id varchar(100) not null,
     script_name varchar(100) not null,
     requester varchar(50) default 'SYSTEM' not null,
@@ -168,7 +168,8 @@ create table if not exists asc_build_history (
     integrity_hash varchar(64),
     error_summary varchar(1000),
     created_at timestamp default current_timestamp not null,
-    primary key (history_id)
+    primary key (history_id),
+    index idx_asc_build_hist_exec (execution_id, target_node_id)
 ) comment = 'Build and Deployment Audit History Master';
 
 -- Build Console Logs

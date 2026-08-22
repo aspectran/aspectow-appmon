@@ -42,7 +42,7 @@ public class AspectowConsoleDemoNode0 {
             File workDir = new File(root, "work");
             File cmdDir = new File(root, "cmd");
 
-            System.setProperty(MY_NODE_ID_PROPERTY, "console-node1");
+            System.setProperty(MY_NODE_ID_PROPERTY, "dev-console-node1");
             System.setProperty(MY_CONSOLE_PROPERTY, "true"); // This node is a console-dedicated node.
             System.setProperty(BASE_PATH_PROPERTY, root.getCanonicalPath()); // for logging configuration
             System.setProperty(LOGS_DIR_PROPERTY, logsDir.getCanonicalPath()); // for logging configuration
