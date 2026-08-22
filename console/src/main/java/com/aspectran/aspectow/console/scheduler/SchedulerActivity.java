@@ -16,7 +16,6 @@
 package com.aspectran.aspectow.console.scheduler;
 
 import com.aspectran.aspectow.console.auth.ConsoleTokenIssuer;
-import com.aspectran.aspectow.console.auth.UserInfo;
 import com.aspectran.aspectow.console.cluster.NodeConsoleHelper;
 import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.aspectow.node.manager.NodeManager;

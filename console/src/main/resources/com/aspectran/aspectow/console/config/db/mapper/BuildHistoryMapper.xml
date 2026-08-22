@@ -108,6 +108,14 @@
         inner join (
             select target_node_id, max(history_id) as max_history_id
             from asc_build_history
+            <where>
+                <if test="targetNodeIds != null and targetNodeIds.size() > 0">
+                    and target_node_id in
+                    <foreach item="nodeId" collection="targetNodeIds" open="(" separator="," close=")">
+                        #{nodeId}
+                    </foreach>
+                </if>
+            </where>
             group by target_node_id
         ) latest on h.history_id = latest.max_history_id
         order by h.history_id desc

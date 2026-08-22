@@ -15,6 +15,8 @@
  */
 package com.aspectran.aspectow.console.build.manager;
 
+import com.aspectran.aspectow.node.manager.NodeManager;
+import com.aspectran.aspectow.node.manager.NodeManagerBuilder;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.aware.ActivityContextAware;
 import com.aspectran.core.context.ActivityContext;
@@ -111,17 +113,17 @@ public class LocalScriptRunner implements ActivityContextAware {
     @Nullable
     public String getCurrentNodeId() {
         if (activityContext != null && activityContext.getBeanRegistry() != null
-                && activityContext.getBeanRegistry().containsBean(com.aspectran.aspectow.node.manager.NodeManager.class)) {
+                && activityContext.getBeanRegistry().containsBean(NodeManager.class)) {
             try {
-                com.aspectran.aspectow.node.manager.NodeManager nodeManager =
-                        activityContext.getBeanRegistry().getBean(com.aspectran.aspectow.node.manager.NodeManager.class);
+                NodeManager nodeManager =
+                        activityContext.getBeanRegistry().getBean(NodeManager.class);
                 if (nodeManager != null && StringUtils.hasText(nodeManager.getNodeId())) {
                     return nodeManager.getNodeId();
                 }
             } catch (Exception ignored) {
             }
         }
-        String prop = System.getProperty(com.aspectran.aspectow.node.manager.NodeManagerBuilder.MY_NODE_ID_PROPERTY);
+        String prop = System.getProperty(NodeManagerBuilder.MY_NODE_ID_PROPERTY);
         if (StringUtils.hasText(prop)) {
             return prop;
         }

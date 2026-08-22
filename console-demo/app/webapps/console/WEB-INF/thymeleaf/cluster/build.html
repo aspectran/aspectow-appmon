@@ -1321,6 +1321,11 @@
                         const header = message.header;
                         const nodeId = message.nodeId || message.targetNodeId || 'unknown';
 
+                        const validNodeIds = (nodes || []).map(n => n.id);
+                        if (nodeId !== 'unknown' && nodeId !== 'cluster' && !validNodeIds.includes(nodeId)) {
+                            return;
+                        }
+
                         if (header === 'log') {
                             if (message.line) {
                                 appendLogLine(nodeId, message.line);
@@ -1352,19 +1357,25 @@
                 onScriptChange();
 
                 if (initialLastExecutions && typeof initialLastExecutions === 'object') {
+                    const validNodeIds = (nodes || []).map(n => n.id);
                     Object.keys(initialLastExecutions).forEach(nid => {
-                        const execData = initialLastExecutions[nid];
-                        if (execData) {
-                            ensureNode(nid);
-                            Object.assign(nodeExecutions[nid], execData);
-                            updateNodeStatusUI(execData);
+                        if (validNodeIds.includes(nid)) {
+                            const execData = initialLastExecutions[nid];
+                            if (execData) {
+                                ensureNode(nid);
+                                Object.assign(nodeExecutions[nid], execData);
+                                updateNodeStatusUI(execData);
+                            }
                         }
                     });
                 } else if (initialLastExecution) {
                     const nid = initialLastExecution.nodeId || initialLastExecution.targetNodeId || myNodeId;
-                    ensureNode(nid);
-                    Object.assign(nodeExecutions[nid], initialLastExecution);
-                    updateNodeStatusUI(initialLastExecution);
+                    const validNodeIds = (nodes || []).map(n => n.id);
+                    if (validNodeIds.includes(nid)) {
+                        ensureNode(nid);
+                        Object.assign(nodeExecutions[nid], initialLastExecution);
+                        updateNodeStatusUI(initialLastExecution);
+                    }
                 }
 
                 initTabs();

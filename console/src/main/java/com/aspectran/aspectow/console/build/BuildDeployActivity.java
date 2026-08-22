@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * BuildDeployActivity provides views and REST endpoints for remote build and deployment management.
@@ -93,7 +94,11 @@ public class BuildDeployActivity {
             model.put("targetNodeId", targetNodeId);
         }
 
-        Map<String, BuildExecutionInfo> lastExecutions = remoteBuildDeployManager.getLastExecutions();
+        Set<String> nodeIds = nodes.stream()
+                .map(n -> (String) n.get("id"))
+                .filter(StringUtils::hasText)
+                .collect(Collectors.toSet());
+        Map<String, BuildExecutionInfo> lastExecutions = remoteBuildDeployManager.getLastExecutions(nodeIds);
         if (lastExecutions != null && !lastExecutions.isEmpty()) {
             model.put("lastExecutions", lastExecutions);
         }

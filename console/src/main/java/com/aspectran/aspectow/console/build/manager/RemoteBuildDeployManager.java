@@ -15,6 +15,8 @@
  */
 package com.aspectran.aspectow.console.build.manager;
 
+import com.aspectran.aspectow.console.build.audit.BuildAuditService;
+import com.aspectran.aspectow.console.build.audit.BuildHistory;
 import com.aspectran.aspectow.console.build.bridge.BuildDeployBroker;
 import com.aspectran.aspectow.console.build.bridge.BuildRequestParameters;
 import com.aspectran.aspectow.console.build.bridge.redis.BuildMessageBridgeHandler;
@@ -32,13 +34,15 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,13 +63,13 @@ public class RemoteBuildDeployManager implements InitializableBean {
 
     private final BuildDeployBroker broker;
 
-    private final com.aspectran.aspectow.console.build.audit.BuildAuditService buildAuditService;
+    private final BuildAuditService buildAuditService;
 
     private final Map<String, BuildExecutionInfo> activeExecutions = new ConcurrentHashMap<>();
 
     public RemoteBuildDeployManager(@NonNull NodeManager nodeManager,
                                    LocalScriptRunner localScriptRunner,
-                                   com.aspectran.aspectow.console.build.audit.BuildAuditService buildAuditService) {
+                                   BuildAuditService buildAuditService) {
         this.nodeManager = nodeManager;
         this.localScriptRunner = localScriptRunner;
         this.broker = new BuildDeployBroker(nodeManager.getNodeId(), nodeManager.getNodeMessagePublisher(), nodeManager.getNodeRegistry());
@@ -113,10 +117,9 @@ public class RemoteBuildDeployManager implements InitializableBean {
         // 2. Fetch latest execution record from shared DB
         if (buildAuditService != null) {
             try {
-                com.aspectran.aspectow.console.build.audit.BuildHistory h =
-                        buildAuditService.getLatestBuildHistory(nodeId);
-                if (h != null) {
-                    return convertToBuildExecutionInfo(h);
+                BuildHistory buildHistory = buildAuditService.getLatestBuildHistory(nodeId);
+                if (buildHistory != null) {
+                    return convertToBuildExecutionInfo(buildHistory);
                 }
             } catch (Exception e) {
                 logger.trace("Failed to load last build execution for node {} from shared DB audit history", nodeId, e);
@@ -125,16 +128,45 @@ public class RemoteBuildDeployManager implements InitializableBean {
         return null;
     }
 
-    public Map<String, BuildExecutionInfo> getLastExecutions() {
-        Map<String, BuildExecutionInfo> result = new HashMap<>();
+    public Set<String> getAvailableNodeIds() {
+        Set<String> nodeIds = new HashSet<>();
+        nodeIds.add(nodeManager.getNodeId());
+        if (nodeManager.getNodeInfoHolder() != null && nodeManager.getNodeInfoHolder().getNodeInfoList() != null) {
+            for (NodeInfo info : nodeManager.getNodeInfoHolder().getNodeInfoList()) {
+                if (info.getId() != null) {
+                    nodeIds.add(info.getId());
+                }
+            }
+        }
+        if (nodeManager.getNodeRegistry() != null) {
+            List<NodeInfo> registered = nodeManager.getNodeRegistry().getNodes();
+            if (registered != null) {
+                for (NodeInfo info : registered) {
+                    if (info.getId() != null) {
+                        nodeIds.add(info.getId());
+                    }
+                }
+            }
+        }
+        return nodeIds;
+    }
 
-        // 1. Fetch latest build histories from shared DB for all nodes
+    public Map<String, BuildExecutionInfo> getLastExecutions() {
+        return getLastExecutions(getAvailableNodeIds());
+    }
+
+    public Map<String, BuildExecutionInfo> getLastExecutions(Collection<String> targetNodeIds) {
+        Map<String, BuildExecutionInfo> result = new HashMap<>();
+        if (targetNodeIds == null || targetNodeIds.isEmpty()) {
+            return result;
+        }
+
+        // 1. Fetch latest build histories from shared DB for available target nodes only
         if (buildAuditService != null) {
             try {
-                List<com.aspectran.aspectow.console.build.audit.BuildHistory> list =
-                        buildAuditService.getLatestBuildHistories();
+                List<BuildHistory> list = buildAuditService.getLatestBuildHistories(targetNodeIds);
                 if (list != null) {
-                    for (com.aspectran.aspectow.console.build.audit.BuildHistory h : list) {
+                    for (BuildHistory h : list) {
                         if (h.getTargetNodeId() != null) {
                             result.put(h.getTargetNodeId(), convertToBuildExecutionInfo(h));
                         }
@@ -147,7 +179,7 @@ public class RemoteBuildDeployManager implements InitializableBean {
 
         // 2. Override with active running executions if any
         for (BuildExecutionInfo active : activeExecutions.values()) {
-            if (active.getTargetNodeId() != null) {
+            if (active.getTargetNodeId() != null && targetNodeIds.contains(active.getTargetNodeId())) {
                 result.put(active.getTargetNodeId(), active);
             }
         }
@@ -155,27 +187,28 @@ public class RemoteBuildDeployManager implements InitializableBean {
         return result;
     }
 
-    private BuildExecutionInfo convertToBuildExecutionInfo(com.aspectran.aspectow.console.build.audit.BuildHistory h) {
+    @NonNull
+    private BuildExecutionInfo convertToBuildExecutionInfo(@NonNull BuildHistory buildHistory) {
         BuildExecutionInfo info = new BuildExecutionInfo();
-        info.setExecutionId(h.getExecutionId());
-        info.setTargetNodeId(h.getTargetNodeId());
-        info.setScriptName(h.getScriptName());
-        if (h.getStatus() != null) {
+        info.setExecutionId(buildHistory.getExecutionId());
+        info.setTargetNodeId(buildHistory.getTargetNodeId());
+        info.setScriptName(buildHistory.getScriptName());
+        if (buildHistory.getStatus() != null) {
             try {
-                info.setStatus(BuildExecutionInfo.Status.valueOf(h.getStatus()));
+                info.setStatus(BuildExecutionInfo.Status.valueOf(buildHistory.getStatus()));
             } catch (Exception ignored) {
                 info.setStatus(BuildExecutionInfo.Status.FAILED);
             }
         }
-        info.setExitCode(h.getExitCode());
-        info.setStartedAt(h.getStartedAt());
-        info.setFinishedAt(h.getFinishedAt());
-        info.setDurationMs(h.getDurationMs());
-        info.setGitBranch(h.getGitBranch());
-        info.setGitCommitBefore(h.getGitCommitBefore());
-        info.setGitCommitAfter(h.getGitCommitAfter());
-        info.setGitCommitMsg(h.getGitCommitMsg());
-        info.setErrorSummary(h.getErrorSummary());
+        info.setExitCode(buildHistory.getExitCode());
+        info.setStartedAt(buildHistory.getStartedAt());
+        info.setFinishedAt(buildHistory.getFinishedAt());
+        info.setDurationMs(buildHistory.getDurationMs());
+        info.setGitBranch(buildHistory.getGitBranch());
+        info.setGitCommitBefore(buildHistory.getGitCommitBefore());
+        info.setGitCommitAfter(buildHistory.getGitCommitAfter());
+        info.setGitCommitMsg(buildHistory.getGitCommitMsg());
+        info.setErrorSummary(buildHistory.getErrorSummary());
         return info;
     }
 

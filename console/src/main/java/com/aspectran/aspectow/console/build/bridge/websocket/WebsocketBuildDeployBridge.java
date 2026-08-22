@@ -28,6 +28,7 @@ import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Initialize;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.apon.JsonToParameters;
+import com.aspectran.utils.apon.VariableParameters;
 import com.aspectran.utils.security.InvalidPBTokenException;
 import com.aspectran.web.websocket.jsr356.AspectranConfigurator;
 import com.aspectran.web.websocket.jsr356.SimplifiedEndpoint;
@@ -188,7 +189,7 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
 
         String username = (String) session.getUserProperties().get("username");
         if (params.getParameters() == null) {
-            params.setParameters(new com.aspectran.utils.apon.VariableParameters());
+            params.setParameters(new VariableParameters());
         }
         if (!params.getParameters().hasParameter("requester")) {
             params.getParameters().putValue("requester", StringUtils.hasText(username) ? username : "SYSTEM");

@@ -16,7 +16,6 @@
 package com.aspectran.aspectow.console.cluster;
 
 import com.aspectran.aspectow.console.auth.ConsoleTokenIssuer;
-import com.aspectran.aspectow.console.auth.UserInfo;
 import com.aspectran.aspectow.console.build.manager.BuildExecutionInfo;
 import com.aspectran.aspectow.console.build.manager.RemoteBuildDeployManager;
 import com.aspectran.aspectow.node.config.GroupInfo;

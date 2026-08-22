@@ -33,6 +33,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -227,11 +228,15 @@ public class BuildAuditService extends InstantActivitySupport {
     }
 
     /**
-     * Retrieves the latest build history record for each target node.
+     * Retrieves the latest build history record for each specified target node.
+     * @param targetNodeIds the collection of target node IDs
      * @return list of latest build history entities per node
      */
-    public List<BuildHistory> getLatestBuildHistories() {
-        return instantActivity(() -> buildHistoryMapper.getLatestBuildHistories());
+    public List<BuildHistory> getLatestBuildHistories(Collection<String> targetNodeIds) {
+        if (targetNodeIds == null || targetNodeIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return instantActivity(() -> buildHistoryMapper.getLatestBuildHistories(targetNodeIds));
     }
 
     /**

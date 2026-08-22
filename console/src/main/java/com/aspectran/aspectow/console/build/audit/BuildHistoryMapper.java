@@ -23,6 +23,7 @@ import com.aspectran.mybatis.SqlMapperAccess;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -69,10 +70,11 @@ public interface BuildHistoryMapper {
     BuildHistory getLatestBuildHistoryByNodeId(@Param("targetNodeId") String targetNodeId);
 
     /**
-     * Retrieves the latest build history record for each target node in the cluster.
+     * Retrieves the latest build history record for each specified target node.
+     * @param targetNodeIds the collection of target node IDs
      * @return list of latest build history entities per node
      */
-    List<BuildHistory> getLatestBuildHistories();
+    List<BuildHistory> getLatestBuildHistories(@Param("targetNodeIds") Collection<String> targetNodeIds);
 
     /**
      * Searches build history records matching the given criteria with pagination.
@@ -159,8 +161,8 @@ public interface BuildHistoryMapper {
         }
 
         @Override
-        public List<BuildHistory> getLatestBuildHistories() {
-            return mapper().getLatestBuildHistories();
+        public List<BuildHistory> getLatestBuildHistories(Collection<String> targetNodeIds) {
+            return mapper().getLatestBuildHistories(targetNodeIds);
         }
 
         @Override
