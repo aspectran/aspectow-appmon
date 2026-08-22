@@ -18,6 +18,7 @@ package com.aspectran.aspectow.console.build.manager;
 import com.aspectran.aspectow.node.manager.NodeManager;
 import com.aspectran.aspectow.node.manager.NodeManagerBuilder;
 import com.aspectran.core.component.bean.annotation.Component;
+import com.aspectran.core.component.bean.annotation.Destroy;
 import com.aspectran.core.component.bean.aware.ActivityContextAware;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.core.context.config.AspectranConfig;
@@ -287,6 +288,19 @@ public class LocalScriptRunner implements ActivityContextAware {
             logger.warn("Error while killing process tree", e);
             process.destroyForcibly();
         }
+    }
+
+    @Destroy
+    public void destroy() {
+        for (Map.Entry<String, Process> entry : activeProcesses.entrySet()) {
+            Process process = entry.getValue();
+            if (process != null && process.isAlive()) {
+                logger.info("Destroying active process for execution [{}] during shutdown", entry.getKey());
+                destroyProcessTree(process);
+            }
+        }
+        activeProcesses.clear();
+        logRingBuffers.clear();
     }
 
     /**
@@ -613,47 +627,6 @@ public class LocalScriptRunner implements ActivityContextAware {
     }
 
     /**
-     * Resolves the daemon log file (stderr or stdout).
-     * @param type "stderr" or "stdout"
-     * @return the resolved log file, or null if not found
-     */
-    @Nullable
-    public File resolveDaemonLogFile(String type) {
-        String filename = "daemon-" + ("stdout".equalsIgnoreCase(type) ? "stdout.log" : "stderr.log");
-
-        String logsDir = System.getProperty(AspectranConfig.LOGS_DIR_PROPERTY);
-        if (StringUtils.hasText(logsDir)) {
-            File f = new File(logsDir, filename);
-            if (f.exists()) {
-                return f;
-            }
-        }
-
-        File baseDir = getBaseDir();
-        File f = new File(new File(baseDir, "app/logs"), filename);
-        if (f.exists()) {
-            return f;
-        }
-
-        f = new File(new File(baseDir, "logs"), filename);
-        if (f.exists()) {
-            return f;
-        }
-
-        if (activityContext != null && activityContext.getApplicationAdapter() != null) {
-            java.nio.file.Path basePath = activityContext.getApplicationAdapter().getBasePath();
-            if (basePath != null) {
-                f = new File(basePath.toFile(), "logs/" + filename);
-                if (f.exists()) {
-                    return f;
-                }
-            }
-        }
-
-        return f;
-    }
-
-    /**
      * Retrieves detailed information and content for the daemon log file.
      * @param type "stderr" or "stdout"
      * @param maxLines maximum number of recent lines to read
@@ -705,6 +678,46 @@ public class LocalScriptRunner implements ActivityContextAware {
         }
 
         return info;
+    }
+
+    /**
+     * Resolves the daemon log file (stderr or stdout).
+     * @param type "stderr" or "stdout"
+     * @return the resolved log file, or null if not found
+     */
+    private File resolveDaemonLogFile(String type) {
+        String filename = "daemon-" + ("stdout".equalsIgnoreCase(type) ? "stdout.log" : "stderr.log");
+
+        String logsDir = System.getProperty(AspectranConfig.LOGS_DIR_PROPERTY);
+        if (StringUtils.hasText(logsDir)) {
+            File f = new File(logsDir, filename);
+            if (f.exists()) {
+                return f;
+            }
+        }
+
+        File baseDir = getBaseDir();
+        File f = new File(new File(baseDir, "app/logs"), filename);
+        if (f.exists()) {
+            return f;
+        }
+
+        f = new File(new File(baseDir, "logs"), filename);
+        if (f.exists()) {
+            return f;
+        }
+
+        if (activityContext != null && activityContext.getApplicationAdapter() != null) {
+            java.nio.file.Path basePath = activityContext.getApplicationAdapter().getBasePath();
+            if (basePath != null) {
+                f = new File(basePath.toFile(), "logs/" + filename);
+                if (f.exists()) {
+                    return f;
+                }
+            }
+        }
+
+        return f;
     }
 
 }

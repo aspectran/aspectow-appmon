@@ -371,8 +371,8 @@ public class NodeManager {
         payload.putValue("nodeId", nodeId);
         payload.putValue("clusterId", clusterConfig.getId());
 
-        // Default 30 seconds expiration
-        return TimeLimitedPBTokenIssuer.createToken(payload, 30000L, password, salt);
+        // 5 minutes expiration to tolerate inter-node clock drift and network delays
+        return TimeLimitedPBTokenIssuer.createToken(payload, 300000L, password, salt);
     }
 
     /**
