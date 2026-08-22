@@ -4,8 +4,6 @@
 
 <mapper namespace="com.aspectran.aspectow.appmon.engine.persist.db.mapper.EventCountMapper">
 
-    <cache />
-
     <select id="getLastEventCount" resultType="com.aspectran.aspectow.appmon.engine.persist.counter.EventCountVO">
         select node_id, group_id, app_id, event_id, datetime, total, delta, error
         from appmon_event_count_last

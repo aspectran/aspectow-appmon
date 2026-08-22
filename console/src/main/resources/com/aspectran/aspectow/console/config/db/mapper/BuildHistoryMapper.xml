@@ -4,8 +4,6 @@
 
 <mapper namespace="com.aspectran.aspectow.console.build.audit.BuildHistoryMapper">
 
-    <cache />
-
     <resultMap id="BuildHistoryResultMap" type="com.aspectran.aspectow.console.build.audit.BuildHistory">
         <id property="historyId" column="history_id" />
         <result property="executionId" column="execution_id" />
@@ -87,38 +85,43 @@
         where history_id = #{historyId}
     </update>
 
-    <select id="getBuildHistoryById" parameterType="long" resultMap="BuildHistoryResultMap">
+    <select id="getBuildHistoryById" parameterType="long" resultMap="BuildHistoryResultMap" flushCache="true" useCache="false">
         select * from asc_build_history where history_id = #{historyId}
     </select>
 
-    <select id="getBuildHistoryByExecutionId" parameterType="string" resultMap="BuildHistoryResultMap">
+    <select id="getBuildHistoryByExecutionId" parameterType="string" resultMap="BuildHistoryResultMap" flushCache="true" useCache="false">
         select * from asc_build_history where execution_id = #{executionId}
     </select>
 
-    <select id="getLatestBuildHistoryByNodeId" parameterType="string" resultMap="BuildHistoryResultMap">
+    <select id="getLatestBuildHistoryByNodeId" parameterType="string" resultMap="BuildHistoryResultMap" flushCache="true" useCache="false">
         select * from asc_build_history
-        where target_node_id = #{targetNodeId}
-        order by history_id desc
-        limit 1
+        where history_id = (
+            select max(history_id)
+            from asc_build_history
+            where target_node_id = #{targetNodeId}
+        )
     </select>
 
-    <select id="getLatestBuildHistories" resultMap="BuildHistorySummaryMap">
-        select h.*
-        from asc_build_history h
-        inner join (
-            select target_node_id, max(history_id) as max_history_id
+    <select id="getLatestBuildHistories" resultMap="BuildHistorySummaryMap" flushCache="true" useCache="false">
+        select *
+        from asc_build_history
+        where execution_id = (
+            select execution_id
             from asc_build_history
-            <where>
-                <if test="targetNodeIds != null and targetNodeIds.size() > 0">
-                    and target_node_id in
-                    <foreach item="nodeId" collection="targetNodeIds" open="(" separator="," close=")">
-                        #{nodeId}
-                    </foreach>
-                </if>
-            </where>
-            group by target_node_id
-        ) latest on h.history_id = latest.max_history_id
-        order by h.history_id desc
+            where history_id = (
+                select max(history_id)
+                from asc_build_history
+                <where>
+                    <if test="targetNodeIds != null and targetNodeIds.size() > 0">
+                        and target_node_id in
+                        <foreach item="nodeId" collection="targetNodeIds" open="(" separator="," close=")">
+                            #{nodeId}
+                        </foreach>
+                    </if>
+                </where>
+            )
+        )
+        order by history_id asc
     </select>
 
     <sql id="searchCriteria">
@@ -142,29 +145,70 @@
                 and started_at &lt;= #{endDate}
             </if>
             <if test="searchKeyword != null and searchKeyword != ''">
-                and (
-                    lower(execution_id) like lower(concat('%', #{searchKeyword}, '%'))
-                    or lower(target_node_id) like lower(concat('%', #{searchKeyword}, '%'))
-                    or lower(script_name) like lower(concat('%', #{searchKeyword}, '%'))
-                    or lower(requester) like lower(concat('%', #{searchKeyword}, '%'))
-                    or lower(git_branch) like lower(concat('%', #{searchKeyword}, '%'))
-                    or lower(git_commit_after) like lower(concat('%', #{searchKeyword}, '%'))
-                    or lower(git_commit_msg) like lower(concat('%', #{searchKeyword}, '%'))
-                )
+                <choose>
+                    <when test="_databaseId == 'oracle'">
+                        and (
+                            lower(execution_id) like '%' || lower(#{searchKeyword}) || '%'
+                            or lower(target_node_id) like '%' || lower(#{searchKeyword}) || '%'
+                            or lower(script_name) like '%' || lower(#{searchKeyword}) || '%'
+                            or lower(requester) like '%' || lower(#{searchKeyword}) || '%'
+                            or lower(git_branch) like '%' || lower(#{searchKeyword}) || '%'
+                            or lower(git_commit_after) like '%' || lower(#{searchKeyword}) || '%'
+                            or lower(git_commit_msg) like '%' || lower(#{searchKeyword}) || '%'
+                        )
+                    </when>
+                    <otherwise>
+                        and (
+                            lower(execution_id) like lower(concat('%', #{searchKeyword}, '%'))
+                            or lower(target_node_id) like lower(concat('%', #{searchKeyword}, '%'))
+                            or lower(script_name) like lower(concat('%', #{searchKeyword}, '%'))
+                            or lower(requester) like lower(concat('%', #{searchKeyword}, '%'))
+                            or lower(git_branch) like lower(concat('%', #{searchKeyword}, '%'))
+                            or lower(git_commit_after) like lower(concat('%', #{searchKeyword}, '%'))
+                            or lower(git_commit_msg) like lower(concat('%', #{searchKeyword}, '%'))
+                        )
+                    </otherwise>
+                </choose>
             </if>
         </where>
     </sql>
 
-    <select id="searchBuildHistory" parameterType="com.aspectran.aspectow.console.build.audit.BuildAuditQuery" resultMap="BuildHistorySummaryMap">
-        select * from asc_build_history
-        <include refid="searchCriteria" />
-        order by history_id desc
-        <if test="pageInfo != null">
-            limit #{pageInfo.size} offset #{pageInfo.offset}
-        </if>
+    <select id="searchBuildHistory" parameterType="com.aspectran.aspectow.console.build.audit.BuildAuditQuery" resultMap="BuildHistorySummaryMap" flushCache="true" useCache="false">
+        <choose>
+            <when test="_databaseId == 'oracle'">
+                <choose>
+                    <when test="pageInfo != null">
+                        select *
+                        from (
+                            select a.*, rownum as rnum
+                            from (
+                                select * from asc_build_history
+                                <include refid="searchCriteria" />
+                                order by history_id desc
+                            ) a
+                            where rownum &lt;= #{pageInfo.offset} + #{pageInfo.size}
+                        )
+                        where rnum &gt; #{pageInfo.offset}
+                    </when>
+                    <otherwise>
+                        select * from asc_build_history
+                        <include refid="searchCriteria" />
+                        order by history_id desc
+                    </otherwise>
+                </choose>
+            </when>
+            <otherwise>
+                select * from asc_build_history
+                <include refid="searchCriteria" />
+                order by history_id desc
+                <if test="pageInfo != null">
+                    limit #{pageInfo.size} offset #{pageInfo.offset}
+                </if>
+            </otherwise>
+        </choose>
     </select>
 
-    <select id="countBuildHistory" parameterType="com.aspectran.aspectow.console.build.audit.BuildAuditQuery" resultType="long">
+    <select id="countBuildHistory" parameterType="com.aspectran.aspectow.console.build.audit.BuildAuditQuery" resultType="long" flushCache="true" useCache="false">
         select count(*) from asc_build_history
         <include refid="searchCriteria" />
     </select>

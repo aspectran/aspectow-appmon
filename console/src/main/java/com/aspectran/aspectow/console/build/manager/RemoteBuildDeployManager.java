@@ -260,11 +260,13 @@ public class RemoteBuildDeployManager implements InitializableBean {
             return;
         }
 
+        String executionId = (params.getExecutionId() != null
+                ? params.getExecutionId()
+                : ("bld_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16)));
+
         for (String nodeId : targetNodeIds) {
             BuildExecutionInfo info = new BuildExecutionInfo();
-            info.setExecutionId(params.getExecutionId() != null && targetNodeIds.size() == 1
-                    ? params.getExecutionId()
-                    : ("bld_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16)));
+            info.setExecutionId(executionId);
             info.setTargetNodeId(nodeId);
             info.setScriptName(scriptName);
             info.setTriggerType("MANUAL");

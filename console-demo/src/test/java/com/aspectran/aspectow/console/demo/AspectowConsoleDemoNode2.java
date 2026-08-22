@@ -50,7 +50,7 @@ public class AspectowConsoleDemoNode2 {
             System.setProperty("tow.server.listener.http.port", "8092");
             System.setProperty("tow.context.root.session.cookieName", "JSESSIONID-8092");
             System.setProperty("tow.context.console.session.cookieName", "JSESSIONID-8092");
-            System.setProperty("aspectow.console.config.db.h2.path_explicit", "~/aspectow-console-demo;AUTO_SERVER=TRUE");
+            System.setProperty("aspectow.console.config.db.h2.path_explicit", "~/aspectow-console-demo");
             System.setProperty("aspectran.profiles.active", "dev,gateway");
             System.setProperty("aspectran.profiles.base.console", "dev,h2");
 

@@ -4,8 +4,6 @@
 
 <mapper namespace="com.aspectran.aspectow.console.common.db.mapper.AccountMapper">
 
-    <cache />
-
     <resultMap id="UserResultMap" type="com.aspectran.aspectow.console.common.db.model.User">
         <id property="userId" column="user_id" />
         <result property="username" column="username" />

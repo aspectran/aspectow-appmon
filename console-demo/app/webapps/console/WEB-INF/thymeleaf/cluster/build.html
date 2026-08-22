@@ -481,16 +481,12 @@
                 if (type === 'node') {
                     if (val) {
                         updateUrl(val);
-                        activeTargetNodes = [val];
                     } else {
                         updateUrl(null);
-                        activeTargetNodes = [];
                     }
                 } else if (type === 'group') {
                     updateUrl(null);
-                    activeTargetNodes = nodes.filter(n => n.group === val).map(n => n.id);
                 }
-                initTabs();
             }
 
             function doTargetTypeChange() {
@@ -503,18 +499,13 @@
                 if (type === 'services') {
                     $container.hide();
                     updateUrl(null);
-                    const serviceNodes = nodes.filter(n => !n.console);
-                    activeTargetNodes = (serviceNodes.length > 0 ? serviceNodes : nodes).map(n => n.id);
                 } else if (type === 'all') {
                     $container.hide();
                     updateUrl(null);
-                    activeTargetNodes = nodes.map(n => n.id);
                 } else if (type === 'group') {
                     $container.show();
                     const groups = [...new Set(nodes.map(n => n.group).filter(g => g))];
                     groups.forEach(g => $select.append(new Option(g, g)));
-                    const selectedGroup = $select.val();
-                    activeTargetNodes = nodes.filter(n => n.group === selectedGroup).map(n => n.id);
                 } else {
                     $container.show();
                     nodes.forEach(n => {
@@ -536,10 +527,8 @@
                     if (targetNodeId) {
                         $select.val(targetNodeId);
                         updateUrl(targetNodeId);
-                        activeTargetNodes = [targetNodeId];
                     }
                 }
-                initTabs();
             }
 
             function updateUrl(nodeId) {
@@ -1410,6 +1399,7 @@
                 onTargetTypeChange();
                 onScriptChange();
 
+                let recentExecutedNodes = [];
                 if (initialLastExecutions && typeof initialLastExecutions === 'object') {
                     const validNodeIds = (nodes || []).map(n => n.id);
                     Object.keys(initialLastExecutions).forEach(nid => {
@@ -1419,6 +1409,7 @@
                                 ensureNode(nid);
                                 Object.assign(nodeExecutions[nid], execData);
                                 updateNodeStatusUI(execData);
+                                recentExecutedNodes.push(nid);
                             }
                         }
                     });
@@ -1429,7 +1420,28 @@
                         ensureNode(nid);
                         Object.assign(nodeExecutions[nid], initialLastExecution);
                         updateNodeStatusUI(initialLastExecution);
+                        recentExecutedNodes.push(nid);
                     }
+                }
+
+                if (recentExecutedNodes.length > 0) {
+                    activeTargetNodes = recentExecutedNodes;
+                    activeTab = activeTargetNodes.length > 1 ? '__all__' : activeTargetNodes[0];
+                } else {
+                    const type = $('#target-type').val();
+                    if (type === 'services') {
+                        const serviceNodes = nodes.filter(n => !n.console);
+                        activeTargetNodes = (serviceNodes.length > 0 ? serviceNodes : nodes).map(n => n.id);
+                    } else if (type === 'all') {
+                        activeTargetNodes = nodes.map(n => n.id);
+                    } else if (type === 'group') {
+                        const groupVal = $('#target-value').val();
+                        activeTargetNodes = nodes.filter(n => n.group === groupVal).map(n => n.id);
+                    } else {
+                        const nodeVal = $('#target-value').val() || currentNodeId || myNodeId;
+                        activeTargetNodes = nodeVal ? [nodeVal] : [];
+                    }
+                    activeTab = activeTargetNodes.length > 1 ? '__all__' : (activeTargetNodes[0] || '__all__');
                 }
 
                 initTabs();
