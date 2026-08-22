@@ -99,13 +99,59 @@ if ! acquire_lock_or_wait; then
   exit 0
 fi
 
+TARGET_REF="${1:-$PARAM_BRANCH}"
+
 if [ ! -d "$REPO_DIR" ]; then
   [ ! -d "$BUILD_DIR" ] && mkdir -p "$BUILD_DIR"
   cd "$BUILD_DIR"
-  git clone "$REPO_URL" "$APP_NAME"
+  if [ -n "$TARGET_REF" ]; then
+    echo "Cloning repository with branch/tag: $TARGET_REF ..."
+    if ! git clone -b "$TARGET_REF" "$REPO_URL" "$APP_NAME"; then
+      echo "[ERROR] Failed to clone branch or tag '$TARGET_REF' from $REPO_URL."
+      echo "[ERROR] Please check if the branch or tag name exists."
+      exit 1
+    fi
+  else
+    echo "Cloning repository from $REPO_URL ..."
+    if ! git clone "$REPO_URL" "$APP_NAME"; then
+      echo "[ERROR] Failed to clone repository from $REPO_URL."
+      exit 1
+    fi
+  fi
   mark_pull_success
 else
   cd "$REPO_DIR"
-  git pull
+  echo "Fetching latest changes and tags from remote repository..."
+  if ! git fetch --all --tags --prune; then
+    echo "[ERROR] Failed to fetch updates from remote repository."
+    exit 1
+  fi
+
+  if [ -n "$TARGET_REF" ]; then
+    echo "Switching to branch or tag: $TARGET_REF ..."
+    if git rev-parse --verify --quiet "refs/tags/$TARGET_REF" >/dev/null 2>&1; then
+      echo "Checking out tag '$TARGET_REF'..."
+      git checkout -q "refs/tags/$TARGET_REF"
+    elif git rev-parse --verify --quiet "refs/heads/$TARGET_REF" >/dev/null 2>&1; then
+      echo "Checking out local branch '$TARGET_REF'..."
+      git checkout -q "$TARGET_REF"
+      if git rev-parse --verify --quiet "origin/$TARGET_REF" >/dev/null 2>&1; then
+        git pull --ff-only origin "$TARGET_REF" || git pull origin "$TARGET_REF"
+      fi
+    elif git rev-parse --verify --quiet "origin/$TARGET_REF" >/dev/null 2>&1; then
+      echo "Checking out remote branch 'origin/$TARGET_REF'..."
+      git checkout -B "$TARGET_REF" "origin/$TARGET_REF"
+    elif git rev-parse --verify --quiet "$TARGET_REF^{commit}" >/dev/null 2>&1; then
+      echo "Checking out commit '$TARGET_REF'..."
+      git checkout -q "$TARGET_REF"
+    else
+      echo "[ERROR] Branch, tag, or commit '$TARGET_REF' not found in repository."
+      echo "[ERROR] Please check the branch or tag name and try again."
+      exit 1
+    fi
+  else
+    echo "Pulling latest changes for current branch..."
+    git pull
+  fi
   mark_pull_success
 fi
