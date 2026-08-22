@@ -342,11 +342,8 @@ public class RemoteBuildDeployManager implements InitializableBean {
             if (result.isEmpty() && targetGroup.equals(nodeManager.getGroupId())) {
                 result.add(nodeManager.getNodeId());
             }
-            return result;
-        }
-
-        // 2. All nodes target
-        if (targetAll) {
+        } else if (targetAll) {
+            // 2. All nodes target
             if (registry != null) {
                 List<NodeInfo> allNodes = registry.getNodes();
                 for (NodeInfo n : allNodes) {
@@ -358,11 +355,8 @@ public class RemoteBuildDeployManager implements InitializableBean {
             if (result.isEmpty()) {
                 result.add(nodeManager.getNodeId());
             }
-            return result;
-        }
-
-        // 3. Service nodes target (excluding console nodes)
-        if (targetServices) {
+        } else if (targetServices) {
+            // 3. Service nodes target (excluding console nodes)
             if (registry != null) {
                 List<NodeInfo> allNodes = registry.getNodes();
                 for (NodeInfo n : allNodes) {
@@ -377,11 +371,8 @@ public class RemoteBuildDeployManager implements InitializableBean {
                     result.add(nodeManager.getNodeId());
                 }
             }
-            return result;
-        }
-
-        // 3. Specific Node target (or check if it was actually passed as a group name)
-        if (StringUtils.hasText(targetNodeId)) {
+        } else if (StringUtils.hasText(targetNodeId)) {
+            // 4. Specific Node target (or check if it was actually passed as a group name)
             if (registry != null && !registry.isFound(targetNodeId)) {
                 List<NodeInfo> groupNodes = registry.getNodesByGroup(targetNodeId);
                 if (!groupNodes.isEmpty()) {
@@ -390,15 +381,17 @@ public class RemoteBuildDeployManager implements InitializableBean {
                             result.add(n.getId());
                         }
                     }
-                    return result;
                 }
             }
-            result.add(targetNodeId);
-            return result;
+            if (result.isEmpty()) {
+                result.add(targetNodeId);
+            }
+        } else {
+            // Default to local node
+            result.add(nodeManager.getNodeId());
         }
 
-        // Default to local node
-        result.add(nodeManager.getNodeId());
+        Collections.sort(result);
         return result;
     }
 

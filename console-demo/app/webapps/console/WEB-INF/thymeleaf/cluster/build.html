@@ -984,6 +984,7 @@
                     targetLabel = `Node '${targetNodeId}'`;
                     activeTargetNodes = [targetNodeId];
                 }
+                activeTargetNodes.sort();
 
                 if (!scriptName) {
                     alert('Please select a script to execute.');
@@ -1426,7 +1427,6 @@
 
                 if (recentExecutedNodes.length > 0) {
                     activeTargetNodes = recentExecutedNodes;
-                    activeTab = activeTargetNodes.length > 1 ? '__all__' : activeTargetNodes[0];
                 } else {
                     const type = $('#target-type').val();
                     if (type === 'services') {
@@ -1441,8 +1441,9 @@
                         const nodeVal = $('#target-value').val() || currentNodeId || myNodeId;
                         activeTargetNodes = nodeVal ? [nodeVal] : [];
                     }
-                    activeTab = activeTargetNodes.length > 1 ? '__all__' : (activeTargetNodes[0] || '__all__');
                 }
+                activeTargetNodes.sort();
+                activeTab = activeTargetNodes.length > 1 ? '__all__' : (activeTargetNodes[0] || '__all__');
 
                 initTabs();
 
