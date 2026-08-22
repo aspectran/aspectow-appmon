@@ -245,7 +245,7 @@
                         </select>
                     </div>
                     <div class="col-md-5" id="target-value-container">
-                        <select id="target-value" class="form-select form-select-sm">
+                        <select id="target-value" class="form-select form-select-sm" onchange="onTargetValueChange()">
                             <!-- Dynamic options -->
                         </select>
                     </div>
@@ -471,6 +471,26 @@
                 } else {
                     doTargetTypeChange();
                 }
+            }
+
+            function onTargetValueChange() {
+                const type = $('#target-type').val();
+                const $select = $('#target-value');
+                const val = $select.val();
+
+                if (type === 'node') {
+                    if (val) {
+                        updateUrl(val);
+                        activeTargetNodes = [val];
+                    } else {
+                        updateUrl(null);
+                        activeTargetNodes = [];
+                    }
+                } else if (type === 'group') {
+                    updateUrl(null);
+                    activeTargetNodes = nodes.filter(n => n.group === val).map(n => n.id);
+                }
+                initTabs();
             }
 
             function doTargetTypeChange() {
@@ -1355,7 +1375,18 @@
                             }
                         } else if (header === 'logBackfill') {
                             if (message.lines && Array.isArray(message.lines)) {
-                                message.lines.forEach(l => appendLogLine(nodeId, l));
+                                const exec = ensureNode(nodeId);
+                                exec.logs = [];
+                                allLogs = allLogs.filter(item => item.nodeId !== nodeId);
+                                message.lines.forEach(l => {
+                                    if (l !== null && l !== undefined) {
+                                        exec.logs.push({ text: l, type: '' });
+                                        allLogs.push({ nodeId: nodeId, text: l, type: '' });
+                                    }
+                                });
+                                if (activeTab === '__all__' || activeTab === nodeId) {
+                                    renderActiveTab();
+                                }
                             }
                         } else if (header === 'status') {
                             if (message.error) {
