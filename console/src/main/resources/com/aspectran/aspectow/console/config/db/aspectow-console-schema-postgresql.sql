@@ -183,6 +183,48 @@ create table if not exists asc_audit_log (
 
 comment on table asc_audit_log is 'Security Audit Log';
 
+-- Build & Deployment Audit History Master
+create table if not exists asc_build_history (
+    history_id bigserial not null,
+    execution_id varchar(64) not null,
+    target_node_id varchar(100) not null,
+    script_name varchar(100) not null,
+    requester varchar(50) default 'SYSTEM' not null,
+    status varchar(20) default 'PENDING' not null, -- PENDING, RUNNING, SUCCESS, FAILED, CANCELLED, TIMEOUT
+    exit_code int,
+    started_at timestamp default current_timestamp not null,
+    finished_at timestamp,
+    duration_ms bigint,
+    git_branch varchar(100),
+    git_commit_before varchar(64),
+    git_commit_after varchar(64),
+    git_commit_msg varchar(500),
+    integrity_hash varchar(64), -- SHA-256 integrity digest for compliance audit
+    error_summary varchar(1000),
+    created_at timestamp default current_timestamp not null,
+    primary key (history_id)
+);
+
+create index if not exists idx_asc_build_hist_exec on asc_build_history (execution_id, target_node_id);
+
+comment on table asc_build_history is 'Build and Deployment Audit History Master';
+
+-- Build Console Logs (supports raw or GZIP compressed payload)
+create table if not exists asc_build_log (
+    log_id bigserial not null,
+    history_id bigint not null,
+    execution_id varchar(64) not null,
+    log_content text,
+    compressed_yn char(1) default 'N' not null,
+    line_count int default 0 not null,
+    byte_size bigint default 0 not null,
+    created_at timestamp default current_timestamp not null,
+    primary key (log_id),
+    foreign key (history_id) references asc_build_history(history_id) on delete cascade
+);
+
+comment on table asc_build_log is 'Build and Deployment Console Output Logs';
+
 -- Initial data
 insert into asc_role (role_name, description) values ('SUPER_ADMIN', 'Super administrator with full access') on conflict (role_name) do nothing;
 insert into asc_role (role_name, description) values ('ADMIN', 'Administrator with limited management access') on conflict (role_name) do nothing;

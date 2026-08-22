@@ -240,8 +240,24 @@
     </select>
 
     <delete id="purgeOldHistories" parameterType="int">
-        delete from asc_build_history
-        where created_at &lt; date_sub(current_timestamp, interval #{retentionDays} day)
+        <choose>
+            <when test="_databaseId == 'oracle'">
+                delete from asc_build_history
+                where created_at &lt; current_timestamp - numtodsinterval(#{retentionDays}, 'DAY')
+            </when>
+            <when test="_databaseId == 'postgresql'">
+                delete from asc_build_history
+                where created_at &lt; current_timestamp - (#{retentionDays} || ' day')::interval
+            </when>
+            <when test="_databaseId == 'mysql'">
+                delete from asc_build_history
+                where created_at &lt; date_sub(current_timestamp, interval #{retentionDays} day)
+            </when>
+            <otherwise>
+                delete from asc_build_history
+                where created_at &lt; dateadd(day, -#{retentionDays}, current_timestamp)
+            </otherwise>
+        </choose>
     </delete>
 
 </mapper>
