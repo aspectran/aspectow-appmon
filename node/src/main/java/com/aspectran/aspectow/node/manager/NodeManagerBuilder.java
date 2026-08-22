@@ -40,6 +40,7 @@ import com.aspectran.utils.PBEncryptionUtils;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.SystemUtils;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +57,8 @@ public abstract class NodeManagerBuilder {
     public static final String MY_NODE_ID_PROPERTY = "aspectow.node.id";
 
     public static final String MY_GROUP_ID_PROPERTY = "aspectow.node.group";
+
+    public static final String MY_CONSOLE_PROPERTY = "aspectow.node.console";
 
     private static final String DEFAULT_CLUSTER_ID = "cluster1";
 
@@ -145,6 +148,11 @@ public abstract class NodeManagerBuilder {
             nodeInfoHolder.putNodeInfo(nodeInfo);
         } else {
             nodeId = nodeInfo.getId();
+        }
+
+        Boolean myConsole = resolveMyConsole();
+        if (myConsole != null) {
+            nodeInfo.setConsole(myConsole);
         }
 
         // Ensure all nodes have a group assigned
@@ -274,6 +282,15 @@ public abstract class NodeManagerBuilder {
 
     private static String resolveMyGroupId() {
         return SystemUtils.getProperty(MY_GROUP_ID_PROPERTY);
+    }
+
+    @Nullable
+    private static Boolean resolveMyConsole() {
+        String val = SystemUtils.getProperty(MY_CONSOLE_PROPERTY);
+        if (StringUtils.hasText(val)) {
+            return Boolean.parseBoolean(val);
+        }
+        return null;
     }
 
     private static void validateSecretConfig(SecretConfig secretConfig) {

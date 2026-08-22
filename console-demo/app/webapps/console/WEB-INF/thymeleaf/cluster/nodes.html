@@ -24,6 +24,20 @@
             font-family: var(--bs-font-monospace);
             font-size: 0.75rem;
         }
+        .action-card {
+            transition: all 0.15s ease-in-out;
+            background: var(--bs-body-bg);
+            cursor: pointer;
+            border-color: var(--bs-border-color);
+        }
+        .action-card:hover {
+            border-color: var(--bs-primary) !important;
+            background: var(--bs-tertiary-bg);
+        }
+        .action-card:has(input:checked) {
+            border-color: var(--bs-primary) !important;
+            background-color: var(--bs-primary-subtle) !important;
+        }
     </style>
 </head>
 <body>
@@ -119,6 +133,7 @@
                         <div>
                             <h5 class="fw-bold mb-0" th:text="${nodeInfo.title}">Node Title</h5>
                             <span class="badge bg-secondary node-id-badge mt-1" th:text="${nodeInfo.id}">node-id</span>
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle mt-1 ms-1" th:if="${nodeInfo.console}">Console</span>
                         </div>
                         <div class="d-flex flex-column align-items-end">
                             <div class="d-flex align-items-center gap-2">
@@ -180,7 +195,7 @@
             </th:block>
             <!-- Bulk Control Modal -->
             <div class="modal fade" id="bulkControlModal" tabindex="-1" aria-labelledby="bulkControlModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
+                <div class="modal-dialog modal-lg">
                     <div class="modal-content text-start">
                         <div class="modal-header">
                             <h5 class="modal-title fw-bold" id="bulkControlModalLabel"><i class="bi bi-sliders text-warning me-2"></i>Cluster Bulk Control</h5>
@@ -191,8 +206,14 @@
                                 <div class="mb-3">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <label class="form-label fw-semibold small text-muted text-uppercase mb-0">1. Select Target Nodes</label>
-                                        <div>
-                                            <button type="button" class="btn btn-link btn-xs text-decoration-none p-0 me-2" id="bulk-select-all">Select All</button>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="form-check form-check-inline mb-0 small" id="bulk-exclude-console-wrapper">
+                                                <input class="form-check-input" type="checkbox" id="bulk-exclude-console" checked>
+                                                <label class="form-check-label small fw-medium text-secondary" for="bulk-exclude-console">
+                                                    Exclude Console
+                                                </label>
+                                            </div>
+                                            <button type="button" class="btn btn-link btn-xs text-decoration-none p-0" id="bulk-select-all">Select All</button>
                                             <button type="button" class="btn btn-link btn-xs text-decoration-none p-0 text-secondary" id="bulk-deselect-all">Deselect All</button>
                                         </div>
                                     </div>
@@ -201,23 +222,76 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold small text-muted text-uppercase">2. Action</label>
-                                    <div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="bulkAction" id="bulkActionPause" value="pause" checked>
-                                            <label class="form-check-label text-warning fw-bold" for="bulkActionPause">PAUSE</label>
+                                    <label class="form-label fw-semibold small text-muted text-uppercase mb-2">2. Action</label>
+                                    <div class="row g-2">
+                                        <!-- PAUSE -->
+                                        <div class="col-sm-6">
+                                            <label class="card h-100 p-2.5 p-2 action-card rounded-3 shadow-none" for="bulkActionPause">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <input class="form-check-input mt-1 flex-shrink-0" type="radio" name="bulkAction" id="bulkActionPause" value="pause" checked>
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-bold text-warning small d-flex align-items-center gap-1 mb-1">
+                                                            <i class="bi bi-pause-circle-fill"></i> PAUSE
+                                                        </div>
+                                                        <div class="text-muted" style="font-size: 0.75rem; line-height: 1.35;">
+                                                            Temporarily stop accepting incoming traffic and pause background activities.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </label>
                                         </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="bulkAction" id="bulkActionResume" value="resume">
-                                            <label class="form-check-label text-success fw-bold" for="bulkActionResume">RESUME</label>
+
+                                        <!-- RESUME -->
+                                        <div class="col-sm-6">
+                                            <label class="card h-100 p-2.5 p-2 action-card rounded-3 shadow-none" for="bulkActionResume">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <input class="form-check-input mt-1 flex-shrink-0" type="radio" name="bulkAction" id="bulkActionResume" value="resume">
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-bold text-success small d-flex align-items-center gap-1 mb-1">
+                                                            <i class="bi bi-play-circle-fill"></i> RESUME
+                                                        </div>
+                                                        <div class="text-muted" style="font-size: 0.75rem; line-height: 1.35;">
+                                                            Resume paused services to accept traffic and reactivate background jobs.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </label>
                                         </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="bulkAction" id="bulkActionRestart" value="restart">
-                                            <label class="form-check-label text-primary fw-bold" for="bulkActionRestart">RESTART SERVICE</label>
+
+                                        <!-- RESTART SERVICE -->
+                                        <div class="col-sm-6">
+                                            <label class="card h-100 p-2.5 p-2 action-card rounded-3 shadow-none" for="bulkActionRestart">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <input class="form-check-input mt-1 flex-shrink-0" type="radio" name="bulkAction" id="bulkActionRestart" value="restart-service">
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-bold text-primary small d-flex align-items-center gap-1 mb-1">
+                                                            <i class="bi bi-arrow-clockwise"></i> RESTART SERVICE
+                                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" style="font-size: 0.65rem;">Hot</span>
+                                                        </div>
+                                                        <div class="text-muted" style="font-size: 0.75rem; line-height: 1.35;">
+                                                            Gracefully recreate ActivityContext and reload classes without stopping the JVM.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </label>
                                         </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="bulkAction" id="bulkActionRestartServer" value="restart-server">
-                                            <label class="form-check-label text-danger fw-bold" for="bulkActionRestartServer">RESTART SERVER</label>
+
+                                        <!-- RESTART SERVER -->
+                                        <div class="col-sm-6">
+                                            <label class="card h-100 p-2.5 p-2 action-card rounded-3 shadow-none" for="bulkActionRestartServer">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <input class="form-check-input mt-1 flex-shrink-0" type="radio" name="bulkAction" id="bulkActionRestartServer" value="restart-server">
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-bold text-danger small d-flex align-items-center gap-1 mb-1">
+                                                            <i class="bi bi-power"></i> RESTART SERVER
+                                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1" style="font-size: 0.65rem;">Cold</span>
+                                                        </div>
+                                                        <div class="text-muted" style="font-size: 0.75rem; line-height: 1.35;">
+                                                            Completely restart the OS daemon/service process and JVM instance.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
@@ -650,29 +724,78 @@
                     client.start('');
                 }
 
+                function updateBulkConsoleState() {
+                    const action = $('input[name="bulkAction"]:checked').val();
+                    const isPauseResume = (action === 'pause' || action === 'resume');
+                    const $excludeConsole = $('#bulk-exclude-console');
+
+                    if (isPauseResume) {
+                        $excludeConsole.prop('checked', true).prop('disabled', true);
+                    } else {
+                        $excludeConsole.prop('disabled', false);
+                    }
+
+                    const exclude = $excludeConsole.is(':checked');
+
+                    $('.bulk-node-chk').each(function() {
+                        const isConsole = $(this).data('console') === true || $(this).data('console') === 'true';
+                        const $row = $(this).closest('.bulk-node-row');
+                        const $notice = $row.find('.console-notice');
+
+                        if (isConsole) {
+                            if (exclude || isPauseResume) {
+                                $(this).prop('checked', false).prop('disabled', true);
+                                $row.addClass('opacity-50');
+                                $notice.show();
+                            } else {
+                                $(this).prop('disabled', false);
+                                $row.removeClass('opacity-50');
+                                $notice.hide();
+                            }
+                        }
+                    });
+
+                    syncGroupCheckboxes();
+                }
+
+                function syncGroupCheckboxes() {
+                    $('.bulk-group-chk').each(function() {
+                        const groupKey = $(this).data('group');
+                        const $activeNodes = $(`.group-node-${groupKey}:not(:disabled)`);
+                        const $checkedNodes = $(`.group-node-${groupKey}:not(:disabled):checked`);
+                        if ($activeNodes.length > 0 && $activeNodes.length === $checkedNodes.length) {
+                            $(this).prop('checked', true);
+                        } else {
+                            $(this).prop('checked', false);
+                        }
+                    });
+                }
+
                 $('#bulk-select-all').on('click', function() {
-                    $('#bulk-node-list input[type="checkbox"]').prop('checked', true);
+                    $('#bulk-node-list input.bulk-node-chk:not(:disabled)').prop('checked', true);
+                    syncGroupCheckboxes();
                 });
 
                 $('#bulk-deselect-all').on('click', function() {
                     $('#bulk-node-list input[type="checkbox"]').prop('checked', false);
                 });
 
+                $('#bulk-exclude-console').on('change', function() {
+                    updateBulkConsoleState();
+                });
+
+                $('input[name="bulkAction"]').on('change', function() {
+                    updateBulkConsoleState();
+                });
+
                 $('#bulk-node-list').on('change', '.bulk-group-chk', function() {
                     const groupKey = $(this).data('group');
                     const isChecked = $(this).is(':checked');
-                    $(`.group-node-${groupKey}`).prop('checked', isChecked);
+                    $(`.group-node-${groupKey}:not(:disabled)`).prop('checked', isChecked);
                 });
 
                 $('#bulk-node-list').on('change', '.bulk-node-chk', function() {
-                    const classList = $(this).attr('class').split(/\s+/);
-                    const groupClass = classList.find(c => c.startsWith('group-node-'));
-                    if (groupClass) {
-                        const groupKey = groupClass.replace('group-node-', '');
-                        const totalInGroup = $(`.group-node-${groupKey}`).length;
-                        const checkedInGroup = $(`.group-node-${groupKey}:checked`).length;
-                        $(`#chk-group-${groupKey}`).prop('checked', totalInGroup === checkedInGroup);
-                    }
+                    syncGroupCheckboxes();
                 });
 
                 $('#bulkControlModal').on('show.bs.modal', function () {
@@ -681,8 +804,12 @@
                     
                     if (!nodes || nodes.length === 0) {
                         $list.html('<div class="text-muted small p-2">No nodes available.</div>');
+                        $('#bulk-exclude-console-wrapper').hide();
                         return;
                     }
+
+                    const hasConsoleNodes = nodes.some(n => n.console);
+                    $('#bulk-exclude-console-wrapper').toggle(hasConsoleNodes);
 
                     const groups = {};
                     nodes.forEach(n => {
@@ -703,6 +830,7 @@
                             <div class="ms-2">`;
                         
                         groups[gName].forEach(n => {
+                            const isConsole = Boolean(n.console);
                             const status = (n.status || 'live').toLowerCase();
                             let statusBadge = '';
                             if (status === 'live') {
@@ -715,12 +843,17 @@
                                 statusBadge = `<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle ms-2">${status.toUpperCase()}</span>`;
                             }
 
+                            const consoleBadge = isConsole ? '<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle ms-1">Console</span>' : '';
+                            const consoleNotice = isConsole ? '<span class="console-notice text-muted ms-1 small" style="font-size:0.75rem; display:none;">(Not Applicable)</span>' : '';
+
                             gHtml += `
-                                <div class="form-check text-start ps-4 py-1">
-                                    <input class="form-check-input bulk-node-chk group-node-${safeGName}" type="checkbox" name="bulkNodes" value="${n.id}" id="chk-${n.id}">
+                                <div class="form-check text-start ps-4 py-1 bulk-node-row">
+                                    <input class="form-check-input bulk-node-chk group-node-${safeGName}" type="checkbox" name="bulkNodes" value="${n.id}" id="chk-${n.id}" data-console="${isConsole}">
                                     <label class="form-check-label small" for="chk-${n.id}">
                                         ${n.title ? n.title + ' (' + n.id + ')' : n.id}
+                                        ${consoleBadge}
                                         ${statusBadge}
+                                        ${consoleNotice}
                                     </label>
                                 </div>`;
                         });
@@ -728,6 +861,8 @@
                         gHtml += `</div></div>`;
                         $list.append(gHtml);
                     });
+
+                    updateBulkConsoleState();
                 });
 
                 $('#execute-bulk-btn').on('click', function() {
@@ -736,9 +871,17 @@
                         return;
                     }
 
+                    const action = $('input[name="bulkAction"]:checked').val();
+                    const isPauseResume = (action === 'pause' || action === 'resume');
+
                     const selectedNodes = [];
                     $('input[name="bulkNodes"]:checked').each(function() {
-                        selectedNodes.push($(this).val());
+                        const nodeId = $(this).val();
+                        const isConsole = $(this).data('console') === true || $(this).data('console') === 'true';
+                        if (isPauseResume && isConsole) {
+                            return; // Safe guard: Skip console node on pause/resume
+                        }
+                        selectedNodes.push(nodeId);
                     });
 
                     if (selectedNodes.length === 0) {
@@ -746,8 +889,7 @@
                         return;
                     }
 
-                    const action = $('input[name="bulkAction"]:checked').val();
-                    const actionName = (action === 'restart' ? 'RESTART SERVICE' : (action === 'restart-server' ? 'RESTART SERVER' : action.toUpperCase()));
+                    const actionName = (action === 'restart-service' || action === 'restart' ? 'RESTART SERVICE' : (action === 'restart-server' ? 'RESTART SERVER' : action.toUpperCase()));
 
                     if (!confirm(`Are you sure you want to execute '${actionName}' on ${selectedNodes.length} selected node(s)?`)) {
                         return;
@@ -783,7 +925,7 @@
 
                         results.forEach(r => {
                             if (r.success) {
-                                if (action === 'restart' || action === 'restart-server') {
+                                if (action === 'restart-service' || action === 'restart' || action === 'restart-server') {
                                     updateNodeStatus({ id: r.nodeId, status: 'stopping' });
                                     if (action === 'restart-server') {
                                         pollNodeRecovery(r.nodeId);

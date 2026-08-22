@@ -34,6 +34,7 @@ public class BuildRequestParameters extends DefaultParameters {
     public static final ParameterKey targetNodeId;
     public static final ParameterKey targetGroup;
     public static final ParameterKey targetAll;
+    public static final ParameterKey targetServices;
     public static final ParameterKey scriptName;
     public static final ParameterKey parameters;
 
@@ -45,6 +46,7 @@ public class BuildRequestParameters extends DefaultParameters {
         targetNodeId = new ParameterKey("targetNodeId", ValueType.STRING);
         targetGroup = new ParameterKey("targetGroup", ValueType.STRING);
         targetAll = new ParameterKey("targetAll", ValueType.BOOLEAN);
+        targetServices = new ParameterKey("targetServices", ValueType.BOOLEAN);
         scriptName = new ParameterKey("scriptName", ValueType.STRING);
         parameters = new ParameterKey("parameters", VariableParameters.class);
 
@@ -54,6 +56,7 @@ public class BuildRequestParameters extends DefaultParameters {
                 targetNodeId,
                 targetGroup,
                 targetAll,
+                targetServices,
                 scriptName,
                 parameters
         };
@@ -105,6 +108,15 @@ public class BuildRequestParameters extends DefaultParameters {
 
     public BuildRequestParameters setTargetAll(boolean value) {
         putValue(targetAll, value);
+        return this;
+    }
+
+    public boolean isTargetServices() {
+        return getBoolean(targetServices, false);
+    }
+
+    public BuildRequestParameters setTargetServices(boolean value) {
+        putValue(targetServices, value);
         return this;
     }
 

@@ -943,7 +943,10 @@
                         <div class="col-12 node-card-wrapper px-0 py-1" data-node-id="${n.id}" data-node-title="${title}" data-node-group="${group}">
                             <div class="card node-grid-card shadow-sm p-3 h-100" onclick="switchToDetailView('${n.id}')">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h6 class="fw-bold mb-0 text-truncate" style="max-width: 70%;" title="${title}">${title}</h6>
+                                    <div class="d-flex align-items-center gap-1 text-truncate" style="max-width: 70%;">
+                                        <h6 class="fw-bold mb-0 text-truncate" title="${title}">${title}</h6>
+                                        ${n.console ? '<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-size:0.65rem;">Console</span>' : ''}
+                                    </div>
                                     <span class="badge bg-secondary small font-monospace">${n.id}</span>
                                 </div>
                                 <div class="d-flex align-items-center mb-1">

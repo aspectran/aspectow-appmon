@@ -245,15 +245,17 @@ public class RemoteBuildDeployManager implements InitializableBean {
         String targetNodeId = params.getTargetNodeId();
         String targetGroup = params.getTargetGroup();
         boolean targetAll = params.isTargetAll();
+        boolean targetServices = params.isTargetServices();
 
-        List<String> targetNodeIds = resolveTargetNodeIds(targetNodeId, targetGroup, targetAll);
+        List<String> targetNodeIds = resolveTargetNodeIds(targetNodeId, targetGroup, targetAll, targetServices);
         if (targetNodeIds.isEmpty()) {
-            logger.warn("No target nodes found for dispatch: nodeId={}, group={}, all={}", targetNodeId, targetGroup, targetAll);
+            logger.warn("No target nodes found for dispatch: nodeId={}, group={}, all={}, services={}",
+                    targetNodeId, targetGroup, targetAll, targetServices);
             BuildExecutionInfo failed = new BuildExecutionInfo();
             failed.setExecutionId(params.getExecutionId() != null ? params.getExecutionId() : "bld_unknown");
             failed.setScriptName(scriptName);
             failed.setStatus(BuildExecutionInfo.Status.FAILED);
-            failed.setErrorSummary("No target nodes found matching criteria (node=" + targetNodeId + ", group=" + targetGroup + ", all=" + targetAll + ")");
+            failed.setErrorSummary("No target nodes found matching criteria (node=" + targetNodeId + ", group=" + targetGroup + ", all=" + targetAll + ", services=" + targetServices + ")");
             broker.broadcastStatusChanged(failed);
             return;
         }
@@ -285,6 +287,18 @@ public class RemoteBuildDeployManager implements InitializableBean {
      * @return list of node IDs
      */
     public List<String> resolveTargetNodeIds(String targetNodeId, String targetGroup, boolean targetAll) {
+        return resolveTargetNodeIds(targetNodeId, targetGroup, targetAll, false);
+    }
+
+    /**
+     * Resolves the list of target node IDs based on node ID, group, all flag, or services flag.
+     * @param targetNodeId optional node ID
+     * @param targetGroup optional group ID
+     * @param targetAll true if all nodes in cluster
+     * @param targetServices true if service nodes only (excluding console-dedicated nodes)
+     * @return list of node IDs
+     */
+    public List<String> resolveTargetNodeIds(String targetNodeId, String targetGroup, boolean targetAll, boolean targetServices) {
         List<String> result = new ArrayList<>();
         NodeRegistry registry = nodeManager.getNodeRegistry();
 
@@ -316,6 +330,25 @@ public class RemoteBuildDeployManager implements InitializableBean {
             }
             if (result.isEmpty()) {
                 result.add(nodeManager.getNodeId());
+            }
+            return result;
+        }
+
+        // 3. Service nodes target (excluding console nodes)
+        if (targetServices) {
+            if (registry != null) {
+                List<NodeInfo> allNodes = registry.getNodes();
+                for (NodeInfo n : allNodes) {
+                    if (n.getId() != null && !n.isConsole(false) && !result.contains(n.getId())) {
+                        result.add(n.getId());
+                    }
+                }
+            }
+            if (result.isEmpty()) {
+                NodeInfo localNode = nodeManager.getNodeInfoHolder().getNodeInfo(nodeManager.getNodeId());
+                if (localNode == null || !localNode.isConsole(false)) {
+                    result.add(nodeManager.getNodeId());
+                }
             }
             return result;
         }

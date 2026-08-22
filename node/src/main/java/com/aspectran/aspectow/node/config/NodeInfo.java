@@ -28,6 +28,7 @@ public class NodeInfo extends DefaultParameters {
     private static final ParameterKey id;
     private static final ParameterKey group;
     private static final ParameterKey title;
+    private static final ParameterKey console;
     private static final ParameterKey host;
     private static final ParameterKey port;
     private static final ParameterKey startTime;
@@ -45,6 +46,7 @@ public class NodeInfo extends DefaultParameters {
         id = new ParameterKey("id", ValueType.STRING);
         group = new ParameterKey("group", ValueType.STRING);
         title = new ParameterKey("title", ValueType.STRING);
+        console = new ParameterKey("console", ValueType.BOOLEAN);
         host = new ParameterKey("host", ValueType.STRING);
         port = new ParameterKey("port", ValueType.INT);
         startTime = new ParameterKey("startTime", ValueType.STRING);
@@ -60,6 +62,7 @@ public class NodeInfo extends DefaultParameters {
                 id,
                 group,
                 title,
+                console,
                 host,
                 port,
                 startTime,
@@ -126,6 +129,31 @@ public class NodeInfo extends DefaultParameters {
      */
     public void setTitle(String title) {
         putValue(NodeInfo.title, title);
+    }
+
+    /**
+     * Returns whether this node is a console-dedicated node.
+     * @return true if console node, false otherwise
+     */
+    public Boolean isConsole() {
+        return getBoolean(console);
+    }
+
+    /**
+     * Returns whether this node is a console-dedicated node with a fallback default.
+     * @param defaultValue the default value
+     * @return true if console node, false otherwise
+     */
+    public boolean isConsole(boolean defaultValue) {
+        return getBoolean(console, defaultValue);
+    }
+
+    /**
+     * Sets whether this node is a console-dedicated node.
+     * @param isConsole true if console node, false otherwise
+     */
+    public void setConsole(Boolean isConsole) {
+        putValue(NodeInfo.console, isConsole);
     }
 
     /**
@@ -344,6 +372,7 @@ public class NodeInfo extends DefaultParameters {
         newInfo.setId(getId());
         newInfo.setGroup(getGroup());
         newInfo.setTitle(getTitle());
+        newInfo.setConsole(nodeInfo.isConsole() != null ? nodeInfo.isConsole() : isConsole());
 
         // update dynamic state
         newInfo.setHost(nodeInfo.getHost());

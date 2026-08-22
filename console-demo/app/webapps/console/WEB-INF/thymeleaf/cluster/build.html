@@ -238,9 +238,10 @@
                     </div>
                     <div class="col-md-3">
                         <select id="target-type" class="form-select form-select-sm" onchange="onTargetTypeChange()">
-                            <option value="node" th:selected="${page.targetNodeId != null}">Individual Node</option>
+                            <option value="services" th:selected="${page.targetNodeId == null}">All Service Nodes</option>
+                            <option value="all">All Nodes in Cluster</option>
                             <option value="group">Specific Group</option>
-                            <option value="all" th:selected="${page.targetNodeId == null}">All Nodes in Cluster</option>
+                            <option value="node" th:selected="${page.targetNodeId != null}">Individual Node</option>
                         </select>
                     </div>
                     <div class="col-md-5" id="target-value-container">
@@ -479,7 +480,12 @@
                 const prevValue = $select.val();
                 $select.empty();
 
-                if (type === 'all') {
+                if (type === 'services') {
+                    $container.hide();
+                    updateUrl(null);
+                    const serviceNodes = nodes.filter(n => !n.console);
+                    activeTargetNodes = (serviceNodes.length > 0 ? serviceNodes : nodes).map(n => n.id);
+                } else if (type === 'all') {
                     $container.hide();
                     updateUrl(null);
                     activeTargetNodes = nodes.map(n => n.id);
@@ -492,10 +498,16 @@
                 } else {
                     $container.show();
                     nodes.forEach(n => {
-                        const option = new Option(n.title + ' (' + n.id + ')', n.id);
+                        let label = n.title + ' (' + n.id + ')';
+                        if (n.console) {
+                            label += ' [Console]';
+                        }
+                        if (n.status && n.status.toUpperCase() === 'DEAD') {
+                            label += ' [DEAD]';
+                        }
+                        const option = new Option(label, n.id);
                         if (n.status && n.status.toUpperCase() === 'DEAD') {
                             $(option).addClass('text-danger');
-                            option.text += ' [DEAD]';
                         }
                         $select.append(option);
                     });
@@ -905,7 +917,8 @@
                 const targetType = $('#target-type').val();
                 const targetVal = $('#target-value').val();
                 let targetLabel = 'target node';
-                if (targetType === 'all') targetLabel = 'ALL nodes in cluster';
+                if (targetType === 'services') targetLabel = 'ALL service nodes in cluster';
+                else if (targetType === 'all') targetLabel = 'ALL nodes in cluster';
                 else if (targetType === 'group') targetLabel = `Group '${targetVal}'`;
                 else if (targetVal) targetLabel = `Node '${targetVal}'`;
 
@@ -941,9 +954,15 @@
                 let targetNodeId = null;
                 let targetGroup = null;
                 let targetAll = false;
+                let targetServices = false;
                 let targetLabel = 'all nodes';
 
-                if (targetType === 'all') {
+                if (targetType === 'services') {
+                    targetServices = true;
+                    targetLabel = 'ALL service nodes in cluster';
+                    const serviceNodes = nodes.filter(n => !n.console);
+                    activeTargetNodes = (serviceNodes.length > 0 ? serviceNodes : nodes).map(n => n.id);
+                } else if (targetType === 'all') {
                     targetAll = true;
                     targetLabel = 'ALL nodes in cluster';
                     activeTargetNodes = nodes.map(n => n.id);
@@ -998,6 +1017,7 @@
                         targetNodeId: targetNodeId,
                         targetGroup: targetGroup,
                         targetAll: targetAll,
+                        targetServices: targetServices,
                         scriptName: scriptName,
                         parameters: {}
                     };

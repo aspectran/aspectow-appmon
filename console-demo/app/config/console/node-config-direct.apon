@@ -9,6 +9,7 @@ cluster: {
 node: {
     id: console-node1
     title: Node-1
+    console: true
     port: 8082
     endpoint: {
         mode: auto
