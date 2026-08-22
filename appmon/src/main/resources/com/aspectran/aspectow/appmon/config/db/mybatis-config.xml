@@ -5,7 +5,14 @@
 
     <settings>
         <!-- http://www.mybatis.org/mybatis-3/configuration.html -->
-        <setting name="cacheEnabled" value="true"/>
+        <!--
+            In a multi-node cluster environment sharing a database, caching must be disabled:
+            1) cacheEnabled=false: Disables global secondary (L2) cache to prevent cross-node cache inconsistencies.
+            2) localCacheScope=STATEMENT: Disables session-level (L1) caching so every query executes directly
+               against the database, ensuring immediately visible updates written by other cluster nodes.
+        -->
+        <setting name="cacheEnabled" value="false"/>
+        <setting name="localCacheScope" value="STATEMENT"/>
         <setting name="lazyLoadingEnabled" value="false"/>
         <setting name="useColumnLabel" value="true"/>
         <setting name="useGeneratedKeys" value="false"/>
