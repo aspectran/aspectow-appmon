@@ -99,6 +99,26 @@
                 </executions>
             </plugin>
             <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>sync-appmon-assets</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.basedir}/app/webapps/console/assets/appmon</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/../appmon-demo/app/webapps/appmon/assets</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
                 <configuration>
                     <excludeDefaultDirectories>true</excludeDefaultDirectories>
@@ -129,6 +149,12 @@
                         </fileset>
                         <fileset>
                             <directory>app/temp</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </fileset>
+                        <fileset>
+                            <directory>app/webapps/console/assets/appmon</directory>
                             <includes>
                                 <include>**/*</include>
                             </includes>
