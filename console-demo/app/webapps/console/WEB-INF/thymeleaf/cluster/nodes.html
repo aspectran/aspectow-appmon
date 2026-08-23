@@ -14,12 +14,6 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             border-color: var(--accent-color);
         }
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-        }
         .node-id-badge {
             font-family: var(--bs-font-monospace);
             font-size: 0.75rem;
@@ -136,7 +130,7 @@
                         </div>
                         <div class="d-flex flex-column align-items-end">
                             <div class="d-flex align-items-center gap-2">
-                                <span class="status-dot" th:classappend="${nodeInfo.status == 'live' ? 'bg-success' : (nodeInfo.status == 'paused' ? 'bg-warning' : (nodeInfo.status == 'stopping' ? 'bg-warning' : 'bg-danger'))}"></span>
+                                <span class="status-indicator" th:classappend="${nodeInfo.status == 'live' ? 'bg-success' : (nodeInfo.status == 'paused' ? 'bg-warning' : (nodeInfo.status == 'stopping' ? 'bg-warning' : 'bg-danger'))}"></span>
                                 <span class="small fw-bold text-uppercase" th:classappend="${nodeInfo.status == 'live' ? 'text-success' : (nodeInfo.status == 'paused' ? 'text-warning' : (nodeInfo.status == 'stopping' ? 'text-warning' : 'text-danger'))}" th:text="${nodeInfo.status}">LIVE</span>
                             </div>
                             <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle mt-1 ms-1" th:if="${nodeInfo.console}">Console</span>
@@ -527,7 +521,7 @@
                 }
                 const $card = $(`.node-card[data-node-id="${node.id}"]`);
                 if ($card.length) {
-                    const $dot = $card.find('.status-dot');
+                    const $dot = $card.find('.status-indicator');
                     const $statusText = $card.find('.small.fw-bold');
                     const status = node.status;
                     if (status) {

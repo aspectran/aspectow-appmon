@@ -109,8 +109,6 @@
         }
         .status-badge {
             width: 80px;
-            display: inline-block;
-            text-align: center;
         }
         .action-card {
             transition: all 0.15s ease-in-out;
@@ -276,7 +274,7 @@
                         </button>
                     </div>
                     <div class="col text-end text-nowrap">
-                        <span id="connection-indicator" class="status-pill bg-secondary text-white text-nowrap">CONNECTING...</span>
+                        <span id="connection-indicator" class="badge status-pill bg-secondary">CONNECTING...</span>
                     </div>
                 </div>
             </div>
@@ -1374,7 +1372,7 @@
                             </div>
                         </div>
                         <div class="table-responsive">
-                            <table class="table text-nowrap align-middle mb-0">
+                            <table class="table text-nowrap mb-0">
                                 <thead>
                                     <tr>
                                         <th style="width: 50px;"></th>
@@ -1412,7 +1410,7 @@
                                     <code class="small px-2 py-1 bg-body-tertiary border border-secondary-subtle rounded">${schedule.scheduler?.trigger?.expression?.expression || schedule.scheduler?.trigger?.type || 'N/A'}</code>
                                 </td>
                                 <td class="text-center">
-                                    <span id="badge-${serviceId}-${safeScheduleId}" class="badge rounded-pill status-badge ${isScheduleEnabled ? 'text-bg-success' : 'text-bg-danger'}">
+                                    <span id="badge-${serviceId}-${safeScheduleId}" class="badge status-pill status-badge ${isScheduleEnabled ? 'text-bg-success' : 'text-bg-danger'}">
                                         ${isScheduleEnabled ? 'ACTIVE' : 'DISABLED'}
                                     </span>
                                 </td>

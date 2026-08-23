@@ -145,7 +145,7 @@
                         </select>
                     </div>
                     <div class="col-12 col-md text-end">
-                        <span id="connection-indicator" class="status-pill bg-secondary text-white">CONNECTING...</span>
+                        <span id="connection-indicator" class="badge status-pill bg-secondary">CONNECTING...</span>
                     </div>
                 </div>
             </div>
@@ -616,16 +616,16 @@ arguments: {
 
                 commandHistory.forEach((cmd, index) => {
                     let statusClass = 'bg-warning';
-                    if (cmd.status === 'completed') statusClass = 'bg-success text-white';
-                    else if (cmd.status === 'failed') statusClass = 'bg-danger text-white';
-                    else if (cmd.status === 'partial') statusClass = 'bg-info text-white';
+                    if (cmd.status === 'completed') statusClass = 'bg-success';
+                    else if (cmd.status === 'failed') statusClass = 'bg-danger';
+                    else if (cmd.status === 'partial') statusClass = 'bg-info';
                     const $item = $(`
                         <div class="history-item ${index === 0 ? 'active' : ''}" onclick="showDetail('${cmd.id}')">
                             <div class="d-flex justify-content-between align-items-start mb-1">
                                 <span class="fw-bold small text-truncate" style="max-width: 180px;">${cmd.target}</span>
-                                <span class="status-pill ${statusClass} text-white">${cmd.status}</span>
+                                <span class="badge status-pill ${statusClass}">${cmd.status}</span>
                             </div>
-                            <div class="text-muted" style="font-size: 0.75rem; display: flex; justify-content: space-between;">
+                            <div class="d-flex justify-cotent-between text-muted" style="font-size: 0.75rem;">
                                 <span>${cmd.content.split('\n')[0]}</span>
                                 <span>${cmd.time}</span>
                             </div>
