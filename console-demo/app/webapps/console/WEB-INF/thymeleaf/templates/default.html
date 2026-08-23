@@ -24,39 +24,38 @@
         </div>
         <nav class="nav-links">
             <th:block th:with="portalUrl=${'%{aspectow.console.portalUrl}'}">
-                <a th:href="${portalUrl}" class="nav-link" th:if="${portalUrl != null and !portalUrl.isEmpty()}">
+                <a th:href="${portalUrl}" class="nav-link mb-3" th:if="${portalUrl != null and !portalUrl.isEmpty()}">
                     <i class="bi bi-arrow-left"></i> Back to Main
                 </a>
             </th:block>
 
-            <div class="mt-4 px-3 small text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Management</div>
+            <div class="mt-1 px-3 small text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Management</div>
 
             <!-- Cluster Group -->
             <div class="nav-group" th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasPermission('MONITOR_VIEW') || session.USER_INFO.hasPermission('BUILD_VIEW') || session.USER_INFO.hasPermission('BUILD_EXECUTE')}">
-                <a class="nav-link d-flex justify-content-between align-items-center"
-                   th:classappend="${page.group == 'cluster-menu' ? 'active' : 'collapsed'}"
+                <a class="nav-link" th:classappend="${page.group == 'cluster-menu' ? 'active' : 'collapsed'}"
                    data-bs-toggle="collapse" href="#cluster-menu" role="button" aria-expanded="false">
                     <span><i class="bi bi-cpu"></i> Cluster</span>
                     <i class="bi bi-chevron-down small"></i>
                 </a>
                 <div class="collapse" th:classappend="${page.group == 'cluster-menu' ? 'show' : ''}" id="cluster-menu">
-                    <a th:href="@{/cluster/nodes/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'nodes-page' ? 'active' : ''}"
+                    <a th:href="@{/cluster/nodes/}" class="nav-link sub" th:classappend="${page.style == 'nodes-page' ? 'active' : ''}"
                        th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                         Nodes
                     </a>
-                    <a th:href="@{/cluster/build/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'build-page' ? 'active' : ''}"
+                    <a th:href="@{/cluster/build/}" class="nav-link sub" th:classappend="${page.style == 'build-page' ? 'active' : ''}"
                        th:if="${session.USER_INFO.hasPermission('BUILD_VIEW') || session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
                         Build &amp; Deployment
                     </a>
-                    <a th:href="@{/cluster/commands/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'commands-page' ? 'active' : ''}"
+                    <a th:href="@{/cluster/commands/}" class="nav-link sub" th:classappend="${page.style == 'commands-page' ? 'active' : ''}"
                        th:if="${session.USER_INFO.hasPermission('COMMAND_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
                         Remote Commands
                     </a>
-                    <a th:href="@{/cluster/scheduler/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'scheduler-page' ? 'active' : ''}"
+                    <a th:href="@{/cluster/scheduler/}" class="nav-link sub" th:classappend="${page.style == 'scheduler-page' ? 'active' : ''}"
                        th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                         Scheduler Manager
                     </a>
-                    <a th:href="@{/appmon/dashboard/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'monitoring-page' ? 'active' : ''}"
+                    <a th:href="@{/appmon/dashboard/}" class="nav-link sub" th:classappend="${page.style == 'monitoring-page' ? 'active' : ''}"
                        th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasPermission('MONITOR_VIEW')}">
                         Monitoring
                     </a>
@@ -65,13 +64,13 @@
 
             <!-- Security Group -->
             <div class="nav-group" th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
-                <a class="nav-link d-flex justify-content-between align-items-center" th:classappend="${page.group == 'security-menu' ? 'active' : 'collapsed'}"
+                <a class="nav-link" th:classappend="${page.group == 'security-menu' ? 'active' : 'collapsed'}"
                    data-bs-toggle="collapse" href="#security-menu" role="button" aria-expanded="false">
                     <span><i class="bi bi-shield-lock"></i> Security</span>
                     <i class="bi bi-chevron-down small"></i>
                 </a>
                 <div class="collapse" th:classappend="${page.group == 'security-menu' ? 'show' : ''}" id="security-menu">
-                    <a th:href="@{/vault/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'vault-page' ? 'active' : ''}">
+                    <a th:href="@{/vault/}" class="nav-link sub" th:classappend="${page.style == 'vault-page' ? 'active' : ''}">
                         Vault
                     </a>
                 </div>
@@ -79,16 +78,16 @@
 
             <!-- Framework Group -->
             <div class="nav-group">
-                <a class="nav-link d-flex justify-content-between align-items-center" th:classappend="${page.group == 'framework-menu' ? 'active' : 'collapsed'}"
+                <a class="nav-link" th:classappend="${page.group == 'framework-menu' ? 'active' : 'collapsed'}"
                    data-bs-toggle="collapse" href="#framework-menu" role="button" aria-expanded="false">
                     <span><i class="bi bi-diagram-3"></i> Framework</span>
                     <i class="bi bi-chevron-down small"></i>
                 </a>
                 <div class="collapse" th:classappend="${page.group == 'framework-menu' ? 'show' : ''}" id="framework-menu">
-                    <a th:href="@{/framework/config/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'config-page' ? 'active' : ''}">
+                    <a th:href="@{/framework/config/}" class="nav-link sub" th:classappend="${page.style == 'config-page' ? 'active' : ''}">
                         Configuration
                     </a>
-                    <a th:href="@{/framework/anatomy/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'anatomy-page' ? 'active' : ''}">
+                    <a th:href="@{/framework/anatomy/}" class="nav-link sub" th:classappend="${page.style == 'anatomy-page' ? 'active' : ''}">
                         Anatomy
                     </a>
                 </div>
@@ -98,48 +97,46 @@
 
             <!-- Developer Tools Group -->
             <div class="nav-group">
-                <a class="nav-link d-flex justify-content-between align-items-center"
-                   th:classappend="${page.group == 'tools-menu' ? 'active' : 'collapsed'}"
+                <a class="nav-link" th:classappend="${page.group == 'tools-menu' ? 'active' : 'collapsed'}"
                    data-bs-toggle="collapse" href="#tools-menu" role="button" aria-expanded="false">
                     <span><i class="bi bi-wrench-adjustable"></i> Developer Tools</span>
                     <i class="bi bi-chevron-down small"></i>
                 </a>
                 <div class="collapse" th:classappend="${page.group == 'tools-menu' ? 'show' : ''}" id="tools-menu">
-                    <a th:href="@{/vault/tool}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'vault-tool-page' ? 'active' : ''}"
+                    <a th:href="@{/vault/tool}" class="nav-link sub" th:classappend="${page.style == 'vault-tool-page' ? 'active' : ''}"
                         th:if="${session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                         Vault Tool
                     </a>
-                    <a th:href="@{/framework/wildcard/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'wildcard-page' ? 'active' : ''}">
+                    <a th:href="@{/framework/wildcard/}" class="nav-link sub" th:classappend="${page.style == 'wildcard-page' ? 'active' : ''}">
                         Wildcard Tester
                     </a>
-                    <a th:href="@{/framework/asel/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'asel-page' ? 'active' : ''}">
+                    <a th:href="@{/framework/asel/}" class="nav-link sub" th:classappend="${page.style == 'asel-page' ? 'active' : ''}">
                         AsEL Tester
                     </a>
-                    <a th:href="@{/framework/apon/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'apon-page' ? 'active' : ''}">
+                    <a th:href="@{/framework/apon/}" class="nav-link sub" th:classappend="${page.style == 'apon-page' ? 'active' : ''}">
                         APON Converter
                     </a>
                 </div>
             </div>
 
             <div class="mt-4 px-3 small text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Governance</div>
-            
+
             <!-- Accounts Group -->
             <div class="nav-group">
-                <a class="nav-link d-flex justify-content-between align-items-center"
-                   th:classappend="${page.group == 'accounts-menu' ? 'active' : 'collapsed'}"
+                <a class="nav-link" th:classappend="${page.group == 'accounts-menu' ? 'active' : 'collapsed'}"
                    data-bs-toggle="collapse" href="#user-menu" role="button" aria-expanded="false">
                     <span><i class="bi bi-person-badge"></i> Accounts</span>
                     <i class="bi bi-chevron-down small"></i>
                 </a>
                 <div class="collapse" th:classappend="${page.group == 'accounts-menu' ? 'show' : ''}" id="user-menu">
-                    <a th:href="@{/user/}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'user-management-page' ? 'active' : ''}"
+                    <a th:href="@{/user/}" class="nav-link sub" th:classappend="${page.style == 'user-management-page' ? 'active' : ''}"
                        th:if="${session.USER_INFO.hasPermission('USER_MANAGE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
                         Users
                     </a>
-                    <a th:href="@{/user/login-history}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'login-history-page' ? 'active' : ''}">
+                    <a th:href="@{/user/login-history}" class="nav-link sub" th:classappend="${page.style == 'login-history-page' ? 'active' : ''}">
                         Login History
                     </a>
-                    <a th:href="@{/user/audit-log}" class="nav-link ps-5 py-2 small" th:classappend="${page.style == 'audit-log-page' ? 'active' : ''}">
+                    <a th:href="@{/user/audit-log}" class="nav-link sub" th:classappend="${page.style == 'audit-log-page' ? 'active' : ''}">
                         Audit Log
                     </a>
                 </div>
@@ -164,7 +161,7 @@
 
     <div id="sidebar-overlay"></div>
     <div id="main-container">
-        <header id="header-bar" class="px-lg-4">
+        <header id="header-bar" class="px-3 px-lg-4">
             <div class="d-flex align-items-center gap-3">
                 <button class="btn d-lg-none p-0" id="sidebar-toggle">
                     <i class="bi bi-list fs-3"></i>

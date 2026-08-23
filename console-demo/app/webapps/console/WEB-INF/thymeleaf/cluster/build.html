@@ -215,16 +215,16 @@
                     </div>
                     <p class="text-muted mb-0">Remote build script execution and automated continuous delivery</p>
                 </div>
-                <div class="d-flex flex-row flex-md-column flex-wrap align-items-end justify-content-between justify-content-md-end gap-2">
+                <div class="d-flex flex-column align-items-end justify-content-end gap-2">
                     <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap">
-                        <span class="text-muted small">Cluster Mode:</span>
+                        <span class="text-muted text-nowrap small">Cluster Mode:</span>
                         <span class="fw-bold text-primary" th:text="${page.clusterMode.toUpperCase()}">GATEWAY</span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openNodesPopup()">
+                        <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" onclick="openNodesPopup()">
                             <i class="bi bi-hdd-network me-1"></i> Manage Nodes
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openAuditPopup()">
+                        <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" onclick="openAuditPopup()">
                             <i class="bi bi-clock-history me-1"></i> Audit Trail
                         </button>
                     </div>
@@ -256,7 +256,7 @@
 
                 <!-- Quick Action Bar -->
                 <div class="quick-actions border-top pt-2 mt-3" th:if="${session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('DEMO')}">
-                    <span class="small text-muted align-self-center me-2"><i class="bi bi-lightning-charge-fill text-warning"></i> Quick:</span>
+                    <span class="d-none d-lg-inline small text-muted align-self-center me-2"><i class="bi bi-lightning-charge-fill text-warning"></i> Quick:</span>
                     <button class="btn btn-sm btn-primary" onclick="quickRun('5-pull_build_deploy.sh')">
                         <i class="bi bi-play-fill"></i> Full Build &amp; Deploy (5)
                     </button>

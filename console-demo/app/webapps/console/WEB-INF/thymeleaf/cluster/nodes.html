@@ -53,9 +53,9 @@
                     </div>
                     <button type="button" class="btn-close d-md-none ms-2" onclick="window.close()" aria-label="Close" title="Close" th:if="${page.layout == 'popup'}"></button>
                 </div>
-                <div class="d-flex flex-row flex-md-column flex-wrap align-items-end justify-content-between justify-content-md-end gap-2">
+                <div class="d-flex flex-column align-items-end justify-content-end gap-2">
                     <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap">
-                        <span class="text-muted small">Cluster Mode:</span>
+                        <span class="text-muted text-nowrap small">Cluster Mode:</span>
                         <span class="fw-bold text-primary" th:text="${page.clusterMode.toUpperCase()}">GATEWAY</span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
@@ -154,7 +154,7 @@
                             </th:block>
                         </div>
                     </div>
-                    <div class="mt-4 d-flex gap-2">
+                    <div class="mt-4 d-flex flex-column flex-sm-row gap-2">
                         <a href="javascript:void(0)" th:onclick="openAppMon([[${nodeInfo.id}]])" class="btn btn-sm btn-outline-secondary flex-grow-1">
                             <i class="bi bi-activity"></i> Metrics
                         </a>
