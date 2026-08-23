@@ -61,11 +61,11 @@
         .terminal-line.error { color: #f85149; font-weight: bold; }
         .terminal-line.warn { color: #d29922; }
         .status-pill {
-            font-size: 0.72rem;
-            padding: 3px 10px;
-            border-radius: 12px;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
             text-transform: uppercase;
-            font-weight: 700;
+            font-weight: bold;
         }
         .target-selector {
             background: var(--bs-secondary-bg);
@@ -255,22 +255,22 @@
                 </div>
 
                 <!-- Quick Action Bar -->
-                <div class="quick-actions border-top pt-2 mt-3" th:if="${session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('DEMO')}">
+                <div class="quick-actions d-none d-md-block border-top pt-2 mt-3" th:if="${session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('DEMO')}">
                     <span class="d-none d-lg-inline small text-muted align-self-center me-2"><i class="bi bi-lightning-charge-fill text-warning"></i> Quick:</span>
                     <button class="btn btn-sm btn-primary" onclick="quickRun('5-pull_build_deploy.sh')">
-                        <i class="bi bi-play-fill"></i> Full Build &amp; Deploy (5)
+                        <i class="bi bi-play-fill"></i> Full Build &amp; Deploy
                     </button>
                     <button class="btn btn-sm btn-outline-primary" onclick="quickRun('1-pull.sh')">
-                        <i class="bi bi-cloud-arrow-down"></i> Pull (1)
+                        <i class="bi bi-cloud-arrow-down"></i> 1. Pull
                     </button>
                     <button class="btn btn-sm btn-outline-primary" onclick="quickRun('2-build.sh')">
-                        <i class="bi bi-gear"></i> Maven Build (2)
+                        <i class="bi bi-gear"></i> 2. Maven Build
                     </button>
                     <button class="btn btn-sm btn-outline-primary" onclick="quickRun('3-deploy_config.sh')">
-                        <i class="bi bi-sliders"></i> Config Deploy (3)
+                        <i class="bi bi-sliders"></i> 3. Config Deploy
                     </button>
                     <button class="btn btn-sm btn-outline-primary" onclick="quickRun('4-deploy_webapps.sh')">
-                        <i class="bi bi-window"></i> Webapps Deploy (4)
+                        <i class="bi bi-window"></i> 4. Webapps Deploy
                     </button>
                 </div>
             </div>

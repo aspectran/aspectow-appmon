@@ -185,7 +185,7 @@
                                 </li>
                                 <li>
                                     <a class="dropdown-item text-danger animate-color" href="javascript:void(0)" th:onclick="restartServer([[${nodeInfo.id}]])" title="Fully restart the OS daemon/service process and JVM">
-                                        <i class="bi bi-power me-1"></i> Restart Server <span class="badge bg-danger-subtle text-danger border border-danger-subtle small ms-1">Cold</span>
+                                        <i class="bi bi-power me-1"></i> Restart Server <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1">Cold</span>
                                     </a>
                                 </li>
                             </ul>
@@ -266,7 +266,7 @@
                                                     <div class="flex-grow-1">
                                                         <div class="fw-bold text-primary small d-flex align-items-center gap-1 mb-1">
                                                             <i class="bi bi-arrow-clockwise"></i> RESTART SERVICE
-                                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" style="font-size: 0.65rem;">Hot</span>
+                                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1">Hot</span>
                                                         </div>
                                                         <div class="text-muted" style="font-size: 0.75rem; line-height: 1.35;">
                                                             Gracefully recreate ActivityContext and reload classes without stopping the JVM.
@@ -284,7 +284,7 @@
                                                     <div class="flex-grow-1">
                                                         <div class="fw-bold text-danger small d-flex align-items-center gap-1 mb-1">
                                                             <i class="bi bi-power"></i> RESTART SERVER
-                                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1" style="font-size: 0.65rem;">Cold</span>
+                                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1">Cold</span>
                                                         </div>
                                                         <div class="text-muted" style="font-size: 0.75rem; line-height: 1.35;">
                                                             Completely restart the OS daemon/service process and JVM instance.
@@ -844,7 +844,7 @@
                             }
 
                             const consoleBadge = isConsole ? '<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle ms-1">Console</span>' : '';
-                            const consoleNotice = isConsole ? '<span class="console-notice text-muted ms-1 small" style="font-size:0.75rem; display:none;">(Not Applicable)</span>' : '';
+                            const consoleNotice = isConsole ? '<span class="console-notice text-muted ms-1 small" style="display:none;">(Not Applicable)</span>' : '';
 
                             gHtml += `
                                 <div class="form-check text-start ps-4 py-1 bulk-node-row">

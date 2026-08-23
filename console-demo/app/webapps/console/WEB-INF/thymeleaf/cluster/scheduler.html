@@ -977,7 +977,7 @@
                 html += '<div class="control-panel">';
                 html += '<div class="d-flex justify-content-between align-items-center mb-2">';
                 html += '<span class="fw-bold text-uppercase small text-muted"><i class="bi bi-grid-fill me-1"></i> Cluster Nodes</span>';
-                html += '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle small" id="dashboard-node-count">' + (nodes ? nodes.length : 0) + ' Nodes</span>';
+                html += '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" id="dashboard-node-count">' + (nodes ? nodes.length : 0) + ' Nodes</span>';
                 html += '</div>';
                 html += '<div id="left-column-scroll" class="left-column-scroll">';
                 html += '<div class="row g-2 mx-0" id="nodes-dashboard">';
@@ -1008,7 +1008,7 @@
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="badge bg-secondary small font-monospace">${n.id}</span>
+                                    <span class="badge bg-secondary font-monospace">${n.id}</span>
                                     ${n.console ? '<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">Console</span>' : ''}
                                 </div>
                                 <div id="info-${n.id}">
