@@ -149,9 +149,7 @@ class ConsoleClient {
             this.socket.onopen = (event) => {
                 console.log(this.node.id, "websocket connected");
                 this.wsEverConnected = true;
-                this.retryCount = 0;
-
-                const subscribeRequest = { header: "subscribe", targetNodeId: this.node.id };
+                const subscribeRequest = Object.assign({ header: "subscribe", targetNodeId: this.node.id }, this.options.subscribeParams);
                 this.socket.send(JSON.stringify(subscribeRequest));
                 this.sendPing();
 

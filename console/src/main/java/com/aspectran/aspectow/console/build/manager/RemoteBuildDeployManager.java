@@ -216,6 +216,84 @@ public class RemoteBuildDeployManager implements InitializableBean {
         return activeExecutions.get(executionId);
     }
 
+    public Map<String, BuildExecutionInfo> getExecutions(String executionId) {
+        if (StringUtils.isEmpty(executionId)) {
+            return Collections.emptyMap();
+        }
+        Map<String, BuildExecutionInfo> result = new HashMap<>();
+
+        // 1. Fetch from shared DB audit history
+        if (buildAuditService != null) {
+            try {
+                List<BuildHistory> list = buildAuditService.getBuildHistoriesByExecutionId(executionId);
+                if (list != null) {
+                    for (BuildHistory h : list) {
+                        if (h.getTargetNodeId() != null) {
+                            result.put(h.getTargetNodeId(), convertToBuildExecutionInfo(h));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.trace("Failed to load build histories for execution {} from shared DB", executionId, e);
+            }
+        }
+
+        // 2. Override with active running executions if matching executionId
+        for (BuildExecutionInfo active : activeExecutions.values()) {
+            if (executionId.equals(active.getExecutionId()) && active.getTargetNodeId() != null) {
+                result.put(active.getTargetNodeId(), active);
+            }
+        }
+
+        return result;
+    }
+
+    public BuildExecutionInfo getExecution(String executionId, String nodeId) {
+        if (StringUtils.isEmpty(executionId)) {
+            return null;
+        }
+        // 1. Check active executions
+        for (BuildExecutionInfo active : activeExecutions.values()) {
+            if (executionId.equals(active.getExecutionId())) {
+                if (nodeId == null || nodeId.equals(active.getTargetNodeId())) {
+                    return active;
+                }
+            }
+        }
+        // 2. Fetch from DB
+        if (buildAuditService != null) {
+            try {
+                BuildHistory history = (nodeId != null)
+                        ? buildAuditService.getHistoryDetailByExecutionIdAndNodeId(executionId, nodeId)
+                        : buildAuditService.getHistoryDetailByExecutionId(executionId);
+                if (history != null) {
+                    return convertToBuildExecutionInfo(history);
+                }
+            } catch (Exception e) {
+                logger.trace("Failed to load build execution {} from DB", executionId, e);
+            }
+        }
+        return null;
+    }
+
+    public Map<String, List<String>> getNodeLogs(String executionId) {
+        if (StringUtils.isEmpty(executionId)) {
+            return Collections.emptyMap();
+        }
+        Map<String, List<String>> result = new HashMap<>();
+        if (buildAuditService != null) {
+            try {
+                result.putAll(buildAuditService.getNodeLogsByExecutionId(executionId));
+            } catch (Exception ignored) {
+            }
+        }
+        List<String> localLogs = localScriptRunner.getLogBuffer(executionId);
+        if (localLogs != null && !localLogs.isEmpty()) {
+            result.put(nodeManager.getNodeId(), localLogs);
+        }
+        return result;
+    }
+
     public List<String> getRecentLogs(BuildExecutionInfo exec) {
         if (exec == null) {
             return Collections.emptyList();
@@ -263,21 +341,21 @@ public class RemoteBuildDeployManager implements InitializableBean {
 
     /**
      * Dispatches a build request based on parameters (supporting single node, group, or all nodes).
-     * @param params the request parameters
+     * @param request the request parameters
      */
-    public void dispatch(@NonNull BuildRequestParameters params) {
-        String scriptName = params.getScriptName();
-        String targetNodeId = params.getTargetNodeId();
-        String targetGroup = params.getTargetGroup();
-        boolean targetAll = params.isTargetAll();
-        boolean targetServices = params.isTargetServices();
+    public void dispatch(@NonNull BuildRequestParameters request) {
+        String scriptName = request.getScriptName();
+        String targetNodeId = request.getTargetNodeId();
+        String targetGroup = request.getTargetGroup();
+        boolean targetAll = request.isTargetAll();
+        boolean targetServices = request.isTargetServices();
 
         List<String> targetNodeIds = resolveTargetNodeIds(targetNodeId, targetGroup, targetAll, targetServices);
         if (targetNodeIds.isEmpty()) {
             logger.warn("No target nodes found for dispatch: nodeId={}, group={}, all={}, services={}",
                     targetNodeId, targetGroup, targetAll, targetServices);
             BuildExecutionInfo failed = new BuildExecutionInfo();
-            failed.setExecutionId(params.getExecutionId() != null ? params.getExecutionId() : "bld_unknown");
+            failed.setExecutionId(request.getExecutionId() != null ? request.getExecutionId() : "bld_unknown");
             failed.setScriptName(scriptName);
             failed.setStatus(BuildExecutionInfo.Status.FAILED);
             failed.setErrorSummary("No target nodes found matching criteria (node=" + targetNodeId + ", group=" + targetGroup + ", all=" + targetAll + ", services=" + targetServices + ")");
@@ -285,8 +363,8 @@ public class RemoteBuildDeployManager implements InitializableBean {
             return;
         }
 
-        String executionId = (params.getExecutionId() != null
-                ? params.getExecutionId()
+        String executionId = (request.getExecutionId() != null
+                ? request.getExecutionId()
                 : ("bld_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16)));
 
         for (String nodeId : targetNodeIds) {
@@ -296,9 +374,9 @@ public class RemoteBuildDeployManager implements InitializableBean {
             info.setScriptName(scriptName);
             info.setTriggerType("MANUAL");
 
-            if (params.getParameters() != null) {
-                for (String pName : params.getParameters().getParameterNames()) {
-                    info.getParameters().put(pName, params.getParameters().getString(pName));
+            if (request.getParameters() != null) {
+                for (String pName : request.getParameters().getParameterNames()) {
+                    info.getParameters().put(pName, request.getParameters().getString(pName));
                 }
             }
 

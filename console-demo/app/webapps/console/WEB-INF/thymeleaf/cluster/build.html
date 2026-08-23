@@ -125,13 +125,6 @@
             border-color: #444 #444 #181818 #444;
             font-weight: 700;
         }
-        .node-tab-badge {
-            font-size: 0.65rem;
-            padding: 1px 6px;
-            border-radius: 10px;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-        }
         .node-summary-card {
             border: 1px solid var(--bs-border-color);
             border-radius: 8px;
@@ -237,7 +230,7 @@
                         </select>
                     </div>
                     <div class="col text-end">
-                        <span id="connection-indicator" class="status-pill bg-secondary text-white">CONNECTING...</span>
+                        <span id="connection-indicator" class="badge status-pill bg-secondary">CONNECTING...</span>
                     </div>
                 </div>
 
@@ -312,7 +305,7 @@
                     <div class="card info-card metadata flex-grow-1">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="fw-bold mb-0"><i class="bi bi-info-circle me-1"></i> <span id="meta-view-title">Current Execution</span></h6>
-                            <span id="exec-status-badge" class="status-pill bg-secondary text-white">IDLE</span>
+                            <span id="exec-status-badge" class="badge status-pill bg-secondary">IDLE</span>
                         </div>
 
                         <!-- Single Node Detailed View -->
@@ -412,6 +405,7 @@
             const myNodeId = [[${page.myNodeId}]];
             const initialLastExecution = /*[[${page.lastExecution}]]*/ null;
             const initialLastExecutions = /*[[${page.lastExecutions}]]*/ null;
+            const targetExecutionId = /*[[${page.targetExecutionId}]]*/ null;
             const canExecute = /*[[${session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}]]*/ false;
             const isDemoUser = /*[[${session.USER_INFO.hasRole('DEMO')}]]*/ false;
         </script>
@@ -721,7 +715,7 @@
                     $bar.append(`
                         <div id="tab-${nid}" class="node-tab ${activeTab === nid ? 'active' : ''}" onclick="selectTab('${nid}')">
                             <i class="bi bi-hdd-network me-1"></i>${nid}
-                            <span id="tab-badge-${nid}" class="node-tab-badge ${badgeClass}">${status}</span>
+                            <span id="tab-badge-${nid}" class="badge status-pill small ${badgeClass}">${status}</span>
                         </div>
                     `);
                 });
@@ -746,13 +740,13 @@
 
             function getBadgeClass(status) {
                 switch (status) {
-                    case 'RUNNING': return 'bg-primary text-white';
-                    case 'PENDING': return 'bg-warning text-dark';
-                    case 'SUCCESS': return 'bg-success text-white';
+                    case 'RUNNING': return 'bg-primary';
+                    case 'PENDING': return 'bg-warning';
+                    case 'SUCCESS': return 'bg-success';
                     case 'FAILED':
-                    case 'TIMEOUT': return 'bg-danger text-white';
-                    case 'CANCELLED': return 'bg-warning text-dark';
-                    default: return 'bg-secondary text-white';
+                    case 'TIMEOUT': return 'bg-danger';
+                    case 'CANCELLED': return 'bg-warning';
+                    default: return 'bg-secondary';
                 }
             }
 
@@ -823,7 +817,7 @@
                                     <span class="fw-bold small"><i class="bi bi-hdd-network me-1"></i>${nid}</span>
                                     <small class="text-muted ms-2">${durationStr}</small>
                                 </div>
-                                <span class="status-pill ${badgeClass}">${st}</span>
+                                <span class="badge status-pill ${badgeClass}">${st}</span>
                             </div>
                         `);
                     });
@@ -833,7 +827,7 @@
                     else if (allSuccess) overallStatus = 'SUCCESS';
 
                     const $badge = $('#exec-status-badge');
-                    $badge.attr('class', 'status-pill ' + getBadgeClass(overallStatus)).text(overallStatus);
+                    $badge.attr('class', 'badge status-pill ' + getBadgeClass(overallStatus)).text(overallStatus);
 
                 } else {
                     $('#meta-view-title').text('Current Execution');
@@ -851,7 +845,7 @@
                     $('#meta-exit-code').text(exec.exitCode !== null && exec.exitCode !== undefined ? exec.exitCode : '-');
 
                     const status = exec.status || 'IDLE';
-                    $('#exec-status-badge').attr('class', 'status-pill ' + getBadgeClass(status)).text(status);
+                    $('#exec-status-badge').attr('class', 'badge status-pill ' + getBadgeClass(status)).text(status);
                 }
             }
 
@@ -869,7 +863,7 @@
                 const $badge = $(`#tab-badge-${nodeId}`);
                 if ($badge.length) {
                     const st = exec.status || 'IDLE';
-                    $badge.attr('class', 'node-tab-badge ' + getBadgeClass(st)).text(st);
+                    $badge.attr('class', 'badge status-pill small ' + getBadgeClass(st)).text(st);
                 }
 
                 // Check overall execution status to toggle buttons
@@ -1314,8 +1308,11 @@
                     }
                 };
 
+                const subscribeParams = targetExecutionId ? { executionId: targetExecutionId } : null;
+
                 client = new ConsoleClient(buildNode, {
                     token: token,
+                    subscribeParams: subscribeParams,
                     onBeforeConnect: () => {
                         return fetch(basePath + "/cluster/token", {
                                 headers: { 'Accept': 'application/json' }
@@ -1347,10 +1344,16 @@
                         }
 
                         if (header === 'log') {
+                            if (currentExecutionId && message.executionId && message.executionId !== currentExecutionId) {
+                                return;
+                            }
                             if (message.line) {
                                 appendLogLine(nodeId, message.line);
                             }
                         } else if (header === 'logBackfill') {
+                            if (currentExecutionId && message.executionId && message.executionId !== currentExecutionId) {
+                                return;
+                            }
                             if (message.lines && Array.isArray(message.lines)) {
                                 const exec = ensureNode(nodeId);
                                 exec.logs = [];
@@ -1366,6 +1369,9 @@
                                 }
                             }
                         } else if (header === 'status') {
+                            if (currentExecutionId && message.executionId && message.executionId !== currentExecutionId) {
+                                return;
+                            }
                             if (message.error) {
                                 const errorKey = (message.executionId || '') + ':' + message.error;
                                 if (lastHandledErrorKey !== errorKey) {
@@ -1381,6 +1387,51 @@
                 });
 
                 client.start('');
+            }
+
+            function loadExecutionLogs(execId) {
+                if (!execId) return;
+                fetch(basePath + "/cluster/build/logs?executionId=" + encodeURIComponent(execId), {
+                    headers: { 'Accept': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(res => {
+                    if (res && res.success && res.data) {
+                        const nodeLogs = res.data.nodeLogs;
+                        if (nodeLogs && typeof nodeLogs === 'object') {
+                            allLogs = [];
+                            Object.keys(nodeLogs).forEach(nid => {
+                                const lines = nodeLogs[nid];
+                                if (Array.isArray(lines)) {
+                                    const exec = ensureNode(nid);
+                                    exec.logs = [];
+                                    lines.forEach(l => {
+                                        if (l !== null && l !== undefined) {
+                                            exec.logs.push({ text: l, type: '' });
+                                            allLogs.push({ nodeId: nid, text: l, type: '' });
+                                        }
+                                    });
+                                }
+                            });
+                            renderActiveTab();
+                        } else if (res.data.logs && Array.isArray(res.data.logs)) {
+                            const nid = res.data.nodeId || currentNodeId || myNodeId;
+                            const exec = ensureNode(nid);
+                            exec.logs = [];
+                            allLogs = [];
+                            res.data.logs.forEach(l => {
+                                if (l !== null && l !== undefined) {
+                                    exec.logs.push({ text: l, type: '' });
+                                    allLogs.push({ nodeId: nid, text: l, type: '' });
+                                }
+                            });
+                            renderActiveTab();
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.warn("Failed to load execution logs for " + execId, err);
+                });
             }
 
             $(function() {
@@ -1433,6 +1484,22 @@
                 activeTab = activeTargetNodes.length > 1 ? '__all__' : (activeTargetNodes[0] || '__all__');
 
                 initTabs();
+
+                if (targetExecutionId) {
+                    currentExecutionId = targetExecutionId;
+                    loadExecutionLogs(targetExecutionId);
+
+                    const refExec = initialLastExecution || (initialLastExecutions && Object.values(initialLastExecutions)[0]);
+                    if (refExec) {
+                        if (refExec.scriptName) {
+                            $('#script-select').val(refExec.scriptName);
+                            onScriptChange();
+                        }
+                        if (refExec.gitBranch) {
+                            $('#branch-input').val(refExec.gitBranch);
+                        }
+                    }
+                }
 
                 fetch(basePath + "/cluster/token", {
                         headers: { 'Accept': 'application/json' }

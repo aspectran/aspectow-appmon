@@ -35,7 +35,9 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -267,6 +269,46 @@ public class BuildAuditService extends InstantActivitySupport {
             return null;
         }
         return instantActivity(() -> buildHistoryMapper.getBuildHistoryByExecutionId(executionId));
+    }
+
+    /**
+     * Retrieves all build history master records by execution ID.
+     * @param executionId the execution ID
+     * @return list of build history entities for the execution
+     */
+    public List<BuildHistory> getBuildHistoriesByExecutionId(String executionId) {
+        if (StringUtils.isEmpty(executionId)) {
+            return Collections.emptyList();
+        }
+        return instantActivity(() -> buildHistoryMapper.getBuildHistoriesByExecutionId(executionId));
+    }
+
+    /**
+     * Retrieves all decompressed console logs by execution ID grouped by target node ID.
+     * @param executionId the execution ID
+     * @return map of node ID to list of log lines
+     */
+    public java.util.Map<String, List<String>> getNodeLogsByExecutionId(String executionId) {
+        if (StringUtils.isEmpty(executionId)) {
+            return Collections.emptyMap();
+        }
+        return instantActivity(() -> {
+            List<BuildHistory> histories = buildHistoryMapper.getBuildHistoriesByExecutionId(executionId);
+            if (histories == null || histories.isEmpty()) {
+                return Collections.emptyMap();
+            }
+            Map<String, List<String>> result = new HashMap<>();
+            for (BuildHistory h : histories) {
+                if (h.getHistoryId() != null && h.getTargetNodeId() != null) {
+                    String raw = getDecompressedLogs(h.getHistoryId());
+                    List<String> lines = (StringUtils.hasText(raw))
+                            ? java.util.Arrays.asList(raw.split("\n"))
+                            : Collections.emptyList();
+                    result.put(h.getTargetNodeId(), lines);
+                }
+            }
+            return result;
+        });
     }
 
     /**

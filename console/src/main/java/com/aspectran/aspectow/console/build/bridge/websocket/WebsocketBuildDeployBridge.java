@@ -108,15 +108,15 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
         }
 
         try {
-            BuildRequestParameters parameters = JsonToParameters.from(message, BuildRequestParameters.class);
-            String header = parameters.getHeader();
+            BuildRequestParameters request = JsonToParameters.from(message, BuildRequestParameters.class);
+            String header = request.getHeader();
 
             if ("execute".equals(header)) {
-                execute(session, parameters);
+                execute(session, request);
             } else if ("cancel".equals(header)) {
-                cancel(session, parameters);
+                cancel(session, request);
             } else if ("join".equals(header) || "subscribe".equals(header)) {
-                join(session);
+                join(session, request);
             } else if ("ping".equals(header)) {
                 pong(session);
             }
@@ -126,7 +126,7 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
         }
     }
 
-    private void join(Session session) {
+    private void join(Session session, BuildRequestParameters request) {
         WebsocketBuildDeploySession buildSession = new WebsocketBuildDeploySession(session);
         buildSession.setNodeId(nodeManager.getNodeId());
         if (addSession(session)) {
@@ -139,9 +139,13 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
             logger.debug("BuildDeploy ConsoleClient joined/subscribed: session {}", session.getId());
 
             // If there are ongoing or recent executions across nodes, backfill status and logs
-            Map<String, BuildExecutionInfo> lastExecutions = remoteBuildDeployManager.getLastExecutions();
-            if (lastExecutions != null && !lastExecutions.isEmpty()) {
-                for (BuildExecutionInfo exec : lastExecutions.values()) {
+            String targetExecId = (request != null ? request.getExecutionId() : null);
+            Map<String, BuildExecutionInfo> executions = StringUtils.hasText(targetExecId)
+                    ? remoteBuildDeployManager.getExecutions(targetExecId)
+                    : remoteBuildDeployManager.getLastExecutions();
+
+            if (executions != null && !executions.isEmpty()) {
+                for (BuildExecutionInfo exec : executions.values()) {
                     if (exec != null) {
                         remoteBuildDeployManager.getBroker().broadcastStatusChanged(exec);
                         List<String> logs = remoteBuildDeployManager.getRecentLogs(exec);
@@ -161,26 +165,26 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
         sendText(session, res.toString());
     }
 
-    private void execute(@NonNull Session session, @NonNull BuildRequestParameters params) {
+    private void execute(@NonNull Session session, @NonNull BuildRequestParameters request) {
         Boolean isDemo = (Boolean) session.getUserProperties().get("isDemo");
         if (isDemo != null && isDemo) {
             logger.warn("Rejecting build execution request from DEMO user session: {}", session.getId());
             BuildResponseParameters res = new BuildResponseParameters()
                     .setHeader("status")
-                    .setExecutionId(params.getExecutionId() != null ? params.getExecutionId() : "bld_rejected")
-                    .setNodeId(params.getTargetNodeId() != null ? params.getTargetNodeId() : nodeManager.getNodeId())
+                    .setExecutionId(request.getExecutionId() != null ? request.getExecutionId() : "bld_rejected")
+                    .setNodeId(request.getTargetNodeId() != null ? request.getTargetNodeId() : nodeManager.getNodeId())
                     .setStatus("FAILED")
                     .setError("Executing build scripts is not allowed in the demo environment.");
             sendText(session, res.toString());
             return;
         }
 
-        String scriptName = params.getScriptName();
+        String scriptName = request.getScriptName();
         if (StringUtils.isEmpty(scriptName)) {
             BuildResponseParameters res = new BuildResponseParameters()
                     .setHeader("status")
-                    .setExecutionId(params.getExecutionId() != null ? params.getExecutionId() : "bld_error")
-                    .setNodeId(params.getTargetNodeId() != null ? params.getTargetNodeId() : nodeManager.getNodeId())
+                    .setExecutionId(request.getExecutionId() != null ? request.getExecutionId() : "bld_error")
+                    .setNodeId(request.getTargetNodeId() != null ? request.getTargetNodeId() : nodeManager.getNodeId())
                     .setStatus("FAILED")
                     .setError("Script name is required");
             sendText(session, res.toString());
@@ -188,44 +192,44 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
         }
 
         String username = (String) session.getUserProperties().get("username");
-        if (params.getParameters() == null) {
-            params.setParameters(new VariableParameters());
+        if (request.getParameters() == null) {
+            request.setParameters(new VariableParameters());
         }
-        if (!params.getParameters().hasParameter("requester")) {
-            params.getParameters().putValue("requester", StringUtils.hasText(username) ? username : "SYSTEM");
+        if (!request.getParameters().hasParameter("requester")) {
+            request.getParameters().putValue("requester", StringUtils.hasText(username) ? username : "SYSTEM");
         }
 
         try {
-            remoteBuildDeployManager.dispatch(params);
+            remoteBuildDeployManager.dispatch(request);
             logger.info("Build execution dispatched: group={}, all={}, target={}, script={}",
-                    params.getTargetGroup(), params.isTargetAll(), params.getTargetNodeId(), scriptName);
+                    request.getTargetGroup(), request.isTargetAll(), request.getTargetNodeId(), scriptName);
         } catch (Exception e) {
             logger.error("Failed to dispatch build execution", e);
             BuildResponseParameters res = new BuildResponseParameters()
                     .setHeader("status")
-                    .setExecutionId(params.getExecutionId() != null ? params.getExecutionId() : "bld_error")
-                    .setNodeId(params.getTargetNodeId() != null ? params.getTargetNodeId() : nodeManager.getNodeId())
+                    .setExecutionId(request.getExecutionId() != null ? request.getExecutionId() : "bld_error")
+                    .setNodeId(request.getTargetNodeId() != null ? request.getTargetNodeId() : nodeManager.getNodeId())
                     .setStatus("FAILED")
                     .setError("Failed to dispatch build: " + e.getMessage());
             sendText(session, res.toString());
         }
     }
 
-    private void cancel(@NonNull Session session, @NonNull BuildRequestParameters params) {
+    private void cancel(@NonNull Session session, @NonNull BuildRequestParameters request) {
         Boolean isDemo = (Boolean) session.getUserProperties().get("isDemo");
         if (isDemo != null && isDemo) {
             logger.warn("Rejecting build cancellation request from DEMO user session: {}", session.getId());
             BuildResponseParameters res = new BuildResponseParameters()
                     .setHeader("status")
-                    .setExecutionId(params.getExecutionId() != null ? params.getExecutionId() : "bld_rejected")
-                    .setNodeId(params.getTargetNodeId() != null ? params.getTargetNodeId() : nodeManager.getNodeId())
+                    .setExecutionId(request.getExecutionId() != null ? request.getExecutionId() : "bld_rejected")
+                    .setNodeId(request.getTargetNodeId() != null ? request.getTargetNodeId() : nodeManager.getNodeId())
                     .setError("Canceling build executions is not allowed in the demo environment.");
             sendText(session, res.toString());
             return;
         }
 
-        String executionId = params.getExecutionId();
-        String targetNodeId = params.getTargetNodeId();
+        String executionId = request.getExecutionId();
+        String targetNodeId = request.getTargetNodeId();
         if (StringUtils.isEmpty(executionId)) {
             BuildResponseParameters res = new BuildResponseParameters()
                     .setHeader("status")

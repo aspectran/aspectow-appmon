@@ -34,6 +34,7 @@ import com.aspectran.web.support.rest.response.SuccessResponse;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,12 +68,13 @@ public class BuildDeployActivity {
     /**
      * Displays the build &amp; deployment dashboard page.
      * @param nodeId the target node ID
+     * @param executionId optional execution ID to load specific build details
      * @return a map of attributes for rendering the view
      */
     @Request("/")
     @Dispatch("cluster/build")
     @Action("page")
-    public Map<String, Object> buildPage(String nodeId) {
+    public Map<String, Object> buildPage(String nodeId, String executionId) {
         String clusterMode = nodeManager.getClusterConfig().getMode();
         List<Map<String, Object>> nodes = nodeConsoleHelper.getNodes(true);
         String targetNodeId = (nodeId != null ? (nodes.stream().anyMatch(n -> nodeId.equals(n.get("id"))) ? nodeId : null) : null);
@@ -93,21 +95,40 @@ public class BuildDeployActivity {
         if (targetNodeId != null) {
             model.put("targetNodeId", targetNodeId);
         }
-
-        Set<String> nodeIds = nodes.stream()
-                .map(n -> (String) n.get("id"))
-                .filter(StringUtils::hasText)
-                .collect(Collectors.toSet());
-        Map<String, BuildExecutionInfo> lastExecutions = remoteBuildDeployManager.getLastExecutions(nodeIds);
-        if (lastExecutions != null && !lastExecutions.isEmpty()) {
-            model.put("lastExecutions", lastExecutions);
+        if (StringUtils.hasText(executionId)) {
+            model.put("targetExecutionId", executionId);
         }
 
-        BuildExecutionInfo lastExec = (targetNodeId != null
-                ? remoteBuildDeployManager.getLastExecution(targetNodeId)
-                : remoteBuildDeployManager.getLastExecution());
-        if (lastExec != null) {
-            model.put("lastExecution", lastExec);
+        if (StringUtils.hasText(executionId)) {
+            Map<String, BuildExecutionInfo> executions = remoteBuildDeployManager.getExecutions(executionId);
+            if (executions != null && !executions.isEmpty()) {
+                model.put("lastExecutions", executions);
+                BuildExecutionInfo mainExec = (targetNodeId != null && executions.containsKey(targetNodeId))
+                        ? executions.get(targetNodeId)
+                        : executions.values().iterator().next();
+                model.put("lastExecution", mainExec);
+            } else {
+                BuildExecutionInfo singleExec = remoteBuildDeployManager.getExecution(executionId, targetNodeId);
+                if (singleExec != null) {
+                    model.put("lastExecution", singleExec);
+                }
+            }
+        } else {
+            Set<String> nodeIds = nodes.stream()
+                    .map(n -> (String) n.get("id"))
+                    .filter(StringUtils::hasText)
+                    .collect(Collectors.toSet());
+            Map<String, BuildExecutionInfo> lastExecutions = remoteBuildDeployManager.getLastExecutions(nodeIds);
+            if (lastExecutions != null && !lastExecutions.isEmpty()) {
+                model.put("lastExecutions", lastExecutions);
+            }
+
+            BuildExecutionInfo lastExec = (targetNodeId != null
+                    ? remoteBuildDeployManager.getLastExecution(targetNodeId)
+                    : remoteBuildDeployManager.getLastExecution());
+            if (lastExec != null) {
+                model.put("lastExecution", lastExec);
+            }
         }
 
         return model;
@@ -146,7 +167,7 @@ public class BuildDeployActivity {
     public Map<String, Object> getStatus(String executionId, String nodeId) {
         BuildExecutionInfo info;
         if (StringUtils.hasText(executionId)) {
-            info = remoteBuildDeployManager.getActiveExecution(executionId);
+            info = remoteBuildDeployManager.getExecution(executionId, nodeId);
         } else if (StringUtils.hasText(nodeId)) {
             info = remoteBuildDeployManager.getLastExecution(nodeId);
         } else {
@@ -172,6 +193,34 @@ public class BuildDeployActivity {
             result.put("status", "IDLE");
         }
         return result;
+    }
+
+    /**
+     * Retrieves execution logs for a given execution ID and optional node ID.
+     * @param executionId execution ID
+     * @param nodeId optional node ID
+     * @return REST response containing list of log lines or map of node logs
+     */
+    @Request("/logs")
+    public RestResponse getExecutionLogs(String executionId, String nodeId) {
+        if (StringUtils.isEmpty(executionId)) {
+            return new FailureResponse().setError("error", "Execution ID is required");
+        }
+        try {
+            Map<String, List<String>> nodeLogs = remoteBuildDeployManager.getNodeLogs(executionId);
+            Map<String, Object> data = new HashMap<>();
+            data.put("executionId", executionId);
+            if (StringUtils.hasText(nodeId)) {
+                List<String> logs = nodeLogs.getOrDefault(nodeId, Collections.emptyList());
+                data.put("nodeId", nodeId);
+                data.put("logs", logs);
+            } else {
+                data.put("nodeLogs", nodeLogs);
+            }
+            return new SuccessResponse(data).ok();
+        } catch (Exception e) {
+            return new FailureResponse().setError("error", e.getMessage());
+        }
     }
 
     /**
