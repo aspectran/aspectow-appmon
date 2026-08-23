@@ -162,9 +162,9 @@
     <div id="sidebar-overlay"></div>
     <div id="main-container">
         <header id="header-bar" class="px-3 px-lg-4">
-            <div class="d-flex align-items-center gap-3">
-                <button class="btn d-lg-none p-0" id="sidebar-toggle">
-                    <i class="bi bi-list fs-3"></i>
+            <div class="d-flex align-items-center gap-2 gap-lg-3">
+                <button id="sidebar-toggle" title="Toggle Sidebar">
+                    <i class="bi bi-layout-sidebar-inset"></i>
                 </button>
                 <a th:href="@{/}" class="d-sm-none"><img src="https://cdn.jsdelivr.net/gh/aspectran/aspectran-assets@main/assets/img/aspectran-logo.svg" class="logo-img" alt="Aspectran"/></a>
                 <nav aria-label="breadcrumb" class="d-none d-sm-block">
@@ -264,11 +264,25 @@
         $(function() {
             const $sidebar = $('#sidebar');
             const $overlay = $('#sidebar-overlay');
+            const STORAGE_KEY = 'aspectow.console.sidebar.collapsed';
+            const isDesktop = () => window.innerWidth > 992;
+
             const toggleSidebar = () => {
-                $sidebar.toggleClass('show');
-                $overlay.toggleClass('show');
+                if (isDesktop()) {
+                    const isCollapsed = $('html').toggleClass('sidebar-collapsed').hasClass('sidebar-collapsed');
+                    $('body').toggleClass('sidebar-collapsed', isCollapsed);
+                    localStorage.setItem(STORAGE_KEY, isCollapsed ? 'true' : 'false');
+                } else {
+                    $sidebar.toggleClass('show');
+                    $overlay.toggleClass('show');
+                }
             };
-            $('#sidebar-toggle, #sidebar-close, #sidebar-overlay').on('click', toggleSidebar);
+
+            $('#sidebar-toggle').on('click', toggleSidebar);
+            $('#sidebar-close, #sidebar-overlay').on('click', function() {
+                $sidebar.removeClass('show');
+                $overlay.removeClass('show');
+            });
         });
     </script>
 </body>

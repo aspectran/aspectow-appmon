@@ -17,6 +17,11 @@
                 document.documentElement.setAttribute('data-bs-theme', newTheme);
             };
             setTheme(getPreferredTheme());
+
+            // Check sidebar collapsed state
+            if (localStorage.getItem('aspectow.console.sidebar.collapsed') === 'true') {
+                document.documentElement.classList.add('sidebar-collapsed');
+            }
         })();
     </script>
 </th:block>
