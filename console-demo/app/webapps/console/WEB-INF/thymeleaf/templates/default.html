@@ -25,7 +25,7 @@
         <nav class="nav-links">
             <th:block th:with="portalUrl=${'%{aspectow.console.portalUrl}'}">
                 <a th:href="${portalUrl}" class="nav-link mb-3" th:if="${portalUrl != null and !portalUrl.isEmpty()}">
-                    <i class="bi bi-arrow-left"></i> Back to Main
+                    <span><i class="bi bi-arrow-left"></i> Back to Main</span>
                 </a>
             </th:block>
 
