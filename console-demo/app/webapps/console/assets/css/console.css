@@ -156,3 +156,18 @@ body {
     font-family: var(--bs-font-monospace);
     font-size: 0.875rem;
 }
+
+/* Main Content Elements */
+.status-pill {
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+}
+.target-selector, .filter-panel {
+    background: var(--bs-secondary-bg);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--bs-border-color);
+}

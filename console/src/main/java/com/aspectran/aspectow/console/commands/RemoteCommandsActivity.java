@@ -17,15 +17,19 @@ package com.aspectran.aspectow.console.commands;
 
 import com.aspectran.aspectow.console.cluster.NodeConsoleHelper;
 import com.aspectran.aspectow.node.manager.NodeManager;
+import com.aspectran.core.activity.Translet;
 import com.aspectran.core.component.bean.annotation.Action;
 import com.aspectran.core.component.bean.annotation.Autowired;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Dispatch;
+import com.aspectran.core.component.bean.annotation.Hint;
 import com.aspectran.core.component.bean.annotation.Profile;
 import com.aspectran.core.component.bean.annotation.Request;
+import com.aspectran.utils.StringUtils;
 import com.aspectran.web.activity.response.RestResponse;
 import com.aspectran.web.support.rest.response.FailureResponse;
 import com.aspectran.web.support.rest.response.SuccessResponse;
+import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -60,13 +64,41 @@ public class RemoteCommandsActivity {
 
     /**
      * Displays the node commands page.
+     * @param translet the current translet
      * @param nodeId the node ID
      * @return a map of attributes for rendering the view
      */
     @Request("/")
     @Dispatch("cluster/commands")
     @Action("page")
-    public Map<String, Object> commands(String nodeId) {
+    public Map<String, Object> commands(@NonNull Translet translet, String nodeId) {
+        String layout = translet.getParameter("layout");
+        if (!StringUtils.hasText(layout)) {
+            layout = "default";
+        }
+        return createCommandsModel(layout, nodeId);
+    }
+
+    /**
+     * Displays the node commands page as a popup.
+     * @param translet the current translet
+     * @param nodeId the node ID
+     * @return a map of attributes for rendering the view
+     */
+    @Request("/popup/")
+    @Dispatch("cluster/commands")
+    @Action("page")
+    @Hint(type = "layout", value = "layout: popup")
+    public Map<String, Object> commandsPopup(@NonNull Translet translet, String nodeId) {
+        String layout = translet.getParameter("layout");
+        if (!StringUtils.hasText(layout)) {
+            layout = "popup";
+        }
+        return createCommandsModel(layout, nodeId);
+    }
+
+    @NonNull
+    private Map<String, Object> createCommandsModel(String layout, String nodeId) {
         String clusterMode = nodeManager.getClusterConfig().getMode();
         List<Map<String, Object>> nodes = nodeConsoleHelper.getNodes(true);
         String targetNodeId = (nodeId != null ? (nodes.stream().anyMatch(n -> nodeId.equals(n.get("id"))) ? nodeId : null) : null);
@@ -76,6 +108,7 @@ public class RemoteCommandsActivity {
         Map<String, Object> model = new HashMap<>();
         model.put("title", "Remote Commands");
         model.put("style", "commands-page");
+        model.put("layout", layout);
         model.put("group", "cluster-menu");
         model.put("clusterMode", clusterMode);
         model.put("nodes", nodes);
