@@ -19,7 +19,7 @@ LOGS_DIR="$DEPLOY_DIR/logs1"
 
 ASPECTRAN_OPTS="
 -Duser.timezone=UTC
--Daspectran.profiles.active=dev,gateway,console.ui
+-Daspectran.profiles.active=dev,gateway,console.custom-ui
 -Daspectran.profiles.base.console=dev,h2,console.custom-ui
 -Daspectran.workPath=$WORK_DIR
 -Daspectran.tempPath=$TEMP_DIR
