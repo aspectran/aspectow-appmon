@@ -152,7 +152,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Permissions</label>
-                            <div class="border rounded p-3 bg-body-tertiary" style="max-height: 310px; overflow-y: auto;">
+                            <div class="border rounded p-3 bg-body-tertiary">
                                 <div class="form-check mb-2" th:each="perm : ${page.permissionList}">
                                     <input class="form-check-input perm-checkbox" type="checkbox" name="permIds" th:value="${perm.permId}" th:id="'perm_' + ${perm.permId}">
                                     <label class="form-check-label" th:for="'perm_' + ${perm.permId}">
