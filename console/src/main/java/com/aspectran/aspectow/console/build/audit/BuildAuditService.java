@@ -22,6 +22,7 @@ import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.utils.StringUtils;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -242,7 +243,7 @@ public class BuildAuditService extends InstantActivitySupport {
                 return false;
             }
 
-            String rawLogs = getDecompressedLogs(historyId);
+            String rawLogs = getDecompressedLogsInternal(historyId);
             String calculated = calculateIntegrityHash(history, rawLogs);
             return history.getIntegrityHash().equalsIgnoreCase(calculated);
         });
@@ -359,7 +360,7 @@ public class BuildAuditService extends InstantActivitySupport {
             Map<String, List<String>> result = new HashMap<>();
             for (BuildHistory h : histories) {
                 if (h.getHistoryId() != null && h.getTargetNodeId() != null) {
-                    String raw = getDecompressedLogs(h.getHistoryId());
+                    String raw = getDecompressedLogsInternal(h.getHistoryId());
                     List<String> lines = (StringUtils.hasText(raw))
                             ? java.util.Arrays.asList(raw.split("\n"))
                             : Collections.emptyList();
@@ -376,22 +377,25 @@ public class BuildAuditService extends InstantActivitySupport {
      * @return raw log string
      */
     public String getDecompressedLogs(Long historyId) {
-        return instantActivity(() -> {
-            BuildLog buildLog = buildHistoryMapper.getBuildLogByHistoryId(historyId);
-            if (buildLog == null || buildLog.getLogContent() == null) {
-                return "";
+        return instantActivity(() -> getDecompressedLogsInternal(historyId));
+    }
+
+    @Nullable
+    private String getDecompressedLogsInternal(Long historyId) {
+        BuildLog buildLog = buildHistoryMapper.getBuildLogByHistoryId(historyId);
+        if (buildLog == null || buildLog.getLogContent() == null) {
+            return "";
+        }
+        if ("Y".equalsIgnoreCase(buildLog.getCompressedYn())) {
+            try {
+                return decompressGzip(buildLog.getLogContent());
+            } catch (Exception e) {
+                logger.error("Failed to decompress GZIP log for history ID {}", historyId, e);
+                return "[Error decompressing log: " + e.getMessage() + "]";
             }
-            if ("Y".equalsIgnoreCase(buildLog.getCompressedYn())) {
-                try {
-                    return decompressGzip(buildLog.getLogContent());
-                } catch (Exception e) {
-                    logger.error("Failed to decompress GZIP log for history ID {}", historyId, e);
-                    return "[Error decompressing log: " + e.getMessage() + "]";
-                }
-            } else {
-                return buildLog.getLogContent();
-            }
-        });
+        } else {
+            return buildLog.getLogContent();
+        }
     }
 
     /**

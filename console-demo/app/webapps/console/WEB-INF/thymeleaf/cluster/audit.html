@@ -382,9 +382,23 @@
                             $('#detail-modal-body').html(html);
                             new bootstrap.Modal(document.getElementById('detailModal')).show();
                         } else {
-                            alert('Failed to load audit detail: ' + (res.error || 'Unknown error'));
+                            alert('Failed to load audit detail: ' + formatErrorMessage(res));
                         }
+                    })
+                    .catch(err => {
+                        alert('Failed to communicate with server: ' + (err.message || err));
                     });
+            }
+
+            function formatErrorMessage(res) {
+                if (!res) return 'Unknown error';
+                if (typeof res.error === 'string') return res.error;
+                if (typeof res.error === 'object' && res.error !== null) {
+                    if (res.error.message) return res.error.message;
+                    if (res.error.error) return res.error.error;
+                    return JSON.stringify(res.error);
+                }
+                return res.message || 'Unknown error';
             }
 
             function viewLogs(historyId) {
@@ -400,8 +414,11 @@
                             currentLoadedLogs = res.data || "No console log output recorded.";
                             $('#modal-log-content').text(currentLoadedLogs);
                         } else {
-                            $('#modal-log-content').text("Failed to load logs: " + (res.error || 'Unknown error'));
+                            $('#modal-log-content').text("Failed to load logs: " + formatErrorMessage(res));
                         }
+                    })
+                    .catch(err => {
+                        $('#modal-log-content').text("Network error loading logs: " + (err.message || err));
                     });
             }
 

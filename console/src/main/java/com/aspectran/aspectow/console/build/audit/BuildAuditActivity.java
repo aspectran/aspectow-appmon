@@ -33,6 +33,9 @@ import com.aspectran.web.support.rest.response.FailureResponse;
 import com.aspectran.web.support.rest.response.SuccessResponse;
 import org.jspecify.annotations.NonNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +49,8 @@ import java.util.Map;
 @Component("/cluster/build/audit")
 @Profile("[console.ui, console.custom-ui]")
 public class BuildAuditActivity {
+
+    private static final Logger logger = LoggerFactory.getLogger(BuildAuditActivity.class);
 
     private final BuildAuditService buildAuditService;
 
@@ -160,12 +165,13 @@ public class BuildAuditActivity {
      * @return detail response with verification status
      */
     @RequestToGet("/detail/${historyId}")
-    public RestResponse getHistoryDetail(Long historyId) {
-        if (historyId == null) {
+    public RestResponse getHistoryDetail(String historyId) {
+        if (StringUtils.isEmpty(historyId)) {
             return new FailureResponse().setError("error", "History ID is required");
         }
         try {
-            BuildHistory history = buildAuditService.getHistoryDetail(historyId);
+            Long id = Long.valueOf(historyId.trim());
+            BuildHistory history = buildAuditService.getHistoryDetail(id);
             if (history == null) {
                 return new FailureResponse().setError("error", "Record not found");
             }
@@ -177,7 +183,7 @@ public class BuildAuditActivity {
                     || StringUtils.isEmpty(history.getIntegrityHash())) {
                 integrityStatus = "PENDING";
             } else {
-                verified = buildAuditService.verifyIntegrity(historyId);
+                verified = buildAuditService.verifyIntegrity(id);
                 integrityStatus = verified ? "VERIFIED" : "FAILED";
             }
 
@@ -187,6 +193,7 @@ public class BuildAuditActivity {
             result.put("integrityStatus", integrityStatus);
             return new SuccessResponse(result).ok();
         } catch (Exception e) {
+            logger.error("Failed to load build audit detail for history ID: {}", historyId, e);
             return new FailureResponse().setError("error", e.getMessage());
         }
     }
@@ -197,14 +204,16 @@ public class BuildAuditActivity {
      * @return log text response
      */
     @RequestToGet("/log/${historyId}")
-    public RestResponse getHistoryLog(Long historyId) {
-        if (historyId == null) {
+    public RestResponse getHistoryLog(String historyId) {
+        if (StringUtils.isEmpty(historyId)) {
             return new FailureResponse().setError("error", "History ID is required");
         }
         try {
-            String logs = buildAuditService.getDecompressedLogs(historyId);
+            Long id = Long.valueOf(historyId.trim());
+            String logs = buildAuditService.getDecompressedLogs(id);
             return new SuccessResponse(logs).ok();
         } catch (Exception e) {
+            logger.error("Failed to load build audit logs for history ID: {}", historyId, e);
             return new FailureResponse().setError("error", e.getMessage());
         }
     }
