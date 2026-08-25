@@ -19,7 +19,7 @@
  * Responsible for assembling the dashboard UI based on configuration data.
  *
  * @version 4.0
- * @last-modified 2026-08-15
+ * @last-modified 2026-08-25
  */
 class DashboardBuilder {
     constructor(options = {}) {
@@ -38,8 +38,8 @@ class DashboardBuilder {
         this.selectedNodeIdByGroup = {};
     }
 
-    build(basePath, appsToSubscribe, nodeToSubscribe) {
-        this.basePath = basePath;
+    build(baseUrl, appsToSubscribe, nodeToSubscribe) {
+        this.baseUrl = baseUrl;
         this.appsToSubscribe = appsToSubscribe;
         this.nodeToSubscribe = nodeToSubscribe;
         this.currentGroupId = null;
@@ -47,7 +47,7 @@ class DashboardBuilder {
         this.suspendMonitoring();
         this.clearView();
         $.ajax({
-            url: basePath + "/appmon/config/data",
+            url: baseUrl + "/appmon/config/data",
             type: "get",
             dataType: "json",
             data: {
@@ -63,7 +63,7 @@ class DashboardBuilder {
 
                     this.settings = { ...data.settings };
                     this.clusterMode = this.settings.clusterMode || "direct";
-                    this.isGatewayMode = (this.settings.clusterMode === "gateway" || this.settings.clusterMode === "autoscaling");
+                    this.isGatewayMode = (this.settings.clusterMode === "gateway");
                     this.counterPersistInterval = this.settings.counterPersistInterval || 5;
                     this.groups = [];
                     this.nodes = [];
@@ -86,7 +86,7 @@ class DashboardBuilder {
                             subscribeAttempts: 0
                         };
                         node.endpoint.mode = node.endpoint.mode || "auto";
-                        node.endpoint.path = basePath + node.endpoint.path + "/" + node.id;
+                        node.endpoint.path = baseUrl + node.endpoint.path + "/" + node.id;
                         node.endpoint.token = data.token;
                         this.nodes.push(node);
                         this.viewers[node.index] = new DashboardViewer(this.counterPersistInterval * 60, this.options);
@@ -159,14 +159,14 @@ class DashboardBuilder {
             error: (xhr) => {
                 if (xhr.status === 403) {
                     alert("Authentication has expired. You will be redirected to the main page.");
-                    location.href = basePath;
+                    location.href = baseUrl;
                 }
             }
         });
     }
 
     rebuild() {
-        this.build(this.basePath, this.appsToSubscribe, this.nodeToSubscribe);
+        this.build(this.baseUrl, this.appsToSubscribe, this.nodeToSubscribe);
     }
 
     connect(nodeIndex) {
@@ -591,7 +591,7 @@ class DashboardBuilder {
             });
         });
         $(".open-popup").off("click").on("click", (e) => {
-            let url = this.basePath + "/appmon/dashboard/popup/" + (this.appsToSubscribe || "");
+            let url = this.baseUrl + "/appmon/dashboard/popup/" + (this.appsToSubscribe || "");
             if (this.nodeToSubscribe) {
                 url += "?nodeId=" + encodeURIComponent(this.nodeToSubscribe);
             }
