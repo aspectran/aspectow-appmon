@@ -70,7 +70,34 @@ public class BuildAuditService extends InstantActivitySupport {
      */
     public BuildHistory startAudit(@NonNull BuildExecutionInfo info, String requester) {
         return instantActivity(() -> {
-            BuildHistory history = new BuildHistory();
+            BuildHistory history = null;
+            if (StringUtils.hasText(info.getExecutionId()) && StringUtils.hasText(info.getTargetNodeId())) {
+                history = buildHistoryMapper.getBuildHistoryByExecutionIdAndNodeId(info.getExecutionId(), info.getTargetNodeId());
+            } else if (StringUtils.hasText(info.getExecutionId())) {
+                history = buildHistoryMapper.getBuildHistoryByExecutionId(info.getExecutionId());
+            }
+
+            if (history != null) {
+                if (info.getStatus() != null) {
+                    history.setStatus(info.getStatus().name());
+                }
+                if (info.getStartedAt() != null) {
+                    history.setStartedAt(info.getStartedAt());
+                }
+                if (StringUtils.hasText(requester) && !"SYSTEM".equals(requester)) {
+                    history.setRequester(requester);
+                }
+                if (info.getGitBranch() != null) {
+                    history.setGitBranch(info.getGitBranch());
+                }
+                if (info.getGitCommitBefore() != null) {
+                    history.setGitCommitBefore(info.getGitCommitBefore());
+                }
+                buildHistoryMapper.updateBuildHistory(history);
+                return history;
+            }
+
+            history = new BuildHistory();
             history.setExecutionId(info.getExecutionId());
             history.setTargetNodeId(info.getTargetNodeId());
             history.setScriptName(info.getScriptName());
@@ -168,6 +195,38 @@ public class BuildAuditService extends InstantActivitySupport {
             });
         } catch (Exception e) {
             logger.error("Failed to complete build audit record for execution [{}]", info.getExecutionId(), e);
+        }
+    }
+
+    /**
+     * Updates the intermediate status (RUNNING, PENDING, etc.) of a build execution in the database.
+     * @param info the build execution info
+     */
+    public void updateStatus(@NonNull BuildExecutionInfo info) {
+        try {
+            instantActivity(() -> {
+                BuildHistory history = null;
+                if (info.getTargetNodeId() != null) {
+                    history = buildHistoryMapper.getBuildHistoryByExecutionIdAndNodeId(info.getExecutionId(), info.getTargetNodeId());
+                } else {
+                    history = buildHistoryMapper.getBuildHistoryByExecutionId(info.getExecutionId());
+                }
+                if (history != null) {
+                    if (info.getStatus() != null) {
+                        history.setStatus(info.getStatus().name());
+                    }
+                    if (info.getGitBranch() != null) {
+                        history.setGitBranch(info.getGitBranch());
+                    }
+                    if (info.getGitCommitBefore() != null) {
+                        history.setGitCommitBefore(info.getGitCommitBefore());
+                    }
+                    buildHistoryMapper.updateBuildHistory(history);
+                }
+                return null;
+            });
+        } catch (Exception e) {
+            logger.trace("Failed to update build audit status for execution [{}]", info.getExecutionId(), e);
         }
     }
 

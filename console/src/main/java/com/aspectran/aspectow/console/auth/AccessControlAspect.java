@@ -88,8 +88,9 @@ public class AccessControlAspect {
         } else if (requestName.startsWith("/cluster/commands") ||
                 requestName.startsWith("/commands")) {
             hasAccess = (userInfo.hasPermission("COMMAND_EXECUTE") || userInfo.hasRole("SUPER_ADMIN"));
-        } else if (requestName.startsWith("/cluster/nodes/") &&
-                (requestName.endsWith("/restart") || requestName.endsWith("/restart-service") || requestName.endsWith("/restart-server") || requestName.endsWith("/pause") || requestName.endsWith("/resume"))) {
+        } else if ((requestName.startsWith("/cluster/nodes/") &&
+                (requestName.endsWith("/restart") || requestName.endsWith("/restart-service") || requestName.endsWith("/restart-server") || requestName.endsWith("/pause") || requestName.endsWith("/resume"))) ||
+                requestName.equals("/cluster/nodes/bulk-action")) {
             hasAccess = ((userInfo.hasPermission("NODE_MANAGE") && !userInfo.hasRole("DEMO")) || userInfo.hasRole("SUPER_ADMIN"));
         } else if (requestName.startsWith("/cluster/build/execute") ||
                 requestName.startsWith("/cluster/build/cancel")) {

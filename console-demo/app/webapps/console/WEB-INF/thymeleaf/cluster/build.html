@@ -874,11 +874,18 @@
             function checkOverallExecutionStatus() {
                 const nodeIds = activeTargetNodes.length > 0 ? activeTargetNodes : Object.keys(nodeExecutions);
                 let anyActive = false;
+                let earliestStartTime = null;
 
                 nodeIds.forEach(nid => {
                     const exec = nodeExecutions[nid];
                     if (exec && (exec.status === 'RUNNING' || exec.status === 'PENDING')) {
                         anyActive = true;
+                        if (exec.startedAt) {
+                            const st = new Date(exec.startedAt).getTime();
+                            if (!isNaN(st) && (earliestStartTime === null || st < earliestStartTime)) {
+                                earliestStartTime = st;
+                            }
+                        }
                     }
                 });
 
@@ -886,6 +893,12 @@
                     $('#btn-dispatch').prop('disabled', true);
                     $('#btn-cancel').prop('disabled', false);
                     $('#terminal-spinner').removeClass('d-none');
+                    if (!durationTicker) {
+                        if (earliestStartTime) {
+                            executionStartTime = earliestStartTime;
+                        }
+                        startDurationTicker();
+                    }
                 } else {
                     $('#btn-dispatch').prop('disabled', false);
                     $('#btn-cancel').prop('disabled', true);
@@ -972,12 +985,18 @@
                     return;
                 }
 
+                // Reset execution state and wait for server-assigned executionId
+                currentExecutionId = null;
+
                 // Reset logs and executions
                 allLogs = [];
                 nodeExecutions = {};
                 activeTargetNodes.forEach(nid => {
                     const exec = ensureNode(nid);
+                    exec.executionId = null;
                     exec.status = 'PENDING';
+                    exec.scriptName = scriptName;
+                    exec.gitBranch = branch || '-';
                     exec.startedAt = new Date().toISOString();
                 });
 
@@ -1037,25 +1056,34 @@
                 if (confirm('Are you sure you want to cancel the currently running execution?')) {
                     if (client) {
                         let sent = 0;
-                        Object.keys(nodeExecutions).forEach(nid => {
+                        const targetType = $('#target-type').val();
+                        const targetVal = $('#target-value').val();
+                        const nodeIds = activeTargetNodes.length > 0 ? activeTargetNodes : Object.keys(nodeExecutions);
+
+                        nodeIds.forEach(nid => {
                             const exec = nodeExecutions[nid];
-                            if (exec && (exec.status === 'RUNNING' || exec.status === 'PENDING') && exec.executionId) {
+                            const execId = (exec && exec.executionId) ? exec.executionId : currentExecutionId;
+                            if (execId && (!exec || exec.status === 'RUNNING' || exec.status === 'PENDING')) {
                                 client.sendMessage({
                                     header: "cancel",
-                                    executionId: exec.executionId,
+                                    executionId: execId,
                                     targetNodeId: nid
                                 });
                                 sent++;
                             }
                         });
+
                         if (sent === 0 && currentExecutionId) {
-                            const targetType = $('#target-type').val();
-                            const targetVal = $('#target-value').val();
-                            const targetNodeId = (targetType === 'node') ? (targetVal || currentNodeId || myNodeId) : null;
+                            let fallbackNodeId = null;
+                            if (targetType === 'node') {
+                                fallbackNodeId = targetVal || currentNodeId || myNodeId;
+                            } else if (activeTargetNodes.length === 1) {
+                                fallbackNodeId = activeTargetNodes[0];
+                            }
                             client.sendMessage({
                                 header: "cancel",
                                 executionId: currentExecutionId,
-                                targetNodeId: targetNodeId
+                                targetNodeId: fallbackNodeId
                             });
                         }
                         appendTerminalLineToAll(`[ABORT] Cancellation signal sent for active executions...`, 'warn');
@@ -1347,12 +1375,28 @@
                             if (currentExecutionId && message.executionId && message.executionId !== currentExecutionId) {
                                 return;
                             }
+                            if (!currentExecutionId && message.executionId) {
+                                currentExecutionId = message.executionId;
+                            }
+                            const exec = ensureNode(nodeId);
+                            if (exec.status === 'PENDING' || exec.status === 'IDLE') {
+                                exec.status = 'RUNNING';
+                                const $badge = $(`#tab-badge-${nodeId}`);
+                                if ($badge.length) {
+                                    $badge.attr('class', 'badge status-pill small ' + getBadgeClass('RUNNING')).text('RUNNING');
+                                }
+                                checkOverallExecutionStatus();
+                                renderMetaView();
+                            }
                             if (message.line) {
                                 appendLogLine(nodeId, message.line);
                             }
                         } else if (header === 'logBackfill') {
                             if (currentExecutionId && message.executionId && message.executionId !== currentExecutionId) {
                                 return;
+                            }
+                            if (!currentExecutionId && message.executionId) {
+                                currentExecutionId = message.executionId;
                             }
                             if (message.lines && Array.isArray(message.lines)) {
                                 const exec = ensureNode(nodeId);
@@ -1369,8 +1413,15 @@
                                 }
                             }
                         } else if (header === 'status') {
-                            if (currentExecutionId && message.executionId && message.executionId !== currentExecutionId) {
-                                return;
+                            if (!currentExecutionId && message.executionId) {
+                                currentExecutionId = message.executionId;
+                            } else if (currentExecutionId && message.executionId && message.executionId !== currentExecutionId) {
+                                const anyActive = Object.values(nodeExecutions).some(e => e.status === 'RUNNING' || e.status === 'PENDING');
+                                if (!anyActive && (message.status === 'RUNNING' || message.status === 'PENDING')) {
+                                    currentExecutionId = message.executionId;
+                                } else {
+                                    return;
+                                }
                             }
                             if (message.error) {
                                 const errorKey = (message.executionId || '') + ':' + message.error;

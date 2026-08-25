@@ -882,11 +882,12 @@
                     const isPauseResume = (action === 'pause' || action === 'resume');
 
                     const selectedNodes = [];
+                    const excludeConsole = $('#bulk-exclude-console').is(':checked');
                     $('input[name="bulkNodes"]:checked').each(function() {
                         const nodeId = $(this).val();
                         const isConsole = $(this).data('console') === true || $(this).data('console') === 'true';
-                        if (isPauseResume && isConsole) {
-                            return; // Safe guard: Skip console node on pause/resume
+                        if ((excludeConsole || isPauseResume) && isConsole) {
+                            return; // Safe guard: Skip console node when exclude console is checked or on pause/resume
                         }
                         selectedNodes.push(nodeId);
                     });
@@ -905,55 +906,62 @@
                     const $btn = $(this);
                     $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Executing...');
 
-                    const promises = selectedNodes.map(nodeId => {
-                        const url = basePath + "/cluster/nodes/" + nodeId + "/" + action;
-                        return fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'Accept': 'application/json'
-                            }
-                        })
-                        .then(response => {
-                            if (response.status === 403) {
-                                throw new Error("Access Denied: You do not have permission to execute this action on node " + nodeId);
-                            }
-                            if (!response.ok) {
-                                throw new Error("HTTP error " + response.status + " for node " + nodeId);
-                            }
-                            return response.json();
-                        })
-                        .then(res => ({ nodeId, success: res.success, error: res.error }))
-                        .catch(err => ({ nodeId, success: false, error: { message: err.message } }));
-                    });
+                    const formData = new URLSearchParams();
+                    formData.append('action', action);
+                    selectedNodes.forEach(nid => formData.append('nodeIds', nid));
 
-                    Promise.all(promises).then(results => {
+                    fetch(basePath + "/cluster/nodes/bulk-action", {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                        },
+                        body: formData.toString()
+                    })
+                    .then(response => {
+                        if (response.status === 403) {
+                            throw new Error("Access Denied: You do not have permission to execute this bulk action.");
+                        }
+                        if (!response.ok) {
+                            throw new Error("HTTP error " + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(res => {
                         $btn.prop('disabled', false).text('Execute Action');
                         bootstrap.Modal.getInstance(document.getElementById('bulkControlModal')).hide();
 
-                        results.forEach(r => {
-                            if (r.success) {
+                        if (res.success && res.data) {
+                            const successNodes = res.data.successNodes || [];
+                            const failedNodes = res.data.failedNodes || [];
+
+                            successNodes.forEach(nodeId => {
                                 if (action === 'restart-service' || action === 'restart' || action === 'restart-server') {
-                                    updateNodeStatus({ id: r.nodeId, status: 'stopping' });
+                                    updateNodeStatus({ id: nodeId, status: 'stopping' });
                                     if (action === 'restart-server') {
-                                        pollNodeRecovery(r.nodeId);
+                                        pollNodeRecovery(nodeId);
                                     }
                                 } else if (action === 'pause') {
-                                    updateNodeStatus({ id: r.nodeId, status: 'paused' });
+                                    updateNodeStatus({ id: nodeId, status: 'paused' });
                                 } else if (action === 'resume') {
-                                    updateNodeStatus({ id: r.nodeId, status: 'live' });
+                                    updateNodeStatus({ id: nodeId, status: 'live' });
                                 }
+                            });
+
+                            if (failedNodes.length === 0) {
+                                alert(`Successfully dispatched '${actionName}' command to all ${successNodes.length} node(s).`);
+                            } else {
+                                const failedDetails = failedNodes.map(r => `${r.nodeId}: ${r.error || 'Failed'}`).join('\n');
+                                alert(`Dispatched '${actionName}' command to ${successNodes.length} node(s). ${failedNodes.length} node(s) failed:\n` + failedDetails);
                             }
-                        });
-
-                        const successCount = results.filter(r => r.success).length;
-                        const failedCount = results.length - successCount;
-
-                        if (failedCount === 0) {
-                            alert(`Successfully dispatched '${actionName}' command to all ${successCount} node(s).`);
                         } else {
-                            const failedDetails = results.filter(r => !r.success).map(r => `${r.nodeId}: ${r.error ? r.error.message : 'Failed'}`).join('\n');
-                            alert(`Dispatched '${actionName}' command to ${successCount} node(s). ${failedCount} node(s) failed:\n` + failedDetails);
+                            alert("Failed to execute bulk action: " + (res.error ? res.error.message : "Unknown error"));
                         }
+                    })
+                    .catch(err => {
+                        $btn.prop('disabled', false).text('Execute Action');
+                        console.error("Error executing bulk action:", err);
+                        alert(err.message || "Error communicating with the server.");
                     });
                 });
             });

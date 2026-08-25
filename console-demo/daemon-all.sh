@@ -6,7 +6,7 @@ SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 ACTION="${1:-restart}"
 [ $# -gt 0 ] && shift
 
-SCRIPTS="daemon.sh daemon-node1.sh daemon-node2.sh"
+SCRIPTS="daemon.sh daemon-dev-node1.sh daemon-dev-node2.sh"
 
 for script in $SCRIPTS; do
   if [ -f "$SCRIPT_DIR/$script" ]; then

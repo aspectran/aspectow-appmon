@@ -89,18 +89,22 @@ public class NodeConsoleHelper {
         Map<String, String> pulses = nodeRegistry.getAllPulses();
         List<Map<String, Object>> result = new ArrayList<>(allNodes.size());
         long now = System.currentTimeMillis();
-        long timeout = 15000; // 15 seconds timeout
+        long pulseInterval = (nodeManager.getClusterConfig() != null ? nodeManager.getClusterConfig().getPulseInterval(10000L) : 10000L);
+        long timeout = Math.max(pulseInterval * 3, 30000L); // at least 30 seconds
 
         for (NodeInfo info : allNodes) {
             String nodeId = info.getId();
-            boolean alive = false;
-            String pulseStr = (pulses != null ? pulses.get(nodeId) : null);
-            if (pulseStr != null) {
-                try {
-                    long lastPulse = Long.parseLong(pulseStr);
-                    alive = (now - lastPulse <= timeout);
-                } catch (NumberFormatException ignored) {
-                    // ignore
+            boolean isMyNode = (nodeId != null && nodeId.equals(nodeManager.getNodeId()));
+            boolean alive = isMyNode;
+            if (!alive) {
+                String pulseStr = (pulses != null ? pulses.get(nodeId) : null);
+                if (pulseStr != null) {
+                    try {
+                        long lastPulse = Long.parseLong(pulseStr);
+                        alive = (now - lastPulse <= timeout);
+                    } catch (NumberFormatException ignored) {
+                        // ignore
+                    }
                 }
             }
             result.add(createNodeMap(info, alive, includeEndpoint));

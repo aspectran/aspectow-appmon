@@ -301,10 +301,12 @@ public class BuildDeployActivity {
         }
         try {
             boolean live = false;
-            if (nodeManager.getNodeRegistry() != null) {
-                live = nodeManager.getNodeRegistry().isLive(nodeId, 5000);
-            } else if (nodeId.equals(nodeManager.getNodeId())) {
+            if (nodeId.equals(nodeManager.getNodeId())) {
                 live = true;
+            } else if (nodeManager.getNodeRegistry() != null) {
+                long pulseInterval = (nodeManager.getClusterConfig() != null ? nodeManager.getClusterConfig().getPulseInterval(10000L) : 10000L);
+                long timeout = Math.max(pulseInterval * 3, 30000L);
+                live = nodeManager.getNodeRegistry().isLive(nodeId, timeout);
             }
 
             Map<String, Object> data = new HashMap<>();

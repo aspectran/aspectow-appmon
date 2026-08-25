@@ -19,6 +19,7 @@ import com.aspectran.aspectow.console.build.audit.BuildAuditService;
 import com.aspectran.aspectow.console.build.audit.BuildHistory;
 import com.aspectran.aspectow.console.build.bridge.BuildDeployBroker;
 import com.aspectran.aspectow.console.build.bridge.BuildRequestParameters;
+import com.aspectran.aspectow.console.build.bridge.BuildResponseParameters;
 import com.aspectran.aspectow.console.build.bridge.redis.BuildMessageBridgeHandler;
 import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.aspectow.node.manager.NodeManager;
@@ -372,6 +373,8 @@ public class RemoteBuildDeployManager implements InitializableBean {
             info.setExecutionId(executionId);
             info.setTargetNodeId(nodeId);
             info.setScriptName(scriptName);
+            info.setStatus(BuildExecutionInfo.Status.PENDING);
+            info.setStartedAt(java.time.Instant.now());
             info.setTriggerType("MANUAL");
 
             if (request.getParameters() != null) {
@@ -482,11 +485,10 @@ public class RemoteBuildDeployManager implements InitializableBean {
             info.setExecutionId("bld_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16));
         }
 
-        String targetNodeId = info.getTargetNodeId();
-        if (StringUtils.isEmpty(targetNodeId)) {
-            targetNodeId = nodeManager.getNodeId();
-            info.setTargetNodeId(targetNodeId);
-        }
+        final String targetNodeId = (StringUtils.hasText(info.getTargetNodeId())
+                ? info.getTargetNodeId()
+                : nodeManager.getNodeId());
+        info.setTargetNodeId(targetNodeId);
 
         if (nodeManager.getNodeId().equals(targetNodeId)) {
             // Case 1: Local node execution
@@ -494,6 +496,7 @@ public class RemoteBuildDeployManager implements InitializableBean {
                     info.getExecutionId(), info.getScriptName());
 
             activeExecutions.put(info.getExecutionId(), info);
+            activeExecutions.put(info.getExecutionId() + ":" + targetNodeId, info);
 
             if (buildAuditService != null) {
                 String requester = (info.getParameters() != null && info.getParameters().containsKey("requester"))
@@ -507,6 +510,9 @@ public class RemoteBuildDeployManager implements InitializableBean {
             localScriptRunner.runAsync(info,
                     startedInfo -> {
                         logger.info("Local build execution [{}] started running", startedInfo.getExecutionId());
+                        if (buildAuditService != null) {
+                            buildAuditService.updateStatus(startedInfo);
+                        }
                         broker.broadcastStatusChanged(startedInfo);
                     },
                     line -> {
@@ -516,6 +522,7 @@ public class RemoteBuildDeployManager implements InitializableBean {
                         logger.info("Local build execution [{}] completed with status: {}",
                                 completedInfo.getExecutionId(), completedInfo.getStatus());
                         activeExecutions.remove(completedInfo.getExecutionId());
+                        activeExecutions.remove(completedInfo.getExecutionId() + ":" + targetNodeId);
                         broker.broadcastStatusChanged(completedInfo);
 
                         if (buildAuditService != null) {
@@ -526,6 +533,16 @@ public class RemoteBuildDeployManager implements InitializableBean {
             );
         } else {
             // Case 2: Remote node execution via Redis Relay
+            activeExecutions.put(info.getExecutionId() + ":" + targetNodeId, info);
+            if (buildAuditService != null) {
+                String requester = (info.getParameters() != null && info.getParameters().containsKey("requester"))
+                        ? String.valueOf(info.getParameters().get("requester"))
+                        : "SYSTEM";
+                buildAuditService.startAudit(info, requester);
+            }
+
+            broker.broadcastStatusChanged(info);
+
             if (nodeManager.getNodeMessagePublisher() != null) {
                 try {
                     BuildRequestParameters req = new BuildRequestParameters()
@@ -552,12 +569,14 @@ public class RemoteBuildDeployManager implements InitializableBean {
                     logger.error("Failed to dispatch build request to cluster target {}", targetNodeId, e);
                     info.setStatus(BuildExecutionInfo.Status.FAILED);
                     info.setErrorSummary("Failed to dispatch to remote node: " + e.getMessage());
+                    activeExecutions.remove(info.getExecutionId() + ":" + targetNodeId);
                     broker.broadcastStatusChanged(info);
                 }
             } else {
                 logger.warn("Cannot dispatch build request: Node message publisher not available");
                 info.setStatus(BuildExecutionInfo.Status.FAILED);
                 info.setErrorSummary("Node message publisher is not available for remote dispatch");
+                activeExecutions.remove(info.getExecutionId() + ":" + targetNodeId);
                 broker.broadcastStatusChanged(info);
             }
         }
@@ -567,15 +586,7 @@ public class RemoteBuildDeployManager implements InitializableBean {
      * Cancels an execution locally or relays cancel command to remote node.
      */
     public boolean cancel(String executionId, String targetNodeId) {
-        if (StringUtils.isEmpty(targetNodeId) || nodeManager.getNodeId().equals(targetNodeId)) {
-            boolean cancelled = localScriptRunner.cancel(executionId);
-            BuildExecutionInfo info = activeExecutions.get(executionId);
-            if (info != null) {
-                info.setStatus(BuildExecutionInfo.Status.CANCELLED);
-                broker.broadcastStatusChanged(info);
-            }
-            return cancelled;
-        } else {
+        if (StringUtils.hasText(targetNodeId) && !nodeManager.getNodeId().equals(targetNodeId)) {
             if (nodeManager.getNodeMessagePublisher() != null) {
                 try {
                     BuildRequestParameters req = new BuildRequestParameters()
@@ -591,6 +602,31 @@ public class RemoteBuildDeployManager implements InitializableBean {
             }
             return false;
         }
+
+        boolean cancelled = localScriptRunner.cancel(executionId);
+        BuildExecutionInfo info = activeExecutions.get(executionId);
+        if (info != null) {
+            info.setStatus(BuildExecutionInfo.Status.CANCELLED);
+            broker.broadcastStatusChanged(info);
+        }
+        if (!cancelled && StringUtils.isEmpty(targetNodeId) && nodeManager.getNodeMessagePublisher() != null && nodeManager.getNodeRegistry() != null) {
+            try {
+                for (NodeInfo nodeInfo : nodeManager.getNodeRegistry().getNodes()) {
+                    if (nodeInfo.getId() != null && !nodeManager.getNodeId().equals(nodeInfo.getId())) {
+                        BuildRequestParameters req = new BuildRequestParameters()
+                                .setHeader("cancel")
+                                .setExecutionId(executionId)
+                                .setTargetNodeId(nodeInfo.getId());
+                        nodeManager.getNodeMessagePublisher().publishRelay(
+                                BuildDeployBroker.CATEGORY_BUILD, nodeInfo.getId(), req.toString());
+                        cancelled = true;
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Failed to broadcast cancel command across cluster nodes", e);
+            }
+        }
+        return cancelled;
     }
 
     /**
@@ -628,6 +664,36 @@ public class RemoteBuildDeployManager implements InitializableBean {
             } else if ("log".equals(header) || "status".equals(header)) {
                 String nodeId = params.getString("nodeId");
                 if (!nodeManager.getNodeId().equals(nodeId)) {
+                    if ("status".equals(header)) {
+                        BuildResponseParameters res = JsonToParameters.from(message, BuildResponseParameters.class);
+                        if (res != null && res.getExecutionId() != null) {
+                            String st = res.getStatus();
+                            if (StringUtils.hasText(st)) {
+                                BuildExecutionInfo info = new BuildExecutionInfo();
+                                info.setExecutionId(res.getExecutionId());
+                                info.setTargetNodeId(nodeId);
+                                try {
+                                    info.setStatus(BuildExecutionInfo.Status.valueOf(st));
+                                } catch (Exception ignored) {
+                                }
+                                info.setGitBranch(res.getGitBranch());
+                                info.setGitCommitBefore(res.getGitCommitBefore());
+                                info.setGitCommitAfter(res.getGitCommitAfter());
+                                info.setGitCommitMsg(res.getGitCommitMsg());
+                                info.setErrorSummary(res.getError());
+
+                                if (info.getStatus() == BuildExecutionInfo.Status.RUNNING || info.getStatus() == BuildExecutionInfo.Status.PENDING) {
+                                    activeExecutions.put(info.getExecutionId() + ":" + nodeId, info);
+                                    if (buildAuditService != null) {
+                                        buildAuditService.updateStatus(info);
+                                    }
+                                } else {
+                                    activeExecutions.remove(info.getExecutionId() + ":" + nodeId);
+                                    activeExecutions.remove(info.getExecutionId());
+                                }
+                            }
+                        }
+                    }
                     broker.bridge(message);
                 }
             }

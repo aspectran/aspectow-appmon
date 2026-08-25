@@ -37,11 +37,14 @@ import com.aspectran.web.activity.response.RestResponse;
 import com.aspectran.web.support.rest.response.FailureResponse;
 import com.aspectran.web.support.rest.response.SuccessResponse;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +55,8 @@ import java.util.stream.Collectors;
 @Component("/cluster")
 @Profile("[console.ui, console.custom-ui]")
 public class ClusterActivity {
+
+    private static final Logger logger = LoggerFactory.getLogger(ClusterActivity.class);
 
     private final NodeManager nodeManager;
 
@@ -278,6 +283,166 @@ public class ClusterActivity {
             }
         } else {
             return new FailureResponse().setError("error", "Missing nodeId parameter");
+        }
+    }
+
+    /**
+     * Dispatches a bulk control action (restart-server, restart-service, pause, resume) to multiple nodes.
+     * For restart-server, a single execution ID is generated and shared across all target nodes
+     * to keep audit history unified.
+     * @param translet the active translet
+     * @return the REST response containing execution results
+     */
+    @Request("/nodes/bulk-action")
+    public RestResponse bulkAction(@NonNull Translet translet) {
+        String action = translet.getParameter("action");
+        String[] nodeIds = translet.getParameterValues("nodeIds");
+        if (nodeIds == null || nodeIds.length == 0) {
+            String nodeIdParam = translet.getParameter("nodeIds");
+            if (StringUtils.hasText(nodeIdParam)) {
+                nodeIds = StringUtils.splitWithComma(nodeIdParam);
+            }
+        }
+
+        if (!StringUtils.hasText(action) || nodeIds == null || nodeIds.length == 0) {
+            return new FailureResponse().setError("error", "Missing action or nodeIds parameter");
+        }
+
+        List<String> successNodes = new ArrayList<>();
+        List<Map<String, String>> failedNodes = new ArrayList<>();
+
+        if ("restart-server".equalsIgnoreCase(action)) {
+            // Generate a single unified execution ID for all target nodes in this bulk session
+            String executionId = "bld_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+
+            for (String nodeId : nodeIds) {
+                if (!StringUtils.hasText(nodeId)) {
+                    continue;
+                }
+                nodeId = nodeId.trim();
+                try {
+                    BuildExecutionInfo info = new BuildExecutionInfo();
+                    info.setExecutionId(executionId);
+                    info.setTargetNodeId(nodeId);
+                    info.setScriptName("daemon.sh");
+                    info.getParameters().put("action", "restart");
+
+                    remoteBuildDeployManager.dispatch(info);
+                    successNodes.add(nodeId);
+                } catch (Exception e) {
+                    logger.error("Failed to dispatch bulk restart-server to node {}", nodeId, e);
+                    Map<String, String> err = new HashMap<>();
+                    err.put("nodeId", nodeId);
+                    err.put("error", e.getMessage());
+                    failedNodes.add(err);
+                }
+            }
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("action", action);
+            data.put("executionId", executionId);
+            data.put("successNodes", successNodes);
+            data.put("failedNodes", failedNodes);
+            return new SuccessResponse(data).ok();
+
+        } else if ("restart-service".equalsIgnoreCase(action) || "restart".equalsIgnoreCase(action)) {
+            for (String nodeId : nodeIds) {
+                if (!StringUtils.hasText(nodeId)) {
+                    continue;
+                }
+                nodeId = nodeId.trim();
+                try {
+                    CommandRequestParameters commandRequest = new CommandRequestParameters();
+                    commandRequest.setHeader("execute");
+                    commandRequest.setTargetNodeId(nodeId);
+
+                    CommandParameters commandParams = new CommandParameters();
+                    commandParams.readFrom("command: restart");
+                    commandRequest.setCommand(commandParams);
+
+                    remoteCommandManager.process(commandRequest);
+                    successNodes.add(nodeId);
+                } catch (Exception e) {
+                    logger.error("Failed to dispatch bulk restart-service to node {}", nodeId, e);
+                    Map<String, String> err = new HashMap<>();
+                    err.put("nodeId", nodeId);
+                    err.put("error", e.getMessage());
+                    failedNodes.add(err);
+                }
+            }
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("action", action);
+            data.put("successNodes", successNodes);
+            data.put("failedNodes", failedNodes);
+            return new SuccessResponse(data).ok();
+
+        } else if ("pause".equalsIgnoreCase(action)) {
+            for (String nodeId : nodeIds) {
+                if (!StringUtils.hasText(nodeId)) {
+                    continue;
+                }
+                nodeId = nodeId.trim();
+                try {
+                    CommandRequestParameters commandRequest = new CommandRequestParameters();
+                    commandRequest.setHeader("execute");
+                    commandRequest.setTargetNodeId(nodeId);
+
+                    CommandParameters commandParams = new CommandParameters();
+                    commandParams.readFrom("command: pause");
+                    commandRequest.setCommand(commandParams);
+
+                    remoteCommandManager.process(commandRequest);
+                    successNodes.add(nodeId);
+                } catch (Exception e) {
+                    logger.error("Failed to dispatch bulk pause to node {}", nodeId, e);
+                    Map<String, String> err = new HashMap<>();
+                    err.put("nodeId", nodeId);
+                    err.put("error", e.getMessage());
+                    failedNodes.add(err);
+                }
+            }
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("action", action);
+            data.put("successNodes", successNodes);
+            data.put("failedNodes", failedNodes);
+            return new SuccessResponse(data).ok();
+
+        } else if ("resume".equalsIgnoreCase(action)) {
+            for (String nodeId : nodeIds) {
+                if (!StringUtils.hasText(nodeId)) {
+                    continue;
+                }
+                nodeId = nodeId.trim();
+                try {
+                    CommandRequestParameters commandRequest = new CommandRequestParameters();
+                    commandRequest.setHeader("execute");
+                    commandRequest.setTargetNodeId(nodeId);
+
+                    CommandParameters commandParams = new CommandParameters();
+                    commandParams.readFrom("command: resume");
+                    commandRequest.setCommand(commandParams);
+
+                    remoteCommandManager.process(commandRequest);
+                    successNodes.add(nodeId);
+                } catch (Exception e) {
+                    logger.error("Failed to dispatch bulk resume to node {}", nodeId, e);
+                    Map<String, String> err = new HashMap<>();
+                    err.put("nodeId", nodeId);
+                    err.put("error", e.getMessage());
+                    failedNodes.add(err);
+                }
+            }
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("action", action);
+            data.put("successNodes", successNodes);
+            data.put("failedNodes", failedNodes);
+            return new SuccessResponse(data).ok();
+
+        } else {
+            return new FailureResponse().setError("error", "Unsupported action: " + action);
         }
     }
 
