@@ -492,11 +492,19 @@ public class LocalScriptRunner implements ActivityContextAware {
                     }
                     appendLog(info.getExecutionId(), logBuffer, line, logConsumer);
                 }
+            } catch (Exception e) {
+                // Stream might be abruptly closed if process was destroyed/cancelled
+                if (!cancelledExecutions.contains(info.getExecutionId())
+                        && info.getStatus() != BuildExecutionInfo.Status.CANCELLED) {
+                    logger.debug("Error or stream closed while reading script output for {}", scriptName, e);
+                }
             }
 
             boolean finished = process.waitFor(30, TimeUnit.MINUTES);
             info.setFinishedAt(Instant.now());
-            info.setDurationMs(Duration.between(info.getStartedAt(), info.getFinishedAt()).toMillis());
+            if (info.getStartedAt() != null) {
+                info.setDurationMs(Duration.between(info.getStartedAt(), info.getFinishedAt()).toMillis());
+            }
 
             boolean wasCancelled = cancelledExecutions.remove(info.getExecutionId())
                     || info.getStatus() == BuildExecutionInfo.Status.CANCELLED;
@@ -533,17 +541,30 @@ public class LocalScriptRunner implements ActivityContextAware {
 
         } catch (InterruptedException e) {
             info.setFinishedAt(Instant.now());
-            info.setDurationMs(Duration.between(info.getStartedAt(), info.getFinishedAt()).toMillis());
+            if (info.getStartedAt() != null) {
+                info.setDurationMs(Duration.between(info.getStartedAt(), info.getFinishedAt()).toMillis());
+            }
             info.setStatus(BuildExecutionInfo.Status.CANCELLED);
             info.setErrorSummary("Execution cancelled by user");
             appendLog(info.getExecutionId(), logBuffer, "[BUILD CANCELLED] Execution interrupted", logConsumer);
             Thread.currentThread().interrupt();
         } catch (Exception e) {
-            logger.error("Error executing script {}", scriptName, e);
             info.setFinishedAt(Instant.now());
-            info.setStatus(BuildExecutionInfo.Status.FAILED);
-            info.setErrorSummary(e.getMessage());
-            appendLog(info.getExecutionId(), logBuffer, "[BUILD ERROR] " + e.getMessage(), logConsumer);
+            if (info.getStartedAt() != null) {
+                info.setDurationMs(Duration.between(info.getStartedAt(), info.getFinishedAt()).toMillis());
+            }
+            boolean wasCancelled = cancelledExecutions.remove(info.getExecutionId())
+                    || info.getStatus() == BuildExecutionInfo.Status.CANCELLED;
+            if (wasCancelled) {
+                info.setStatus(BuildExecutionInfo.Status.CANCELLED);
+                info.setErrorSummary("Execution cancelled by user");
+                appendLog(info.getExecutionId(), logBuffer, "[BUILD CANCELLED] Execution cancelled by user", logConsumer);
+            } else {
+                logger.error("Error executing script {}", scriptName, e);
+                info.setStatus(BuildExecutionInfo.Status.FAILED);
+                info.setErrorSummary(e.getMessage());
+                appendLog(info.getExecutionId(), logBuffer, "[BUILD ERROR] " + e.getMessage(), logConsumer);
+            }
         } finally {
             cancelledExecutions.remove(info.getExecutionId());
             activeProcesses.remove(info.getExecutionId());

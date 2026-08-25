@@ -619,6 +619,9 @@ public class RemoteBuildDeployManager implements InitializableBean {
 
         boolean cancelled = localScriptRunner.cancel(executionId);
         BuildExecutionInfo info = activeExecutions.get(executionId);
+        if (info == null && StringUtils.hasText(targetNodeId)) {
+            info = activeExecutions.get(executionId + ":" + targetNodeId);
+        }
         if (info != null) {
             info.setStatus(BuildExecutionInfo.Status.CANCELLED);
             broker.broadcastStatusChanged(info);
@@ -684,7 +687,7 @@ public class RemoteBuildDeployManager implements InitializableBean {
                         if (StringUtils.hasText(execId) && StringUtils.hasText(line)) {
                             appendRemoteLog(execId, nodeId, line);
                         }
-                    } else if ("status".equals(header)) {
+                    } else {
                         BuildResponseParameters res = JsonToParameters.from(message, BuildResponseParameters.class);
                         if (res.getExecutionId() != null) {
                             String st = res.getStatus();
