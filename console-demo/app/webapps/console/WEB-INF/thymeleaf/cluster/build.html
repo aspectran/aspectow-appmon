@@ -1187,10 +1187,10 @@
 
                 let lineClass = 'terminal-line';
                 if (type) lineClass += ' ' + type;
-                else if (cleanText.includes('[INFO]') || cleanText.includes('[BUILD STARTED]')) lineClass += ' info';
-                else if (cleanText.includes('[SUCCESS]') || cleanText.includes('BUILD SUCCESS')) lineClass += ' success';
-                else if (cleanText.includes('[ERROR]') || cleanText.includes('BUILD FAILURE') || cleanText.includes('[FAILED]')) lineClass += ' error';
-                else if (cleanText.includes('[WARN]') || cleanText.includes('[WARNING]') || cleanText.includes('[BUILD LOCK]')) lineClass += ' warn';
+                else if (cleanText.includes('[BUILD STARTED]') || cleanText.includes('[BUILD CANCELLED]') || cleanText.includes('[DAEMON LOG]')) lineClass += ' info';
+                else if (cleanText.includes('[SUCCESS]') || cleanText.includes('BUILD SUCCESS') || cleanText.includes('[BUILD SUCCESS]')) lineClass += ' success';
+                else if (cleanText.includes('[ERROR]') || cleanText.includes('BUILD FAILURE') || cleanText.includes('[BUILD FAILED]') || cleanText.includes('[FAILED]') || cleanText.includes('[BUILD ERROR]')) lineClass += ' error';
+                else if (cleanText.includes('[WARN]') || cleanText.includes('[WARNING]') || cleanText.includes('[BUILD LOCK]') || cleanText.includes('[BUILD TIMEOUT]')) lineClass += ' warn';
 
                 let renderedHtml = ansiToHtml(text);
                 let tagPrefix = '';
