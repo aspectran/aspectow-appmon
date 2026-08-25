@@ -170,11 +170,21 @@ public class BuildAuditActivity {
                 return new FailureResponse().setError("error", "Record not found");
             }
 
-            boolean verified = buildAuditService.verifyIntegrity(historyId);
+            String integrityStatus;
+            boolean verified = false;
+            if ("RUNNING".equalsIgnoreCase(history.getStatus())
+                    || "PENDING".equalsIgnoreCase(history.getStatus())
+                    || StringUtils.isEmpty(history.getIntegrityHash())) {
+                integrityStatus = "PENDING";
+            } else {
+                verified = buildAuditService.verifyIntegrity(historyId);
+                integrityStatus = verified ? "VERIFIED" : "FAILED";
+            }
 
             Map<String, Object> result = new HashMap<>();
             result.put("history", history);
             result.put("integrityVerified", verified);
+            result.put("integrityStatus", integrityStatus);
             return new SuccessResponse(result).ok();
         } catch (Exception e) {
             return new FailureResponse().setError("error", e.getMessage());

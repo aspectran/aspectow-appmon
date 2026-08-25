@@ -331,13 +331,23 @@
                         if (res.success) {
                             const h = res.data.history;
                             const verified = res.data.integrityVerified;
+                            const integrityStatus = res.data.integrityStatus || (verified ? 'VERIFIED' : (h.status === 'RUNNING' || h.status === 'PENDING' || !h.integrityHash ? 'PENDING' : 'FAILED'));
 
-                            const verifiedBadge = verified
-                                ? '<span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Cryptographically Valid &amp; Untampered</span>'
-                                : '<span class="badge bg-danger"><i class="bi bi-exclamation-triangle-fill"></i> Integrity Verification Failed!</span>';
+                            let alertClass = 'alert-danger';
+                            let verifiedBadge = '<span class="badge bg-danger"><i class="bi bi-exclamation-triangle-fill"></i> Integrity Verification Failed!</span>';
+
+                            if (integrityStatus === 'VERIFIED') {
+                                alertClass = 'alert-success';
+                                verifiedBadge = '<span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Cryptographically Valid &amp; Untampered</span>';
+                            } else if (integrityStatus === 'PENDING') {
+                                alertClass = 'alert-warning';
+                                verifiedBadge = '<span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Pending (Execution in progress)</span>';
+                            }
+
+                            const statusBadgeClass = h.status === 'SUCCESS' ? 'bg-success' : (h.status === 'FAILED' ? 'bg-danger' : (h.status === 'RUNNING' ? 'bg-primary' : 'bg-warning'));
 
                             let html = `
-                                <div class="alert ${verified ? 'alert-success' : 'alert-danger'} d-flex justify-content-between align-items-center mb-3">
+                                <div class="alert ${alertClass} d-flex justify-content-between align-items-center mb-3">
                                     <div><strong>Integrity Check:</strong> ${verifiedBadge}</div>
                                     <div class="small text-muted">Algorithm: SHA-256</div>
                                 </div>
@@ -355,7 +365,7 @@
                                             <tr><th class="bg-body-tertiary text-body-secondary">Target Node</th><td><strong>${h.targetNodeId}</strong></td></tr>
                                             <tr><th class="bg-body-tertiary text-body-secondary">Script Executed</th><td>${h.scriptName}</td></tr>
                                             <tr><th class="bg-body-tertiary text-body-secondary">Requester</th><td>${h.requester}</td></tr>
-                                            <tr><th class="bg-body-tertiary text-body-secondary">Execution Status</th><td><span class="badge bg-primary">${h.status}</span> (Exit Code: ${h.exitCode})</td></tr>
+                                            <tr><th class="bg-body-tertiary text-body-secondary">Execution Status</th><td><span class="badge ${statusBadgeClass}">${h.status}</span> (Exit Code: ${h.exitCode !== null && h.exitCode !== undefined ? h.exitCode : '-'})</td></tr>
                                             <tr><th class="bg-body-tertiary text-body-secondary">Started At</th><td>${formatDateTime(h.startedAt)}</td></tr>
                                             <tr><th class="bg-body-tertiary text-body-secondary">Finished At</th><td>${formatDateTime(h.finishedAt)}</td></tr>
                                             <tr><th class="bg-body-tertiary text-body-secondary">Duration</th><td>${h.durationMs ? (h.durationMs / 1000).toFixed(2) + ' seconds' : '-'}</td></tr>
@@ -363,7 +373,7 @@
                                             <tr><th class="bg-body-tertiary text-body-secondary">Git Commit Before</th><td><code>${h.gitCommitBefore || '-'}</code></td></tr>
                                             <tr><th class="bg-body-tertiary text-body-secondary">Git Commit After</th><td><code>${h.gitCommitAfter || '-'}</code></td></tr>
                                             <tr><th class="bg-body-tertiary text-body-secondary">Git Commit Message</th><td>${h.gitCommitMsg || '-'}</td></tr>
-                                            <tr><th class="bg-body-tertiary text-body-secondary">SHA-256 Digest</th><td><small class="text-break font-monospace">${h.integrityHash || '-'}</small></td></tr>
+                                            <tr><th class="bg-body-tertiary text-body-secondary">SHA-256 Digest</th><td><small class="text-break font-monospace">${h.integrityHash || '(Generated upon execution completion)'}</small></td></tr>
                                             ${h.errorSummary ? `<tr><th class="bg-body-tertiary text-danger">Error Summary</th><td class="text-danger">${h.errorSummary}</td></tr>` : ''}
                                         </tbody>
                                     </table>
