@@ -36,6 +36,10 @@
             padding: 15px;
             line-height: 1.45;
         }
+        .terminal-line {
+            white-space: pre;
+            margin-bottom: 1px;
+        }
         .table-detail-container {
             border-radius: 8px;
             overflow: hidden;
@@ -86,9 +90,9 @@
                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()">
                         <i class="bi bi-printer"></i> Print Report
                     </button>
-                    <button type="button" class="btn btn-sm btn-success" th:href="@{/cluster/build/audit/export(nodeId=${page.targetNodeId}, status=${page.status}, q=${page.searchKeyword})}">
+                    <a class="btn btn-sm btn-success" th:href="@{/cluster/build/audit/export(nodeId=${page.targetNodeId}, status=${page.status}, q=${page.searchKeyword})}">
                         <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV Report
-                    </button>
+                    </a>
                 </div>
             </div>
 
@@ -270,9 +274,9 @@
                             <div id="modal-log-content" class="terminal-modal-body m-3">Loading logs...</div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="downloadModalLogs()">
+                            <a id="btn-download-modal-log" class="btn btn-sm btn-outline-primary" href="javascript:void(0)" download>
                                 <i class="bi bi-download"></i> Download Full Log
-                            </button>
+                            </a>
                             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
@@ -401,9 +405,98 @@
                 return res.message || 'Unknown error';
             }
 
+            function ansiToHtml(text) {
+                if (!text) return '';
+
+                let str = text
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+
+                let openSpans = 0;
+                const ansiColorRegex = new RegExp('\\u001b\\[([0-9;]*)m', 'g');
+
+                str = str.replace(ansiColorRegex, (match, codeStr) => {
+                    let tags = '';
+                    if (!codeStr || codeStr === '0' || codeStr === '') {
+                        if (openSpans > 0) {
+                            tags += '</span>'.repeat(openSpans);
+                            openSpans = 0;
+                        }
+                        return tags;
+                    }
+
+                    let styles = [];
+                    const codes = codeStr.split(';');
+                    for (let code of codes) {
+                        if (code === '0') {
+                            if (openSpans > 0) {
+                                tags += '</span>'.repeat(openSpans);
+                                openSpans = 0;
+                            }
+                        } else if (code === '1') {
+                            styles.push('font-weight:bold');
+                        } else if (code === '2') {
+                            styles.push('opacity:0.8');
+                        } else if (code === '3') {
+                            styles.push('font-style:italic');
+                        } else if (code === '4') {
+                            styles.push('text-decoration:underline');
+                        } else if (code === '30') {
+                            styles.push('color:#6e7681');
+                        } else if (code === '31') {
+                            styles.push('color:#f85149');
+                        } else if (code === '32') {
+                            styles.push('color:#3fb950');
+                        } else if (code === '33') {
+                            styles.push('color:#d29922');
+                        } else if (code === '34') {
+                            styles.push('color:#58a6ff');
+                        } else if (code === '35') {
+                            styles.push('color:#bc8cff');
+                        } else if (code === '36') {
+                            styles.push('color:#39c5cf');
+                        } else if (code === '37') {
+                            styles.push('color:#e6edf3');
+                        } else if (code === '90') {
+                            styles.push('color:#8b949e');
+                        } else if (code === '91') {
+                            styles.push('color:#ff7b72');
+                        } else if (code === '92') {
+                            styles.push('color:#56d364');
+                        } else if (code === '93') {
+                            styles.push('color:#e3b341');
+                        } else if (code === '94') {
+                            styles.push('color:#79c0ff');
+                        } else if (code === '95') {
+                            styles.push('color:#d2a8ff');
+                        } else if (code === '96') {
+                            styles.push('color:#56d4dd');
+                        } else if (code === '97') {
+                            styles.push('color:#ffffff');
+                        }
+                    }
+
+                    if (styles.length > 0) {
+                        openSpans++;
+                        tags += `<span style="${styles.join(';')};">`;
+                    }
+                    return tags;
+                });
+
+                if (openSpans > 0) {
+                    str += '</span>'.repeat(openSpans);
+                }
+
+                str = str.replace(new RegExp('\\u001b\\[[0-9;?]*[a-zA-Z]', 'g'), '');
+                return str;
+            }
+
             function viewLogs(historyId) {
                 currentLogHistoryId = historyId;
-                $('#modal-log-content').text('Fetching decompressed console stream from database...');
+                const downloadUrl = contextPath + `/cluster/build/audit/download-log/${historyId}`;
+                $('#btn-download-modal-log').attr('href', downloadUrl);
+                $('#modal-log-content').html('<div class="text-secondary">Fetching decompressed console stream from database...</div>');
                 const modal = new bootstrap.Modal(document.getElementById('logModal'));
                 modal.show();
 
@@ -412,28 +505,24 @@
                     .then(res => {
                         if (res.success) {
                             currentLoadedLogs = res.data || "No console log output recorded.";
-                            $('#modal-log-content').text(currentLoadedLogs);
+                            const lines = currentLoadedLogs.split('\n');
+                            const htmlLines = lines.map(line => {
+                                const clean = line.replace(new RegExp('\\u001b\\[[0-9;?]*[a-zA-Z]', 'g'), '');
+                                let lineClass = 'terminal-line';
+                                if (clean.includes('[BUILD STARTED]') || clean.includes('[BUILD CANCELLED]') || clean.includes('[DAEMON LOG]')) lineClass += ' text-info';
+                                else if (clean.includes('[SUCCESS]') || clean.includes('BUILD SUCCESS') || clean.includes('[BUILD SUCCESS]')) lineClass += ' text-success fw-bold';
+                                else if (clean.includes('[ERROR]') || clean.includes('BUILD FAILURE') || clean.includes('[BUILD FAILED]') || clean.includes('[FAILED]') || clean.includes('[BUILD ERROR]')) lineClass += ' text-danger fw-bold';
+                                else if (clean.includes('[WARN]') || clean.includes('[WARNING]') || clean.includes('[BUILD LOCK]') || clean.includes('[BUILD TIMEOUT]')) lineClass += ' text-warning';
+                                return `<div class="${lineClass}">${ansiToHtml(line)}</div>`;
+                            }).join('');
+                            $('#modal-log-content').html(htmlLines || '<div class="text-secondary">No console log output recorded.</div>');
                         } else {
-                            $('#modal-log-content').text("Failed to load logs: " + formatErrorMessage(res));
+                            $('#modal-log-content').html('<div class="text-danger">Failed to load logs: ' + formatErrorMessage(res) + '</div>');
                         }
                     })
                     .catch(err => {
-                        $('#modal-log-content').text("Network error loading logs: " + (err.message || err));
+                        $('#modal-log-content').html('<div class="text-danger">Network error loading logs: ' + (err.message || err) + '</div>');
                     });
-            }
-
-            function downloadModalLogs() {
-                if (!currentLoadedLogs) {
-                    alert('No logs available to download.');
-                    return;
-                }
-                const blob = new Blob([currentLoadedLogs], { type: 'text/plain;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `build-audit-log-${currentLogHistoryId || 'export'}.log`;
-                a.click();
-                URL.revokeObjectURL(url);
             }
         </script>
     </th:block>

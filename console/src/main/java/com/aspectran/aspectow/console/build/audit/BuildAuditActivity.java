@@ -245,4 +245,27 @@ public class BuildAuditActivity {
         response.getOutputStream().write(csvData.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Downloads raw decompressed console logs for a specific build history as a file attachment.
+     * @param historyId history ID
+     * @param translet current translet
+     */
+    @RequestToGet("/download-log/${historyId}")
+    public void downloadLog(String historyId, @NonNull Translet translet) throws Exception {
+        if (StringUtils.isEmpty(historyId)) {
+            return;
+        }
+        Long id = Long.valueOf(historyId.trim());
+        String logs = buildAuditService.getDecompressedLogs(id);
+        if (logs == null) {
+            logs = "";
+        }
+        String cleanLogs = logs.replaceAll("\\u001b\\[[0-9;?]*[a-zA-Z]", "");
+
+        var response = translet.getResponseAdapter();
+        response.setContentType("text/plain; charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"build-audit-log-" + id + ".log\"");
+        response.getOutputStream().write(cleanLogs.getBytes(StandardCharsets.UTF_8));
+    }
+
 }
