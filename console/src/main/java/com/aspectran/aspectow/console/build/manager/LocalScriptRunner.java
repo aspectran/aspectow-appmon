@@ -153,7 +153,7 @@ public class LocalScriptRunner implements ActivityContextAware {
             nodeId = getCurrentNodeId();
         }
 
-        // Strict 1:1 rule: daemon-[nodeId].sh or service-[nodeId].sh
+        // 1. If generic daemon/service script requested, check if a node-specific script exists first (e.g. daemon-[nodeId].sh)
         if (StringUtils.hasText(nodeId) && isRestartScript(scriptName)) {
             int dotIdx = scriptName.lastIndexOf('.');
             String ext = (dotIdx >= 0 ? scriptName.substring(dotIdx) : "");
@@ -181,14 +181,11 @@ public class LocalScriptRunner implements ActivityContextAware {
             } catch (Exception e) {
                 logger.trace("Error matching node-specific script file in BASE_DIR", e);
             }
-
-            // If a specific node restart was requested but daemon-[nodeId].sh does not exist,
-            // do NOT fall back to generic daemon.sh (which would inadvertently restart the console node).
-            return new File(baseDir, nodeScriptName);
         }
 
+        // 2. Fall back to standard script (e.g. daemon.sh in standalone node installation directory)
         File scriptFile = findFile(baseDir, scriptName);
-        if (scriptFile != null) {
+        if (scriptFile != null && scriptFile.exists()) {
             return scriptFile;
         }
         return new File(baseDir, scriptName);
