@@ -153,54 +153,38 @@ public class LocalScriptRunner implements ActivityContextAware {
             nodeId = getCurrentNodeId();
         }
 
-        // If generic daemon/service script requested and a node-specific script exists, prefer the node-specific one.
-        // e.g. scriptName = "daemon.sh", nodeId = "dev-node1" -> look for "daemon-dev-node1.sh", "daemon-node1.sh", etc.
+        // Strict 1:1 rule: daemon-[nodeId].sh or service-[nodeId].sh
         if (StringUtils.hasText(nodeId) && isRestartScript(scriptName)) {
             int dotIdx = scriptName.lastIndexOf('.');
             String ext = (dotIdx >= 0 ? scriptName.substring(dotIdx) : "");
             String prefix = (dotIdx >= 0 ? scriptName.substring(0, dotIdx) : scriptName);
+            String nodeScriptName = prefix + "-" + nodeId + ext;
 
-            List<String> candidates = new ArrayList<>();
-            candidates.add(prefix + "-" + nodeId + ext);
-
-            if (nodeId.contains("-")) {
-                String subName = nodeId.substring(nodeId.indexOf('-') + 1);
-                candidates.add(prefix + "-" + subName + ext);
-            }
-            if (nodeId.contains("_")) {
-                String subName = nodeId.substring(nodeId.indexOf('_') + 1);
-                candidates.add(prefix + "-" + subName + ext);
-            }
-            String digitsOnly = nodeId.replaceAll("\\D+", "");
-            if (!digitsOnly.isEmpty()) {
-                candidates.add(prefix + "-node" + digitsOnly + ext);
-                candidates.add(prefix + "-" + digitsOnly + ext);
+            File nodeScriptFile = findFile(baseDir, nodeScriptName);
+            if (nodeScriptFile != null && nodeScriptFile.exists()) {
+                return nodeScriptFile;
             }
 
-            for (String cand : candidates) {
-                File nodeScriptFile = findFile(baseDir, cand);
-                if (nodeScriptFile != null && nodeScriptFile.exists()) {
-                    return nodeScriptFile;
-                }
-            }
-
+            // Case-insensitive exact match for the exact nodeId
             try {
                 if (baseDir.isDirectory()) {
                     File[] files = baseDir.listFiles((dir, name) -> name.startsWith(prefix + "-") && name.endsWith(ext));
                     if (files != null) {
                         for (File f : files) {
                             String baseName = f.getName().substring(prefix.length() + 1, f.getName().length() - ext.length());
-                            if (nodeId.equalsIgnoreCase(baseName)
-                                    || nodeId.toLowerCase().endsWith(baseName.toLowerCase())
-                                    || baseName.toLowerCase().endsWith(nodeId.toLowerCase())) {
+                            if (nodeId.equalsIgnoreCase(baseName)) {
                                 return f;
                             }
                         }
                     }
                 }
             } catch (Exception e) {
-                logger.trace("Error matching node-specific script files in BASE_DIR", e);
+                logger.trace("Error matching node-specific script file in BASE_DIR", e);
             }
+
+            // If a specific node restart was requested but daemon-[nodeId].sh does not exist,
+            // do NOT fall back to generic daemon.sh (which would inadvertently restart the console node).
+            return new File(baseDir, nodeScriptName);
         }
 
         File scriptFile = findFile(baseDir, scriptName);
