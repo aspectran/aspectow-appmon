@@ -27,6 +27,7 @@ import com.aspectran.aspectow.node.manager.NodeRegistry;
 import com.aspectran.core.component.bean.ablility.InitializableBean;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
+import com.aspectran.core.component.bean.annotation.Destroy;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.apon.JsonToParameters;
 import com.aspectran.utils.apon.Parameters;
@@ -41,6 +42,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +60,10 @@ public class RemoteBuildDeployManager implements InitializableBean {
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteBuildDeployManager.class);
 
+    private static final int MAX_REMOTE_LOG_BUFFER_SIZE = 10000;
+
+    private static final int MAX_REMOTE_BUFFER_SESSIONS = 100;
+
     private final NodeManager nodeManager;
 
     private final LocalScriptRunner localScriptRunner;
@@ -68,6 +74,8 @@ public class RemoteBuildDeployManager implements InitializableBean {
 
     private final Map<String, BuildExecutionInfo> activeExecutions = new ConcurrentHashMap<>();
 
+    private final Map<String, List<String>> remoteLogBuffers = new ConcurrentHashMap<>();
+
     public RemoteBuildDeployManager(@NonNull NodeManager nodeManager,
                                    LocalScriptRunner localScriptRunner,
                                    BuildAuditService buildAuditService) {
@@ -75,6 +83,12 @@ public class RemoteBuildDeployManager implements InitializableBean {
         this.localScriptRunner = localScriptRunner;
         this.broker = new BuildDeployBroker(nodeManager.getNodeId(), nodeManager.getNodeMessagePublisher(), nodeManager.getNodeRegistry());
         this.buildAuditService = buildAuditService;
+    }
+
+    @Destroy
+    public void destroy() {
+        activeExecutions.clear();
+        remoteLogBuffers.clear();
     }
 
     @Override
@@ -664,18 +678,27 @@ public class RemoteBuildDeployManager implements InitializableBean {
             } else if ("log".equals(header) || "status".equals(header)) {
                 String nodeId = params.getString("nodeId");
                 if (!nodeManager.getNodeId().equals(nodeId)) {
-                    if ("status".equals(header)) {
+                    if ("log".equals(header)) {
+                        String execId = params.getString("executionId");
+                        String line = params.getString("line");
+                        if (StringUtils.hasText(execId) && StringUtils.hasText(line)) {
+                            appendRemoteLog(execId, nodeId, line);
+                        }
+                    } else if ("status".equals(header)) {
                         BuildResponseParameters res = JsonToParameters.from(message, BuildResponseParameters.class);
-                        if (res != null && res.getExecutionId() != null) {
+                        if (res.getExecutionId() != null) {
                             String st = res.getStatus();
                             if (StringUtils.hasText(st)) {
                                 BuildExecutionInfo info = new BuildExecutionInfo();
                                 info.setExecutionId(res.getExecutionId());
                                 info.setTargetNodeId(nodeId);
+                                info.setScriptName(res.getScriptName());
                                 try {
                                     info.setStatus(BuildExecutionInfo.Status.valueOf(st));
                                 } catch (Exception ignored) {
                                 }
+                                info.setExitCode(res.getExitCode());
+                                info.setDurationMs(res.getDurationMs());
                                 info.setGitBranch(res.getGitBranch());
                                 info.setGitCommitBefore(res.getGitCommitBefore());
                                 info.setGitCommitAfter(res.getGitCommitAfter());
@@ -690,6 +713,10 @@ public class RemoteBuildDeployManager implements InitializableBean {
                                 } else {
                                     activeExecutions.remove(info.getExecutionId() + ":" + nodeId);
                                     activeExecutions.remove(info.getExecutionId());
+                                    if (buildAuditService != null) {
+                                        List<String> logs = remoteLogBuffers.remove(info.getExecutionId() + ":" + nodeId);
+                                        buildAuditService.completeAudit(info, logs);
+                                    }
                                 }
                             }
                         }
@@ -700,6 +727,21 @@ public class RemoteBuildDeployManager implements InitializableBean {
         } catch (Exception e) {
             logger.error("Error processing incoming build relay message: {}", message, e);
         }
+    }
+
+    private void appendRemoteLog(String execId, String nodeId, String line) {
+        String key = execId + ":" + nodeId;
+        if (remoteLogBuffers.size() > MAX_REMOTE_BUFFER_SESSIONS && !remoteLogBuffers.containsKey(key)) {
+            Iterator<String> it = remoteLogBuffers.keySet().iterator();
+            if (it.hasNext()) {
+                remoteLogBuffers.remove(it.next());
+            }
+        }
+        List<String> buffer = remoteLogBuffers.computeIfAbsent(key, k -> Collections.synchronizedList(new ArrayList<>()));
+        if (buffer.size() >= MAX_REMOTE_LOG_BUFFER_SIZE) {
+            buffer.removeFirst();
+        }
+        buffer.add(line);
     }
 
 }
