@@ -199,14 +199,14 @@
     </th:block>
     <script layout:fragment="script" th:inline="javascript">
         $(function () {
-            const basePath = [[@{/}]].replace(/\/$/, '');
+            const contextPath = [[@{/}]].replace(/\/$/, '');
             const appsToSubscribe = [[${page.appsToSubscribe}]];
             const options = {
                 // flagsUrl: "https://cdn.jsdelivr.net/gh/aspectran/aspectran-assets@main/assets/countries/flags/"
             };
             const urlParams = new URLSearchParams(window.location.search);
             const nodeToSubscribe = urlParams.get('nodeId');
-            new DashboardBuilder(options).build(basePath, appsToSubscribe, nodeToSubscribe);
+            new DashboardBuilder(options).build(contextPath, appsToSubscribe, nodeToSubscribe);
         });
     </script>
 </body>

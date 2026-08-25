@@ -287,7 +287,7 @@
 
     <th:block layout:fragment="script">
         <script th:inline="javascript">
-            const BASE_PATH = [[@{/}]].replace(/\/$/, '');
+            const contextPath = [[@{/}]].replace(/\/$/, '');
             let currentLoadedLogs = "";
             let currentLogHistoryId = null;
 
@@ -303,7 +303,7 @@
             }
 
             function openBuildConsole(executionId, nodeId) {
-                let url = BASE_PATH + '/cluster/build/';
+                let url = contextPath + '/cluster/build/';
                 const params = [];
                 if (executionId) params.push('executionId=' + encodeURIComponent(executionId));
                 if (nodeId) params.push('nodeId=' + encodeURIComponent(nodeId));
@@ -325,7 +325,7 @@
             }
 
             function viewDetail(historyId) {
-                fetch(BASE_PATH + `/cluster/build/audit/detail/${historyId}`)
+                fetch(contextPath + `/cluster/build/audit/detail/${historyId}`)
                     .then(res => res.json())
                     .then(res => {
                         if (res.success) {
@@ -407,7 +407,7 @@
                 const modal = new bootstrap.Modal(document.getElementById('logModal'));
                 modal.show();
 
-                fetch(BASE_PATH + `/cluster/build/audit/log/${historyId}`)
+                fetch(contextPath + `/cluster/build/audit/log/${historyId}`)
                     .then(res => res.json())
                     .then(res => {
                         if (res.success) {

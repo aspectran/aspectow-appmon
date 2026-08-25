@@ -215,7 +215,7 @@ arguments: {
         <script th:if="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:src="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/console@4.0/js/console-client.js|"></script>
         <script th:unless="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:src="@{/assets/js/console-client.js}"></script>
         <script th:inline="javascript">
-            const basePath = [[@{/}]].replace(/\/$/, '');
+            const contextPath = [[@{/}]].replace(/\/$/, '');
             const clusterMode = [[${page.clusterMode}]];
             const isGatewayMode = (clusterMode === 'gateway');
             const isDirectMode = (clusterMode !== 'gateway');
@@ -240,7 +240,7 @@ arguments: {
             };
 
             function refreshNodeList() {
-                return fetch(basePath + "/cluster/commands/list", {
+                return fetch(contextPath + "/cluster/commands/list", {
                         headers: { 'Accept': 'application/json' }
                     })
                     .then(res => res.json())
@@ -743,7 +743,7 @@ arguments: {
                         id: targetNodeId || myNodeId,
                         port: null,
                         endpoint: {
-                            path: basePath + "/nodes/" + (targetNodeId || myNodeId),
+                            path: contextPath + "/nodes/" + (targetNodeId || myNodeId),
                             mode: (targetNode && targetNode.endpoint ? targetNode.endpoint.mode : null)
                         }
                     };
@@ -755,7 +755,7 @@ arguments: {
                             id: n.id,
                             port: n.port,
                             endpoint: {
-                                path: basePath + "/nodes/" + n.id,
+                                path: contextPath + "/nodes/" + n.id,
                                 mode: (n.endpoint ? n.endpoint.mode : null)
                             }
                         };
@@ -771,7 +771,7 @@ arguments: {
                 return new ConsoleClient(nodeInfo, {
                     token: token,
                     onBeforeConnect: () => {
-                        return fetch(basePath + "/cluster/token", {
+                        return fetch(contextPath + "/cluster/token", {
                                 headers: { 'Accept': 'application/json' }
                             })
                             .then(response => response.json())
@@ -1001,7 +1001,7 @@ arguments: {
                     }
                 });
 
-                fetch(basePath + "/cluster/token", {
+                fetch(contextPath + "/cluster/token", {
                         headers: { 'Accept': 'application/json' }
                     })
                     .then(response => response.json())

@@ -165,7 +165,7 @@
             const clusterMode = [[${page.clusterMode}]];
             const nodes = [[${page.nodes}]];
             const myNodeId = [[${page.myNodeId}]];
-            const basePath = [[@{/}]].replace(/\/$/, '');
+            const contextPath = [[@{/}]].replace(/\/$/, '');
 
             function checkDirectNodesHealth() {
                 if (clusterMode !== 'direct' || !nodes) return;
@@ -176,7 +176,7 @@
                         return;
                     }
 
-                    let path = basePath + "/nodes/" + n.id + "/ping";
+                    let path = contextPath + "/nodes/" + n.id + "/ping";
                     if (n.port && (location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
                         const url = new URL(path, location.href);
                         url.port = n.port;

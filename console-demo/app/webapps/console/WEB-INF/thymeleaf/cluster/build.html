@@ -399,7 +399,7 @@
     <th:block layout:fragment="script">
         <script th:src="@{/assets/js/console-client.js}"></script>
         <script th:inline="javascript">
-            const basePath = [[@{/}]].replace(/\/$/, '');
+            const contextPath = [[@{/}]].replace(/\/$/, '');
             let nodes = [[${page.nodes}]];
             const currentNodeId = [[${page.targetNodeId}]];
             const myNodeId = [[${page.myNodeId}]];
@@ -438,7 +438,7 @@
             }
 
             function refreshNodeList() {
-                return fetch(basePath + "/cluster/build/list")
+                return fetch(contextPath + "/cluster/build/list")
                     .then(res => res.json())
                     .then(res => {
                         nodes = res.data || [];
@@ -529,7 +529,7 @@
                 const left = (window.screen.width - width) / 2;
                 const top = (window.screen.height - height) / 2;
                 const popup = window.open(
-                    basePath + '/cluster/nodes/popup/',
+                    contextPath + '/cluster/nodes/popup/',
                     'clusterNodesPopup',
                     `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes`
                 );
@@ -545,7 +545,7 @@
                 const left = (window.screen.width - width) / 2;
                 const top = (window.screen.height - height) / 2;
                 const popup = window.open(
-                    basePath + '/cluster/build/audit/',
+                    contextPath + '/cluster/build/audit/',
                     'buildAuditTrailPopup',
                     `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes`
                 );
@@ -1290,7 +1290,7 @@
                 const defaultName = `daemon-${type}.log`;
                 const target = (activeTab !== '__all__' ? activeTab : (currentNodeId || myNodeId || 'gateway'));
                 appendTerminalLineToAll(`[DAEMON LOG] Fetching latest ${defaultName} from '${target}'...`, 'info');
-                fetch(basePath + `/cluster/build/daemon-log?type=${type}&nodeId=${target}&lines=200`)
+                fetch(contextPath + `/cluster/build/daemon-log?type=${type}&nodeId=${target}&lines=200`)
                     .then(res => res.json())
                     .then(res => {
                         if (res.success && res.data) {
@@ -1331,7 +1331,7 @@
                 const buildNode = {
                     id: currentNodeId || myNodeId || 'gateway',
                     endpoint: {
-                        path: basePath + "/build-deploy",
+                        path: contextPath + "/build-deploy",
                         token: token
                     }
                 };
@@ -1342,15 +1342,15 @@
                     token: token,
                     subscribeParams: subscribeParams,
                     onBeforeConnect: () => {
-                        return fetch(basePath + "/cluster/token", {
-                                headers: { 'Accept': 'application/json' }
-                            })
-                            .then(response => response.json())
-                            .then(res => res.success ? res.data : null)
-                            .catch(err => {
-                                console.error("Failed to fetch new token:", err);
-                                return null;
-                            });
+                        return fetch(contextPath + "/cluster/token", {
+                                    headers: { 'Accept': 'application/json' }
+                                })
+                                .then(response => response.json())
+                                .then(res => res.success ? res.data : null)
+                                .catch(err => {
+                                    console.error("Failed to fetch new token:", err);
+                                    return null;
+                                });
                     },
                     onEstablished: () => {
                         $('#connection-indicator').text("CONNECTED").removeClass("bg-secondary bg-danger bg-warning").addClass("bg-success");
@@ -1442,7 +1442,7 @@
 
             function loadExecutionLogs(execId) {
                 if (!execId) return;
-                fetch(basePath + "/cluster/build/logs?executionId=" + encodeURIComponent(execId), {
+                fetch(contextPath + "/cluster/build/logs?executionId=" + encodeURIComponent(execId), {
                     headers: { 'Accept': 'application/json' }
                 })
                 .then(response => response.json())
@@ -1552,7 +1552,7 @@
                     }
                 }
 
-                fetch(basePath + "/cluster/token", {
+                fetch(contextPath + "/cluster/token", {
                         headers: { 'Accept': 'application/json' }
                     })
                     .then(response => response.json())

@@ -179,12 +179,12 @@
 
     <script layout:fragment="script" th:inline="javascript">
     $(function () {
-        const basePath = [[@{/}]].replace(/\/$/, '');
+        const contextPath = [[@{/}]].replace(/\/$/, '');
         const appsToSubscribe = [[${page.appsToSubscribe}]];
         const options = {
             // flagsUrl: "https://cdn.jsdelivr.net/gh/aspectran/aspectran-assets@main/assets/countries/flags/"
         };
-        new DashboardBuilder(options).build(basePath, appsToSubscribe);
+        new DashboardBuilder(options).build(contextPath, appsToSubscribe);
     });
     </script>
 </body>

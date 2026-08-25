@@ -428,7 +428,7 @@
         <script th:inline="javascript">
             const VIEW_MODE_DASHBOARD = 'dashboard';
             const VIEW_MODE_DETAIL = 'detail';
-            const basePath = [[@{/}]].replace(/\/$/, '');
+            const contextPath = [[@{/}]].replace(/\/$/, '');
             const clusterMode = [[${page.clusterMode}]];
             const isGatewayMode = (clusterMode === 'gateway');
             const isDirectMode = (clusterMode !== 'gateway');
@@ -442,7 +442,7 @@
             const isDetailView = () => (currentViewMode === VIEW_MODE_DETAIL);
 
             function refreshNodeList() {
-                return fetch(basePath + "/cluster/scheduler/nodes", {
+                return fetch(contextPath + "/cluster/scheduler/nodes", {
                         headers: { 'Accept': 'application/json' }
                     })
                     .then(res => res.json())
@@ -680,7 +680,7 @@
                         id: nodeId,
                         port: null,
                         endpoint: {
-                            path: basePath + "/nodes/" + nodeId,
+                            path: contextPath + "/nodes/" + nodeId,
                             mode: (targetNode && targetNode.endpoint ? targetNode.endpoint.mode : null)
                         }
                     };
@@ -692,7 +692,7 @@
                             id: n.id,
                             port: n.port,
                             endpoint: {
-                                path: basePath + "/nodes/" + n.id,
+                                path: contextPath + "/nodes/" + n.id,
                                 mode: (n.endpoint ? n.endpoint.mode : null)
                             }
                         };
@@ -708,7 +708,7 @@
                 return new ConsoleClient(nodeInfo, {
                     token: token,
                     onBeforeConnect: () => {
-                        return fetch(basePath + "/cluster/token", {
+                        return fetch(contextPath + "/cluster/token", {
                                 headers: { 'Accept': 'application/json' }
                             })
                             .then(response => response.json())
@@ -1658,7 +1658,7 @@
 
             $(function() {
                 renderNodeSelector();
-                fetch(basePath + "/cluster/token", {
+                fetch(contextPath + "/cluster/token", {
                         headers: { 'Accept': 'application/json' }
                     })
                     .then(response => response.json())

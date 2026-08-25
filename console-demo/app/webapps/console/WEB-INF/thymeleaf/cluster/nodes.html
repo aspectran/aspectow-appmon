@@ -182,6 +182,12 @@
                                         <i class="bi bi-power me-1"></i> Restart Server <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1">Cold</span>
                                     </a>
                                 </li>
+                                <li th:if="${session.USER_INFO.hasPermission('BUILD_VIEW') || session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}"><hr class="dropdown-divider"></li>
+                                <li th:if="${session.USER_INFO.hasPermission('BUILD_VIEW') || session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN')}">
+                                    <a class="dropdown-item text-body-secondary animate-color" href="javascript:void(0)" th:onclick="openAudit([[${nodeInfo.id}]])" title="View build &amp; deployment audit history for this node">
+                                        <i class="bi bi-shield-check me-1"></i> Audit Trail
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -314,7 +320,7 @@
         <script th:if="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:src="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/console@4.0/js/console-client.js|"></script>
         <script th:unless="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:src="@{/assets/js/console-client.js}"></script>
         <script th:inline="javascript">
-            const basePath = [[@{/}]].replace(/\/$/, '');
+            const contextPath = [[@{/}]].replace(/\/$/, '');
             const clusterMode = [[${page.clusterMode}]];
             const isGatewayMode = (clusterMode === 'gateway');
             const isDirectMode = (clusterMode !== 'gateway');
@@ -323,7 +329,7 @@
             const isDemoUser = /*[[${session.USER_INFO.hasRole('DEMO')}]]*/ false;
 
             function openAppMon(nodeId) {
-                const url = basePath + "/appmon/dashboard/popup/?nodeId=" + nodeId;
+                const url = contextPath + "/appmon/dashboard/popup/?nodeId=" + nodeId;
                 const name = "appmon_dashboard_popup_" + nodeId.replace(/[^a-zA-Z0-9]/g, '_');
                 const features = "width=1500,height=1070,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes";
                 const popup = window.open(url, name, features);
@@ -335,8 +341,20 @@
             }
 
             function openCommands(nodeId) {
-                const url = basePath + "/cluster/commands/popup/?nodeId=" + nodeId;
+                const url = contextPath + "/cluster/commands/popup/?nodeId=" + nodeId;
                 const name = "cluster_commands_popup_" + nodeId.replace(/[^a-zA-Z0-9]/g, '_');
+                const features = "width=1500,height=1070,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes";
+                const popup = window.open(url, name, features);
+                if (popup) {
+                    popup.focus();
+                } else {
+                    alert("Please allow popups for this site.");
+                }
+            }
+
+            function openAudit(nodeId) {
+                const url = contextPath + "/cluster/build/audit/?nodeId=" + encodeURIComponent(nodeId) + "&layout=popup";
+                const name = "cluster_audit_popup_" + nodeId.replace(/[^a-zA-Z0-9]/g, '_');
                 const features = "width=1500,height=1070,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes";
                 const popup = window.open(url, name, features);
                 if (popup) {
@@ -352,7 +370,7 @@
                     return;
                 }
                 if (confirm("Are you sure you want to restart the service on node '" + nodeId + "'?\n\nThis will recreate the ActivityContext and reload classes without stopping the JVM process.")) {
-                    const url = basePath + "/cluster/nodes/" + nodeId + "/restart-service";
+                    const url = contextPath + "/cluster/nodes/" + nodeId + "/restart-service";
                     fetch(url, {
                         method: 'POST',
                         headers: {
@@ -388,7 +406,7 @@
                     return;
                 }
                 if (confirm("Are you sure you want to reboot the server process on node '" + nodeId + "'?\n\nWarning: This will terminate the OS daemon process and restart the JVM. The node will be temporarily offline until JVM reboot completes.")) {
-                    const url = basePath + "/cluster/nodes/" + nodeId + "/restart-server";
+                    const url = contextPath + "/cluster/nodes/" + nodeId + "/restart-server";
                     fetch(url, {
                         method: 'POST',
                         headers: {
@@ -424,7 +442,7 @@
                 const maxAttempts = 40; // 80 seconds
                 const pollInterval = setInterval(() => {
                     attempts++;
-                    fetch(basePath + "/cluster/build/health/" + nodeId, {
+                    fetch(contextPath + "/cluster/build/health/" + nodeId, {
                         headers: { 'Accept': 'application/json' }
                     })
                     .then(res => res.json())
@@ -450,7 +468,7 @@
                     return;
                 }
                 if (confirm("Are you sure you want to pause node '" + nodeId + "'?")) {
-                    const url = basePath + "/cluster/nodes/" + nodeId + "/pause";
+                    const url = contextPath + "/cluster/nodes/" + nodeId + "/pause";
                     fetch(url, {
                         method: 'POST',
                         headers: {
@@ -484,7 +502,7 @@
                     return;
                 }
                 if (confirm("Are you sure you want to resume node '" + nodeId + "'?")) {
-                    const url = basePath + "/cluster/nodes/" + nodeId + "/resume";
+                    const url = contextPath + "/cluster/nodes/" + nodeId + "/resume";
                     fetch(url, {
                         method: 'POST',
                         headers: {
@@ -638,7 +656,7 @@
                 });
 
                 function refreshNodeList() {
-                    return fetch(basePath + "/cluster/nodes/list", {
+                    return fetch(contextPath + "/cluster/nodes/list", {
                             headers: { 'Accept': 'application/json' }
                         })
                         .then(res => res.json())
@@ -657,7 +675,7 @@
                 function createConsoleClient(targetNode) {
                     return new ConsoleClient(targetNode, {
                         onBeforeConnect: () => {
-                            return fetch(basePath + "/cluster/token", {
+                            return fetch(contextPath + "/cluster/token", {
                                     headers: { 'Accept': 'application/json' }
                                 })
                                 .then(response => response.json())
@@ -717,7 +735,7 @@
                             port: n.port,
                             status: n.status,
                             endpoint: {
-                                path: basePath + "/nodes/" + n.id,
+                                path: contextPath + "/nodes/" + n.id,
                                 mode: (n.endpoint ? n.endpoint.mode : null)
                             }
                         };
@@ -726,7 +744,7 @@
                     });
                 } else {
                     node.status = [[${page.node.status}]];
-                    node.endpoint.path = basePath + "/nodes/" + node.id;
+                    node.endpoint.path = contextPath + "/nodes/" + node.id;
                     const client = createConsoleClient(node);
                     client.start('');
                 }
@@ -910,7 +928,7 @@
                     formData.append('action', action);
                     selectedNodes.forEach(nid => formData.append('nodeIds', nid));
 
-                    fetch(basePath + "/cluster/nodes/bulk-action", {
+                    fetch(contextPath + "/cluster/nodes/bulk-action", {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
