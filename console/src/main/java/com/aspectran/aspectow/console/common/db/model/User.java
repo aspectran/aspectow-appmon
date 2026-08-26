@@ -35,6 +35,7 @@ public class User implements Serializable {
     private String email;
     private String status;
     private String allowedIps;
+    private int failedAttempts;
     private LocalDateTime lastLoginAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -151,6 +152,22 @@ public class User implements Serializable {
      */
     public void setAllowedIps(String allowedIps) {
         this.allowedIps = allowedIps;
+    }
+
+    /**
+     * Gets the number of consecutive failed login attempts.
+     * @return the number of failed login attempts
+     */
+    public int getFailedAttempts() {
+        return failedAttempts;
+    }
+
+    /**
+     * Sets the number of consecutive failed login attempts.
+     * @param failedAttempts the number of failed login attempts
+     */
+    public void setFailedAttempts(int failedAttempts) {
+        this.failedAttempts = failedAttempts;
     }
 
     /**

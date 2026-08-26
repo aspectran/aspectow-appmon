@@ -12,6 +12,7 @@
         <result property="email" column="email" />
         <result property="status" column="status" />
         <result property="allowedIps" column="allowed_ips" />
+        <result property="failedAttempts" column="failed_attempts" />
         <result property="lastLoginAt" column="last_login_at" />
         <result property="createdAt" column="created_at" />
         <result property="updatedAt" column="updated_at" />
@@ -72,8 +73,8 @@
     </select>
 
     <insert id="insertUser" parameterType="com.aspectran.aspectow.console.common.db.model.User" useGeneratedKeys="true" keyProperty="userId">
-        insert into asc_user (username, password, nickname, email, status, allowed_ips)
-        values (#{username}, #{password}, #{nickname}, #{email}, #{status}, #{allowedIps})
+        insert into asc_user (username, password, nickname, email, status, allowed_ips, failed_attempts)
+        values (#{username}, #{password}, #{nickname}, #{email}, #{status}, #{allowedIps}, #{failedAttempts})
     </insert>
 
     <update id="updateUser" parameterType="com.aspectran.aspectow.console.common.db.model.User">
@@ -86,6 +87,7 @@
             email = #{email},
             status = #{status},
             allowed_ips = #{allowedIps},
+            failed_attempts = #{failedAttempts},
             updated_at = current_timestamp
         where user_id = #{userId}
     </update>
@@ -96,7 +98,8 @@
 
     <update id="updateLastLogin" parameterType="string">
         update asc_user
-        set last_login_at = current_timestamp
+        set last_login_at = current_timestamp,
+            failed_attempts = 0
         where username = #{username}
     </update>
 
