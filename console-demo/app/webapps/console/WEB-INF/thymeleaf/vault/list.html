@@ -139,15 +139,13 @@
                         </td>
                         <td th:text="${#temporals.format(v.updatedAt, 'yyyy-MM-dd HH:mm:ss')}" class="small text-muted">2023-10-01</td>
                         <td class="text-end pe-3">
-                            <div class="d-flex justify-content-end flex-wrap gap-1">
-                                <button class="btn btn-sm btn-outline-secondary"
-                                        th:onclick="openVaultModal([[${v.vaultId}]], [[${v.label}]], [[${v.description}]], [[${v.tokenType}]], [[${v.encryptedValue}]], [[${#temporals.format(v.validUntil, 'yyyy-MM-dd HH:mm:ss')}]] )">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" th:onclick="deleteVault([[${v.vaultId}]])">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    th:onclick="openVaultModal([[${v.vaultId}]], [[${v.label}]], [[${v.description}]], [[${v.tokenType}]], [[${v.encryptedValue}]], [[${#temporals.format(v.validUntil, 'yyyy-MM-dd HH:mm:ss')}]] )">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" th:onclick="deleteVault([[${v.vaultId}]])">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(page.vaultList)}">
