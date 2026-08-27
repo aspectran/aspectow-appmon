@@ -51,7 +51,7 @@ function command_demo() {
     echo "Demo dependencies not found in console-demo/app/lib. Rebuilding project..."
     command_rebuild "$@"
   fi
-  exec console-demo/app/bin/shell.sh "$@"
+  exec console-demo/shell.sh "$@"
 }
 
 # Main command dispatcher

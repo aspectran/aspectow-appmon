@@ -59,7 +59,11 @@ exit /b 1
     goto :eof
 
 :command_demo
-    call console-demo\app\bin\shell.bat %*
+    if not exist "console-demo\app\lib\*.jar" (
+        echo Demo dependencies not found in console-demo\app\lib. Rebuilding project...
+        call :command_rebuild %*
+    )
+    call console-demo\shell.bat %*
     goto :eof
 
 :command_release-prepare

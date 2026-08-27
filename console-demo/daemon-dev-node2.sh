@@ -4,6 +4,7 @@
 set -e
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+cd "$SCRIPT_DIR"
 . "$SCRIPT_DIR/app.conf"
 
 NODE_ID="dev-node2"
@@ -30,7 +31,7 @@ ASPECTRAN_OPTS="
 -Dtow.server.listener.http.port=$PORT
 -Dtow.context.root.session.cookieName=JSESSIONID-$PORT
 -Dtow.context.console.session.cookieName=JSESSIONID-$PORT
--Daspectow.console.config.db.h2.path_explicit=~/aspectow-console-demo;AUTO_SERVER=TRUE
+-Daspectow.console.config.db.h2.path_explicit=~/aspectow-console-demo
 "
 
 "$DEPLOY_DIR/bin/jsvc-daemon.sh" \

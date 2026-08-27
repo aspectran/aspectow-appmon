@@ -3,6 +3,7 @@
 # Usage: ./daemon-all.sh [start|stop|restart|status]
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+cd "$SCRIPT_DIR"
 ACTION="${1:-restart}"
 [ $# -gt 0 ] && shift
 
