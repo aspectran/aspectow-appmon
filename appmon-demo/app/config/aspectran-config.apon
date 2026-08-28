@@ -63,7 +63,7 @@ shell: {
         |{{YELLOW }}   /  _  \ |_) | |_) / /\/\ \ (_) | | | |
         |{{RED    }}   \_/ \_/ .__/| .__/\/    \/\___/|_| |_|    {{WHITE}}Application Monitor
         |{{gray   }}=========|_|===|_|==========================================================
-        |{{MAGENTA}}:: Built with Aspectran :: {{RED}}#{class:com.aspectran.core.AboutMe^version}{{reset}}
+        |{{WHITE}}Aspectow {{CYAN}}v#{class:com.aspectran.aspectow.console.AboutMe^version}{{gray}} (Built with Aspectran {{RED}}#{class:com.aspectran.core.AboutMe^version}{{gray}}){{reset}}
         |
         |{{gray   }}To see a list of all built-in commands, type {{GREEN}}help{{reset}}.
         |{{gray   }}To get help for a specific command, type {{GREEN}}command_name -h{{reset}}.
