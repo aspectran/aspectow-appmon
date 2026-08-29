@@ -28,12 +28,21 @@
 <body>
 <th:block layout:fragment="content">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-3">
-        <div>
-            <h3 class="fw-bold mb-0"><i class="bi bi-safe me-2"></i> Vault Management</h3>
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h3 class="fw-bold mb-0"><i class="bi bi-safe me-2"></i> Vault Management</h3>
+                </div>
+                <p class="text-muted mb-0">Aspectran PBE-based Security Token Storage</p>
+            </div>
         </div>
-        <div class="d-flex flex-wrap align-items-center justify-content-end gap-2">
-            <div class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="d-flex flex-column align-items-end justify-content-end gap-2">
+            <div class="d-flex flex-wrap align-items-center justify-content-end gap-2">
                 <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fw-semibold text-nowrap me-2" id="total-vault-count" th:text="${page.pageInfo != null ? page.pageInfo.totalElements : (#lists.size(page.vaultList))} + ' Tokens'">0 Tokens</span>
+                <div class="form-check form-switch mb-0 text-nowrap">
+                    <input class="form-check-input" type="checkbox" id="hideExpired" onchange="filterExpired()">
+                    <label class="form-check-label small text-muted" for="hideExpired">Hide Expired</label>
+                </div>
                 <div class="input-group input-group-sm" style="width: 180px;">
                     <span class="input-group-text cursor-pointer" onclick="performSearch()"><i class="bi bi-search"></i></span>
                     <input type="text" id="vault-search" class="form-control" placeholder="Search..." th:value="${page.searchKeyword}">
@@ -49,10 +58,6 @@
                     <option value="50">50 / page</option>
                     <option value="100">100 / page</option>
                 </select>
-                <div class="form-check form-switch mb-0 text-nowrap">
-                    <input class="form-check-input" type="checkbox" id="hideExpired" onchange="filterExpired()">
-                    <label class="form-check-label small text-muted" for="hideExpired">Hide Expired</label>
-                </div>
             </div>
             <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap">
                 <a th:href="@{/vault/tool}" class="btn btn-sm btn-outline-primary text-nowrap">
