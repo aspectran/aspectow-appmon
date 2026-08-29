@@ -145,6 +145,9 @@ public class BuildAuditService extends InstantActivitySupport {
                     buildHistoryMapper.insertBuildHistory(history);
                 }
 
+                if (info.getStartedAt() != null) {
+                    history.setStartedAt(info.getStartedAt());
+                }
                 history.setStatus(info.getStatus() != null ? info.getStatus().name() : BuildExecutionInfo.Status.FAILED.name());
                 history.setExitCode(info.getExitCode());
                 history.setFinishedAt(info.getFinishedAt() != null ? info.getFinishedAt() : Instant.now());
@@ -471,8 +474,7 @@ public class BuildAuditService extends InstantActivitySupport {
                     (history.getRequester() != null ? history.getRequester() : "") + delimiter +
                     (history.getStatus() != null ? history.getStatus() : "") + delimiter +
                     (history.getExitCode() != null ? history.getExitCode() : "") + delimiter +
-                    (history.getStartedAt() != null ? String.valueOf(history.getStartedAt().getEpochSecond()) : "") + delimiter +
-                    (history.getFinishedAt() != null ? String.valueOf(history.getFinishedAt().getEpochSecond()) : "") + delimiter +
+                    (history.getDurationMs() != null ? history.getDurationMs() : "") + delimiter +
                     (history.getGitCommitBefore() != null ? history.getGitCommitBefore() : "") + delimiter +
                     (history.getGitCommitAfter() != null ? history.getGitCommitAfter() : "") + delimiter +
                     sha256Hex(rawLogContent != null ? rawLogContent : "");

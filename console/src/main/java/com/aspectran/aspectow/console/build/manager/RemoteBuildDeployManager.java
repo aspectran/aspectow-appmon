@@ -36,6 +36,7 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -692,13 +693,25 @@ public class RemoteBuildDeployManager implements InitializableBean {
                         if (res.getExecutionId() != null) {
                             String st = res.getStatus();
                             if (StringUtils.hasText(st)) {
-                                BuildExecutionInfo info = new BuildExecutionInfo();
-                                info.setExecutionId(res.getExecutionId());
-                                info.setTargetNodeId(nodeId);
-                                info.setScriptName(res.getScriptName());
+                                BuildExecutionInfo info = activeExecutions.get(res.getExecutionId() + ":" + nodeId);
+                                if (info == null) {
+                                    info = activeExecutions.get(res.getExecutionId());
+                                }
+                                if (info == null) {
+                                    info = new BuildExecutionInfo();
+                                    info.setExecutionId(res.getExecutionId());
+                                    info.setTargetNodeId(nodeId);
+                                    info.setScriptName(res.getScriptName());
+                                }
                                 try {
                                     info.setStatus(BuildExecutionInfo.Status.valueOf(st));
                                 } catch (Exception ignored) {
+                                }
+                                if (res.getStartedAt() != null) {
+                                    try {
+                                        info.setStartedAt(Instant.parse(res.getStartedAt()));
+                                    } catch (Exception ignored) {
+                                    }
                                 }
                                 info.setExitCode(res.getExitCode());
                                 info.setDurationMs(res.getDurationMs());

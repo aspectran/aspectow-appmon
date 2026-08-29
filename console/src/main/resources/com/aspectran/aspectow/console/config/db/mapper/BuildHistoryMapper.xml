@@ -74,6 +74,7 @@
         update asc_build_history
         set status = #{status},
             exit_code = #{exitCode},
+            started_at = #{startedAt},
             finished_at = #{finishedAt},
             duration_ms = #{durationMs},
             git_branch = #{gitBranch},
