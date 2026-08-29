@@ -129,7 +129,7 @@ public class BuildAuditService extends InstantActivitySupport {
     public void completeAudit(@NonNull BuildExecutionInfo info, List<String> logLines) {
         try {
             instantActivity(() -> {
-                BuildHistory history = null;
+                BuildHistory history;
                 if (info.getTargetNodeId() != null) {
                     history = buildHistoryMapper.getBuildHistoryByExecutionIdAndNodeId(info.getExecutionId(), info.getTargetNodeId());
                 } else {
@@ -209,7 +209,7 @@ public class BuildAuditService extends InstantActivitySupport {
     public void updateStatus(@NonNull BuildExecutionInfo info) {
         try {
             instantActivity(() -> {
-                BuildHistory history = null;
+                BuildHistory history;
                 if (info.getTargetNodeId() != null) {
                     history = buildHistoryMapper.getBuildHistoryByExecutionIdAndNodeId(info.getExecutionId(), info.getTargetNodeId());
                 } else {
