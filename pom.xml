@@ -118,7 +118,6 @@
         <javadoc.locale>en_US</javadoc.locale>
 
         <aspectran.version>9.6.5</aspectran.version>
-        <jakarta.websocket.api.version>2.2.0</jakarta.websocket.api.version>
     </properties>
 
     <dependencyManagement>
