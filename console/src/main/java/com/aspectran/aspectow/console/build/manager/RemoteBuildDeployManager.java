@@ -615,12 +615,13 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
                                 completedInfo.getExecutionId(), completedInfo.getStatus());
                         activeExecutions.remove(completedInfo.getExecutionId());
                         activeExecutions.remove(completedInfo.getExecutionId() + ":" + targetNodeId);
-                        broker.broadcastStatusChanged(completedInfo);
 
                         if (buildAuditService != null) {
                             List<String> logLines = localScriptRunner.getLogBuffer(completedInfo.getExecutionId());
                             buildAuditService.completeAudit(completedInfo, logLines);
                         }
+
+                        broker.broadcastStatusChanged(completedInfo);
                     }
             );
         } else {

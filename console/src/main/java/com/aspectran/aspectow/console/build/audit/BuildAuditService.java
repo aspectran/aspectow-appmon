@@ -184,7 +184,7 @@ public class BuildAuditService extends InstantActivitySupport {
 
                 buildHistoryMapper.updateBuildHistory(history);
 
-                // Insert build log if not present
+                // Insert or update build log
                 BuildLog existingLog = buildHistoryMapper.getBuildLogByHistoryId(history.getHistoryId());
                 if (existingLog == null) {
                     BuildLog buildLog = new BuildLog();
@@ -195,6 +195,12 @@ public class BuildAuditService extends InstantActivitySupport {
                     buildLog.setLineCount(lineCount);
                     buildLog.setByteSize(byteSize);
                     buildHistoryMapper.insertBuildLog(buildLog);
+                } else {
+                    existingLog.setLogContent(storedLogContent);
+                    existingLog.setCompressedYn(compressedYn);
+                    existingLog.setLineCount(lineCount);
+                    existingLog.setByteSize(byteSize);
+                    buildHistoryMapper.updateBuildLog(existingLog);
                 }
 
                 logger.info("Build audit record completed: historyId={}, executionId={}, status={}, lines={}, integrityHash={}",
@@ -252,7 +258,15 @@ public class BuildAuditService extends InstantActivitySupport {
 
             String rawLogs = getDecompressedLogsInternal(historyId);
             String calculated = calculateIntegrityHash(history, rawLogs);
-            return history.getIntegrityHash().equalsIgnoreCase(calculated);
+            boolean verified = history.getIntegrityHash().equalsIgnoreCase(calculated);
+            if (!verified) {
+                logger.warn("Build audit integrity verification FAILED for history ID [{}]: stored=[{}], calculated=[{}]",
+                        historyId, history.getIntegrityHash(), calculated);
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("Build audit integrity verification SUCCEEDED for history ID [{}]: hash=[{}]",
+                        historyId, history.getIntegrityHash());
+            }
+            return verified;
         });
     }
 

@@ -113,6 +113,13 @@ public interface BuildHistoryMapper {
     int insertBuildLog(BuildLog buildLog);
 
     /**
+     * Updates console logs for an existing build history.
+     * @param buildLog the build log entity
+     * @return number of rows affected
+     */
+    int updateBuildLog(BuildLog buildLog);
+
+    /**
      * Retrieves the build log entity for a given history ID.
      * @param historyId the history ID
      * @return the build log entity, or null if not found
@@ -203,6 +210,11 @@ public interface BuildHistoryMapper {
         @Override
         public int insertBuildLog(BuildLog buildLog) {
             return mapper().insertBuildLog(buildLog);
+        }
+
+        @Override
+        public int updateBuildLog(BuildLog buildLog) {
+            return mapper().updateBuildLog(buildLog);
         }
 
         @Override

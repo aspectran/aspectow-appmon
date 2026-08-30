@@ -232,6 +232,15 @@
         )
     </insert>
 
+    <update id="updateBuildLog" parameterType="com.aspectran.aspectow.console.build.audit.BuildLog">
+        update asc_build_log
+        set log_content = #{logContent},
+            compressed_yn = #{compressedYn},
+            line_count = #{lineCount},
+            byte_size = #{byteSize}
+        where history_id = #{historyId}
+    </update>
+
     <select id="getBuildLogByHistoryId" parameterType="long" resultMap="BuildLogResultMap">
         select * from asc_build_log where history_id = #{historyId}
     </select>
