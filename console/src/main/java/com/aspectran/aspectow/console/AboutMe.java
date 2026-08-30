@@ -35,7 +35,7 @@ public class AboutMe {
         if (pkg != null && pkg.getImplementationVersion() != null) {
             VERSION = pkg.getImplementationVersion();
         } else {
-            VERSION = System.getProperty("aspectow.version", "4.0.x");
+            VERSION = System.getProperty("aspectow.version", "4.1.x");
         }
 
         // Show warning when RC# or M# or -SNAPSHOT is in version string
