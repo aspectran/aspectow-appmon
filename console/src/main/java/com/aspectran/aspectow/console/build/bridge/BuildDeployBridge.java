@@ -22,8 +22,17 @@ package com.aspectran.aspectow.console.build.bridge;
  */
 public interface BuildDeployBridge {
 
+    /**
+     * Broadcasts data to all connected sessions through this bridge.
+     * @param data the payload string to broadcast
+     */
     void bridge(String data);
 
+    /**
+     * Delivers data to a specific target session through this bridge.
+     * @param session the target session
+     * @param data the payload string to send
+     */
     void bridge(BuildDeploySession session, String data);
 
 }

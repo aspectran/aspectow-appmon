@@ -29,10 +29,18 @@ public class WebsocketBuildDeploySession implements BuildDeploySession {
 
     private String nodeId;
 
+    /**
+     * Constructs a new WebsocketBuildDeploySession wrapping the given WebSocket session.
+     * @param session the WebSocket session
+     */
     public WebsocketBuildDeploySession(Session session) {
         this.session = session;
     }
 
+    /**
+     * Returns the underlying WebSocket session.
+     * @return the WebSocket session
+     */
     public Session getSession() {
         return session;
     }

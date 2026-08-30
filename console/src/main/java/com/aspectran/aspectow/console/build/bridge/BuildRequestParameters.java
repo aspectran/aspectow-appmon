@@ -62,77 +62,152 @@ public class BuildRequestParameters extends DefaultParameters {
         };
     }
 
+    /**
+     * Constructs a new BuildRequestParameters.
+     */
     public BuildRequestParameters() {
         super(parameterKeys);
     }
 
+    /**
+     * Returns the message header/action name (e.g. "execute", "cancel", "join").
+     * @return the message header
+     */
     public String getHeader() {
         return getString(header);
     }
 
+    /**
+     * Sets the message header/action name.
+     * @param value the message header
+     * @return this parameters instance
+     */
     public BuildRequestParameters setHeader(String value) {
         putValue(header, value);
         return this;
     }
 
+    /**
+     * Returns the execution ID.
+     * @return the execution ID
+     */
     public String getExecutionId() {
         return getString(executionId);
     }
 
+    /**
+     * Sets the execution ID.
+     * @param value the execution ID
+     * @return this parameters instance
+     */
     public BuildRequestParameters setExecutionId(String value) {
         putValue(executionId, value);
         return this;
     }
 
+    /**
+     * Returns the target node ID.
+     * @return the target node ID
+     */
     public String getTargetNodeId() {
         return getString(targetNodeId);
     }
 
+    /**
+     * Sets the target node ID.
+     * @param value the target node ID
+     * @return this parameters instance
+     */
     public BuildRequestParameters setTargetNodeId(String value) {
         putValue(targetNodeId, value);
         return this;
     }
 
+    /**
+     * Returns the target node group name.
+     * @return the target group name
+     */
     public String getTargetGroup() {
         return getString(targetGroup);
     }
 
+    /**
+     * Sets the target node group name.
+     * @param value the target group name
+     * @return this parameters instance
+     */
     public BuildRequestParameters setTargetGroup(String value) {
         putValue(targetGroup, value);
         return this;
     }
 
+    /**
+     * Returns whether the target is all nodes in the cluster.
+     * @return true if targeting all nodes; false otherwise
+     */
     public boolean isTargetAll() {
         return getBoolean(targetAll, false);
     }
 
+    /**
+     * Sets whether the target is all nodes in the cluster.
+     * @param value true to target all nodes
+     * @return this parameters instance
+     */
     public BuildRequestParameters setTargetAll(boolean value) {
         putValue(targetAll, value);
         return this;
     }
 
+    /**
+     * Returns whether the target is service nodes only.
+     * @return true if targeting service nodes only; false otherwise
+     */
     public boolean isTargetServices() {
         return getBoolean(targetServices, false);
     }
 
+    /**
+     * Sets whether the target is service nodes only.
+     * @param value true to target service nodes only
+     * @return this parameters instance
+     */
     public BuildRequestParameters setTargetServices(boolean value) {
         putValue(targetServices, value);
         return this;
     }
 
+    /**
+     * Returns the build script name.
+     * @return the script name
+     */
     public String getScriptName() {
         return getString(scriptName);
     }
 
+    /**
+     * Sets the build script name.
+     * @param value the script name
+     * @return this parameters instance
+     */
     public BuildRequestParameters setScriptName(String value) {
         putValue(scriptName, value);
         return this;
     }
 
+    /**
+     * Returns the extra parameters map.
+     * @return the parameters
+     */
     public Parameters getParameters() {
         return getParameters(parameters);
     }
 
+    /**
+     * Sets the extra parameters map.
+     * @param value the parameters
+     * @return this parameters instance
+     */
     public BuildRequestParameters setParameters(Parameters value) {
         putValue(parameters, value);
         return this;

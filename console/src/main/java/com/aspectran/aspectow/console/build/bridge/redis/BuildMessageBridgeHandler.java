@@ -29,6 +29,10 @@ public class BuildMessageBridgeHandler implements NodeMessageListener {
 
     private final RemoteBuildDeployManager remoteBuildDeployManager;
 
+    /**
+     * Constructs a new BuildMessageBridgeHandler.
+     * @param remoteBuildDeployManager the remote build deploy manager
+     */
     public BuildMessageBridgeHandler(RemoteBuildDeployManager remoteBuildDeployManager) {
         this.remoteBuildDeployManager = remoteBuildDeployManager;
     }

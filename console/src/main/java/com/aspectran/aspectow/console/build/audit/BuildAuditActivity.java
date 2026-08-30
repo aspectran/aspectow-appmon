@@ -58,6 +58,12 @@ public class BuildAuditActivity {
 
     private final NodeConsoleHelper nodeConsoleHelper;
 
+    /**
+     * Constructs a new BuildAuditActivity.
+     * @param buildAuditService the build audit service
+     * @param nodeManager the node manager
+     * @param nodeConsoleHelper the node console helper
+     */
     @Autowired
     public BuildAuditActivity(BuildAuditService buildAuditService,
                               NodeManager nodeManager,

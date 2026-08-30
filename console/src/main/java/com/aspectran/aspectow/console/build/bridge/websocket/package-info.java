@@ -13,31 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aspectran.aspectow.console.build.bridge;
-
 /**
- * Interface representing a client session for build/deploy communications.
- *
- * <p>Created: 2026-08-18</p>
+ * Contains WebSocket endpoints and session management for real-time build streaming and control.
  */
-public interface BuildDeploySession {
-
-    /**
-     * Returns the unique session ID.
-     * @return the session ID
-     */
-    String getSessionId();
-
-    /**
-     * Returns the node ID associated with this session.
-     * @return the node ID
-     */
-    String getNodeId();
-
-    /**
-     * Sets the node ID associated with this session.
-     * @param nodeId the node ID
-     */
-    void setNodeId(String nodeId);
-
-}
+package com.aspectran.aspectow.console.build.bridge.websocket;

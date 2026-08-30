@@ -46,66 +46,130 @@ public class BuildAuditQuery implements Serializable {
 
     private PageInfo pageInfo;
 
+    /**
+     * Returns the target node ID to filter by.
+     * @return the target node ID
+     */
     public String getTargetNodeId() {
         return targetNodeId;
     }
 
+    /**
+     * Sets the target node ID to filter by.
+     * @param targetNodeId the target node ID
+     */
     public void setTargetNodeId(String targetNodeId) {
         this.targetNodeId = targetNodeId;
     }
 
+    /**
+     * Returns the script name to filter by.
+     * @return the script name
+     */
     public String getScriptName() {
         return scriptName;
     }
 
+    /**
+     * Sets the script name to filter by.
+     * @param scriptName the script name
+     */
     public void setScriptName(String scriptName) {
         this.scriptName = scriptName;
     }
 
+    /**
+     * Returns the requester username to filter by.
+     * @return the requester username
+     */
     public String getRequester() {
         return requester;
     }
 
+    /**
+     * Sets the requester username to filter by.
+     * @param requester the requester username
+     */
     public void setRequester(String requester) {
         this.requester = requester;
     }
 
+    /**
+     * Returns the build execution status to filter by.
+     * @return the build execution status
+     */
     public String getStatus() {
         return status;
     }
 
+    /**
+     * Sets the build execution status to filter by.
+     * @param status the build execution status
+     */
     public void setStatus(String status) {
         this.status = status;
     }
 
+    /**
+     * Returns the search keyword.
+     * @return the search keyword
+     */
     public String getSearchKeyword() {
         return searchKeyword;
     }
 
+    /**
+     * Sets the search keyword.
+     * @param searchKeyword the search keyword
+     */
     public void setSearchKeyword(String searchKeyword) {
         this.searchKeyword = searchKeyword;
     }
 
+    /**
+     * Returns the start date string for time-range filtering.
+     * @return the start date string
+     */
     public String getStartDate() {
         return startDate;
     }
 
+    /**
+     * Sets the start date string for time-range filtering.
+     * @param startDate the start date string
+     */
     public void setStartDate(String startDate) {
         this.startDate = startDate;
     }
 
+    /**
+     * Returns the end date string for time-range filtering.
+     * @return the end date string
+     */
     public String getEndDate() {
         return endDate;
     }
 
+    /**
+     * Sets the end date string for time-range filtering.
+     * @param endDate the end date string
+     */
     public void setEndDate(String endDate) {
         this.endDate = endDate;
     }
 
+    /**
+     * Returns the pagination information.
+     * @return the pagination information
+     */
     public PageInfo getPageInfo() {
         return pageInfo;
     }
 
+    /**
+     * Sets the pagination information.
+     * @param pageInfo the pagination information
+     */
     public void setPageInfo(PageInfo pageInfo) {
         this.pageInfo = pageInfo;
     }

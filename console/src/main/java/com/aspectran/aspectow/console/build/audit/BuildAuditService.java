@@ -58,6 +58,10 @@ public class BuildAuditService extends InstantActivitySupport {
 
     private final BuildHistoryMapper buildHistoryMapper;
 
+    /**
+     * Constructs a new BuildAuditService.
+     * @param buildHistoryMapper the MyBatis mapper for build history and logs
+     */
     @Autowired
     public BuildAuditService(BuildHistoryMapper buildHistoryMapper) {
         this.buildHistoryMapper = buildHistoryMapper;

@@ -60,12 +60,20 @@ public class WebsocketBuildDeployBridge extends SimplifiedEndpoint implements Bu
 
     private final NodeManager nodeManager;
 
+    /**
+     * Constructs a new WebsocketBuildDeployBridge.
+     * @param remoteBuildDeployManager the remote build deploy manager
+     * @param nodeManager the node manager
+     */
     @Autowired
     public WebsocketBuildDeployBridge(RemoteBuildDeployManager remoteBuildDeployManager, NodeManager nodeManager) {
         this.remoteBuildDeployManager = remoteBuildDeployManager;
         this.nodeManager = nodeManager;
     }
 
+    /**
+     * Registers this WebSocket bridge with the BuildDeployBroker upon bean initialization.
+     */
     @Initialize
     public void register() {
         if (remoteBuildDeployManager.getBroker() != null) {

@@ -92,6 +92,10 @@ public class LocalScriptRunner implements ActivityContextAware {
         this.activityContext = activityContext;
     }
 
+    /**
+     * Returns the base directory of the installation where scripts and deployment files reside.
+     * @return the base directory File
+     */
     public File getBaseDir() {
         File dir = null;
         if (activityContext != null && activityContext.getApplicationAdapter() != null) {
@@ -111,6 +115,10 @@ public class LocalScriptRunner implements ActivityContextAware {
         return dir;
     }
 
+    /**
+     * Returns the current node ID resolved from the NodeManager bean or system property.
+     * @return the current node ID, or null if undetermined
+     */
     @Nullable
     public String getCurrentNodeId() {
         if (activityContext != null && activityContext.getBeanRegistry() != null
@@ -206,6 +214,10 @@ public class LocalScriptRunner implements ActivityContextAware {
         return null;
     }
 
+    /**
+     * Returns the set of all allowed build and deployment script names.
+     * @return set of allowed script file names
+     */
     public Set<String> getAllowedScripts() {
         Set<String> scripts = new java.util.LinkedHashSet<>(ALLOWED_SCRIPTS);
         try {
@@ -225,6 +237,10 @@ public class LocalScriptRunner implements ActivityContextAware {
         return scripts;
     }
 
+    /**
+     * Checks if a build execution is currently in progress on this node.
+     * @return true if busy; false otherwise
+     */
     public boolean isBusy() {
         return buildLock.isLocked();
     }
@@ -307,6 +323,9 @@ public class LocalScriptRunner implements ActivityContextAware {
         }
     }
 
+    /**
+     * Cleans up active processes and buffered logs upon component destruction.
+     */
     @Destroy
     public void destroy() {
         for (Map.Entry<String, Process> entry : activeProcesses.entrySet()) {
@@ -350,6 +369,10 @@ public class LocalScriptRunner implements ActivityContextAware {
 
     /**
      * Executes the script synchronously on the current thread.
+     * @param info the execution metadata
+     * @param startedCallback callback invoked when execution starts
+     * @param logConsumer callback for real-time log lines
+     * @param completionCallback callback invoked upon execution completion
      */
     public void run(@NonNull BuildExecutionInfo info,
                     Consumer<BuildExecutionInfo> startedCallback,

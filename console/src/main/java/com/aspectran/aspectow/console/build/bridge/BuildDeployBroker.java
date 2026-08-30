@@ -47,36 +47,71 @@ public class BuildDeployBroker {
 
     private final Set<BuildDeployBridge> bridges = new CopyOnWriteArraySet<>();
 
+    /**
+     * Constructs a new BuildDeployBroker with the given node ID and message publisher.
+     * @param nodeId the local node ID
+     * @param messagePublisher the node message publisher
+     */
     public BuildDeployBroker(String nodeId, NodeMessagePublisher messagePublisher) {
         this(nodeId, messagePublisher, null);
     }
 
+    /**
+     * Constructs a new BuildDeployBroker with the given node ID, message publisher, and node registry.
+     * @param nodeId the local node ID
+     * @param messagePublisher the node message publisher
+     * @param nodeRegistry the node registry
+     */
     public BuildDeployBroker(String nodeId, NodeMessagePublisher messagePublisher, NodeRegistry nodeRegistry) {
         this.nodeId = nodeId;
         this.messagePublisher = messagePublisher;
         this.nodeRegistry = nodeRegistry;
     }
 
+    /**
+     * Returns the local node ID.
+     * @return the local node ID
+     */
     public String getNodeId() {
         return nodeId;
     }
 
+    /**
+     * Returns the node message publisher.
+     * @return the node message publisher
+     */
     public NodeMessagePublisher getMessagePublisher() {
         return messagePublisher;
     }
 
+    /**
+     * Returns the node registry.
+     * @return the node registry
+     */
     public NodeRegistry getNodeRegistry() {
         return nodeRegistry;
     }
 
+    /**
+     * Registers a new bridge with this broker.
+     * @param bridge the bridge to register
+     */
     public void addBridge(BuildDeployBridge bridge) {
         bridges.add(bridge);
     }
 
+    /**
+     * Unregisters a bridge from this broker.
+     * @param bridge the bridge to unregister
+     */
     public void removeBridge(BuildDeployBridge bridge) {
         bridges.remove(bridge);
     }
 
+    /**
+     * Relays data across all registered bridges.
+     * @param data the message string to broadcast
+     */
     public void bridge(String data) {
         for (BuildDeployBridge bridge : bridges) {
             try {
@@ -88,6 +123,11 @@ public class BuildDeployBroker {
         }
     }
 
+    /**
+     * Relays data to a specific session across registered bridges.
+     * @param session the target session
+     * @param data the message string to send
+     */
     public void bridge(BuildDeploySession session, String data) {
         for (BuildDeployBridge bridge : bridges) {
             try {
@@ -100,7 +140,10 @@ public class BuildDeployBroker {
     }
 
     /**
-     * Broadcasts a single log line to connected clients.
+     * Broadcasts a single log line to connected clients and relays.
+     * @param executionId the execution ID
+     * @param targetNodeId the target node ID
+     * @param line the log output line
      */
     public void broadcastLogLine(String executionId, String targetNodeId, String line) {
         BuildResponseParameters res = new BuildResponseParameters()
@@ -115,6 +158,10 @@ public class BuildDeployBroker {
 
     /**
      * Sends backfilled logs to a specific connected session.
+     * @param session the target session
+     * @param executionId the execution ID
+     * @param targetNodeId the target node ID
+     * @param lines the list of log lines
      */
     public void sendLogBackfill(BuildDeploySession session, String executionId, String targetNodeId, List<String> lines) {
         if (lines == null || lines.isEmpty()) {
@@ -129,7 +176,8 @@ public class BuildDeployBroker {
     }
 
     /**
-     * Broadcasts a status change event to connected clients.
+     * Broadcasts a status change event to connected clients and relays.
+     * @param info the build execution info
      */
     public void broadcastStatusChanged(@NonNull BuildExecutionInfo info) {
         BuildResponseParameters res = new BuildResponseParameters()

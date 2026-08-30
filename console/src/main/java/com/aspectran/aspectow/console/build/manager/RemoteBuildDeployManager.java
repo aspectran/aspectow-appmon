@@ -77,6 +77,12 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
 
     private final Map<String, List<String>> remoteLogBuffers = new ConcurrentHashMap<>();
 
+    /**
+     * Constructs a new RemoteBuildDeployManager.
+     * @param nodeManager the node manager
+     * @param localScriptRunner the local script runner
+     * @param buildAuditService the build audit service
+     */
     public RemoteBuildDeployManager(@NonNull NodeManager nodeManager,
                                    LocalScriptRunner localScriptRunner,
                                    BuildAuditService buildAuditService) {
@@ -102,22 +108,43 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
         remoteLogBuffers.clear();
     }
 
+    /**
+     * Returns the local node ID.
+     * @return the local node ID
+     */
     public String getNodeId() {
         return nodeManager.getNodeId();
     }
 
+    /**
+     * Returns the BuildDeployBroker instance.
+     * @return the broker
+     */
     public BuildDeployBroker getBroker() {
         return broker;
     }
 
+    /**
+     * Returns the LocalScriptRunner instance.
+     * @return the local script runner
+     */
     public LocalScriptRunner getLocalScriptRunner() {
         return localScriptRunner;
     }
 
+    /**
+     * Returns the latest build execution on the local node.
+     * @return the build execution info, or null if none
+     */
     public BuildExecutionInfo getLastExecution() {
         return getLastExecution(nodeManager.getNodeId());
     }
 
+    /**
+     * Returns the latest build execution on the specified node.
+     * @param nodeId the node ID
+     * @return the build execution info, or null if none
+     */
     public BuildExecutionInfo getLastExecution(String nodeId) {
         if (StringUtils.isEmpty(nodeId)) {
             nodeId = nodeManager.getNodeId();
@@ -144,6 +171,10 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
         return null;
     }
 
+    /**
+     * Returns the set of all available node IDs in the cluster including the local node.
+     * @return set of available node IDs
+     */
     public Set<String> getAvailableNodeIds() {
         Set<String> nodeIds = new HashSet<>();
         nodeIds.add(nodeManager.getNodeId());
@@ -167,10 +198,19 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
         return nodeIds;
     }
 
+    /**
+     * Returns the latest build execution for all available cluster nodes.
+     * @return map of node ID to latest build execution info
+     */
     public Map<String, BuildExecutionInfo> getLastExecutions() {
         return getLastExecutions(getAvailableNodeIds());
     }
 
+    /**
+     * Returns the latest build execution for the specified collection of node IDs.
+     * @param targetNodeIds the collection of target node IDs
+     * @return map of node ID to latest build execution info
+     */
     public Map<String, BuildExecutionInfo> getLastExecutions(Collection<String> targetNodeIds) {
         Map<String, BuildExecutionInfo> result = new HashMap<>();
         if (targetNodeIds == null || targetNodeIds.isEmpty()) {
@@ -228,10 +268,20 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
         return info;
     }
 
+    /**
+     * Returns the active running execution for the given execution ID.
+     * @param executionId the execution ID
+     * @return active build execution info, or null if not currently running
+     */
     public BuildExecutionInfo getActiveExecution(String executionId) {
         return activeExecutions.get(executionId);
     }
 
+    /**
+     * Returns all build executions matching the execution ID across target nodes.
+     * @param executionId the execution ID
+     * @return map of target node ID to build execution info
+     */
     public Map<String, BuildExecutionInfo> getExecutions(String executionId) {
         if (StringUtils.isEmpty(executionId)) {
             return Collections.emptyMap();
@@ -264,6 +314,12 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
         return result;
     }
 
+    /**
+     * Returns a single build execution matching the execution ID and optional node ID.
+     * @param executionId the execution ID
+     * @param nodeId optional target node ID
+     * @return the build execution info, or null if not found
+     */
     public BuildExecutionInfo getExecution(String executionId, String nodeId) {
         if (StringUtils.isEmpty(executionId)) {
             return null;
@@ -292,6 +348,11 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
         return null;
     }
 
+    /**
+     * Retrieves captured console logs for an execution grouped by target node ID.
+     * @param executionId the execution ID
+     * @return map of target node ID to list of log lines
+     */
     public Map<String, List<String>> getNodeLogs(String executionId) {
         if (StringUtils.isEmpty(executionId)) {
             return Collections.emptyMap();
@@ -310,6 +371,11 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
         return result;
     }
 
+    /**
+     * Retrieves recent logs for the specified build execution info.
+     * @param exec the build execution info
+     * @return list of log lines
+     */
     public List<String> getRecentLogs(BuildExecutionInfo exec) {
         if (exec == null) {
             return Collections.emptyList();
@@ -335,6 +401,11 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
         return Collections.emptyList();
     }
 
+    /**
+     * Retrieves recent logs for the specified execution ID.
+     * @param executionId the execution ID
+     * @return list of log lines
+     */
     public List<String> getRecentLogs(String executionId) {
         if (executionId == null) {
             return Collections.emptyList();
@@ -605,6 +676,9 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
 
     /**
      * Cancels an execution locally or relays cancel command to remote node.
+     * @param executionId the execution ID
+     * @param targetNodeId the target node ID
+     * @return true if cancellation was initiated; false otherwise
      */
     public boolean cancel(String executionId, String targetNodeId) {
         if (StringUtils.hasText(targetNodeId) && !nodeManager.getNodeId().equals(targetNodeId)) {

@@ -56,6 +56,12 @@ public class BuildDeployActivity {
 
     private final NodeConsoleHelper nodeConsoleHelper;
 
+    /**
+     * Constructs a new BuildDeployActivity.
+     * @param nodeManager the node manager
+     * @param remoteBuildDeployManager the remote build deploy manager
+     * @param nodeConsoleHelper the node console helper
+     */
     @Autowired
     public BuildDeployActivity(NodeManager nodeManager,
                                RemoteBuildDeployManager remoteBuildDeployManager,
