@@ -242,11 +242,17 @@
     </update>
 
     <select id="getBuildLogByHistoryId" parameterType="long" resultMap="BuildLogResultMap">
-        select * from asc_build_log where history_id = #{historyId}
+        select * from asc_build_log
+        where log_id = (
+            select max(log_id) from asc_build_log where history_id = #{historyId}
+        )
     </select>
 
     <select id="getBuildLogByExecutionId" parameterType="string" resultMap="BuildLogResultMap">
-        select * from asc_build_log where execution_id = #{executionId}
+        select * from asc_build_log
+        where log_id = (
+            select max(log_id) from asc_build_log where execution_id = #{executionId}
+        )
     </select>
 
     <delete id="purgeOldHistories" parameterType="int">

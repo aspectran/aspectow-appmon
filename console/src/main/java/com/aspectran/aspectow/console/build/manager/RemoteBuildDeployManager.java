@@ -368,6 +368,16 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
         if (localLogs != null && !localLogs.isEmpty()) {
             result.put(nodeManager.getNodeId(), localLogs);
         }
+        for (Map.Entry<String, List<String>> entry : remoteLogBuffers.entrySet()) {
+            String key = entry.getKey();
+            if (key.startsWith(executionId + ":")) {
+                String targetNodeId = key.substring(executionId.length() + 1);
+                List<String> rLogs = entry.getValue();
+                if (rLogs != null && !rLogs.isEmpty()) {
+                    result.put(targetNodeId, new ArrayList<>(rLogs));
+                }
+            }
+        }
         return result;
     }
 
@@ -383,6 +393,12 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
         List<String> logs = localScriptRunner.getLogBuffer(exec.getExecutionId());
         if (logs != null && !logs.isEmpty()) {
             return logs;
+        }
+        if (exec.getTargetNodeId() != null) {
+            List<String> rLogs = remoteLogBuffers.get(exec.getExecutionId() + ":" + exec.getTargetNodeId());
+            if (rLogs != null && !rLogs.isEmpty()) {
+                return new ArrayList<>(rLogs);
+            }
         }
         if (buildAuditService != null && exec.getExecutionId() != null) {
             try {
@@ -413,6 +429,15 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
         List<String> logs = localScriptRunner.getLogBuffer(executionId);
         if (logs != null && !logs.isEmpty()) {
             return logs;
+        }
+        for (Map.Entry<String, List<String>> entry : remoteLogBuffers.entrySet()) {
+            String key = entry.getKey();
+            if (key.startsWith(executionId + ":")) {
+                List<String> rLogs = entry.getValue();
+                if (rLogs != null && !rLogs.isEmpty()) {
+                    return new ArrayList<>(rLogs);
+                }
+            }
         }
         if (buildAuditService != null) {
             try {
@@ -760,63 +785,59 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
                 if (nodeManager.getNodeId().equals(req.getTargetNodeId())) {
                     cancel(req.getExecutionId(), req.getTargetNodeId());
                 }
-            } else if ("log".equals(header) || "status".equals(header)) {
+            } else if ("status".equals(header)) {
                 String nodeId = params.getString("nodeId");
                 if (!nodeManager.getNodeId().equals(nodeId)) {
-                    if ("log".equals(header)) {
-                        String execId = params.getString("executionId");
-                        String line = params.getString("line");
-                        if (StringUtils.hasText(execId) && StringUtils.hasText(line)) {
-                            appendRemoteLog(execId, nodeId, line);
-                        }
-                    } else {
-                        BuildResponseParameters res = JsonToParameters.from(message, BuildResponseParameters.class);
-                        if (res.getExecutionId() != null) {
-                            String st = res.getStatus();
-                            if (StringUtils.hasText(st)) {
-                                BuildExecutionInfo info = activeExecutions.get(res.getExecutionId() + ":" + nodeId);
-                                if (info == null) {
-                                    info = activeExecutions.get(res.getExecutionId());
-                                }
-                                if (info == null) {
-                                    info = new BuildExecutionInfo();
-                                    info.setExecutionId(res.getExecutionId());
-                                    info.setTargetNodeId(nodeId);
-                                    info.setScriptName(res.getScriptName());
-                                }
+                    BuildResponseParameters res = JsonToParameters.from(message, BuildResponseParameters.class);
+                    if (res.getExecutionId() != null) {
+                        String st = res.getStatus();
+                        if (StringUtils.hasText(st)) {
+                            BuildExecutionInfo info = activeExecutions.get(res.getExecutionId() + ":" + nodeId);
+                            if (info == null) {
+                                info = activeExecutions.get(res.getExecutionId());
+                            }
+                            if (info == null) {
+                                info = new BuildExecutionInfo();
+                                info.setExecutionId(res.getExecutionId());
+                                info.setTargetNodeId(nodeId);
+                                info.setScriptName(res.getScriptName());
+                            }
+                            try {
+                                info.setStatus(BuildExecutionInfo.Status.valueOf(st));
+                            } catch (Exception ignored) {
+                            }
+                            if (res.getStartedAt() != null) {
                                 try {
-                                    info.setStatus(BuildExecutionInfo.Status.valueOf(st));
+                                    info.setStartedAt(Instant.parse(res.getStartedAt()));
                                 } catch (Exception ignored) {
                                 }
-                                if (res.getStartedAt() != null) {
-                                    try {
-                                        info.setStartedAt(Instant.parse(res.getStartedAt()));
-                                    } catch (Exception ignored) {
-                                    }
-                                }
-                                info.setExitCode(res.getExitCode());
-                                info.setDurationMs(res.getDurationMs());
-                                info.setGitBranch(res.getGitBranch());
-                                info.setGitCommitBefore(res.getGitCommitBefore());
-                                info.setGitCommitAfter(res.getGitCommitAfter());
-                                info.setGitCommitMsg(res.getGitCommitMsg());
-                                info.setErrorSummary(res.getError());
+                            }
+                            info.setExitCode(res.getExitCode());
+                            info.setDurationMs(res.getDurationMs());
+                            info.setGitBranch(res.getGitBranch());
+                            info.setGitCommitBefore(res.getGitCommitBefore());
+                            info.setGitCommitAfter(res.getGitCommitAfter());
+                            info.setGitCommitMsg(res.getGitCommitMsg());
+                            info.setErrorSummary(res.getError());
 
-                                if (info.getStatus() == BuildExecutionInfo.Status.RUNNING || info.getStatus() == BuildExecutionInfo.Status.PENDING) {
-                                    activeExecutions.put(info.getExecutionId() + ":" + nodeId, info);
-                                    if (buildAuditService != null) {
-                                        buildAuditService.updateStatus(info);
-                                    }
-                                } else {
-                                    activeExecutions.remove(info.getExecutionId() + ":" + nodeId);
-                                    activeExecutions.remove(info.getExecutionId());
-                                    if (buildAuditService != null) {
-                                        List<String> logs = remoteLogBuffers.remove(info.getExecutionId() + ":" + nodeId);
-                                        buildAuditService.completeAudit(info, logs);
-                                    }
-                                }
+                            if (info.getStatus() == BuildExecutionInfo.Status.RUNNING || info.getStatus() == BuildExecutionInfo.Status.PENDING) {
+                                activeExecutions.put(info.getExecutionId() + ":" + nodeId, info);
+                            } else {
+                                activeExecutions.remove(info.getExecutionId() + ":" + nodeId);
+                                activeExecutions.remove(info.getExecutionId());
+                                remoteLogBuffers.remove(info.getExecutionId() + ":" + nodeId);
                             }
                         }
+                    }
+                    broker.bridge(message);
+                }
+            } else if ("log".equals(header)) {
+                String nodeId = params.getString("nodeId");
+                if (!nodeManager.getNodeId().equals(nodeId)) {
+                    String execId = params.getString("executionId");
+                    String line = params.getString("line");
+                    if (StringUtils.hasText(execId) && line != null) {
+                        appendRemoteLog(execId, nodeId, line);
                     }
                     broker.bridge(message);
                 }
