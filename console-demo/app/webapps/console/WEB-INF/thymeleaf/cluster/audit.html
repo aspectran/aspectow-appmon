@@ -108,6 +108,11 @@
                                     th:text="${n.title + ' (' + n.id + ')'}"
                                     th:selected="${n.id == page.targetNodeId}">
                             </option>
+                            <option th:if="${page.targetNodeId != null and !#strings.isEmpty(page.targetNodeId) and !#lists.contains(page.nodes.![id], page.targetNodeId)}"
+                                    th:value="${page.targetNodeId}"
+                                    th:text="${page.targetNodeId + ' (Offline / History)'}"
+                                    selected>
+                            </option>
                         </select>
                     </div>
                     <div class="col-md-2">

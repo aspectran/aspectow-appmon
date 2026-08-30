@@ -225,9 +225,14 @@
                         </select>
                     </div>
                     <div class="col-md-5" id="target-value-container">
-                        <select id="target-value" class="form-select form-select-sm" onchange="onTargetValueChange()">
-                            <!-- Dynamic options -->
-                        </select>
+                        <div class="d-flex align-items-center gap-2">
+                            <select id="target-value" class="form-select form-select-sm" onchange="onTargetValueChange()">
+                                <!-- Dynamic options -->
+                            </select>
+                            <span id="target-warning-badge" class="badge bg-danger-subtle text-danger text-nowrap d-none" title="This node is offline or historical and cannot execute builds">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>Offline
+                            </span>
+                        </div>
                     </div>
                     <div class="col text-end">
                         <span id="connection-indicator" class="badge status-pill bg-secondary">CONNECTING...</span>
@@ -454,6 +459,58 @@
                 }
             }
 
+            function isTargetExecutable() {
+                const type = $('#target-type').val();
+                const val = $('#target-value').val();
+
+                if (type === 'node') {
+                    const targetId = val || currentNodeId || myNodeId;
+                    if (!targetId) {
+                        return { executable: false, reason: 'No target node selected.' };
+                    }
+                    const matchedNode = (nodes || []).find(n => n.id === targetId);
+                    if (!matchedNode) {
+                        return { executable: false, reason: `Node '${targetId}' is offline or does not exist in the cluster.` };
+                    }
+                    if (matchedNode.status && matchedNode.status.toUpperCase() === 'DEAD') {
+                        return { executable: false, reason: `Node '${targetId}' is currently offline (DEAD).` };
+                    }
+                    return { executable: true, targetId: targetId };
+                } else if (type === 'services') {
+                    const serviceNodes = (nodes || []).filter(n => !n.console && (!n.status || n.status.toUpperCase() !== 'DEAD'));
+                    if (serviceNodes.length === 0) {
+                        return { executable: false, reason: 'No active service nodes found in the cluster.' };
+                    }
+                    return { executable: true };
+                } else if (type === 'all') {
+                    const liveNodes = (nodes || []).filter(n => !n.status || n.status.toUpperCase() !== 'DEAD');
+                    if (liveNodes.length === 0) {
+                        return { executable: false, reason: 'No active nodes found in the cluster.' };
+                    }
+                    return { executable: true };
+                } else if (type === 'group') {
+                    if (!val) {
+                        return { executable: false, reason: 'No node group selected.' };
+                    }
+                    const groupNodes = (nodes || []).filter(n => n.group === val && (!n.status || n.status.toUpperCase() !== 'DEAD'));
+                    if (groupNodes.length === 0) {
+                        return { executable: false, reason: `No active nodes found in group '${val}'.` };
+                    }
+                    return { executable: true };
+                }
+                return { executable: true };
+            }
+
+            function updateTargetWarningBadge() {
+                const targetCheck = isTargetExecutable();
+                const $badge = $('#target-warning-badge');
+                if (!targetCheck.executable) {
+                    $badge.removeClass('d-none').attr('title', targetCheck.reason);
+                } else {
+                    $badge.addClass('d-none').removeAttr('title');
+                }
+            }
+
             function onTargetValueChange() {
                 const type = $('#target-type').val();
                 const $select = $('#target-value');
@@ -468,6 +525,8 @@
                 } else if (type === 'group') {
                     updateUrl(null);
                 }
+                updateTargetWarningBadge();
+                checkOverallExecutionStatus();
             }
 
             function doTargetTypeChange() {
@@ -489,6 +548,7 @@
                     groups.forEach(g => $select.append(new Option(g, g)));
                 } else {
                     $container.show();
+                    let targetFound = false;
                     nodes.forEach(n => {
                         let label = n.title + ' (' + n.id + ')';
                         if (n.console) {
@@ -502,14 +562,24 @@
                             $(option).addClass('text-danger');
                         }
                         $select.append(option);
+                        if (n.id === (prevValue || currentNodeId)) {
+                            targetFound = true;
+                        }
                     });
-                    
+
                     const targetNodeId = prevValue || currentNodeId || myNodeId || (nodes[0] ? nodes[0].id : '');
                     if (targetNodeId) {
+                        if (!targetFound && targetNodeId !== myNodeId) {
+                            const option = new Option(targetNodeId + ' [Offline / History]', targetNodeId);
+                            $(option).addClass('text-danger fst-italic');
+                            $select.append(option);
+                        }
                         $select.val(targetNodeId);
                         updateUrl(targetNodeId);
                     }
                 }
+                updateTargetWarningBadge();
+                checkOverallExecutionStatus();
             }
 
             function updateUrl(nodeId) {
@@ -890,7 +960,8 @@
                 });
 
                 if (anyActive) {
-                    $('#btn-dispatch').prop('disabled', true);
+                    $('#btn-dispatch').prop('disabled', true).removeAttr('title');
+                    $('.quick-actions button').prop('disabled', true).removeAttr('title');
                     $('#btn-cancel').prop('disabled', false);
                     $('#terminal-spinner').removeClass('d-none');
                     if (!durationTicker) {
@@ -900,10 +971,19 @@
                         startDurationTicker();
                     }
                 } else {
-                    $('#btn-dispatch').prop('disabled', false);
                     $('#btn-cancel').prop('disabled', true);
                     $('#terminal-spinner').addClass('d-none');
                     stopDurationTicker();
+
+                    const targetCheck = isTargetExecutable();
+                    if (!targetCheck.executable) {
+                        $('#btn-dispatch').prop('disabled', true).attr('title', targetCheck.reason);
+                        $('.quick-actions button').prop('disabled', true).attr('title', targetCheck.reason);
+                    } else {
+                        const allowExecute = canExecute && !isDemoUser;
+                        $('#btn-dispatch').prop('disabled', !allowExecute).removeAttr('title');
+                        $('.quick-actions button').prop('disabled', !allowExecute).removeAttr('title');
+                    }
                 }
             }
 
@@ -914,6 +994,12 @@
                 }
                 if (isDemoUser) {
                     alert('Executing build scripts is not allowed in the demo environment.');
+                    return;
+                }
+
+                const targetCheck = isTargetExecutable();
+                if (!targetCheck.executable) {
+                    alert('Cannot execute build:\n' + targetCheck.reason);
                     return;
                 }
 
@@ -946,6 +1032,12 @@
                 }
                 if (isDemoUser) {
                     alert('Executing build scripts is not allowed in the demo environment.');
+                    return;
+                }
+
+                const targetCheck = isTargetExecutable();
+                if (!targetCheck.executable) {
+                    alert('Cannot execute build:\n' + targetCheck.reason);
                     return;
                 }
 
@@ -1372,7 +1464,7 @@
                         const nodeId = message.nodeId || message.targetNodeId || 'unknown';
 
                         const validNodeIds = (nodes || []).map(n => n.id);
-                        if (nodeId !== 'unknown' && nodeId !== 'cluster' && !validNodeIds.includes(nodeId)) {
+                        if (nodeId !== 'unknown' && nodeId !== 'cluster' && !validNodeIds.includes(nodeId) && !activeTargetNodes.includes(nodeId)) {
                             return;
                         }
 
@@ -1496,22 +1588,18 @@
 
                 let recentExecutedNodes = [];
                 if (initialLastExecutions && typeof initialLastExecutions === 'object') {
-                    const validNodeIds = (nodes || []).map(n => n.id);
                     Object.keys(initialLastExecutions).forEach(nid => {
-                        if (validNodeIds.includes(nid)) {
-                            const execData = initialLastExecutions[nid];
-                            if (execData) {
-                                ensureNode(nid);
-                                Object.assign(nodeExecutions[nid], execData);
-                                updateNodeStatusUI(execData);
-                                recentExecutedNodes.push(nid);
-                            }
+                        const execData = initialLastExecutions[nid];
+                        if (execData) {
+                            ensureNode(nid);
+                            Object.assign(nodeExecutions[nid], execData);
+                            updateNodeStatusUI(execData);
+                            recentExecutedNodes.push(nid);
                         }
                     });
                 } else if (initialLastExecution) {
-                    const nid = initialLastExecution.nodeId || initialLastExecution.targetNodeId || myNodeId;
-                    const validNodeIds = (nodes || []).map(n => n.id);
-                    if (validNodeIds.includes(nid)) {
+                    const nid = initialLastExecution.nodeId || initialLastExecution.targetNodeId || currentNodeId || myNodeId;
+                    if (nid) {
                         ensureNode(nid);
                         Object.assign(nodeExecutions[nid], initialLastExecution);
                         updateNodeStatusUI(initialLastExecution);
@@ -1537,7 +1625,11 @@
                     }
                 }
                 activeTargetNodes.sort();
-                activeTab = activeTargetNodes.length > 1 ? '__all__' : (activeTargetNodes[0] || '__all__');
+                if (currentNodeId && activeTargetNodes.includes(currentNodeId)) {
+                    activeTab = currentNodeId;
+                } else {
+                    activeTab = activeTargetNodes.length > 1 ? '__all__' : (activeTargetNodes[0] || '__all__');
+                }
 
                 initTabs();
 
@@ -1548,11 +1640,11 @@
                     const refExec = initialLastExecution || (initialLastExecutions && Object.values(initialLastExecutions)[0]);
                     if (refExec) {
                         if (refExec.scriptName) {
-                            $('#script-select').val(refExec.scriptName);
+                            $('#script-selector').val(refExec.scriptName);
                             onScriptChange();
                         }
-                        if (refExec.gitBranch) {
-                            $('#branch-input').val(refExec.gitBranch);
+                        if (refExec.gitBranch && refExec.gitBranch !== '-') {
+                            $('#param-branch').val(refExec.gitBranch);
                         }
                     }
                 }

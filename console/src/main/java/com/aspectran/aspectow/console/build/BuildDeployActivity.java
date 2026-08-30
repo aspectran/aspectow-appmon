@@ -77,10 +77,7 @@ public class BuildDeployActivity {
     public Map<String, Object> buildPage(String nodeId, String executionId) {
         String clusterMode = nodeManager.getClusterConfig().getMode();
         List<Map<String, Object>> nodes = nodeConsoleHelper.getNodes(true);
-        String targetNodeId = (nodeId != null ? (nodes.stream().anyMatch(n -> nodeId.equals(n.get("id"))) ? nodeId : null) : null);
-        if (nodeId != null && targetNodeId == null) {
-            throw new IllegalArgumentException("No node found with ID: " + nodeId);
-        }
+        String targetNodeId = (StringUtils.hasText(nodeId) ? nodeId : null);
 
         Set<String> allowedScripts = remoteBuildDeployManager.getLocalScriptRunner().getAllowedScripts();
 
@@ -107,10 +104,18 @@ public class BuildDeployActivity {
                         ? executions.get(targetNodeId)
                         : executions.values().iterator().next();
                 model.put("lastExecution", mainExec);
+                if (targetNodeId == null && mainExec != null && mainExec.getTargetNodeId() != null) {
+                    targetNodeId = mainExec.getTargetNodeId();
+                    model.put("targetNodeId", targetNodeId);
+                }
             } else {
                 BuildExecutionInfo singleExec = remoteBuildDeployManager.getExecution(executionId, targetNodeId);
                 if (singleExec != null) {
                     model.put("lastExecution", singleExec);
+                    if (targetNodeId == null && singleExec.getTargetNodeId() != null) {
+                        targetNodeId = singleExec.getTargetNodeId();
+                        model.put("targetNodeId", targetNodeId);
+                    }
                 }
             }
         } else {
@@ -239,6 +244,13 @@ public class BuildDeployActivity {
         }
         if (StringUtils.isEmpty(targetNodeId)) {
             targetNodeId = nodeManager.getNodeId();
+        } else if (!targetNodeId.equals(nodeManager.getNodeId())) {
+            final String finalTargetNodeId = targetNodeId;
+            List<Map<String, Object>> nodes = nodeConsoleHelper.getNodes(true);
+            boolean exists = nodes.stream().anyMatch(n -> finalTargetNodeId.equals(n.get("id")));
+            if (!exists) {
+                throw new IllegalArgumentException("Target node '" + targetNodeId + "' is offline or does not exist in the cluster");
+            }
         }
 
         BuildExecutionInfo info = new BuildExecutionInfo();

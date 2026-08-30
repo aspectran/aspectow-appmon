@@ -24,10 +24,10 @@ import com.aspectran.aspectow.console.build.bridge.redis.BuildMessageBridgeHandl
 import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.aspectow.node.manager.NodeManager;
 import com.aspectran.aspectow.node.manager.NodeRegistry;
+import com.aspectran.core.component.bean.ablility.DisposableBean;
 import com.aspectran.core.component.bean.ablility.InitializableBean;
 import com.aspectran.core.component.bean.annotation.Bean;
 import com.aspectran.core.component.bean.annotation.Component;
-import com.aspectran.core.component.bean.annotation.Destroy;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.apon.JsonToParameters;
 import com.aspectran.utils.apon.Parameters;
@@ -57,7 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 @Bean(id = "remoteBuildDeployManager")
-public class RemoteBuildDeployManager implements InitializableBean {
+public class RemoteBuildDeployManager implements InitializableBean, DisposableBean {
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteBuildDeployManager.class);
 
@@ -86,12 +86,6 @@ public class RemoteBuildDeployManager implements InitializableBean {
         this.buildAuditService = buildAuditService;
     }
 
-    @Destroy
-    public void destroy() {
-        activeExecutions.clear();
-        remoteLogBuffers.clear();
-    }
-
     @Override
     public void initialize() throws Exception {
         logger.info("Initializing RemoteBuildDeployManager for node: {}", nodeManager.getNodeId());
@@ -100,6 +94,12 @@ public class RemoteBuildDeployManager implements InitializableBean {
             BuildMessageBridgeHandler bridgeHandler = new BuildMessageBridgeHandler(this);
             nodeManager.getNodeMessageSubscriber().addListener(bridgeHandler);
         }
+    }
+
+    @Override
+    public void destroy() {
+        activeExecutions.clear();
+        remoteLogBuffers.clear();
     }
 
     public String getNodeId() {
@@ -480,7 +480,13 @@ public class RemoteBuildDeployManager implements InitializableBean {
                 }
             }
             if (result.isEmpty()) {
-                result.add(targetNodeId);
+                if (targetNodeId.equals(nodeManager.getNodeId())) {
+                    result.add(nodeManager.getNodeId());
+                } else if (registry != null && registry.isFound(targetNodeId)) {
+                    result.add(targetNodeId);
+                } else if (nodeManager.getNodeInfoHolder() != null && nodeManager.getNodeInfoHolder().getNodeInfo(targetNodeId) != null) {
+                    result.add(targetNodeId);
+                }
             }
         } else {
             // Default to local node
