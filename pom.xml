@@ -19,7 +19,7 @@
 
     <groupId>com.aspectran</groupId>
     <artifactId>aspectow</artifactId>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>4.1.1</version>
     <packaging>pom</packaging>
 
     <name>Aspectow</name>
@@ -59,7 +59,7 @@
         <url>https://github.com/aspectran/aspectow</url>
         <connection>scm:git:ssh://git@github.com/aspectran/aspectow.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/aspectran/aspectow.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v4.1.1</tag>
     </scm>
 
     <issueManagement>
