@@ -44,6 +44,8 @@ public class BuildAuditQuery implements Serializable {
 
     private String endDate;
 
+    private String timeZone;
+
     private PageInfo pageInfo;
 
     /**
@@ -156,6 +158,22 @@ public class BuildAuditQuery implements Serializable {
      */
     public void setEndDate(String endDate) {
         this.endDate = endDate;
+    }
+
+    /**
+     * Returns the client time zone ID.
+     * @return the time zone ID
+     */
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    /**
+     * Sets the client time zone ID.
+     * @param timeZone the time zone ID
+     */
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
     }
 
     /**

@@ -90,7 +90,7 @@
                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()">
                         <i class="bi bi-printer"></i> Print Report
                     </button>
-                    <a class="btn btn-sm btn-success" th:href="@{/cluster/build/audit/export(nodeId=${page.targetNodeId}, status=${page.status}, q=${page.searchKeyword})}">
+                    <a class="btn btn-sm btn-success" href="javascript:void(0)" onclick="exportCsv()">
                         <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV Report
                     </a>
                 </div>
@@ -197,7 +197,7 @@
                                     </div>
                                     <span th:if="${item.gitCommitBefore == null && item.gitCommitAfter == null}" class="text-muted small">-</span>
                                 </td>
-                                <td class="small" th:text="${#temporals.format(item.startedAt, 'yyyy-MM-dd HH:mm:ss')}">2026-08-18 12:00:00</td>
+                                <td class="small format-local-time" th:data-utc="${item.startedAt}" th:text="${#temporals.format(item.startedAt, 'yyyy-MM-dd HH:mm:ss')}">2026-08-18 12:00:00</td>
                                 <td class="small" th:text="${item.durationMs != null ? (item.durationMs / 1000.0) + 's' : '-'}">12.4s</td>
                                 <td>
                                     <span th:if="${item.integrityHash != null}" class="badge bg-success-subtle text-success" title="SHA-256 Verified">
@@ -305,11 +305,33 @@
                 let d;
                 if (typeof dateVal === 'object' && dateVal.epochSecond !== undefined) {
                     d = dayjs.unix(dateVal.epochSecond);
+                } else if (typeof dateVal === 'number') {
+                    d = dayjs(dateVal);
                 } else {
                     d = dayjs(dateVal);
                 }
                 return d.isValid() ? d.format('YYYY-MM-DD HH:mm:ss') : String(dateVal);
             }
+
+            function exportCsv() {
+                const url = new URL(contextPath + '/cluster/build/audit/export', window.location.href);
+                const searchParams = new URLSearchParams(window.location.search);
+                searchParams.set('timeZone', Intl.DateTimeFormat().resolvedOptions().timeZone);
+                url.search = searchParams.toString();
+                location.href = url.href;
+            }
+
+            $(function() {
+                $('.format-local-time').each(function() {
+                    const utc = $(this).data('utc');
+                    if (utc) {
+                        const d = dayjs(utc);
+                        if (d.isValid()) {
+                            $(this).text(d.format('YYYY-MM-DD HH:mm:ss'));
+                        }
+                    }
+                });
+            });
 
             function openBuildConsole(executionId, nodeId) {
                 let url = contextPath + '/cluster/build/';

@@ -235,6 +235,7 @@ public class BuildAuditActivity {
         String searchKeyword = translet.getParameter("q");
         String startDate = translet.getParameter("startDate");
         String endDate = translet.getParameter("endDate");
+        String timeZone = translet.getParameter("timeZone");
 
         BuildAuditQuery query = new BuildAuditQuery();
         query.setTargetNodeId(targetNodeId);
@@ -242,6 +243,7 @@ public class BuildAuditActivity {
         query.setSearchKeyword(searchKeyword);
         query.setStartDate(startDate);
         query.setEndDate(endDate);
+        query.setTimeZone(timeZone);
 
         String csvData = buildAuditService.exportCsvReport(query);
 

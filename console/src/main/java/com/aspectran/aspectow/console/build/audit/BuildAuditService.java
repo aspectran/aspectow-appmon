@@ -33,6 +33,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
@@ -454,11 +457,25 @@ public class BuildAuditService extends InstantActivitySupport {
     public String exportCsvReport(BuildAuditQuery query) {
         return instantActivity(() -> {
             List<BuildHistory> list = buildHistoryMapper.searchBuildHistory(query);
+            ZoneId zoneId = ZoneOffset.UTC;
+            if (query != null && query.getTimeZone() != null) {
+                try {
+                    zoneId = ZoneId.of(query.getTimeZone());
+                } catch (Exception e) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Invalid time zone: {}", query.getTimeZone());
+                    }
+                }
+            }
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
             StringBuilder sb = new StringBuilder();
             sb.append("History ID,Execution ID,Target Node,Script Name,Requester,Status,Exit Code,Started At,Finished ")
                     .append("At,Duration (ms),Git Branch,Before Commit,After Commit,Integrity Hash\n");
 
             for (BuildHistory h : list) {
+                String startedAtStr = (h.getStartedAt() != null ? h.getStartedAt().atZone(zoneId).format(formatter) : "");
+                String finishedAtStr = (h.getFinishedAt() != null ? h.getFinishedAt().atZone(zoneId).format(formatter) : "");
                 sb.append(escapeCsv(h.getHistoryId())).append(",")
                         .append(escapeCsv(h.getExecutionId())).append(",")
                         .append(escapeCsv(h.getTargetNodeId())).append(",")
@@ -466,8 +483,8 @@ public class BuildAuditService extends InstantActivitySupport {
                         .append(escapeCsv(h.getRequester())).append(",")
                         .append(escapeCsv(h.getStatus())).append(",")
                         .append(escapeCsv(h.getExitCode())).append(",")
-                        .append(escapeCsv(h.getStartedAt())).append(",")
-                        .append(escapeCsv(h.getFinishedAt())).append(",")
+                        .append(escapeCsv(startedAtStr)).append(",")
+                        .append(escapeCsv(finishedAtStr)).append(",")
                         .append(escapeCsv(h.getDurationMs())).append(",")
                         .append(escapeCsv(h.getGitBranch())).append(",")
                         .append(escapeCsv(h.getGitCommitBefore())).append(",")
