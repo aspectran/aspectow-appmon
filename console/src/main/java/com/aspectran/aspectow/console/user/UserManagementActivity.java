@@ -38,6 +38,7 @@ import com.aspectran.web.support.rest.response.SuccessResponse;
 import com.aspectran.web.support.util.WebUtils;
 import org.jspecify.annotations.NonNull;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -76,6 +77,8 @@ public class UserManagementActivity {
             for (User u : userList) {
                 u.setPassword(null);
             }
+        } else {
+            userList = Collections.emptyList();
         }
         List<Role> roleList = userService.getRoleList();
         List<Permission> permissionList = userService.getPermissionList();
