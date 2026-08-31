@@ -138,14 +138,14 @@
                         <td>
                             <div th:if="${v.validUntil != null}" class="small">
                                 <span th:if="${v.validUntil.isBefore(page.now)}" class="badge bg-danger">EXPIRED</span>
-                                <span th:if="${v.validUntil.isAfter(page.now)}" class="text-muted" th:text="${#temporals.format(v.validUntil, 'yyyy-MM-dd HH:mm')}">2023-12-31</span>
+                                <span th:if="${v.validUntil.isAfter(page.now)}" class="text-muted format-local-time" data-format="YYYY-MM-DD HH:mm" th:data-utc="${v.validUntil}" th:text="${#temporals.format(v.validUntil, 'yyyy-MM-dd HH:mm')}">2023-12-31</span>
                             </div>
                             <span th:if="${v.validUntil == null}" class="text-muted small">-</span>
                         </td>
-                        <td th:text="${#temporals.format(v.updatedAt, 'yyyy-MM-dd HH:mm:ss')}" class="small text-muted">2023-10-01</td>
+                        <td class="small text-muted format-local-time" th:data-utc="${v.updatedAt}" th:text="${#temporals.format(v.updatedAt, 'yyyy-MM-dd HH:mm:ss')}">2023-10-01</td>
                         <td class="text-end pe-3">
                             <button class="btn btn-sm btn-outline-secondary"
-                                    th:onclick="openVaultModal([[${v.vaultId}]], [[${v.label}]], [[${v.description}]], [[${v.tokenType}]], [[${v.encryptedValue}]], [[${#temporals.format(v.validUntil, 'yyyy-MM-dd HH:mm:ss')}]] )">
+                                    th:onclick="openVaultModal([[${v.vaultId}]], [[${v.label}]], [[${v.description}]], [[${v.tokenType}]], [[${v.encryptedValue}]], [[${v.validUntil}]] )">
                                 <i class="bi bi-pencil"></i>
                             </button>
                             <button class="btn btn-sm btn-outline-danger" th:onclick="deleteVault([[${v.vaultId}]])">
@@ -330,6 +330,17 @@
         }
 
         $(function() {
+            $('.format-local-time').each(function() {
+                const utc = $(this).data('utc');
+                const fmt = $(this).data('format') || 'YYYY-MM-DD HH:mm:ss';
+                if (utc) {
+                    const d = dayjs.utc(utc).local();
+                    if (d.isValid()) {
+                        $(this).text(d.format(fmt));
+                    }
+                }
+            });
+
             $('#vault-search').on('keydown', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -514,7 +525,7 @@
             
             let remainingMinutes = '';
             if (validUntil) {
-                const expiry = new Date(validUntil);
+                const expiry = dayjs.utc(validUntil).toDate();
                 const now = new Date();
                 const diffMs = expiry - now;
                 if (diffMs > 0) {

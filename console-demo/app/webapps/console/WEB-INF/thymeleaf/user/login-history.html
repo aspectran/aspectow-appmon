@@ -64,7 +64,7 @@
                             <span th:class="${#strings.equals(history.successYn, 'Y') ? 'badge bg-success' : 'badge bg-danger'}"
                                   th:text="${#strings.equals(history.successYn, 'Y') ? 'SUCCESS' : 'FAILED'}">SUCCESS</span>
                         </td>
-                        <td th:text="${#temporals.format(history.loginAt, 'yyyy-MM-dd HH:mm:ss')}">2023-10-01 12:00:00</td>
+                        <td class="format-local-time" th:data-utc="${history.loginAt}" th:text="${#temporals.format(history.loginAt, 'yyyy-MM-dd HH:mm:ss')}">2023-10-01 12:00:00</td>
                         <td class="pe-3 small text-muted text-truncate" style="max-width: 300px;" 
                             th:text="${history.userAgent}" th:title="${history.userAgent}">Mozilla/5.0...</td>
                     </tr>
@@ -164,6 +164,16 @@
         }
 
         $(function() {
+            $('.format-local-time').each(function() {
+                const utc = $(this).data('utc');
+                if (utc) {
+                    const d = dayjs.utc(utc).local();
+                    if (d.isValid()) {
+                        $(this).text(d.format('YYYY-MM-DD HH:mm:ss'));
+                    }
+                }
+            });
+
             $('#history-search').on('keydown', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();

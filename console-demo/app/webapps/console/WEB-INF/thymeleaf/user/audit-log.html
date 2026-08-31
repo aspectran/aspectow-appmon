@@ -68,7 +68,7 @@
                         <td class="small text-muted text-truncate" style="max-width: 300px;" 
                             th:text="${audit.details}" th:title="${audit.details}">Created new user</td>
                         <td th:text="${session.USER_INFO.hasRole('DEMO') ? (audit.ipAddress.indexOf('.') != -1 ? audit.ipAddress.replaceAll('(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)', '$1.$2.*.*') : (audit.ipAddress.indexOf(':') != -1 ? audit.ipAddress.replaceAll('(:[^:]*){1,4}$', ':*:*:*:*') : '***')) : audit.ipAddress}">127.0.0.1</td>
-                        <td class="pe-3 small text-muted" th:text="${#temporals.format(audit.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2026-08-01 12:00:00</td>
+                        <td class="pe-3 small text-muted format-local-time" th:data-utc="${audit.createdAt}" th:text="${#temporals.format(audit.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2026-08-01 12:00:00</td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(page.auditList)}">
                         <td colspan="7" class="text-center py-4 text-muted">No audit logs found.</td>
@@ -166,6 +166,16 @@
         }
 
         $(function() {
+            $('.format-local-time').each(function() {
+                const utc = $(this).data('utc');
+                if (utc) {
+                    const d = dayjs.utc(utc).local();
+                    if (d.isValid()) {
+                        $(this).text(d.format('YYYY-MM-DD HH:mm:ss'));
+                    }
+                }
+            });
+
             $('#audit-search').on('keydown', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();

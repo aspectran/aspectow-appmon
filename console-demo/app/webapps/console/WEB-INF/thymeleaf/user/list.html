@@ -74,7 +74,7 @@
                                   th:title="'Failed login attempts: ' + ${user.failedAttempts}"
                                   th:text="${user.failedAttempts} + ' failed'">1 failed</span>
                         </td>
-                        <td class="small text-muted" th:text="${user.lastLoginAt != null ? #temporals.format(user.lastLoginAt, 'yyyy-MM-dd HH:mm:ss') : '-'}">2023-10-01</td>
+                        <td class="small text-muted format-local-time" th:data-utc="${user.lastLoginAt}" th:text="${user.lastLoginAt != null ? #temporals.format(user.lastLoginAt, 'yyyy-MM-dd HH:mm:ss') : '-'}">2023-10-01</td>
                         <td th:if="${session.USER_INFO.hasPermission('USER_MANAGE') || session.USER_INFO.hasRole('SUPER_ADMIN')}" class="text-end pe-3">
                             <button class="btn btn-sm btn-outline-secondary"
                                     th:onclick="openUserModal([[${user.userId}]], [[${user.username}]], [[${user.nickname}]], [[${user.email}]], [[${user.status}]], [[${user.roles != null ? user.roles.![roleId] : null}]], [[${user.allowedIps}]], [[${user.failedAttempts}]])">
@@ -311,6 +311,16 @@
         }
 
         $(function() {
+            $('.format-local-time').each(function() {
+                const utc = $(this).data('utc');
+                if (utc) {
+                    const d = dayjs.utc(utc).local();
+                    if (d.isValid()) {
+                        $(this).text(d.format('YYYY-MM-DD HH:mm:ss'));
+                    }
+                }
+            });
+
             $('#togglePassword').on('click', function() {
                 const $passwordInput = $('#password');
                 const $icon = $(this).find('i');
