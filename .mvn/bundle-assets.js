@@ -208,6 +208,7 @@ console.log(`[bundle-assets] Target Console directory: ${path.relative(rootDir, 
 const consoleJsSrc = path.join(consoleDir, "js");
 const consoleCssSrc = path.join(consoleDir, "css");
 const consoleJsFiles = [
+    "console-common.js",
     "apon-highlighter.js",
     "console-client.js"
 ];

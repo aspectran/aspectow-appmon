@@ -330,17 +330,6 @@
         }
 
         $(function() {
-            $('.format-local-time').each(function() {
-                const utc = $(this).data('utc');
-                const fmt = $(this).data('format') || 'YYYY-MM-DD HH:mm:ss';
-                if (utc) {
-                    const d = dayjs.utc(utc).local();
-                    if (d.isValid()) {
-                        $(this).text(d.format(fmt));
-                    }
-                }
-            });
-
             $('#vault-search').on('keydown', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();

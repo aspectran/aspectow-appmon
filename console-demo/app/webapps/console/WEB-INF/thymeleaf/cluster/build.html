@@ -1410,19 +1410,6 @@
                     });
             }
 
-            function formatDateTime(dateVal) {
-                if (!dateVal) return '-';
-                let d;
-                if (typeof dateVal === 'object' && dateVal.epochSecond !== undefined) {
-                    d = dayjs.unix(dateVal.epochSecond);
-                } else if (typeof dateVal === 'number') {
-                    d = dayjs(dateVal);
-                } else {
-                    d = dayjs(dateVal);
-                }
-                return d.isValid() ? d.format('YYYY-MM-DD HH:mm:ss') : String(dateVal);
-            }
-
             function initConsoleClient(token) {
                 const buildNode = {
                     id: currentNodeId || myNodeId || 'gateway',

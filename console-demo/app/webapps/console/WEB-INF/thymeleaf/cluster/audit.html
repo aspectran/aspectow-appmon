@@ -300,19 +300,6 @@
             let currentLoadedLogs = "";
             let currentLogHistoryId = null;
 
-            function formatDateTime(dateVal) {
-                if (!dateVal) return '-';
-                let d;
-                if (typeof dateVal === 'object' && dateVal.epochSecond !== undefined) {
-                    d = dayjs.unix(dateVal.epochSecond);
-                } else if (typeof dateVal === 'number') {
-                    d = dayjs(dateVal);
-                } else {
-                    d = dayjs(dateVal);
-                }
-                return d.isValid() ? d.format('YYYY-MM-DD HH:mm:ss') : String(dateVal);
-            }
-
             function exportCsv() {
                 const url = new URL(contextPath + '/cluster/build/audit/export', window.location.href);
                 const searchParams = new URLSearchParams(window.location.search);
@@ -320,18 +307,6 @@
                 url.search = searchParams.toString();
                 location.href = url.href;
             }
-
-            $(function() {
-                $('.format-local-time').each(function() {
-                    const utc = $(this).data('utc');
-                    if (utc) {
-                        const d = dayjs(utc);
-                        if (d.isValid()) {
-                            $(this).text(d.format('YYYY-MM-DD HH:mm:ss'));
-                        }
-                    }
-                });
-            });
 
             function openBuildConsole(executionId, nodeId) {
                 let url = contextPath + '/cluster/build/';

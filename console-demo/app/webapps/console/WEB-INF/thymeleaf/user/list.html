@@ -311,16 +311,6 @@
         }
 
         $(function() {
-            $('.format-local-time').each(function() {
-                const utc = $(this).data('utc');
-                if (utc) {
-                    const d = dayjs.utc(utc).local();
-                    if (d.isValid()) {
-                        $(this).text(d.format('YYYY-MM-DD HH:mm:ss'));
-                    }
-                }
-            });
-
             $('#togglePassword').on('click', function() {
                 const $passwordInput = $('#password');
                 const $icon = $(this).find('i');
