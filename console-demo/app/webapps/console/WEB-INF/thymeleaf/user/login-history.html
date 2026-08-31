@@ -13,8 +13,8 @@
                 <span th:if="${#strings.isEmpty(page.username)}">All Login History</span>
             </h3>
         </div>
-        <div class="d-flex flex-wrap align-items-center justify-content-end gap-2">
-            <div class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
+            <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
                 <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fw-semibold text-nowrap me-2" id="total-history-count" th:text="${page.pageInfo != null ? page.pageInfo.totalElements : (#lists.size(page.historyList))} + ' Records'">0 Records</span>
                 <div class="input-group input-group-sm" style="width: 180px;">
                     <span class="input-group-text cursor-pointer" onclick="performSearch()"><i class="bi bi-search"></i></span>

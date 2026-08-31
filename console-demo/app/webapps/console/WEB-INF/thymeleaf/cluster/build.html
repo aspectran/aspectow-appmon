@@ -196,11 +196,11 @@
                     <p class="text-muted mb-0">Remote build script execution and automated continuous delivery</p>
                 </div>
                 <div class="d-flex flex-column align-items-end justify-content-end gap-2">
-                    <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap">
+                    <div class="d-flex flex-nowrap align-items-center gap-2">
                         <span class="text-muted text-nowrap small">Cluster Mode:</span>
                         <span class="fw-bold text-primary" th:text="${page.clusterMode.toUpperCase()}">GATEWAY</span>
                     </div>
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex flex-wrap flex-sm-nowrap justify-content-end align-items-center gap-2">
                         <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" onclick="openNodesPopup()">
                             <i class="bi bi-hdd-network me-1"></i> Manage Nodes
                         </button>
