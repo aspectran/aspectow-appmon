@@ -423,8 +423,8 @@
     </th:block>
 
     <th:block layout:fragment="script">
-        <script th:if="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:src="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/console@4.0/js/console-client.js|"></script>
-        <script th:unless="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:src="@{/assets/js/console-client.js}"></script>
+        <script th:if="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:src="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/console@4.1/js/console-bundle.js|"></script>
+        <script th:unless="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:src="@{/assets/js/console-bundle.js}"></script>
         <script th:inline="javascript">
             const VIEW_MODE_DASHBOARD = 'dashboard';
             const VIEW_MODE_DETAIL = 'detail';

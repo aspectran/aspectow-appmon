@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title th:text="${page.title != null ? page.title + ' - Aspectow Console' : 'Aspectow Console'}">Aspectow Console</title>
     <th:block th:replace="~{templates/base-head :: common-assets}"></th:block>
-    <link rel="stylesheet" th:if="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:href="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/console@4.0/css/console.css|"/>
-    <link rel="stylesheet" th:unless="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:href="@{/assets/css/console.css}"/>
+    <link rel="stylesheet" th:if="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:href="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/console@4.1/css/console-bundle.css|"/>
+    <link rel="stylesheet" th:unless="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:href="@{/assets/css/console-bundle.css}"/>
 </head>
 <body th:class="${page.style}">
     <aside id="sidebar">
