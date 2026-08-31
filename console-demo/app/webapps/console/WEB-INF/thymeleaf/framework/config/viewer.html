@@ -77,8 +77,6 @@
     </th:block>
 
     <th:block layout:fragment="script">
-        <script th:if="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:src="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/console@4.1/js/console-bundle.js|"></script>
-        <script th:unless="${#{currentEnvironment}.matchesProfiles('cdn-assets')}" th:src="@{/assets/js/console-bundle.js}"></script>
         <script th:inline="javascript">
             $(function() {
                 const dataUrl = [[@{/framework/config/{name}/data(name=${page.contextName})}]];
