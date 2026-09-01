@@ -16,6 +16,7 @@
 package com.aspectran.aspectow.node.manager;
 
 import com.aspectran.aspectow.node.redis.RedisConnectionPool;
+import com.aspectran.utils.logging.LoggingGroupHelper;
 import com.aspectran.utils.thread.CustomizableThreadFactory;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateListener;
@@ -57,6 +58,8 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> im
 
     private StatefulRedisPubSubConnection<String, String> pubSubConnection;
 
+    private String defaultLoggingGroup;
+
     /**
      * Constructs a new NodeMessageSubscriber.
      * @param clusterId the cluster ID
@@ -67,6 +70,22 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> im
         this.clusterId = clusterId;
         this.nodeId = nodeId;
         this.connectionPool = connectionPool;
+    }
+
+    /**
+     * Returns the default logging group name.
+     * @return the default logging group name
+     */
+    public String getDefaultLoggingGroup() {
+        return defaultLoggingGroup;
+    }
+
+    /**
+     * Sets the default logging group name.
+     * @param defaultLoggingGroup the default logging group name
+     */
+    public void setDefaultLoggingGroup(String defaultLoggingGroup) {
+        this.defaultLoggingGroup = defaultLoggingGroup;
     }
 
     /**
@@ -128,10 +147,13 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> im
             for (NodeMessageListener listener : listeners) {
                 String listenerCategory = listener.getCategory();
                 if (listenerCategory == null || listenerCategory.equals(category)) {
+                    setLoggingGroup();
                     try {
                         listener.onControlMessage(targetNodeId, message);
                     } catch (Exception e) {
                         logger.error("Error processing control message from channel '{}'", channel, e);
+                    } finally {
+                        clearLoggingGroup();
                     }
                 }
             }
@@ -139,6 +161,7 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> im
             for (NodeMessageListener listener : listeners) {
                 String listenerCategory = listener.getCategory();
                 if (listenerCategory == null || listenerCategory.equals(category)) {
+                    setLoggingGroup();
                     try {
                         if (sessionId != null) {
                             listener.onRelayMessage(targetNodeId, sessionId, message);
@@ -147,6 +170,8 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> im
                         }
                     } catch (Exception e) {
                         logger.error("Error processing relay message from channel '{}'", channel, e);
+                    } finally {
+                        clearLoggingGroup();
                     }
                 }
             }
@@ -163,7 +188,12 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> im
 
         String subscribePattern = NodeMessageProtocol.getClusterSubscriptionPattern(clusterId, nodeId);
         pubSubConnection.sync().psubscribe(subscribePattern);
-        logger.info("NodeMessageSubscriber initialized and subscribed to pattern: {}", subscribePattern);
+        setLoggingGroup();
+        try {
+            logger.info("NodeMessageSubscriber initialized and subscribed to pattern: {}", subscribePattern);
+        } finally {
+            clearLoggingGroup();
+        }
     }
 
     @Override
@@ -172,26 +202,46 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> im
             try {
                 String subscribePattern = NodeMessageProtocol.getClusterSubscriptionPattern(clusterId, nodeId);
                 pubSubConnection.async().psubscribe(subscribePattern).whenComplete((res, ex) -> {
-                    if (ex != null) {
-                        logger.error("Failed to re-subscribe pattern after reconnection for node '{}'", nodeId, ex);
-                    } else {
-                        logger.info("NodeMessageSubscriber re-subscribed to pattern after reconnection: {}", subscribePattern);
+                    setLoggingGroup();
+                    try {
+                        if (ex != null) {
+                            logger.error("Failed to re-subscribe pattern after reconnection for node '{}'", nodeId, ex);
+                        } else {
+                            logger.info("NodeMessageSubscriber re-subscribed to pattern after reconnection: {}", subscribePattern);
+                        }
+                    } finally {
+                        clearLoggingGroup();
                     }
                 });
             } catch (Exception e) {
-                logger.error("Failed to trigger re-subscription after reconnection for node '{}'", nodeId, e);
+                setLoggingGroup();
+                try {
+                    logger.error("Failed to trigger re-subscription after reconnection for node '{}'", nodeId, e);
+                } finally {
+                    clearLoggingGroup();
+                }
             }
         }
     }
 
     @Override
     public void onRedisDisconnected(RedisChannelHandler<?, ?> connection) {
-        logger.warn("NodeMessageSubscriber disconnected from Redis for node '{}'", nodeId);
+        setLoggingGroup();
+        try {
+            logger.warn("NodeMessageSubscriber disconnected from Redis for node '{}'", nodeId);
+        } finally {
+            clearLoggingGroup();
+        }
     }
 
     @Override
     public void onRedisExceptionCaught(RedisChannelHandler<?, ?> connection, @NonNull Throwable cause) {
-        logger.warn("NodeMessageSubscriber caught Redis exception for node '{}': {}", nodeId, cause.getMessage());
+        setLoggingGroup();
+        try {
+            logger.warn("NodeMessageSubscriber caught Redis exception for node '{}': {}", nodeId, cause.getMessage());
+        } finally {
+            clearLoggingGroup();
+        }
     }
 
     /**
@@ -205,10 +255,27 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> im
                 pubSubConnection.removeListener((RedisConnectionStateListener)this);
                 pubSubConnection.close();
             } catch (Exception e) {
-                logger.warn("Error closing pub/sub connection for node '{}'", nodeId, e);
+                setLoggingGroup();
+                try {
+                    logger.warn("Error closing pub/sub connection for node '{}'", nodeId, e);
+                } finally {
+                    clearLoggingGroup();
+                }
             } finally {
                 pubSubConnection = null;
             }
+        }
+    }
+
+    private void setLoggingGroup() {
+        if (defaultLoggingGroup != null) {
+            LoggingGroupHelper.set(defaultLoggingGroup);
+        }
+    }
+
+    private void clearLoggingGroup() {
+        if (defaultLoggingGroup != null) {
+            LoggingGroupHelper.clear();
         }
     }
 

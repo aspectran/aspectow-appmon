@@ -33,9 +33,7 @@
     </bean>
 
     <bean id="nodeManager" class="com.aspectran.aspectow.node.manager.NodeManagerFactoryBean" lazyDestroy="true">
-        <properties>
-            <item name="redisConnectionPoolConfig">#{redisConnectionPoolConfig}</item>
-        </properties>
+        <property name="redisConnectionPoolConfig">#{redisConnectionPoolConfig}</property>
     </bean>
 
     <bean id="remoteNodeManager" class="com.aspectran.aspectow.node.management.nodes.RemoteNodeManager"/>

@@ -67,6 +67,8 @@ public class NodeManager {
 
     private ClusterEventSubscriber clusterEventSubscriber;
 
+    private String loggingGroup;
+
     /**
      * Instantiates a new NodeManager.
      * @param nodeId the unique identifier of the current node
@@ -257,6 +259,22 @@ public class NodeManager {
         if (clusterEventSubscriber != null) {
             clusterEventSubscriber.addListener(this.clusterEventListener);
         }
+    }
+
+    /**
+     * Returns the logging group name for the cluster node.
+     * @return the logging group name
+     */
+    public String getLoggingGroup() {
+        return loggingGroup;
+    }
+
+    /**
+     * Sets the logging group name for the cluster node.
+     * @param loggingGroup the logging group name
+     */
+    protected void setLoggingGroup(String loggingGroup) {
+        this.loggingGroup = loggingGroup;
     }
 
     /**

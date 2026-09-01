@@ -34,6 +34,8 @@ public class NodeManagerFactoryBean implements ActivityContextAware, Initializab
 
     private RedisConnectionPoolConfig redisConnectionPoolConfig;
 
+    private String loggingGroup;
+
     private NodeManager nodeManager;
 
     @Override
@@ -47,6 +49,22 @@ public class NodeManagerFactoryBean implements ActivityContextAware, Initializab
      */
     public void setRedisConnectionPoolConfig(RedisConnectionPoolConfig redisConnectionPoolConfig) {
         this.redisConnectionPoolConfig = redisConnectionPoolConfig;
+    }
+
+    /**
+     * Returns the logging group name for node manager logs.
+     * @return the logging group name
+     */
+    public String getLoggingGroup() {
+        return loggingGroup;
+    }
+
+    /**
+     * Sets the logging group name for node manager logs.
+     * @param loggingGroup the logging group name
+     */
+    public void setLoggingGroup(String loggingGroup) {
+        this.loggingGroup = loggingGroup;
     }
 
     @Override
@@ -64,7 +82,7 @@ public class NodeManagerFactoryBean implements ActivityContextAware, Initializab
             nodeConfig = NodeConfigBuilder.build();
         }
 
-        nodeManager = NodeManagerBuilder.build(context, nodeConfig, redisConnectionPoolConfig);
+        nodeManager = NodeManagerBuilder.build(context, nodeConfig, redisConnectionPoolConfig, loggingGroup);
         if (nodeManager.getNodeReporter() != null) {
             nodeManager.getNodeReporter().start();
         }

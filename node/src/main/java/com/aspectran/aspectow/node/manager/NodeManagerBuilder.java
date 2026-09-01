@@ -80,6 +80,23 @@ public abstract class NodeManagerBuilder {
     public static NodeManager build(
             ActivityContext context, NodeConfig nodeConfig,
             RedisConnectionPoolConfig redisConnectionPoolConfig) throws Exception {
+        return build(context, nodeConfig, redisConnectionPoolConfig, null);
+    }
+
+    /**
+     * Builds and initializes a new {@link NodeManager} instance with an optional logging group.
+     * @param context the activity context
+     * @param nodeConfig the node configuration
+     * @param redisConnectionPoolConfig the Redis connection pool configuration
+     * @param loggingGroup the explicit logging group name, or null to use context name
+     * @return the configured and built NodeManager instance
+     * @throws Exception if an error occurs during initialization
+     */
+    @NonNull
+    public static NodeManager build(
+            ActivityContext context, NodeConfig nodeConfig,
+            RedisConnectionPoolConfig redisConnectionPoolConfig,
+            String loggingGroup) throws Exception {
         Assert.notNull(context, "context must not be null");
         Assert.notNull(nodeConfig, "nodeConfig must not be null");
 
@@ -203,9 +220,14 @@ public abstract class NodeManagerBuilder {
 
             NodeRegistry nodeRegistry = new NodeRegistry(clusterId, connectionPool);
             NodeMessagePublisher nodeMessagePublisher = new NodeMessagePublisher(clusterId, nodeId, connectionPool);
-            NodeMessageSubscriber nodeMessageSubscriber = new NodeMessageSubscriber(clusterId, nodeId, connectionPool);
-            ClusterEventSubscriber clusterEventSubscriber = new ClusterEventSubscriber(clusterId, connectionPool);
 
+            String defaultLoggingGroup = StringUtils.hasText(loggingGroup) ? loggingGroup : context.getName();
+            NodeMessageSubscriber nodeMessageSubscriber = new NodeMessageSubscriber(clusterId, nodeId, connectionPool);
+            nodeMessageSubscriber.setDefaultLoggingGroup(defaultLoggingGroup);
+            ClusterEventSubscriber clusterEventSubscriber = new ClusterEventSubscriber(clusterId, connectionPool);
+            clusterEventSubscriber.setDefaultLoggingGroup(defaultLoggingGroup);
+
+            nodeManager.setLoggingGroup(defaultLoggingGroup);
             nodeManager.setNodeRegistry(nodeRegistry);
             nodeManager.setNodeMessagePublisher(nodeMessagePublisher);
             nodeManager.setNodeMessageSubscriber(nodeMessageSubscriber);

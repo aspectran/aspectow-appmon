@@ -17,6 +17,7 @@ package com.aspectran.aspectow.node.manager;
 
 import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.aspectow.node.redis.RedisConnectionPool;
+import com.aspectran.utils.logging.LoggingGroupHelper;
 import com.aspectran.utils.thread.CustomizableThreadFactory;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateListener;
@@ -62,6 +63,8 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> i
 
     private StatefulRedisPubSubConnection<String, String> pubSubConnection;
 
+    private String defaultLoggingGroup;
+
     /**
      * Constructs a new ClusterEventSubscriber.
      * @param clusterId the cluster ID
@@ -70,6 +73,22 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> i
     public ClusterEventSubscriber(String clusterId, RedisConnectionPool connectionPool) {
         this.clusterId = clusterId;
         this.connectionPool = connectionPool;
+    }
+
+    /**
+     * Returns the default logging group name.
+     * @return the default logging group name
+     */
+    public String getDefaultLoggingGroup() {
+        return defaultLoggingGroup;
+    }
+
+    /**
+     * Sets the default logging group name.
+     * @param defaultLoggingGroup the default logging group name
+     */
+    public void setDefaultLoggingGroup(String defaultLoggingGroup) {
+        this.defaultLoggingGroup = defaultLoggingGroup;
     }
 
     /**
@@ -96,45 +115,50 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> i
     }
 
     private void dispatchMessage(@NonNull String channel, @NonNull String message) {
-        if (message.startsWith(MESSAGE_JOINED)) {
-            String aponData = message.substring(7);
-            try {
-                NodeInfo info = new NodeInfo();
-                info.readFrom(aponData);
-                for (ClusterEventListener listener : listeners) {
-                    try {
-                        listener.onNodeJoined(info);
-                    } catch (Exception e) {
-                        logger.error("Error processing node joined event for node '{}'", info.getId(), e);
-                    }
-                }
-            } catch (IOException e) {
-                logger.warn("Failed to parse JOINED event data", e);
-            }
-        } else if (message.startsWith(MESSAGE_LEFT)) {
-            String leftNodeId = message.substring(5);
-            for (ClusterEventListener listener : listeners) {
+        setLoggingGroup();
+        try {
+            if (message.startsWith(MESSAGE_JOINED)) {
+                String aponData = message.substring(7);
                 try {
-                    listener.onNodeLeft(leftNodeId);
-                } catch (Exception e) {
-                    logger.error("Error processing node left event for node '{}'", leftNodeId, e);
+                    NodeInfo info = new NodeInfo();
+                    info.readFrom(aponData);
+                    for (ClusterEventListener listener : listeners) {
+                        try {
+                            listener.onNodeJoined(info);
+                        } catch (Exception e) {
+                            logger.error("Error processing node joined event for node '{}'", info.getId(), e);
+                        }
+                    }
+                } catch (IOException e) {
+                    logger.warn("Failed to parse JOINED event data", e);
                 }
-            }
-        } else if (message.startsWith(MESSAGE_STATUS_CHANGED)) {
-            String aponData = message.substring(15);
-            try {
-                NodeInfo info = new NodeInfo();
-                info.readFrom(aponData);
+            } else if (message.startsWith(MESSAGE_LEFT)) {
+                String leftNodeId = message.substring(5);
                 for (ClusterEventListener listener : listeners) {
                     try {
-                        listener.onNodeStatusChanged(info);
+                        listener.onNodeLeft(leftNodeId);
                     } catch (Exception e) {
-                        logger.error("Error processing node status changed event for node '{}'", info.getId(), e);
+                        logger.error("Error processing node left event for node '{}'", leftNodeId, e);
                     }
                 }
-            } catch (IOException e) {
-                logger.warn("Failed to parse STATUS_CHANGED event data", e);
+            } else if (message.startsWith(MESSAGE_STATUS_CHANGED)) {
+                String aponData = message.substring(15);
+                try {
+                    NodeInfo info = new NodeInfo();
+                    info.readFrom(aponData);
+                    for (ClusterEventListener listener : listeners) {
+                        try {
+                            listener.onNodeStatusChanged(info);
+                        } catch (Exception e) {
+                            logger.error("Error processing node status changed event for node '{}'", info.getId(), e);
+                        }
+                    }
+                } catch (IOException e) {
+                    logger.warn("Failed to parse STATUS_CHANGED event data", e);
+                }
             }
+        } finally {
+            clearLoggingGroup();
         }
     }
 
@@ -148,7 +172,12 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> i
 
         String eventsChannel = NodeMessageProtocol.getClusterEventsChannel(clusterId);
         pubSubConnection.sync().subscribe(eventsChannel);
-        logger.info("ClusterEventSubscriber initialized and subscribed to channel: {}", eventsChannel);
+        setLoggingGroup();
+        try {
+            logger.info("ClusterEventSubscriber initialized and subscribed to channel: {}", eventsChannel);
+        } finally {
+            clearLoggingGroup();
+        }
     }
 
     @Override
@@ -157,26 +186,46 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> i
             try {
                 String eventsChannel = NodeMessageProtocol.getClusterEventsChannel(clusterId);
                 pubSubConnection.async().subscribe(eventsChannel).whenComplete((res, ex) -> {
-                    if (ex != null) {
-                        logger.error("Failed to re-subscribe channel after reconnection for cluster '{}'", clusterId, ex);
-                    } else {
-                        logger.info("ClusterEventSubscriber re-subscribed to channel after reconnection: {}", eventsChannel);
+                    setLoggingGroup();
+                    try {
+                        if (ex != null) {
+                            logger.error("Failed to re-subscribe channel after reconnection for cluster '{}'", clusterId, ex);
+                        } else {
+                            logger.info("ClusterEventSubscriber re-subscribed to channel after reconnection: {}", eventsChannel);
+                        }
+                    } finally {
+                        clearLoggingGroup();
                     }
                 });
             } catch (Exception e) {
-                logger.error("Failed to trigger re-subscription after reconnection for cluster '{}'", clusterId, e);
+                setLoggingGroup();
+                try {
+                    logger.error("Failed to trigger re-subscription after reconnection for cluster '{}'", clusterId, e);
+                } finally {
+                    clearLoggingGroup();
+                }
             }
         }
     }
 
     @Override
     public void onRedisDisconnected(RedisChannelHandler<?, ?> connection) {
-        logger.warn("ClusterEventSubscriber disconnected from Redis for cluster '{}'", clusterId);
+        setLoggingGroup();
+        try {
+            logger.warn("ClusterEventSubscriber disconnected from Redis for cluster '{}'", clusterId);
+        } finally {
+            clearLoggingGroup();
+        }
     }
 
     @Override
     public void onRedisExceptionCaught(RedisChannelHandler<?, ?> connection, @NonNull Throwable cause) {
-        logger.warn("ClusterEventSubscriber caught Redis exception for cluster '{}': {}", clusterId, cause.getMessage());
+        setLoggingGroup();
+        try {
+            logger.warn("ClusterEventSubscriber caught Redis exception for cluster '{}': {}", clusterId, cause.getMessage());
+        } finally {
+            clearLoggingGroup();
+        }
     }
 
     /**
@@ -190,10 +239,27 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> i
                 pubSubConnection.removeListener((RedisConnectionStateListener)this);
                 pubSubConnection.close();
             } catch (Exception e) {
-                logger.warn("Error closing pub/sub connection for cluster '{}'", clusterId, e);
+                setLoggingGroup();
+                try {
+                    logger.warn("Error closing pub/sub connection for cluster '{}'", clusterId, e);
+                } finally {
+                    clearLoggingGroup();
+                }
             } finally {
                 pubSubConnection = null;
             }
+        }
+    }
+
+    private void setLoggingGroup() {
+        if (defaultLoggingGroup != null) {
+            LoggingGroupHelper.set(defaultLoggingGroup);
+        }
+    }
+
+    private void clearLoggingGroup() {
+        if (defaultLoggingGroup != null) {
+            LoggingGroupHelper.clear();
         }
     }
 
