@@ -708,6 +708,15 @@ public class RemoteBuildDeployManager implements InitializableBean, DisposableBe
      */
     public boolean cancel(String executionId, String targetNodeId) {
         if (StringUtils.hasText(targetNodeId) && !nodeManager.getNodeId().equals(targetNodeId)) {
+            BuildExecutionInfo info = activeExecutions.get(executionId + ":" + targetNodeId);
+            if (info == null) {
+                info = activeExecutions.get(executionId);
+            }
+            if (info != null) {
+                info.setStatus(BuildExecutionInfo.Status.CANCELLED);
+                info.setErrorSummary("Execution cancelled by user");
+                broker.broadcastStatusChanged(info);
+            }
             if (nodeManager.getNodeMessagePublisher() != null) {
                 try {
                     BuildRequestParameters req = new BuildRequestParameters()

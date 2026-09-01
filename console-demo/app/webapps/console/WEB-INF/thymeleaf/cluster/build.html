@@ -868,6 +868,7 @@
                     let overallStatus = 'IDLE';
                     let hasRunning = false;
                     let hasFailed = false;
+                    let hasCancelled = false;
                     let allSuccess = (nodeIds.length > 0);
 
                     nodeIds.forEach(nid => {
@@ -875,6 +876,7 @@
                         const st = exec.status || 'IDLE';
                         if (st === 'RUNNING' || st === 'PENDING') hasRunning = true;
                         if (st === 'FAILED' || st === 'TIMEOUT') hasFailed = true;
+                        if (st === 'CANCELLED') hasCancelled = true;
                         if (st !== 'SUCCESS') allSuccess = false;
 
                         const durationStr = (exec.durationMs !== null && exec.durationMs !== undefined) ? ((exec.durationMs / 1000).toFixed(1) + 's') : '-';
@@ -893,6 +895,7 @@
 
                     if (hasRunning) overallStatus = 'RUNNING';
                     else if (hasFailed) overallStatus = 'FAILED';
+                    else if (hasCancelled) overallStatus = 'CANCELLED';
                     else if (allSuccess) overallStatus = 'SUCCESS';
 
                     const $badge = $('#exec-status-badge');
@@ -1161,6 +1164,13 @@
                                     targetNodeId: nid
                                 });
                                 sent++;
+                                if (exec) {
+                                    exec.status = 'CANCELLED';
+                                    const $badge = $(`#tab-badge-${nid}`);
+                                    if ($badge.length) {
+                                        $badge.attr('class', 'badge status-pill small ' + getBadgeClass('CANCELLED')).text('CANCELLED');
+                                    }
+                                }
                             }
                         });
 
@@ -1176,9 +1186,21 @@
                                 executionId: currentExecutionId,
                                 targetNodeId: fallbackNodeId
                             });
+                            nodeIds.forEach(nid => {
+                                const exec = nodeExecutions[nid];
+                                if (exec && (exec.status === 'RUNNING' || exec.status === 'PENDING')) {
+                                    exec.status = 'CANCELLED';
+                                    const $badge = $(`#tab-badge-${nid}`);
+                                    if ($badge.length) {
+                                        $badge.attr('class', 'badge status-pill small ' + getBadgeClass('CANCELLED')).text('CANCELLED');
+                                    }
+                                }
+                            });
                         }
                         appendTerminalLineToAll(`[ABORT] Cancellation signal sent for active executions...`, 'warn');
                         stopDurationTicker();
+                        checkOverallExecutionStatus();
+                        renderMetaView();
                     }
                 }
             }

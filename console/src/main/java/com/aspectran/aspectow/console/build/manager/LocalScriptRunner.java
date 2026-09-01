@@ -294,14 +294,16 @@ public class LocalScriptRunner implements ActivityContextAware {
      * @return true if cancelled successfully
      */
     public boolean cancel(String executionId) {
+        if (executionId == null) {
+            return false;
+        }
+        logger.info("Cancelling build execution: {}", executionId);
+        cancelledExecutions.add(executionId);
         Process process = activeProcesses.get(executionId);
         if (process != null && process.isAlive()) {
-            logger.info("Cancelling build execution: {}", executionId);
-            cancelledExecutions.add(executionId);
             destroyProcessTree(process);
-            return true;
         }
-        return false;
+        return true;
     }
 
     private void destroyProcessTree(Process process) {
@@ -378,6 +380,30 @@ public class LocalScriptRunner implements ActivityContextAware {
                     Consumer<BuildExecutionInfo> startedCallback,
                     Consumer<String> logConsumer,
                     Consumer<BuildExecutionInfo> completionCallback) {
+        execute(info, startedCallback, logConsumer, completionCallback);
+    }
+
+    private void execute(
+            @NonNull BuildExecutionInfo info,
+            Consumer<BuildExecutionInfo> startedCallback,
+            Consumer<String> logConsumer,
+            Consumer<BuildExecutionInfo> completionCallback) {
+        if (cancelledExecutions.remove(info.getExecutionId())
+                || info.getStatus() == BuildExecutionInfo.Status.CANCELLED) {
+            info.setStatus(BuildExecutionInfo.Status.CANCELLED);
+            info.setExitCode(-1);
+            info.setErrorSummary("Execution cancelled before start");
+            if (info.getStartedAt() == null) {
+                info.setStartedAt(Instant.now());
+            }
+            info.setFinishedAt(Instant.now());
+            info.setDurationMs(Duration.between(info.getStartedAt(), info.getFinishedAt()).toMillis());
+            if (completionCallback != null) {
+                completionCallback.accept(info);
+            }
+            return;
+        }
+
         String scriptName = info.getScriptName();
         if (!isScriptAllowed(scriptName)) {
             info.setStatus(BuildExecutionInfo.Status.FAILED);
@@ -396,6 +422,23 @@ public class LocalScriptRunner implements ActivityContextAware {
         if (!buildLock.tryLock()) {
             info.setStatus(BuildExecutionInfo.Status.FAILED);
             info.setErrorSummary("Another build or deployment is already running on this node");
+            if (info.getStartedAt() == null) {
+                info.setStartedAt(Instant.now());
+            }
+            info.setFinishedAt(Instant.now());
+            info.setDurationMs(Duration.between(info.getStartedAt(), info.getFinishedAt()).toMillis());
+            if (completionCallback != null) {
+                completionCallback.accept(info);
+            }
+            return;
+        }
+
+        if (cancelledExecutions.remove(info.getExecutionId())
+                || info.getStatus() == BuildExecutionInfo.Status.CANCELLED) {
+            buildLock.unlock();
+            info.setStatus(BuildExecutionInfo.Status.CANCELLED);
+            info.setExitCode(-1);
+            info.setErrorSummary("Execution cancelled before start");
             if (info.getStartedAt() == null) {
                 info.setStartedAt(Instant.now());
             }
