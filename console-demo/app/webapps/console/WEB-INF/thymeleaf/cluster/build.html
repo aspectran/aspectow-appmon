@@ -63,6 +63,7 @@
         .quick-actions {
             display: flex;
             flex-wrap: wrap;
+            align-items: center;
             gap: 8px;
             margin-top: 10px;
         }
@@ -170,6 +171,20 @@
                 margin-left: 0 !important;
             }
         }
+        @media (max-width: 768px) {
+            .quick-actions {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+            .quick-actions .quick-label {
+                align-self: flex-start;
+                margin-bottom: 2px;
+            }
+            .quick-actions button {
+                width: 100%;
+            }
+        }
         @media (max-width: 576px) {
             .terminal-header {
                 padding: 6px 10px;
@@ -240,8 +255,8 @@
                 </div>
 
                 <!-- Quick Action Bar -->
-                <div class="quick-actions d-none d-md-block border-top pt-2 mt-3" th:if="${session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('DEMO')}">
-                    <span class="d-none d-lg-inline small text-muted align-self-center me-2"><i class="bi bi-lightning-charge-fill text-warning"></i> Quick:</span>
+                <div class="quick-actions border-top pt-2 mt-3" th:if="${session.USER_INFO.hasPermission('BUILD_EXECUTE') || session.USER_INFO.hasRole('SUPER_ADMIN') || session.USER_INFO.hasRole('DEMO')}">
+                    <span class="quick-label small text-muted me-2"><i class="bi bi-lightning-charge-fill text-warning"></i> Quick:</span>
                     <button class="btn btn-sm btn-primary" onclick="quickRun('5-pull_build_deploy.sh')">
                         <i class="bi bi-play-fill"></i> Full Build &amp; Deploy
                     </button>
@@ -888,7 +903,7 @@
                                     <span class="fw-bold small"><i class="bi bi-hdd-network me-1"></i>${nid}</span>
                                     <small class="text-muted ms-2">${durationStr}</small>
                                 </div>
-                                <span class="badge status-pill ${badgeClass}">${st}</span>
+                                <span class="badge status-pill ${badgeClass} small">${st}</span>
                             </div>
                         `);
                     });
