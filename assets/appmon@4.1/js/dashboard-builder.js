@@ -235,7 +235,9 @@ class DashboardBuilder {
         const onNodeJoined = (node) => {
             this.groups.forEach(group => {
                 if (group.id === node.group) {
-                    this.showNewNodeNotification(node.id);
+                    setTimeout(() => {
+                        this.showNewNodeNotification(node.id);
+                    }, 3000);
                 }
             });
         };
