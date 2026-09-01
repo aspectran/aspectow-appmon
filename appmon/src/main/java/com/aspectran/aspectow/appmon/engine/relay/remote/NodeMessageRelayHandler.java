@@ -68,7 +68,7 @@ public class NodeMessageRelayHandler implements NodeMessageListener {
     private void handleControlMessage(@NonNull String message) {
         CommandOptions commandOptions = new CommandOptions();
         try {
-            commandOptions.parseCommand(message);
+            commandOptions.readFrom(message);
         } catch (Exception e) {
             logger.error("Failed to parse control message: {}", message, e);
             return;

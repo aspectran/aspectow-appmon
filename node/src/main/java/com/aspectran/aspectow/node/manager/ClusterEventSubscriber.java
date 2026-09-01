@@ -17,6 +17,7 @@ package com.aspectran.aspectow.node.manager;
 
 import com.aspectran.aspectow.node.config.NodeInfo;
 import com.aspectran.aspectow.node.redis.RedisConnectionPool;
+import com.aspectran.utils.thread.CustomizableThreadFactory;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateListener;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
@@ -30,6 +31,8 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Listens to the cluster-wide event channel and notifies
@@ -52,6 +55,10 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> i
     private final RedisConnectionPool connectionPool;
 
     private final Set<ClusterEventListener> listeners = new CopyOnWriteArraySet<>();
+
+    private final ExecutorService executorService = Executors.newCachedThreadPool(
+            new CustomizableThreadFactory("cluster-event-sub-")
+    );
 
     private StatefulRedisPubSubConnection<String, String> pubSubConnection;
 
@@ -83,13 +90,23 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> i
 
     @Override
     public void message(@NonNull String channel, @NonNull String message) {
+        if (!executorService.isShutdown()) {
+            executorService.submit(() -> dispatchMessage(channel, message));
+        }
+    }
+
+    private void dispatchMessage(@NonNull String channel, @NonNull String message) {
         if (message.startsWith(MESSAGE_JOINED)) {
             String aponData = message.substring(7);
             try {
                 NodeInfo info = new NodeInfo();
                 info.readFrom(aponData);
                 for (ClusterEventListener listener : listeners) {
-                    listener.onNodeJoined(info);
+                    try {
+                        listener.onNodeJoined(info);
+                    } catch (Exception e) {
+                        logger.error("Error processing node joined event for node '{}'", info.getId(), e);
+                    }
                 }
             } catch (IOException e) {
                 logger.warn("Failed to parse JOINED event data", e);
@@ -97,7 +114,11 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> i
         } else if (message.startsWith(MESSAGE_LEFT)) {
             String leftNodeId = message.substring(5);
             for (ClusterEventListener listener : listeners) {
-                listener.onNodeLeft(leftNodeId);
+                try {
+                    listener.onNodeLeft(leftNodeId);
+                } catch (Exception e) {
+                    logger.error("Error processing node left event for node '{}'", leftNodeId, e);
+                }
             }
         } else if (message.startsWith(MESSAGE_STATUS_CHANGED)) {
             String aponData = message.substring(15);
@@ -105,7 +126,11 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> i
                 NodeInfo info = new NodeInfo();
                 info.readFrom(aponData);
                 for (ClusterEventListener listener : listeners) {
-                    listener.onNodeStatusChanged(info);
+                    try {
+                        listener.onNodeStatusChanged(info);
+                    } catch (Exception e) {
+                        logger.error("Error processing node status changed event for node '{}'", info.getId(), e);
+                    }
                 }
             } catch (IOException e) {
                 logger.warn("Failed to parse STATUS_CHANGED event data", e);
@@ -158,6 +183,7 @@ public class ClusterEventSubscriber extends RedisPubSubAdapter<String, String> i
      * Stops the subscriber, removing listeners and closing the connection.
      */
     public void stop() {
+        executorService.shutdown();
         if (pubSubConnection != null) {
             try {
                 pubSubConnection.removeListener((RedisPubSubListener<String, String>)this);

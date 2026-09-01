@@ -18,6 +18,8 @@ package com.aspectran.aspectow.node.manager;
 import com.aspectran.aspectow.node.redis.RedisConnectionPool;
 import io.lettuce.core.api.StatefulRedisConnection;
 
+import java.util.List;
+
 /**
  * Provides methods to publish management control messages and transparent
  * application data to Redis Pub/Sub channels for inter-node communication relay.
@@ -130,6 +132,20 @@ public class NodeMessagePublisher {
     }
 
     /**
+     * Publishes multiple transparent application messages to be relayed to a specific session on a node.
+     * Borrows a single connection from the pool to pipeline and publish all messages efficiently.
+     * @param category the category of the relay message
+     * @param targetNodeId the target node ID
+     * @param sessionId the session ID
+     * @param messages the list of messages to publish
+     * @throws Exception if an error occurs during publication
+     */
+    public void publishRelay(String category, String targetNodeId, String sessionId, List<String> messages) throws Exception {
+        String channel = NodeMessageProtocol.getRelayChannel(category, clusterId, targetNodeId, sessionId);
+        asyncPublish(channel, messages);
+    }
+
+    /**
      * Publishes a message to a specific channel synchronously.
      * @param channel the channel to publish to
      * @param message the message to publish
@@ -144,6 +160,23 @@ public class NodeMessagePublisher {
     }
 
     /**
+     * Publishes multiple messages to a specific channel synchronously using a single connection.
+     * @param channel the channel to publish to
+     * @param messages the list of messages to publish
+     * @throws Exception if an error occurs during publication
+     */
+    public void syncPublish(String channel, List<String> messages) throws Exception {
+        if (messages != null && !messages.isEmpty() && connectionPool.isAvailable()) {
+            try (StatefulRedisConnection<String, String> connection = connectionPool.getConnection()) {
+                var syncCommands = connection.sync();
+                for (String message : messages) {
+                    syncCommands.publish(channel, message);
+                }
+            }
+        }
+    }
+
+    /**
      * Publishes a message to a specific channel asynchronously.
      * @param channel the channel to publish to
      * @param message the message to publish
@@ -153,6 +186,23 @@ public class NodeMessagePublisher {
         if (connectionPool.isAvailable()) {
             try (StatefulRedisConnection<String, String> connection = connectionPool.getConnection()) {
                 connection.async().publish(channel, message);
+            }
+        }
+    }
+
+    /**
+     * Publishes multiple messages to a specific channel asynchronously using a single connection.
+     * @param channel the channel to publish to
+     * @param messages the list of messages to publish
+     * @throws Exception if an error occurs during publication
+     */
+    public void asyncPublish(String channel, List<String> messages) throws Exception {
+        if (messages != null && !messages.isEmpty() && connectionPool.isAvailable()) {
+            try (StatefulRedisConnection<String, String> connection = connectionPool.getConnection()) {
+                var asyncCommands = connection.async();
+                for (String message : messages) {
+                    asyncCommands.publish(channel, message);
+                }
             }
         }
     }

@@ -16,6 +16,7 @@
 package com.aspectran.aspectow.node.manager;
 
 import com.aspectran.aspectow.node.redis.RedisConnectionPool;
+import com.aspectran.utils.thread.CustomizableThreadFactory;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateListener;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
@@ -28,6 +29,8 @@ import org.slf4j.LoggerFactory;
 import java.net.SocketAddress;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.aspectran.aspectow.node.manager.NodeMessageProtocol.TYPE_CONTROL;
 import static com.aspectran.aspectow.node.manager.NodeMessageProtocol.TYPE_RELAY;
@@ -47,6 +50,10 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> im
     private final RedisConnectionPool connectionPool;
 
     private final Set<NodeMessageListener> listeners = new CopyOnWriteArraySet<>();
+
+    private final ExecutorService executorService = Executors.newCachedThreadPool(
+            new CustomizableThreadFactory("node-msg-sub-")
+    );
 
     private StatefulRedisPubSubConnection<String, String> pubSubConnection;
 
@@ -93,6 +100,12 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> im
 
     @Override
     public void message(@NonNull String channel, String message) {
+        if (!executorService.isShutdown()) {
+            executorService.submit(() -> dispatchMessage(channel, message));
+        }
+    }
+
+    private void dispatchMessage(@NonNull String channel, String message) {
         // Expected patterns:
         // aspectow:cluster:control:<category>:<clusterId>:<nodeId>
         // aspectow:cluster:relay:<category>:<clusterId>:<nodeId>:<sessionId>
@@ -115,17 +128,25 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> im
             for (NodeMessageListener listener : listeners) {
                 String listenerCategory = listener.getCategory();
                 if (listenerCategory == null || listenerCategory.equals(category)) {
-                    listener.onControlMessage(targetNodeId, message);
+                    try {
+                        listener.onControlMessage(targetNodeId, message);
+                    } catch (Exception e) {
+                        logger.error("Error processing control message from channel '{}'", channel, e);
+                    }
                 }
             }
         } else if (TYPE_RELAY.equals(type)) {
             for (NodeMessageListener listener : listeners) {
                 String listenerCategory = listener.getCategory();
                 if (listenerCategory == null || listenerCategory.equals(category)) {
-                    if (sessionId != null) {
-                        listener.onRelayMessage(targetNodeId, sessionId, message);
-                    } else {
-                        listener.onRelayMessage(targetNodeId, message);
+                    try {
+                        if (sessionId != null) {
+                            listener.onRelayMessage(targetNodeId, sessionId, message);
+                        } else {
+                            listener.onRelayMessage(targetNodeId, message);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error processing relay message from channel '{}'", channel, e);
                     }
                 }
             }
@@ -177,6 +198,7 @@ public class NodeMessageSubscriber extends RedisPubSubAdapter<String, String> im
      * Stops the subscriber, removing listeners and closing the connection.
      */
     public void stop() {
+        executorService.shutdown();
         if (pubSubConnection != null) {
             try {
                 pubSubConnection.removeListener((RedisPubSubListener<String, String>)this);

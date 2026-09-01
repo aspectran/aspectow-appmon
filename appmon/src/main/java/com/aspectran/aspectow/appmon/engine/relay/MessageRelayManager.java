@@ -174,6 +174,34 @@ public class MessageRelayManager {
                     .prettyPrint(false)
                     .put(info);
             relayLocally(info.getId() + "::node:joined:" + jsonBuilder.toString());
+            if (isGatewayMode()) {
+                resubscribeJoinedNode(info.getId());
+            }
+        }
+    }
+
+    private synchronized void resubscribeJoinedNode(String targetNodeId) {
+        for (Map.Entry<String, MessageRelayer> entry : sessionRelayerMap.entrySet()) {
+            String sessionId = entry.getKey();
+            MessageRelayer relayer = entry.getValue();
+            RelaySession session = relayer.findRelaySession(sessionId);
+            if (session != null && session.isValid()) {
+                String subscribedNodeId = session.getSubscribedNodeId();
+                if (subscribedNodeId == null || subscribedNodeId.equals(targetNodeId)) {
+                    String[] subscribedApps = session.getSubscribedApps();
+                    if (subscribedApps != null && subscribedApps.length > 0) {
+                        CommandOptions commandOptions = new CommandOptions();
+                        commandOptions.setCommand(COMMAND_SUBSCRIBE);
+                        commandOptions.setNodeId(getNodeId());
+                        commandOptions.setSessionId(session.getId());
+                        commandOptions.setTimeZone(session.getTimeZone());
+                        for (String appId : subscribedApps) {
+                            commandOptions.setAppId(appId);
+                            publishControl(targetNodeId, commandOptions);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -238,6 +266,16 @@ public class MessageRelayManager {
                 messagePublisher.publishRelay(CATEGORY_APPMON, targetNodeId, sessionId, message);
             } catch (Exception e) {
                 logger.error("Failed to publish relay message to node {}", targetNodeId, e);
+            }
+        }
+    }
+
+    private void publishRelay(String targetNodeId, String sessionId, List<String> messages) {
+        if (messagePublisher != null && messages != null && !messages.isEmpty()) {
+            try {
+                messagePublisher.publishRelay(CATEGORY_APPMON, targetNodeId, sessionId, messages);
+            } catch (Exception e) {
+                logger.error("Failed to publish relay messages to node {}", targetNodeId, e);
             }
         }
     }
@@ -435,10 +473,8 @@ public class MessageRelayManager {
         }
         subscriptionRegistry.addRemoteSubscription(nodeId, appId);
         List<String> messages = getLastMessages(commandOptions);
-        if (sessionId != null) {
-            for (String message : messages) {
-                publishRelay(nodeId, sessionId, message);
-            }
+        if (sessionId != null && !messages.isEmpty()) {
+            publishRelay(nodeId, sessionId, messages);
         }
     }
 
@@ -526,8 +562,8 @@ public class MessageRelayManager {
             String sessionId = commandOptions.getSessionId();
             List<String> messages = new ArrayList<>();
             collectNewMessages(appId, messages, commandOptions);
-            for (String message : messages) {
-                publishRelay(fromNodeId, sessionId, message);
+            if (sessionId != null && !messages.isEmpty()) {
+                publishRelay(fromNodeId, sessionId, messages);
             }
         }
     }
