@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 9.0//EN"
+        "https://aspectran.com/dtd/aspectran-9.dtd">
+<aspectran>
+
+    <description>
+        Aspectran configuration for setting up the servlet context.
+    </description>
+
+    <environment>
+        <property name="netty.context.console.name">console</property>
+        <property name="netty.context.console.config">classpath:com/aspectran/aspectow/console/config/aspectran-config.apon</property>
+    </environment>
+
+    <bean id="netty.context.console"
+          class="com.aspectran.netty.server.NettyContext"
+          scope="prototype">
+        <property name="contextPath">/%{netty.context.console.name}</property>
+        <property name="aspectranConfigFile">%{netty.context.console.config}</property>
+    </bean>
+
+</aspectran>

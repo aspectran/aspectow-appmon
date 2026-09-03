@@ -17,10 +17,9 @@ package com.aspectran.aspectow.appmon.common.auth;
 
 import com.aspectran.core.activity.Translet;
 import com.aspectran.utils.security.InvalidPBTokenException;
+import com.aspectran.web.support.http.Cookie;
+import com.aspectran.web.support.util.CookieGenerator;
 import com.aspectran.web.support.util.WebUtils;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -59,23 +58,19 @@ public final class AppMonCookieIssuer {
      * Removes the authentication token cookie.
      * @param translet the current translet
      */
-    public void removeCookie(@NonNull Translet translet) {
-        HttpServletRequest request = translet.getRequestAdaptee();
-        HttpServletResponse response = translet.getResponseAdaptee();
-        Cookie cookie = WebUtils.getCookie(request, AUTH_TOKEN_NAME);
+    public void removeCookie(@NonNull Translet translet, String contextPath) {
+        Cookie cookie = WebUtils.getCookie(translet.getRequestAdapter(), AUTH_TOKEN_NAME);
         if (cookie != null) {
-            cookie.setMaxAge(0);
-            response.addCookie(cookie);
+            addCookie(translet, contextPath, "", 0);
         }
     }
 
     private void addCookie(@NonNull Translet translet, String contextPath, String token, int maxAgeInSeconds) {
-        HttpServletResponse response = translet.getResponseAdaptee();
-        Cookie cookie = new Cookie(AUTH_TOKEN_NAME, token);
-        cookie.setPath(contextPath);
-        cookie.setMaxAge(maxAgeInSeconds);
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
+        CookieGenerator cookieGenerator = new CookieGenerator(AUTH_TOKEN_NAME);
+        cookieGenerator.setCookiePath(contextPath);
+        cookieGenerator.setCookieMaxAge(maxAgeInSeconds);
+        cookieGenerator.setCookieHttpOnly(true);
+        cookieGenerator.addCookie(translet.getResponseAdapter(), token);
     }
 
 }

@@ -60,6 +60,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>aspectran-with-netty</artifactId>
+            <version>${aspectran.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>aspectow-node</artifactId>
             <version>${project.version}</version>
         </dependency>

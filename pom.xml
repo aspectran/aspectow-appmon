@@ -117,7 +117,7 @@
         <javadoc.title>${project.name} API Reference (${project.version})</javadoc.title>
         <javadoc.locale>en_US</javadoc.locale>
 
-        <aspectran.version>9.6.5</aspectran.version>
+        <aspectran.version>9.7.0-SNAPSHOT</aspectran.version>
     </properties>
 
     <dependencyManagement>

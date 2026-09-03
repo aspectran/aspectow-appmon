@@ -25,11 +25,9 @@ import com.aspectran.core.component.session.SessionIdGenerator;
 import com.aspectran.utils.CopyOnWriteMap;
 import com.aspectran.utils.scheduling.ScheduledExecutorScheduler;
 import com.aspectran.utils.scheduling.Scheduler;
+import com.aspectran.web.support.http.Cookie;
 import com.aspectran.web.support.util.CookieGenerator;
 import com.aspectran.web.support.util.WebUtils;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
@@ -103,7 +101,6 @@ public class PollingSessionManager extends AbstractComponent {
             } else {
                 newSession.access(true);
                 return newSession;
-
             }
         }
     }
@@ -128,17 +125,15 @@ public class PollingSessionManager extends AbstractComponent {
     }
 
     private String getSessionId(@NonNull Translet translet, boolean create) {
-        HttpServletRequest request = translet.getRequestAdaptee();
-        HttpServletResponse response = translet.getResponseAdaptee();
         String cookieName = sessionIdCookieGenerator.getCookieName();
-        Cookie cookie = WebUtils.getCookie(request, cookieName);
+        Cookie cookie = WebUtils.getCookie(translet.getRequestAdapter(), cookieName);
         String sessionId = null;
         if (cookie != null) {
             sessionId = cookie.getValue();
         }
         if (sessionId == null && create) {
             sessionId = sessionIdGenerator.createSessionId();
-            sessionIdCookieGenerator.addCookie(response, sessionId);
+            sessionIdCookieGenerator.addCookie(translet.getResponseAdapter(), sessionId);
         }
         return sessionId;
     }
