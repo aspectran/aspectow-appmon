@@ -23,6 +23,7 @@ import com.aspectran.core.component.bean.annotation.Before;
 import com.aspectran.core.component.bean.annotation.Component;
 import com.aspectran.core.component.bean.annotation.Joinpoint;
 import com.aspectran.core.component.bean.annotation.Profile;
+import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.security.InvalidPBTokenException;
 import com.aspectran.web.activity.response.DefaultRestResponse;
 import com.aspectran.web.support.http.Cookie;
@@ -72,8 +73,11 @@ public class AppMonAuthCheckAspect {
             reject(translet);
             return;
         }
-
         String token = cookie.getValue();
+        if (StringUtils.isEmpty(token)) {
+            reject(translet);
+            return;
+        }
         try {
             appMonCookieIssuer.refreshCookie(translet, token);
         } catch (Exception e) {

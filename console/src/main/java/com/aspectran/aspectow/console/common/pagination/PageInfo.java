@@ -18,8 +18,8 @@ package com.aspectran.aspectow.console.common.pagination;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.utils.Assert;
 import com.aspectran.utils.StringUtils;
+import com.aspectran.web.support.http.Cookie;
 import com.aspectran.web.support.util.WebUtils;
-import jakarta.servlet.http.Cookie;
 import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;

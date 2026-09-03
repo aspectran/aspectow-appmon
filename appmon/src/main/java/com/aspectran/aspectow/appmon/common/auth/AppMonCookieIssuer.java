@@ -59,7 +59,7 @@ public final class AppMonCookieIssuer {
      * @param translet the current translet
      */
     public void removeCookie(@NonNull Translet translet, String contextPath) {
-        Cookie cookie = WebUtils.getCookie(translet.getRequestAdapter(), AUTH_TOKEN_NAME);
+        Cookie cookie = WebUtils.getCookie(translet, AUTH_TOKEN_NAME);
         if (cookie != null) {
             addCookie(translet, contextPath, "", 0);
         }

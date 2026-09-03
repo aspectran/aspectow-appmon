@@ -126,7 +126,7 @@ public class PollingSessionManager extends AbstractComponent {
 
     private String getSessionId(@NonNull Translet translet, boolean create) {
         String cookieName = sessionIdCookieGenerator.getCookieName();
-        Cookie cookie = WebUtils.getCookie(translet.getRequestAdapter(), cookieName);
+        Cookie cookie = WebUtils.getCookie(translet, cookieName);
         String sessionId = null;
         if (cookie != null) {
             sessionId = cookie.getValue();
