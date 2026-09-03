@@ -20,14 +20,14 @@
         <property name="sessionManager">#{netty.context.console.sessionManager}</property>
         <property name="sessionConfig">#{netty.context.console.sessionConfig}</property>
         <properties profile="!console.custom-ui">
-            <item name="resourceManager">
+            <item name="resourceHandler">
                 <bean class="com.aspectran.netty.server.handler.resource.NettyClassPathResourceHandler">
                     <argument>META-INF/resources/console/</argument>
                 </bean>
             </item>
         </properties>
         <properties profile="console.custom-ui">
-            <item name="resourceManager">
+            <item name="resourceHandler">
                 <bean class="com.aspectran.netty.server.handler.resource.NettyResourceHandler">
                     <property name="base">/webapps/%{netty.context.console.name}</property>
                 </bean>
@@ -36,9 +36,9 @@
     </bean>
 
     <bean id="netty.context.console.sessionConfig" class="com.aspectran.netty.server.session.NettySessionConfig">
-        <property name="cookieName" value="%{system:netty.context.console.session.cookieName:JSESSIONID}(%{netty.context.console.name})"/>
-        <property name="path" value="/%{netty.context.console.name}"/>
-        <property name="domain" value="%{netty.server.domain}"/>
+        <property name="cookieName" value="%{system:netty.context.console.session.cookieName:JSESSIONID}_%{netty.context.console.name}"/>
+        <property name="cookiePath" value="/%{netty.context.console.name}"/>
+        <property name="cookieDomain" value="%{netty.server.domain}"/>
     </bean>
 
     <bean id="netty.context.console.sessionManager"

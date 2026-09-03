@@ -59,7 +59,7 @@
         <property name="sessionTrackingModes" type="set">
             <value>#{class:jakarta.servlet.SessionTrackingMode^COOKIE}</value>
         </property>
-        <property name="name" value="%{system:tow.context.console.session.cookieName:JSESSIONID}(%{tow.context.console.name})"/>
+        <property name="name" value="%{system:tow.context.console.session.cookieName:JSESSIONID}_%{tow.context.console.name}"/>
         <property name="path" value="/%{tow.context.console.name}"/>
         <property name="domain" value="%{tow.server.domain}"/>
     </bean>
