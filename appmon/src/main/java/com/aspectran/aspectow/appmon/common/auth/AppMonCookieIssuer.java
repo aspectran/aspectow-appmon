@@ -18,7 +18,6 @@ package com.aspectran.aspectow.appmon.common.auth;
 import com.aspectran.core.activity.Translet;
 import com.aspectran.utils.security.InvalidPBTokenException;
 import com.aspectran.web.support.http.Cookie;
-import com.aspectran.web.support.util.CookieGenerator;
 import com.aspectran.web.support.util.WebUtils;
 import org.jspecify.annotations.NonNull;
 
@@ -59,18 +58,16 @@ public final class AppMonCookieIssuer {
      * @param translet the current translet
      */
     public void removeCookie(@NonNull Translet translet, String contextPath) {
-        Cookie cookie = WebUtils.getCookie(translet, AUTH_TOKEN_NAME);
-        if (cookie != null) {
-            addCookie(translet, contextPath, "", 0);
-        }
+        WebUtils.removeCookie(translet, AUTH_TOKEN_NAME, contextPath);
     }
 
     private void addCookie(@NonNull Translet translet, String contextPath, String token, int maxAgeInSeconds) {
-        CookieGenerator cookieGenerator = new CookieGenerator(AUTH_TOKEN_NAME);
-        cookieGenerator.setCookiePath(contextPath);
-        cookieGenerator.setCookieMaxAge(maxAgeInSeconds);
-        cookieGenerator.setCookieHttpOnly(true);
-        cookieGenerator.addCookie(translet.getResponseAdapter(), token);
+        Cookie cookie = Cookie.builder(AUTH_TOKEN_NAME, token)
+                .path(contextPath)
+                .maxAge(maxAgeInSeconds)
+                .httpOnly(true)
+                .build();
+        WebUtils.setCookie(translet, cookie);
     }
 
 }
