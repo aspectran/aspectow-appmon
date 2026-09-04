@@ -17,6 +17,11 @@
           scope="prototype">
         <property name="contextPath">/%{netty.context.console.name}</property>
         <property name="aspectranConfigFile">%{netty.context.console.config}</property>
+        <property name="webSocketServerContainerInitializer">
+            <bean class="com.aspectran.netty.server.websocket.NettyWebSocketServerContainerInitializer">
+                <property name="idleTimeout" valueType="long">60000</property>
+            </bean>
+        </property>
     </bean>
 
 </aspectran>

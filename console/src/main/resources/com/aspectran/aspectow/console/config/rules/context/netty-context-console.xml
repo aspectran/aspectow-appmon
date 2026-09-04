@@ -19,6 +19,11 @@
         <property name="aspectranConfigFile">%{netty.context.console.config}</property>
         <property name="sessionManager">#{netty.context.console.sessionManager}</property>
         <property name="sessionConfig">#{netty.context.console.sessionConfig}</property>
+        <property name="webSocketServerContainerInitializer">
+            <bean class="com.aspectran.netty.server.websocket.NettyWebSocketServerContainerInitializer">
+                <property name="idleTimeout" valueType="long">60000</property>
+            </bean>
+        </property>
         <properties profile="!console.custom-ui">
             <item name="resourceHandler">
                 <bean class="com.aspectran.netty.server.handler.resource.NettyClassPathResourceHandler">

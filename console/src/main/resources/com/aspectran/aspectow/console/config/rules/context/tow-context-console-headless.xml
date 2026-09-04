@@ -33,8 +33,7 @@
         </property>
         <property name="webSocketServerContainerInitializer">
             <bean class="com.aspectran.undertow.server.servlet.TowWebSocketServerContainerInitializer">
-                <property name="directBuffers" valueType="boolean">true</property>
-                <property name="bufferSize" valueType="int">16384</property>
+                <property name="idleTimeout" valueType="long">60000</property>
             </bean>
         </property>
     </bean>
