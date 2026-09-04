@@ -34,7 +34,7 @@
         <properties profile="console.custom-ui">
             <item name="resourceHandler">
                 <bean class="com.aspectran.netty.server.handler.resource.NettyResourceHandler">
-                    <property name="base">/webapps/%{netty.context.console.name}</property>
+                    <property name="basePath">/webapps/%{netty.context.console.name}</property>
                 </bean>
             </item>
         </properties>
