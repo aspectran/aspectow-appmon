@@ -101,6 +101,9 @@ class NettyServerPortProviderTest {
                 (proxy, method, args) -> {
                     if ("getBean".equals(method.getName())) {
                         if (args.length == 2 && NettyServer.class.equals(args[0])) {
+                            if (expectedBeanId == null && args[1] == null) {
+                                return nettyServer;
+                            }
                             if (expectedBeanId != null && expectedBeanId.equals(args[1])) {
                                 return nettyServer;
                             }

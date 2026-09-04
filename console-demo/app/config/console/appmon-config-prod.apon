@@ -87,7 +87,7 @@ app: {
         id: undertow-tp
         title: Undertow TP
         description: Metrics of Undertow thread pool resources
-        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.undertow.NioWorkerMetricsReader
+        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.undertow.UndertowThreadPoolMetricsReader
         target: tow.server
         sampleInterval: 500
         heading: true

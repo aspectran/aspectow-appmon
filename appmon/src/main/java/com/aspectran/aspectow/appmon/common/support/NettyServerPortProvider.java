@@ -20,7 +20,6 @@ import com.aspectran.core.component.bean.aware.ActivityContextAware;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.netty.server.NettyServer;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
 /**
  * A bridge class that provides the active port from a Netty server.
@@ -44,7 +43,7 @@ public class NettyServerPortProvider implements NodePortProvider, ActivityContex
      * Constructs a new {@code NettyServerPortProvider} with the specified bean ID of the Netty server.
      * @param serverBeanId the bean ID of the Netty server
      */
-    public NettyServerPortProvider(@Nullable String serverBeanId) {
+    public NettyServerPortProvider(String serverBeanId) {
         this.serverBeanId = serverBeanId;
     }
 
@@ -64,17 +63,10 @@ public class NettyServerPortProvider implements NodePortProvider, ActivityContex
     @Override
     public Integer getActivePort() {
         try {
-            NettyServer nettyServer;
-            if (serverBeanId != null) {
-                nettyServer = context.getBeanRegistry().getBean(NettyServer.class, serverBeanId);
-            } else {
-                nettyServer = context.getBeanRegistry().getBean(NettyServer.class);
-            }
+            NettyServer nettyServer = context.getBeanRegistry().getBean(NettyServer.class, serverBeanId);
             if (nettyServer != null) {
                 int port = nettyServer.getActivePort();
-                if (port > 0) {
-                    return port;
-                }
+                return (port > 0 ? port : null);
             }
         } catch (Exception e) {
             // ignore

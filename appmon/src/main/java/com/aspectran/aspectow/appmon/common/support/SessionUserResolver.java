@@ -28,12 +28,12 @@ public interface SessionUserResolver {
 
     /**
      * Resolves the username from the given session.
-     * @param deploymentName the deployment name (e.g., "jpetstore", "petclinic")
+     * @param contextName the context name (e.g., "root", "jpetstore", "petclinic")
      * @param session the session instance
      * @return the resolved username, or null if not authenticated
      */
     @Nullable
-    String resolveUsername(@NonNull String deploymentName, @NonNull Session session);
+    String resolveUsername(@NonNull String contextName, @NonNull Session session);
 
     /**
      * Resolves the username from the given session.

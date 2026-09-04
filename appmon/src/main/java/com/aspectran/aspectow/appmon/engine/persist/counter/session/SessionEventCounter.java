@@ -18,17 +18,20 @@ package com.aspectran.aspectow.appmon.engine.persist.counter.session;
 import com.aspectran.aspectow.appmon.engine.config.EventInfo;
 import com.aspectran.aspectow.appmon.engine.persist.counter.AbstractEventCounter;
 import com.aspectran.aspectow.appmon.engine.persist.counter.EventCounter;
+import com.aspectran.core.component.bean.aware.ActivityContextAware;
 import com.aspectran.core.component.session.SessionListener;
 import com.aspectran.core.component.session.SessionListenerRegistration;
 import com.aspectran.core.component.session.SessionManager;
+import com.aspectran.core.component.session.SessionManagerProvider;
 import com.aspectran.core.context.ActivityContext;
 import com.aspectran.core.service.CoreService;
 import com.aspectran.core.service.CoreServiceHolder;
 import com.aspectran.core.service.ServiceHoldingListener;
-import com.aspectran.undertow.server.TowServer;
-import com.aspectran.undertow.support.SessionListenerRegistrationBean;
+import com.aspectran.utils.ClassUtils;
 import com.aspectran.utils.StringUtils;
 import org.jspecify.annotations.NonNull;
+
+import java.lang.reflect.Constructor;
 
 /**
  * An {@link EventCounter} for counting session creation events.
@@ -40,7 +43,7 @@ public class SessionEventCounter extends AbstractEventCounter {
 
     private final String serverId;
 
-    private final String deploymentName;
+    private final String contextName;
 
     /**
      * Instantiates a new SessionEventCounter.
@@ -51,13 +54,13 @@ public class SessionEventCounter extends AbstractEventCounter {
 
         String[] arr = StringUtils.divide(eventInfo.getTarget(), "/");
         this.serverId = arr[0];
-        this.deploymentName = arr[1];
+        this.contextName = (arr[1] != null ? arr[1] : "");
     }
 
     @Override
     public void initialize() throws Exception {
         final SessionListener sessionListener = new SessionEventCountingListener(this);
-        ActivityContext context = CoreServiceHolder.findActivityContext(deploymentName);
+        ActivityContext context = CoreServiceHolder.findActivityContext(contextName);
         if (context != null) {
             registerSessionListener(context, sessionListener);
         } else {
@@ -65,8 +68,8 @@ public class SessionEventCounter extends AbstractEventCounter {
                 @Override
                 public void afterServiceHolding(CoreService service) {
                     if (service.getActivityContext() != null) {
-                        String contextName = service.getActivityContext().getName();
-                        if (contextName != null && contextName.equals(deploymentName)) {
+                        String serviceContextName = service.getActivityContext().getName();
+                        if (serviceContextName != null && serviceContextName.equals(contextName)) {
                             registerSessionListener(service.getActivityContext(), sessionListener);
                         }
                     }
@@ -78,29 +81,47 @@ public class SessionEventCounter extends AbstractEventCounter {
     private void registerSessionListener(@NonNull ActivityContext context, SessionListener sessionListener) {
         SessionManager sessionManager;
         try {
-            TowServer towServer = context.getBeanRegistry().getBean(serverId);
-            sessionManager = towServer.getSessionManager(deploymentName);
+            SessionManagerProvider server = context.getBeanRegistry().getBean(serverId);
+            sessionManager = (StringUtils.hasLength(contextName) ?
+                    server.getSessionManager(contextName) : server.getSessionManager());
         } catch (Exception e) {
             throw new RuntimeException("Cannot resolve session handler with " + getEventInfo().getTarget(), e);
         }
         if (sessionManager != null) {
-            getSessionListenerRegistration(context).register(sessionListener, deploymentName);
+            getSessionListenerRegistration(context).register(sessionListener, contextName);
         }
     }
 
     @NonNull
     private SessionListenerRegistration getSessionListenerRegistration(@NonNull ActivityContext context) {
-        SessionListenerRegistration sessionListenerRegistration;
         if (context.getBeanRegistry().containsBean(SessionListenerRegistration.class)) {
-            sessionListenerRegistration = context.getBeanRegistry().getBean(SessionListenerRegistration.class);
-        } else {
-            if (context.getBeanRegistry().containsBean(TowServer.class)) {
-                sessionListenerRegistration = new SessionListenerRegistrationBean();
-            } else {
-                throw new IllegalStateException("Bean for SessionListenerRegistration must be defined");
+            return context.getBeanRegistry().getBean(SessionListenerRegistration.class);
+        }
+        return createSessionListenerRegistrationFallback(context);
+    }
+
+    private SessionListenerRegistration createSessionListenerRegistrationFallback(@NonNull ActivityContext context) {
+        String[] candidateClasses = {
+            "com.aspectran.undertow.support.SessionListenerRegistrationBean",
+            "com.aspectran.netty.support.SessionListenerRegistrationBean"
+        };
+        for (String className : candidateClasses) {
+            try {
+                Class<?> clazz = ClassUtils.classForName(className);
+                Constructor<?> ctor = clazz.getConstructor(String.class, String.class);
+                SessionListenerRegistration registration =
+                        (SessionListenerRegistration) ctor.newInstance(serverId, contextName);
+                if (registration instanceof ActivityContextAware aware) {
+                    aware.setActivityContext(context);
+                }
+                return registration;
+            } catch (ClassNotFoundException ignored) {
+                // Ignore and try the next candidate
+            } catch (Exception e) {
+                // ignore
             }
         }
-        return sessionListenerRegistration;
+        throw new IllegalStateException("Bean for SessionListenerRegistration must be defined");
     }
 
     /**

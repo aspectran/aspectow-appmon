@@ -26,7 +26,7 @@ import org.jspecify.annotations.NonNull;
 import org.xnio.management.XnioWorkerMXBean;
 
 /**
- * A {@link MetricReader} for monitoring Undertow's NIO worker threads.
+ * A {@link MetricReader} for monitoring Undertow's XNIO worker threads.
  * <p>It requires specific JVM system properties to be enabled for statistics collection.</p>
  * <pre>
  *   -Djboss.threads.eqe.statistics=true
@@ -44,7 +44,7 @@ import org.xnio.management.XnioWorkerMXBean;
  *
  * <p>Created: 2025-07-07</p>
  */
-public class NioWorkerMetricsReader extends AbstractMetricReader {
+public class UndertowThreadPoolMetricsReader extends AbstractMetricReader {
 
     private String serverId;
 
@@ -53,11 +53,11 @@ public class NioWorkerMetricsReader extends AbstractMetricReader {
     private int oldActive;
 
     /**
-     * Instantiates a new NioWorkerMetricsReader.
+     * Instantiates a new UndertowThreadPoolMetricsReader.
      * @param exporterManager the exporter manager
      * @param metricInfo the metric configuration
      */
-    public NioWorkerMetricsReader(
+    public UndertowThreadPoolMetricsReader(
             @NonNull ExporterManager exporterManager,
             @NonNull MetricInfo metricInfo) {
         super(exporterManager, metricInfo);
@@ -76,7 +76,7 @@ public class NioWorkerMetricsReader extends AbstractMetricReader {
             Undertow undertow = towServer.getUndertow();
             metrics = undertow.getWorker().getMXBean();
         } catch (Exception e) {
-            throw new RuntimeException("Cannot resolve session manager with " + getMetricInfo().getTarget(), e);
+            throw new RuntimeException("Cannot resolve Undertow server with " + getMetricInfo().getTarget(), e);
         }
     }
 

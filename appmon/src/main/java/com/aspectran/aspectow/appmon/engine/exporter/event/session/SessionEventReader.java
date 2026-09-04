@@ -23,15 +23,15 @@ import com.aspectran.aspectow.appmon.engine.exporter.ExporterManager;
 import com.aspectran.aspectow.appmon.engine.exporter.event.AbstractEventReader;
 import com.aspectran.aspectow.appmon.engine.persist.counter.EventCount;
 import com.aspectran.core.component.UnavailableException;
+import com.aspectran.core.component.bean.aware.ActivityContextAware;
 import com.aspectran.core.component.session.ManagedSession;
 import com.aspectran.core.component.session.Session;
 import com.aspectran.core.component.session.SessionListener;
 import com.aspectran.core.component.session.SessionListenerRegistration;
 import com.aspectran.core.component.session.SessionManager;
+import com.aspectran.core.component.session.SessionManagerProvider;
 import com.aspectran.core.component.session.SessionStatistics;
 import com.aspectran.core.context.ActivityContext;
-import com.aspectran.undertow.server.TowServer;
-import com.aspectran.undertow.support.SessionListenerRegistrationBean;
 import com.aspectran.utils.BeanUtils;
 import com.aspectran.utils.ClassUtils;
 import com.aspectran.utils.StringUtils;
@@ -42,6 +42,8 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Constructor;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -72,7 +74,7 @@ public class SessionEventReader extends AbstractEventReader {
 
     private String serverId;
 
-    private String deploymentName;
+    private String contextName;
 
     private SessionUserResolver userResolver;
 
@@ -105,9 +107,9 @@ public class SessionEventReader extends AbstractEventReader {
     public void init() throws Exception {
         String[] arr = StringUtils.divide(getEventInfo().getTarget(), "/");
         serverId = arr[0];
-        deploymentName = arr[1];
+        contextName = (arr[1] != null ? arr[1] : "");
 
-        String targetKey = serverId + "/" + deploymentName;
+        String targetKey = serverId + "/" + contextName;
         if (registeredTrackingTargets.add(targetKey)) {
             IPCountryResolver ipCountryResolver = null;
             if (getExporterManager().containsBean(IPCountryResolver.class)) {
@@ -115,7 +117,7 @@ public class SessionEventReader extends AbstractEventReader {
             }
             ActivityContext context = getExporterManager().getAppMonManager().getActivityContext();
             UserTrackingListener userTrackingListener = new UserTrackingListener(context, ipCountryResolver);
-            getSessionListenerRegistration().register(userTrackingListener, deploymentName);
+            getSessionListenerRegistration().register(userTrackingListener, contextName);
         }
 
         if (getEventInfo().hasParameters()) {
@@ -158,14 +160,15 @@ public class SessionEventReader extends AbstractEventReader {
     @Override
     public void start() {
         try {
-            TowServer towServer = getExporterManager().getBean(serverId);
-            sessionManager = towServer.getSessionManager(deploymentName);
+            SessionManagerProvider server = getExporterManager().getBean(serverId);
+            sessionManager = (StringUtils.hasLength(contextName) ?
+                    server.getSessionManager(contextName) : server.getSessionManager());
         } catch (Exception e) {
             throw new RuntimeException("Cannot resolve session manager with " + getEventInfo().getTarget(), e);
         }
         if (sessionManager != null) {
             sessionListener = new SessionEventReadingListener(this);
-            getSessionListenerRegistration().register(sessionListener, deploymentName);
+            getSessionListenerRegistration().register(sessionListener, contextName);
             changed = true;
         }
     }
@@ -176,7 +179,7 @@ public class SessionEventReader extends AbstractEventReader {
             changed = false;
             if (sessionListener != null) {
                 try {
-                    getSessionListenerRegistration().remove(sessionListener, deploymentName);
+                    getSessionListenerRegistration().remove(sessionListener, contextName);
                 } catch (UnavailableException e) {
                     // ignored
                 }
@@ -187,17 +190,36 @@ public class SessionEventReader extends AbstractEventReader {
 
     @NonNull
     private SessionListenerRegistration getSessionListenerRegistration() {
-        SessionListenerRegistration sessionListenerRegistration;
         if (getExporterManager().containsBean(SessionListenerRegistration.class)) {
-            sessionListenerRegistration = getExporterManager().getBean(SessionListenerRegistration.class);
-        } else {
-            if (getExporterManager().containsBean(TowServer.class)) {
-                sessionListenerRegistration = new SessionListenerRegistrationBean();
-            } else {
-                throw new IllegalStateException("Bean for SessionListenerRegistration must be defined");
+            return getExporterManager().getBean(SessionListenerRegistration.class);
+        }
+        return createSessionListenerRegistrationFallback();
+    }
+
+    @NonNull
+    private SessionListenerRegistration createSessionListenerRegistrationFallback() {
+        ActivityContext context = getExporterManager().getAppMonManager().getActivityContext();
+        String[] candidateClasses = {
+            "com.aspectran.undertow.support.SessionListenerRegistrationBean",
+            "com.aspectran.netty.support.SessionListenerRegistrationBean"
+        };
+        for (String className : candidateClasses) {
+            try {
+                Class<?> clazz = ClassUtils.classForName(className);
+                Constructor<?> ctor = clazz.getConstructor(String.class, String.class);
+                SessionListenerRegistration registration =
+                        (SessionListenerRegistration) ctor.newInstance(serverId, contextName);
+                if (registration instanceof ActivityContextAware aware) {
+                    aware.setActivityContext(context);
+                }
+                return registration;
+            } catch (ClassNotFoundException ignored) {
+                // Ignore and try the next candidate
+            } catch (Exception e) {
+                logger.warn("Failed to instantiate {}", className, e);
             }
         }
-        return sessionListenerRegistration;
+        throw new IllegalStateException("Bean for SessionListenerRegistration must be defined");
     }
 
     @Override
@@ -336,13 +358,13 @@ public class SessionEventReader extends AbstractEventReader {
     private String resolveUsername(@NonNull Session session) {
         if (userResolver != null) {
             try {
-                String username = userResolver.resolveUsername(deploymentName, session);
+                String username = userResolver.resolveUsername(contextName, session);
                 if (StringUtils.hasLength(username)) {
                     return username;
                 }
             } catch (Exception e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to resolve username using userResolver for deployment {}", deploymentName, e);
+                    logger.debug("Failed to resolve username using userResolver for context {}", contextName, e);
                 }
             }
         }
@@ -361,7 +383,7 @@ public class SessionEventReader extends AbstractEventReader {
                 }
             } catch (Exception e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to resolve username attribute '{}' for deployment {}", usernameAttribute, deploymentName, e);
+                    logger.debug("Failed to resolve username attribute '{}' for context {}", usernameAttribute, contextName, e);
                 }
             }
         }

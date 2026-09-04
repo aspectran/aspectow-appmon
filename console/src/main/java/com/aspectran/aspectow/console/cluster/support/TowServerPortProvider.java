@@ -18,12 +18,8 @@ package com.aspectran.aspectow.console.cluster.support;
 import com.aspectran.aspectow.node.manager.NodePortProvider;
 import com.aspectran.core.component.bean.aware.ActivityContextAware;
 import com.aspectran.core.context.ActivityContext;
-
 import com.aspectran.undertow.server.TowServer;
-import io.undertow.Undertow;
 import org.jspecify.annotations.NonNull;
-
-import java.net.InetSocketAddress;
 
 /**
  * A bridge class that provides the active port from an Undertow server.
@@ -62,15 +58,8 @@ public class TowServerPortProvider implements NodePortProvider, ActivityContextA
         try {
             TowServer towServer = context.getBeanRegistry().getBean(TowServer.class, serverBeanId);
             if (towServer != null) {
-                Undertow undertow = towServer.getUndertow();
-                if (undertow != null) {
-                    for (Undertow.ListenerInfo listenerInfo : undertow.getListenerInfo()) {
-                        // Note: Undertow has a typo in the method name 'getProtcol'
-                        if ("http".equals(listenerInfo.getProtcol()) || "https".equals(listenerInfo.getProtcol())) {
-                            return ((InetSocketAddress)listenerInfo.getAddress()).getPort();
-                        }
-                    }
-                }
+                int port = towServer.getActivePort();
+                return (port > 0 ? port : null);
             }
         } catch (Exception e) {
             // ignore
