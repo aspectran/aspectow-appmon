@@ -648,9 +648,11 @@
             $(function() {
                 $('#node-search').on('input', filterNodes);
 
+                let clients = [];
                 let isUnloading = false;
                 $(window).on('beforeunload pagehide', function() {
                     isUnloading = true;
+                    clients.forEach(c => c.stop());
                 });
 
                 function refreshNodeList() {
@@ -673,13 +675,23 @@
                 function createConsoleClient(targetNode) {
                     return new ConsoleClient(targetNode, {
                         onBeforeConnect: () => {
+                            if (isUnloading) {
+                                return Promise.reject(new Error("Page is unloading"));
+                            }
                             return fetch(contextPath + "/cluster/token", {
                                     headers: { 'Accept': 'application/json' }
                                 })
-                                .then(response => response.json())
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error("HTTP error " + response.status);
+                                    }
+                                    return response.json();
+                                })
                                 .then(res => res.success ? res.data : null)
                                 .catch(err => {
-                                    console.error("Failed to fetch new token:", err);
+                                    if (!isUnloading) {
+                                        console.error("Failed to fetch new token:", err);
+                                    }
                                     return null;
                                 });
                         },
@@ -738,12 +750,14 @@
                             }
                         };
                         const client = createConsoleClient(node);
+                        clients.push(client);
                         client.start('');
                     });
                 } else {
                     node.status = [[${page.node.status}]];
                     node.endpoint.path = contextPath + "/nodes/" + node.id;
                     const client = createConsoleClient(node);
+                    clients.push(client);
                     client.start('');
                 }
 

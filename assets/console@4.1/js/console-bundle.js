@@ -295,7 +295,7 @@ function highlightApon(text) {
  * automatically falling back to HTTP long-polling if WebSockets are unavailable.
  *
  * @version 4.1
- * @last-modified 2026-08-29
+ * @last-modified 2026-09-05
  */
 class ConsoleClient {
 
@@ -323,6 +323,7 @@ class ConsoleClient {
         this.socket = null;
         this.heartbeatTimer = null;
         this.pollingTimer = null;
+        this.reconnectTimer = null;
         this.retryCount = 0;
         this.established = false;
         this.manualClose = false;
@@ -347,6 +348,10 @@ class ConsoleClient {
      */
     stop() {
         this.manualClose = true;
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
         this.closeSocket(false);
         this.stopPolling();
     }
@@ -355,14 +360,32 @@ class ConsoleClient {
      * Opens a new connection.
      */
     openSocket() {
+        if (this.manualClose) {
+            return;
+        }
         if (this.options.onBeforeConnect) {
             Promise.resolve(this.options.onBeforeConnect(this.node)).then((token) => {
-                if (token) {
-                    this.node.endpoint.token = token;
+                if (this.manualClose) {
+                    return;
                 }
-                this.connect();
+                if (token) {
+                    if (this.node.endpoint) {
+                        this.node.endpoint.token = token;
+                    }
+                }
+                if (this.node.endpoint && this.node.endpoint.token) {
+                    this.connect();
+                } else {
+                    console.warn(this.node.id, "failed to obtain token before connect");
+                    if (!this.manualClose) {
+                        this.reconnect();
+                    }
+                }
             }).catch((err) => {
-                console.error(this.node.id, "failed to prepare connection:", err);
+                if (!this.manualClose) {
+                    console.error(this.node.id, "failed to prepare connection:", err);
+                    this.reconnect();
+                }
             });
         } else {
             this.connect();
@@ -378,7 +401,11 @@ class ConsoleClient {
         if (this.socket) {
             this.established = false;
             if (!afterClosing) {
-                this.socket.close();
+                try {
+                    this.socket.close(1000, "Normal closure");
+                } catch (e) {
+                    // Ignore if already closed
+                }
             }
             this.socket = null;
         }
@@ -408,8 +435,18 @@ class ConsoleClient {
      * @private
      */
     connect() {
+        if (this.manualClose) {
+            return;
+        }
         if (this.node.endpoint && this.node.endpoint.mode === 'polling') {
             this.switchToPolling();
+            return;
+        }
+        if (!this.node.endpoint || !this.node.endpoint.token) {
+            console.warn(this.node.id, "cannot connect to websocket without a valid token");
+            if (!this.manualClose) {
+                this.reconnect();
+            }
             return;
         }
         this.mode = 'websocket';
@@ -689,6 +726,9 @@ class ConsoleClient {
      * @private
      */
     reconnect() {
+        if (this.manualClose) {
+            return;
+        }
         if (this.established) {
             this.established = false;
             if (this.options.onClose) {
@@ -703,6 +743,11 @@ class ConsoleClient {
             }
         }
 
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
+
         if (this.retryCount < this.options.maxRetries) {
             this.retryCount++;
             const jitter = Math.floor(Math.random() * 1000);
@@ -712,7 +757,9 @@ class ConsoleClient {
             if (this.options.onRetry) {
                 this.options.onRetry(this.retryCount, this.options.maxRetries, interval);
             }
-            setTimeout(() => {
+            this.reconnectTimer = setTimeout(() => {
+                this.reconnectTimer = null;
+                if (this.manualClose) return;
                 if (this.mode === 'websocket') {
                     this.openSocket();
                 } else if (this.mode === 'polling') {
@@ -726,7 +773,9 @@ class ConsoleClient {
                     if (this.options.onFailed) {
                         this.options.onFailed(this.node);
                     }
-                    setTimeout(() => {
+                    this.reconnectTimer = setTimeout(() => {
+                        this.reconnectTimer = null;
+                        if (this.manualClose) return;
                         this.retryCount = Math.max(0, this.options.maxRetries - 2);
                         this.openSocket();
                     }, this.options.retryInterval);

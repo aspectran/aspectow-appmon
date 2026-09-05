@@ -69,13 +69,17 @@ public class WebsocketNodeBridge extends SimplifiedEndpoint implements NodeBridg
     @Override
     protected boolean checkAuthorized(@NonNull Session session) {
         String token = session.getPathParameters().get("token");
-        try {
-            ConsoleTokenIssuer.validateToken(token);
-        } catch (InvalidPBTokenException e) {
-            logger.error("Invalid token: {}", token);
+        if (token == null || token.isEmpty() || "undefined".equals(token)) {
+            logger.warn("Node WebSocket connection rejected: missing token");
             return false;
         }
-        return true;
+        try {
+            ConsoleTokenIssuer.validateToken(token);
+            return true;
+        } catch (InvalidPBTokenException e) {
+            logger.warn("Node WebSocket connection rejected: invalid or expired token");
+            return false;
+        }
     }
 
     /**
