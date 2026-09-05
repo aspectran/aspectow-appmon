@@ -33,8 +33,8 @@ public class AppMonDemo {
             File baseDir = new File(ResourceUtils.getResourceAsFile(""), "../../app");
             System.setProperty(BASE_PATH_PROPERTY, baseDir.getCanonicalPath()); // for logback
             System.setProperty("netty.server.listener.http.port", "8083");
-            System.setProperty("netty.context.root.session.cookieName", "JSESSIONID-8083");
-            System.setProperty("netty.context.appmon.session.cookieName", "JSESSIONID-8083");
+            System.setProperty("netty.context.root.session.cookieName", "JSESSIONID_8083");
+            System.setProperty("netty.context.appmon.session.cookieName", "JSESSIONID_8083");
             System.setProperty("aspectran.profiles.active", "dev");
             JLineAspectranShell.main(new String[] { baseDir.getCanonicalPath(), "config/aspectran-config.apon" });
         } catch (IOException e) {

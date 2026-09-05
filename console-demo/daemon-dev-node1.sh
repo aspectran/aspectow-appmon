@@ -26,16 +26,16 @@ if [ "$SERVER_ENGINE" = "undertow" ]; then
 -Daspectran.profiles.active=dev,gateway,console.custom-ui,undertow
 -Daspectran.profiles.base.console=dev,h2,console.custom-ui,undertow
 -Dtow.server.listener.http.port=$PORT
--Dtow.context.root.session.cookieName=JSESSIONID-$PORT
--Dtow.context.console.session.cookieName=JSESSIONID-$PORT
+-Dtow.context.root.session.cookieName=JSESSIONID_$PORT
+-Dtow.context.console.session.cookieName=JSESSIONID_$PORT
 "
 else
   SERVER_OPTS="
 -Daspectran.profiles.active=dev,gateway,console.custom-ui
 -Daspectran.profiles.base.console=dev,h2,console.custom-ui
 -Dnetty.server.listener.http.port=$PORT
--Dnetty.context.root.session.cookieName=JSESSIONID-$PORT
--Dnetty.context.console.session.cookieName=JSESSIONID-$PORT
+-Dnetty.context.root.session.cookieName=JSESSIONID_$PORT
+-Dnetty.context.console.session.cookieName=JSESSIONID_$PORT
 "
 fi
 
