@@ -18,6 +18,8 @@
         <property name="deploymentName">%{tow.context.console.name}</property>
         <property name="contextPath">/%{tow.context.console.name}</property>
         <property name="scratchDir">%{system:aspectran.workPath:/work}/_webapps/%{tow.context.console.name}</property>
+        <property name="servletSessionConfig">#{tow.context.console.servletSessionConfig}</property>
+        <property name="sessionManager">#{tow.context.console.sessionManager}</property>
         <property name="initParams" type="map">
             <entry name="aspectran:config">%{tow.context.console.config}</entry>
         </property>
@@ -36,8 +38,6 @@
                 <property name="idleTimeout" valueType="long">60000</property>
             </bean>
         </property>
-        <property name="servletSessionConfig">#{tow.context.console.servletSessionConfig}</property>
-        <property name="sessionManager">#{tow.context.console.sessionManager}</property>
         <properties profile="!console.custom-ui">
             <item name="resourceManager">
                 <bean class="com.aspectran.undertow.server.handler.resource.TowClassPathResourceManager">

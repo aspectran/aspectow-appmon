@@ -9,7 +9,18 @@
         "https://aspectran.com/dtd/aspectran-9.dtd">
 <aspectran>
 
-    <description style="apon">
+    <description style="apon" profile="!undertow">
+        |
+        |{{CYAN}}Netty Server is active and listening at:{{reset}}
+        |   {{81}}http://localhost:%{netty.server.listener.http.port:8083}/{{reset}}
+        |
+        |Use the '{{GREEN}}netty{{reset}}' command to manage server operations.
+        |
+        |{{gray}}Current Environment:{{reset}} #{currentEnvironment^currentProfiles}
+        |
+    </description>
+
+    <description style="apon" profile="undertow">
         |
         |{{CYAN}}Undertow Server is active and listening at:{{reset}}
         |   {{81}}http://localhost:%{tow.server.listener.http.port:8083}/{{reset}}

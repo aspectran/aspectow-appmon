@@ -18,17 +18,10 @@
         <property name="deploymentName">%{tow.context.appmon.name}</property>
         <property name="contextPath">/%{tow.context.appmon.name}</property>
         <property name="scratchDir">%{system:aspectran.workPath:/work}/_webapps/%{tow.context.appmon.name}</property>
+        <property name="servletSessionConfig">#{tow.context.appmon.servletSessionConfig}</property>
+        <property name="sessionManager">#{tow.context.appmon.sessionManager}</property>
         <property name="initParams" type="map">
             <entry name="aspectran:config">%{tow.context.appmon.config}</entry>
-        </property>
-        <property name="filters" type="array">
-            <bean class="com.aspectran.undertow.server.servlet.TowFilter">
-                <argument>urlSessionTrackingFilter</argument>
-                <argument>com.aspectran.web.servlet.filter.URLSessionTrackingFilter</argument>
-                <property name="mappingUrls" type="array">
-                    <value>/*</value>
-                </property>
-            </bean>
         </property>
         <property name="servlets" type="array">
             <bean class="com.aspectran.undertow.server.servlet.DefaultJspServlet">
@@ -45,8 +38,7 @@
         </property>
         <property name="webSocketServerContainerInitializer">
             <bean class="com.aspectran.undertow.server.servlet.TowWebSocketServerContainerInitializer">
-                <property name="directBuffers" valueType="boolean">true</property>
-                <property name="bufferSize" valueType="int">16384</property>
+                <property name="idleTimeout" valueType="long">60000</property>
             </bean>
         </property>
         <properties profile="!appmon.custom-ui">
@@ -60,6 +52,41 @@
             <item name="resourceManager">
                 <bean class="com.aspectran.undertow.server.handler.resource.TowResourceManager">
                     <property name="base">/webapps/%{tow.context.appmon.name}</property>
+                </bean>
+            </item>
+        </properties>
+    </bean>
+
+    <bean id="tow.context.appmon.servletSessionConfig" class="io.undertow.servlet.api.ServletSessionConfig">
+        <property name="sessionTrackingModes" type="set">
+            <value>#{class:jakarta.servlet.SessionTrackingMode^COOKIE}</value>
+        </property>
+        <property name="name" value="%{system:tow.context.appmon.session.cookieName:JSESSIONID}_%{tow.context.appmon.name}"/>
+        <property name="path" value="/%{tow.context.appmon.name}"/>
+        <property name="domain" value="%{tow.server.domain}"/>
+    </bean>
+
+    <bean id="tow.context.appmon.sessionManager"
+          class="com.aspectran.undertow.server.session.TowSessionManager"
+          scope="prototype">
+        <properties>
+            <item name="sessionManagerConfig">
+                <bean class="com.aspectran.core.context.config.SessionManagerConfig">
+                    <argument>
+                        workerName: cn0
+                        maxActiveSessions: 999
+                        maxIdleSeconds: 600
+                        evictionIdleSeconds: 300
+                        maxIdleSecondsForNew: 120
+                        evictionIdleSecondsForNew: 60
+                        scavengingIntervalSeconds: 180
+                        clusterEnabled: false
+                    </argument>
+                </bean>
+            </item>
+            <item name="sessionStore">
+                <bean class="com.aspectran.core.component.session.FileSessionStoreFactoryBean">
+                    <property name="storeDir">%{system:aspectran.workPath:/work}/_sessions/%{tow.context.appmon.name}</property>
                 </bean>
             </item>
         </properties>

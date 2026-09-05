@@ -57,6 +57,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>aspectran-with-netty</artifactId>
+            <version>${aspectran.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>aspectow-appmon</artifactId>
             <version>${project.version}</version>
         </dependency>

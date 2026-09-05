@@ -5,6 +5,11 @@ set -e
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 cd "$SCRIPT_DIR"
-. "$SCRIPT_DIR/app.conf"
 
-"$DEPLOY_DIR/bin/shell.sh" --debug
+if [ "$SERVER_ENGINE" = "undertow" ]; then
+  . "$SCRIPT_DIR/app-undertow.conf"
+else
+  . "$SCRIPT_DIR/app.conf"
+fi
+
+"$DEPLOY_DIR/bin/shell.sh" --debug "$@"

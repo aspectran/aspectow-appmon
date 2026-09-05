@@ -3,7 +3,7 @@
 
     <include file="${aspectran.basePath:-app}/config/logging/included/logback-default.xml"/>
     <include file="${aspectran.basePath:-app}/config/logging/included/logback-scheduler.xml"/>
-    <include file="${aspectran.basePath:-app}/config/logging/included/logback-undertow.xml"/>
+    <include file="${aspectran.basePath:-app}/config/logging/included/logback-accesslog.xml"/>
     <include file="${aspectran.basePath:-app}/config/logging/included/logback-console.xml"/>
 
     <logger name="com.aspectran.daemon.command.polling.DefaultFileCommander" level="trace"/>

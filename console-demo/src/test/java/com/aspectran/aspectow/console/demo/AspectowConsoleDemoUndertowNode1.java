@@ -29,30 +29,30 @@ import static com.aspectran.core.context.config.AspectranConfig.TEMP_PATH_PROPER
 import static com.aspectran.core.context.config.AspectranConfig.WORK_PATH_PROPERTY;
 
 /**
- * Main entry point for the application.
+ * Main entry point for the Undertow-based service node1 application.
  */
-public class AspectowConsoleDemoNode2 {
+public class AspectowConsoleDemoUndertowNode1 {
 
     public static void main(String[] args) {
         try {
             File baseDir = new File(ResourceUtils.getResourceAsFile(""), "../../app");
-            File logsDir = new File(baseDir, "logs2");
-            File tempDir = new File(baseDir, "temp2");
-            File workDir = new File(baseDir, "work2");
-            File cmdDir = new File(baseDir, "cmd2");
+            File logsDir = new File(baseDir, "logs1");
+            File tempDir = new File(baseDir, "temp1");
+            File workDir = new File(baseDir, "work1");
+            File cmdDir = new File(baseDir, "cmd1");
 
-            System.setProperty(MY_NODE_ID_PROPERTY, "dev-node2");
+            System.setProperty(MY_NODE_ID_PROPERTY, "dev-node1");
             System.setProperty(BASE_PATH_PROPERTY, baseDir.getCanonicalPath()); // for logging configuration
             System.setProperty(LOGS_DIR_PROPERTY, logsDir.getCanonicalPath()); // for logging configuration
             System.setProperty(WORK_PATH_PROPERTY, workDir.getCanonicalPath());
             System.setProperty(TEMP_PATH_PROPERTY, tempDir.getCanonicalPath());
             System.setProperty(COMMANDS_PATH_PROPERTY, cmdDir.getCanonicalPath());
-            System.setProperty("netty.server.listener.http.port", "8092");
-            System.setProperty("netty.context.root.session.cookieName", "JSESSIONID-8092");
-            System.setProperty("netty.context.console.session.cookieName", "JSESSIONID-8092");
+            System.setProperty("tow.server.listener.http.port", "8091");
+            System.setProperty("tow.context.root.session.cookieName", "JSESSIONID-8091");
+            System.setProperty("tow.context.console.session.cookieName", "JSESSIONID-8091");
             System.setProperty("aspectow.console.config.db.h2.path_explicit", "~/aspectow-console-demo");
-            System.setProperty("aspectran.profiles.active", "dev,gateway");
-            System.setProperty("aspectran.profiles.base.console", "dev,h2");
+            System.setProperty("aspectran.profiles.active", "dev,gateway,console.custom-ui,undertow");
+            System.setProperty("aspectran.profiles.base.console", "dev,h2,console.custom-ui,undertow");
 
             JLineAspectranShell.main(new String[] { baseDir.getCanonicalPath(), "config/aspectran-config.apon" });
         } catch (IOException e) {

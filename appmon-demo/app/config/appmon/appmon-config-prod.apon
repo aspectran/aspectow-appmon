@@ -17,7 +17,7 @@ app: {
     }
     event: {
         id: session
-        target: tow.server/root
+        target: netty.server/root
     }
     metric: {
         id: heap
@@ -28,11 +28,11 @@ app: {
         heading: true
     }
     metric: {
-        id: undertow-tp
-        title: Undertow TP
-        description: Metrics of Undertow thread pool resources
-        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.undertow.UndertowThreadPoolMetricsReader
-        target: tow.server
+        id: netty-tp
+        title: Netty TP
+        description: Metrics of Netty thread pool resources
+        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.netty.NettyThreadPoolMetricsReader
+        target: netty.server
         sampleInterval: 30
         exportInterval: 900
         heading: true
@@ -63,7 +63,7 @@ app: {
     }
     event: {
         id: session
-        target: tow.server/appmon
+        target: netty.server/appmon
     }
     log: {
         id: app

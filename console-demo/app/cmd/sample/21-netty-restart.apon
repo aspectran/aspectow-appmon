@@ -1,0 +1,12 @@
+# Restart the Netty server
+command: netty
+parameters: {
+    item: {
+        name: mode
+        value: restart
+    }
+    item: {
+        name: server
+        value: netty.server
+    }
+}

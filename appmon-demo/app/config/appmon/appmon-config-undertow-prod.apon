@@ -5,9 +5,8 @@ pollingConfig: {
     # The duration in milliseconds after which an inactive polling session expires
     sessionTimeout: 30000
 }
-counterPersistInterval: 1
 app: {
-    id: appmon-root
+    id: root
     title: Root
     event: {
         id: activity
@@ -18,7 +17,7 @@ app: {
     }
     event: {
         id: session
-        target: netty.server/root
+        target: tow.server/root
     }
     metric: {
         id: heap
@@ -29,11 +28,11 @@ app: {
         heading: true
     }
     metric: {
-        id: netty-tp
-        title: Netty TP
-        description: Metrics of Netty thread pool resources
-        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.netty.NettyThreadPoolMetricsReader
-        target: netty.server
+        id: undertow-tp
+        title: Undertow TP
+        description: Metrics of Undertow thread pool resources
+        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.undertow.UndertowThreadPoolMetricsReader
+        target: tow.server
         sampleInterval: 30
         exportInterval: 900
         heading: true
@@ -64,7 +63,7 @@ app: {
     }
     event: {
         id: session
-        target: netty.server/appmon
+        target: tow.server/appmon
     }
     log: {
         id: app

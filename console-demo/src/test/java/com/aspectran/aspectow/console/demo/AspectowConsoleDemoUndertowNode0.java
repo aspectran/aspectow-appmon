@@ -21,6 +21,7 @@ import com.aspectran.utils.ResourceUtils;
 import java.io.File;
 import java.io.IOException;
 
+import static com.aspectran.aspectow.node.manager.NodeManagerBuilder.MY_CONSOLE_PROPERTY;
 import static com.aspectran.aspectow.node.manager.NodeManagerBuilder.MY_NODE_ID_PROPERTY;
 import static com.aspectran.core.context.config.AspectranConfig.BASE_PATH_PROPERTY;
 import static com.aspectran.core.context.config.AspectranConfig.COMMANDS_PATH_PROPERTY;
@@ -29,30 +30,31 @@ import static com.aspectran.core.context.config.AspectranConfig.TEMP_PATH_PROPER
 import static com.aspectran.core.context.config.AspectranConfig.WORK_PATH_PROPERTY;
 
 /**
- * Main entry point for the application.
+ * Main entry point for the Undertow-based console node application.
  */
-public class AspectowConsoleDemoNode2 {
+public class AspectowConsoleDemoUndertowNode0 {
 
     public static void main(String[] args) {
         try {
             File baseDir = new File(ResourceUtils.getResourceAsFile(""), "../../app");
-            File logsDir = new File(baseDir, "logs2");
-            File tempDir = new File(baseDir, "temp2");
-            File workDir = new File(baseDir, "work2");
-            File cmdDir = new File(baseDir, "cmd2");
+            File logsDir = new File(baseDir, "logs");
+            File tempDir = new File(baseDir, "temp");
+            File workDir = new File(baseDir, "work");
+            File cmdDir = new File(baseDir, "cmd");
 
-            System.setProperty(MY_NODE_ID_PROPERTY, "dev-node2");
+            System.setProperty(MY_NODE_ID_PROPERTY, "dev-console-node1");
+            System.setProperty(MY_CONSOLE_PROPERTY, "true"); // This node is a console-dedicated node.
             System.setProperty(BASE_PATH_PROPERTY, baseDir.getCanonicalPath()); // for logging configuration
             System.setProperty(LOGS_DIR_PROPERTY, logsDir.getCanonicalPath()); // for logging configuration
             System.setProperty(WORK_PATH_PROPERTY, workDir.getCanonicalPath());
             System.setProperty(TEMP_PATH_PROPERTY, tempDir.getCanonicalPath());
             System.setProperty(COMMANDS_PATH_PROPERTY, cmdDir.getCanonicalPath());
-            System.setProperty("netty.server.listener.http.port", "8092");
-            System.setProperty("netty.context.root.session.cookieName", "JSESSIONID-8092");
-            System.setProperty("netty.context.console.session.cookieName", "JSESSIONID-8092");
+            System.setProperty("tow.server.listener.http.port", "8082");
+            System.setProperty("tow.context.root.session.cookieName", "JSESSIONID-8082");
+            System.setProperty("tow.context.console.session.cookieName", "JSESSIONID-8082");
             System.setProperty("aspectow.console.config.db.h2.path_explicit", "~/aspectow-console-demo");
-            System.setProperty("aspectran.profiles.active", "dev,gateway");
-            System.setProperty("aspectran.profiles.base.console", "dev,h2");
+            System.setProperty("aspectran.profiles.active", "dev,gateway,console.custom-ui,undertow");
+            System.setProperty("aspectran.profiles.base.console", "dev,h2,console.custom-ui,undertow");
 
             JLineAspectranShell.main(new String[] { baseDir.getCanonicalPath(), "config/aspectran-config.apon" });
         } catch (IOException e) {

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 9.0//EN"
+        "https://aspectran.com/dtd/aspectran-9.dtd">
+<aspectran>
+
+    <description>
+        Aspectran configuration for setting up a Netty context.
+    </description>
+
+    <environment>
+        <property name="netty.context.appmon.name">appmon</property>
+        <property name="netty.context.appmon.config">classpath:com/aspectran/aspectow/appmon/config/aspectran-config.apon</property>
+    </environment>
+
+    <bean id="netty.context.appmon"
+          class="com.aspectran.netty.server.NettyContext"
+          scope="prototype">
+        <property name="contextPath">/%{netty.context.appmon.name}</property>
+        <property name="aspectranConfigFile">%{netty.context.appmon.config}</property>
+        <property name="sessionManager">#{netty.context.appmon.sessionManager}</property>
+        <property name="sessionConfig">#{netty.context.appmon.sessionConfig}</property>
+        <property name="webSocketServerContainerInitializer">
+            <bean class="com.aspectran.netty.server.websocket.NettyWebSocketServerContainerInitializer">
+                <property name="idleTimeout" valueType="long">60000</property>
+            </bean>
+        </property>
+        <properties profile="!appmon.custom-ui">
+            <item name="resourceHandler">
+                <bean class="com.aspectran.netty.server.handler.resource.NettyClassPathResourceHandler">
+                    <argument>META-INF/resources/appmon/</argument>
+                </bean>
+            </item>
+        </properties>
+        <properties profile="appmon.custom-ui">
+            <item name="resourceHandler">
+                <bean class="com.aspectran.netty.server.handler.resource.NettyResourceHandler">
+                    <property name="basePath">/webapps/%{netty.context.appmon.name}</property>
+                </bean>
+            </item>
+        </properties>
+    </bean>
+
+    <bean id="netty.context.appmon.sessionConfig" class="com.aspectran.netty.server.session.NettySessionConfig">
+        <property name="cookieName" value="%{system:netty.context.appmon.session.cookieName:JSESSIONID}_%{netty.context.appmon.name}"/>
+        <property name="cookiePath" value="/%{netty.context.appmon.name}"/>
+        <property name="cookieDomain" value="%{netty.server.domain}"/>
+    </bean>
+
+    <bean id="netty.context.appmon.sessionManager"
+          class="com.aspectran.netty.server.session.NettySessionManager"
+          scope="prototype">
+        <properties>
+            <item name="sessionManagerConfig">
+                <bean class="com.aspectran.core.context.config.SessionManagerConfig">
+                    <argument>
+                        workerName: an0
+                        maxActiveSessions: 999
+                        maxIdleSeconds: 600
+                        evictionIdleSeconds: 300
+                        maxIdleSecondsForNew: 120
+                        evictionIdleSecondsForNew: 60
+                        scavengingIntervalSeconds: 180
+                        clusterEnabled: false
+                    </argument>
+                </bean>
+            </item>
+            <item name="sessionStore">
+                <bean class="com.aspectran.core.component.session.FileSessionStoreFactoryBean">
+                    <property name="storeDir">%{system:aspectran.workPath:/work}/_sessions/%{netty.context.appmon.name}</property>
+                </bean>
+            </item>
+        </properties>
+    </bean>
+
+</aspectran>

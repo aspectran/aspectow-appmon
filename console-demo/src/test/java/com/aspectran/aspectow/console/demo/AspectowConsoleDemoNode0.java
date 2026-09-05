@@ -36,27 +36,27 @@ public class AspectowConsoleDemoNode0 {
 
     public static void main(String[] args) {
         try {
-            File root = new File(ResourceUtils.getResourceAsFile(""), "../../app");
-            File logsDir = new File(root, "logs");
-            File tempDir = new File(root, "temp");
-            File workDir = new File(root, "work");
-            File cmdDir = new File(root, "cmd");
+            File baseDir = new File(ResourceUtils.getResourceAsFile(""), "../../app");
+            File logsDir = new File(baseDir, "logs");
+            File tempDir = new File(baseDir, "temp");
+            File workDir = new File(baseDir, "work");
+            File cmdDir = new File(baseDir, "cmd");
 
             System.setProperty(MY_NODE_ID_PROPERTY, "dev-console-node1");
             System.setProperty(MY_CONSOLE_PROPERTY, "true"); // This node is a console-dedicated node.
-            System.setProperty(BASE_PATH_PROPERTY, root.getCanonicalPath()); // for logging configuration
+            System.setProperty(BASE_PATH_PROPERTY, baseDir.getCanonicalPath()); // for logging configuration
             System.setProperty(LOGS_DIR_PROPERTY, logsDir.getCanonicalPath()); // for logging configuration
             System.setProperty(WORK_PATH_PROPERTY, workDir.getCanonicalPath());
             System.setProperty(TEMP_PATH_PROPERTY, tempDir.getCanonicalPath());
             System.setProperty(COMMANDS_PATH_PROPERTY, cmdDir.getCanonicalPath());
-            System.setProperty("tow.server.listener.http.port", "8082");
-            System.setProperty("tow.context.root.session.cookieName", "JSESSIONID-8082");
-            System.setProperty("tow.context.console.session.cookieName", "JSESSIONID-8082");
+            System.setProperty("netty.server.listener.http.port", "8082");
+            System.setProperty("netty.context.root.session.cookieName", "JSESSIONID-8082");
+            System.setProperty("netty.context.console.session.cookieName", "JSESSIONID-8082");
             System.setProperty("aspectow.console.config.db.h2.path_explicit", "~/aspectow-console-demo");
             System.setProperty("aspectran.profiles.active", "dev,gateway,console.custom-ui");
             System.setProperty("aspectran.profiles.base.console", "dev,h2,console.custom-ui");
 
-            JLineAspectranShell.main(new String[] { root.getCanonicalPath(), "config/aspectran-config.apon" });
+            JLineAspectranShell.main(new String[] { baseDir.getCanonicalPath(), "config/aspectran-config.apon" });
         } catch (IOException e) {
             e.printStackTrace(System.err);
         }

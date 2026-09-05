@@ -24,18 +24,18 @@ import java.io.IOException;
 import static com.aspectran.core.context.config.AspectranConfig.BASE_PATH_PROPERTY;
 
 /**
- * Main entry point for the application.
+ * Main entry point for the Undertow-based AppMon demo application.
  */
-public class AppMonDemo {
+public class AppMonDemoUndertow {
 
     public static void main(String[] args) {
         try {
             File baseDir = new File(ResourceUtils.getResourceAsFile(""), "../../app");
             System.setProperty(BASE_PATH_PROPERTY, baseDir.getCanonicalPath()); // for logback
-            System.setProperty("netty.server.listener.http.port", "8083");
-            System.setProperty("netty.context.root.session.cookieName", "JSESSIONID-8083");
-            System.setProperty("netty.context.appmon.session.cookieName", "JSESSIONID-8083");
-            System.setProperty("aspectran.profiles.active", "dev");
+            System.setProperty("tow.server.listener.http.port", "8083");
+            System.setProperty("tow.context.root.session.cookieName", "JSESSIONID-8083");
+            System.setProperty("tow.context.appmon.session.cookieName", "JSESSIONID-8083");
+            System.setProperty("aspectran.profiles.active", "dev,undertow");
             JLineAspectranShell.main(new String[] { baseDir.getCanonicalPath(), "config/aspectran-config.apon" });
         } catch (IOException e) {
             e.printStackTrace(System.err);

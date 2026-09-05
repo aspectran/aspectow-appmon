@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 9.0//EN"
+        "https://aspectran.com/dtd/aspectran-9.dtd">
+<aspectran>
+
+    <description>
+        Aspectran configuration for setting up a Netty server.
+    </description>
+
+    <environment>
+        <property name="netty.server.listener.http.port" valueType="int">%{system:netty.server.listener.http.port:8082}</property>
+        <property name="netty.server.listener.http.host">0.0.0.0</property>
+        <properties profile="prod">
+            <item name="netty.server.domain">aspectran.com</item>
+        </properties>
+    </environment>
+
+    <bean id="netty.server" class="com.aspectran.netty.server.DefaultNettyServer">
+        <property name="virtualThreads" valueType="boolean">true</property>
+        <property name="accessLogHandler">#{netty.server.handler.accessLogHandler}</property>
+        <property name="encodingHandler">#{netty.server.handler.encodingHandler}</property>
+        <property name="listeners" type="array">
+            <bean class="com.aspectran.netty.server.NettyListenerConfig">
+                <property name="port" valueType="int">%{netty.server.listener.http.port}</property>
+                <property name="host">%{netty.server.listener.http.host}</property>
+            </bean>
+        </property>
+        <property name="contexts" type="array">
+            <value>#{netty.context.root}</value>
+            <value>#{netty.context.console}</value>
+        </property>
+    </bean>
+
+    <bean id="netty.server.handler.accessLogHandler"
+          class="com.aspectran.netty.server.handler.accesslog.NettyAccessLogHandler"
+          scope="prototype">
+        <property name="formatString" tokenize="false">%t %a %{i,X-Forwarded-For} %{c,JSESSIONID} "%r" %s %b "%{i,Referer}" "%{i,User-Agent}"</property>
+        <property name="category">com.aspectran.netty.accesslog</property>
+    </bean>
+
+    <bean id="netty.server.handler.encodingHandler"
+          class="com.aspectran.netty.server.handler.encoding.NettyEncodingHandler"
+          scope="prototype">
+        <property name="encodingProviders" type="array">
+            <value>gzip</value>
+        </property>
+        <property name="encodingPredicates" type="array">
+            <bean class="com.aspectran.netty.server.handler.encoding.ContentEncodingPredicates">
+                <property name="mediaTypes" type="array">
+                    <value>text/html</value>
+                    <value>text/css</value>
+                    <value>text/javascript</value>
+                    <value>application/javascript</value>
+                </property>
+            </bean>
+            <bean class="com.aspectran.netty.server.handler.encoding.ContentEncodingPredicates">
+                <property name="contentSizeLargerThan" valueType="long">32</property>
+                <property name="mediaTypes" type="array">
+                    <value>text/xml</value>
+                    <value>text/plain</value>
+                    <value>application/json</value>
+                    <value>application/xml</value>
+                    <value>application/apon</value>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+</aspectran>

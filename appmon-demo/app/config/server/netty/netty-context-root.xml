@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectran PUBLIC "-//ASPECTRAN//DTD Aspectran 9.0//EN"
+        "https://aspectran.com/dtd/aspectran-9.dtd">
+<aspectran>
+
+    <description>
+        Aspectran configuration for setting up a Netty context.
+    </description>
+
+    <environment>
+        <property name="netty.context.root.name">root</property>
+    </environment>
+
+    <bean id="netty.context.root" class="com.aspectran.netty.server.NettyContext">
+        <property name="contextPath">/</property>
+        <property name="sessionManager">#{netty.context.root.sessionManager}</property>
+        <property name="sessionConfig">#{netty.context.root.sessionConfig}</property>
+    </bean>
+
+    <bean id="netty.context.root.sessionConfig" class="com.aspectran.netty.server.session.NettySessionConfig">
+        <property name="cookieName" value="%{system:netty.context.root.session.cookieName:JSESSIONID}"/>
+        <property name="cookiePath" value="/"/>
+        <property name="cookieDomain" value="%{netty.server.domain}"/>
+    </bean>
+
+    <bean id="netty.context.root.sessionManager"
+          class="com.aspectran.netty.server.session.NettySessionManager"
+          scope="prototype">
+        <property name="sessionManagerConfig">
+            <bean class="com.aspectran.core.context.config.SessionManagerConfig">
+                <argument>
+                    workerName: rn0
+                    maxActiveSessions: 9999
+                    maxIdleSeconds: 1800
+                    evictionIdleSeconds: 900
+                    maxIdleSecondsForNew: 60
+                    evictionIdleSecondsForNew: 30
+                    scavengingIntervalSeconds: 90
+                    clusterEnabled: false
+                </argument>
+            </bean>
+        </property>
+        <property name="sessionStore">
+            <bean class="com.aspectran.core.component.session.FileSessionStoreFactoryBean">
+                <property name="storeDir">%{system:aspectran.workPath:/work}/_sessions/%{netty.context.root.name}</property>
+                <property name="gracePeriodSecs" valueType="int">30</property>
+            </bean>
+        </property>
+    </bean>
+
+</aspectran>

@@ -3,9 +3,16 @@
         "https://aspectran.com/dtd/aspectran-9.dtd">
 <aspectran>
 
-    <append file="/config/server/undertow/tow-server.xml"/>
-    <append file="/config/server/undertow/tow-context-root.xml"/>
-    <append file="/config/server/undertow/tow-context-appmon.xml"/>
-    <append file="/config/server/undertow/tow-support.xml"/>
+    <!-- Netty Server (Default or 'netty' profile) -->
+    <append file="/config/server/netty/netty-server.xml" profile="!undertow"/>
+    <append file="/config/server/netty/netty-context-root.xml" profile="!undertow"/>
+    <append resource="com/aspectran/aspectow/appmon/config/rules/context/netty-context-appmon.xml" profile="!undertow"/>
+    <append file="/config/server/netty/netty-support.xml" profile="!undertow"/>
+
+    <!-- Undertow Server ('undertow' profile) -->
+    <append file="/config/server/undertow/tow-server.xml" profile="undertow"/>
+    <append file="/config/server/undertow/tow-context-root.xml" profile="undertow"/>
+    <append resource="com/aspectran/aspectow/appmon/config/rules/context/tow-context-appmon.xml" profile="undertow"/>
+    <append file="/config/server/undertow/tow-support.xml" profile="undertow"/>
 
 </aspectran>

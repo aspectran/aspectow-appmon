@@ -4,11 +4,20 @@
 <aspectran>
 
     <bean class="com.aspectran.aspectow.appmon.engine.config.AppMonConfigResolver">
-        <properties profile="!prod">
+        <!-- Netty (Default) -->
+        <properties profile="(!prod, !undertow)">
             <item name="configLocation">/config/console/appmon-config.apon</item>
         </properties>
-        <properties profile="prod">
+        <properties profile="(prod, !undertow)">
             <item name="configLocation">/config/console/appmon-config-prod.apon</item>
+        </properties>
+
+        <!-- Undertow -->
+        <properties profile="(!prod, undertow)">
+            <item name="configLocation">/config/console/appmon-config-undertow.apon</item>
+        </properties>
+        <properties profile="(prod, undertow)">
+            <item name="configLocation">/config/console/appmon-config-undertow-prod.apon</item>
         </properties>
     </bean>
 

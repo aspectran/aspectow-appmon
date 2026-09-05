@@ -3,10 +3,18 @@
         "https://aspectran.com/dtd/aspectran-9.dtd">
 <aspectran>
 
-    <append file="/config/server/undertow/tow-server.xml"/>
-    <append file="/config/server/undertow/tow-context-root.xml"/>
-    <append resource="com/aspectran/aspectow/console/config/rules/context/tow-context-console.xml" profile="[console.ui, console.custom-ui]"/>
-    <append resource="com/aspectran/aspectow/console/config/rules/context/tow-context-console-headless.xml" profile="![console.ui, console.custom-ui]"/>
-    <append file="/config/server/undertow/tow-support.xml"/>
+    <!-- Netty Server (Default or 'netty' profile) -->
+    <append file="/config/server/netty/netty-server.xml" profile="!undertow"/>
+    <append file="/config/server/netty/netty-context-root.xml" profile="!undertow"/>
+    <append resource="com/aspectran/aspectow/console/config/rules/context/netty-context-console.xml" profile="(!undertow, [console.ui, console.custom-ui])"/>
+    <append resource="com/aspectran/aspectow/console/config/rules/context/netty-context-console-headless.xml" profile="(!undertow, ![console.ui, console.custom-ui])"/>
+    <append file="/config/server/netty/netty-support.xml" profile="!undertow"/>
+
+    <!-- Undertow Server ('undertow' profile) -->
+    <append file="/config/server/undertow/tow-server.xml" profile="undertow"/>
+    <append file="/config/server/undertow/tow-context-root.xml" profile="undertow"/>
+    <append resource="com/aspectran/aspectow/console/config/rules/context/tow-context-console.xml" profile="(undertow, [console.ui, console.custom-ui])"/>
+    <append resource="com/aspectran/aspectow/console/config/rules/context/tow-context-console-headless.xml" profile="(undertow, ![console.ui, console.custom-ui])"/>
+    <append file="/config/server/undertow/tow-support.xml" profile="undertow"/>
 
 </aspectran>

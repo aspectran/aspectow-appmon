@@ -1,0 +1,12 @@
+# Stop the Netty server
+command: netty
+parameters: {
+    item: {
+        name: mode
+        value: stop
+    }
+    item: {
+        name: server
+        value: netty.server
+    }
+}

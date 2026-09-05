@@ -69,6 +69,7 @@ shell: {
     )
     prompt: "{{green}}console>{{reset}} "
     commands: [
+        com.aspectran.netty.shell.command.NettyCommand
         com.aspectran.undertow.shell.command.UndertowCommand
         com.aspectran.shell.command.builtins.TransletCommand
         com.aspectran.shell.command.builtins.AspectCommand
@@ -104,6 +105,7 @@ daemon: {
         enabled: true
     }
     commands: [
+        com.aspectran.netty.daemon.command.NettyCommand
         com.aspectran.undertow.daemon.command.UndertowCommand
         com.aspectran.daemon.command.builtins.InvokeActionCommand
         com.aspectran.daemon.command.builtins.TransletCommand
