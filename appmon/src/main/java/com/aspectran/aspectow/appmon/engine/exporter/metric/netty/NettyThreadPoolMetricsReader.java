@@ -30,6 +30,19 @@ import java.util.concurrent.ThreadPoolExecutor;
 /**
  * A {@link MetricReader} for monitoring Netty server thread pool and worker resources.
  *
+ * <p>Collected metric data points:</p>
+ * <ul>
+ *   <li>{@code workerName} - The configured name of the Netty worker executor.</li>
+ *   <li>{@code active} - Number of active requests or threads currently processing.</li>
+ *   <li>{@code total} - Total pool size or peak request count.</li>
+ *   <li>{@code max} - Maximum configured pool size (-1 if unbounded or virtual threads).</li>
+ *   <li>{@code workerThreads} - Number of worker event loop threads.</li>
+ *   <li>{@code bossThreads} - Number of boss event loop threads.</li>
+ *   <li>{@code virtualThreads} - Whether virtual threads are enabled.</li>
+ *   <li>{@code queued} - Number of queued tasks awaiting execution (if available).</li>
+ *   <li>{@code completed} - Number of completed tasks or requests (if available).</li>
+ * </ul>
+ *
  * <p>Created: 2026-09-04</p>
  */
 public class NettyThreadPoolMetricsReader extends AbstractMetricReader {
@@ -85,7 +98,33 @@ public class NettyThreadPoolMetricsReader extends AbstractMetricReader {
         }
 
         oldActive = active;
+        return buildMetricData(active);
+    }
 
+    @Override
+    public MetricData getMetricDataIfChanged() {
+        if (nettyServer == null) {
+            return null;
+        }
+
+        int active = nettyServer.getActiveRequests();
+        if (active == oldActive) {
+            return null;
+        }
+
+        oldActive = active;
+        return buildMetricData(active);
+    }
+
+    @Override
+    public boolean hasChanges() {
+        if (nettyServer == null) {
+            return false;
+        }
+        return (nettyServer.getActiveRequests() != oldActive);
+    }
+
+    private MetricData buildMetricData(int active) {
         int total;
         int max;
         int queued = 0;
@@ -123,14 +162,6 @@ public class NettyThreadPoolMetricsReader extends AbstractMetricReader {
             metricData.putData("completed", completed);
         }
         return metricData;
-    }
-
-    @Override
-    public boolean hasChanges() {
-        if (nettyServer == null) {
-            return false;
-        }
-        return (nettyServer.getActiveRequests() != oldActive);
     }
 
     private int getWorkerThreads() {

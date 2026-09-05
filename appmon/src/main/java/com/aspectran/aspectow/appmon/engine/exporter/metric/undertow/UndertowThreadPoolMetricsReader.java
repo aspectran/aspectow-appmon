@@ -42,6 +42,17 @@ import org.xnio.management.XnioWorkerMXBean;
  *   }
  * </pre>
  *
+ * <p>Collected metric data points:</p>
+ * <ul>
+ *   <li>{@code workerName} - The configured name of the Undertow worker.</li>
+ *   <li>{@code active} - Number of active worker threads.</li>
+ *   <li>{@code total} - Total number of worker threads in the pool.</li>
+ *   <li>{@code max} - Maximum configured worker pool size.</li>
+ *   <li>{@code core} - Core worker pool size.</li>
+ *   <li>{@code busy} - Busy worker thread count.</li>
+ *   <li>{@code queued} - Number of queued tasks awaiting execution.</li>
+ * </ul>
+ *
  * <p>Created: 2025-07-07</p>
  */
 public class UndertowThreadPoolMetricsReader extends AbstractMetricReader {
@@ -98,17 +109,23 @@ public class UndertowThreadPoolMetricsReader extends AbstractMetricReader {
             return null;
         }
 
-        int total = metrics.getWorkerPoolSize();
-        int max = metrics.getMaxWorkerPoolSize();
+        oldActive = active;
+        return buildMetricData(active);
+    }
+
+    @Override
+    public MetricData getMetricDataIfChanged() {
+        if (metrics == null) {
+            return null;
+        }
+
+        int active = metrics.getBusyWorkerThreadCount();
+        if (active == oldActive) {
+            return null;
+        }
 
         oldActive = active;
-
-        return new MetricData(getMetricInfo())
-                .setFormat("{active}/{total}")
-                .putData("workerName", metrics.getName())
-                .putData("active", active)
-                .putData("total", total)
-                .putData("max", max);
+        return buildMetricData(active);
     }
 
     @Override
@@ -117,6 +134,18 @@ public class UndertowThreadPoolMetricsReader extends AbstractMetricReader {
             return false;
         }
         return (metrics.getBusyWorkerThreadCount() != oldActive);
+    }
+
+    private MetricData buildMetricData(int active) {
+        int total = metrics.getWorkerPoolSize();
+        int max = metrics.getMaxWorkerPoolSize();
+
+        return new MetricData(getMetricInfo())
+                .setFormat("{active}/{total}")
+                .putData("workerName", metrics.getName())
+                .putData("active", active)
+                .putData("total", total)
+                .putData("max", max);
     }
 
 }

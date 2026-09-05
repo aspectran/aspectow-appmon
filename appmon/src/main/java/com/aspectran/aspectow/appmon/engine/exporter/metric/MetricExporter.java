@@ -102,8 +102,12 @@ public class MetricExporter extends AbstractExporter {
 
     @Override
     public void readIfChanged(@NonNull List<String> messages, CommandOptions commandOptions) {
-        if (metricReader.hasChanges()) {
-            read(messages, commandOptions);
+        MetricData metricData = metricReader.getMetricDataIfChanged();
+        if (metricData != null) {
+            String json = metricData.toJson();
+            if (json != null) {
+                messages.add(prefix + json);
+            }
         }
     }
 

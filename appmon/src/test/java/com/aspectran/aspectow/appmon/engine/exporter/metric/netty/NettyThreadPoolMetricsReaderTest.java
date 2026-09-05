@@ -82,9 +82,11 @@ class NettyThreadPoolMetricsReaderTest {
         assertNull(reader.getMetricData(true));
 
         assertFalse(reader.hasChanges());
+        assertNull(reader.getMetricDataIfChanged());
 
         reader.stop();
         assertNull(reader.getMetricData(false));
+        assertNull(reader.getMetricDataIfChanged());
     }
 
     @Test

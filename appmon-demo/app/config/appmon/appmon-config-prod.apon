@@ -20,6 +20,14 @@ app: {
         target: netty.server/root
     }
     metric: {
+        id: cpu
+        title: CPU
+        description: Shows JVM process and system CPU usage
+        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.jvm.CpuUsageReader
+        sampleInterval: 1000
+        heading: true
+    }
+    metric: {
         id: heap
         title: Heap
         description: Shows JVM Heap memory usage status

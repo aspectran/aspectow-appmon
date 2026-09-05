@@ -68,6 +68,14 @@ public interface MetricReader {
     MetricData getMetricData(boolean greater);
 
     /**
+     * Gets the metric data only if a key monitored value has changed since the last read.
+     * @return a {@link MetricData} object if changed, or {@code null} if no change
+     */
+    default MetricData getMetricDataIfChanged() {
+        return (hasChanges() ? getMetricData(false) : null);
+    }
+
+    /**
      * Checks if the metric data has changed since the last read.
      * @return {@code true} if the data has changed, {@code false} otherwise
      */

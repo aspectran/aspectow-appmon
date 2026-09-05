@@ -32,6 +32,15 @@ import java.lang.management.ManagementFactory;
  * A {@link MetricReader} for monitoring a HikariCP connection pool via JMX.
  * It connects to the {@link com.zaxxer.hikari.HikariPoolMXBean} to read connection statistics.
  *
+ * <p>Collected metric data points:</p>
+ * <ul>
+ *   <li>{@code poolName} - The configured pool name.</li>
+ *   <li>{@code active} - Number of currently active (in-use) connections.</li>
+ *   <li>{@code idle} - Number of idle connections in the pool.</li>
+ *   <li>{@code total} - Total number of connections in the pool.</li>
+ *   <li>{@code threadsAwaitingConnection} - Number of threads currently awaiting a connection.</li>
+ * </ul>
+ *
  * <p>Created: 2025-06-02</p>
  */
 public class HikariPoolMBeanReader extends AbstractMetricReader {
@@ -88,19 +97,25 @@ public class HikariPoolMBeanReader extends AbstractMetricReader {
             return null;
         }
 
-        int active = hikariPoolMXBean.getActiveConnections();
-        int awaiting = hikariPoolMXBean.getThreadsAwaitingConnection();
+        oldUsed = used;
+        return buildMetricData(total, idle, used);
+    }
+
+    @Override
+    public MetricData getMetricDataIfChanged() {
+        if (hikariPoolMXBean == null) {
+            return null;
+        }
+
+        int total = hikariPoolMXBean.getTotalConnections();
+        int idle = hikariPoolMXBean.getIdleConnections();
+        int used = total - idle;
+        if (used == oldUsed) {
+            return null;
+        }
 
         oldUsed = used;
-
-        return new MetricData(getMetricInfo())
-                .setFormat("{used}/{total}")
-                .putData("poolName", poolName)
-                .putData("total", total)
-                .putData("active", active)
-                .putData("idle", idle)
-                .putData("awaiting", awaiting)
-                .putData("used", used);
+        return buildMetricData(total, idle, used);
     }
 
     @Override
@@ -112,6 +127,20 @@ public class HikariPoolMBeanReader extends AbstractMetricReader {
         int idle = hikariPoolMXBean.getIdleConnections();
         int used = total - idle;
         return (used != oldUsed);
+    }
+
+    private MetricData buildMetricData(int total, int idle, int used) {
+        int active = hikariPoolMXBean.getActiveConnections();
+        int awaiting = hikariPoolMXBean.getThreadsAwaitingConnection();
+
+        return new MetricData(getMetricInfo())
+                .setFormat("{used}/{total}")
+                .putData("poolName", poolName)
+                .putData("total", total)
+                .putData("active", active)
+                .putData("idle", idle)
+                .putData("awaiting", awaiting)
+                .putData("used", used);
     }
 
 }

@@ -21,6 +21,7 @@ import com.aspectran.aspectow.appmon.engine.exporter.metric.AbstractMetricReader
 import com.aspectran.aspectow.appmon.engine.exporter.metric.MetricData;
 import com.aspectran.aspectow.appmon.engine.exporter.metric.MetricReader;
 import com.aspectran.utils.DataSizeUtils;
+import org.jspecify.annotations.NonNull;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -29,6 +30,16 @@ import java.lang.management.MemoryUsage;
 /**
  * A {@link MetricReader} for monitoring JVM heap memory usage.
  * It uses the {@link java.lang.management.MemoryMXBean} to get memory statistics.
+ *
+ * <p>Collected metric data points:</p>
+ * <ul>
+ *   <li>{@code init} - Initial amount of memory in KB that the Java Virtual Machine initially requests from the operating system.</li>
+ *   <li>{@code used} - Amount of used memory in KB.</li>
+ *   <li>{@code usedKB} - Human-friendly byte size representation of used memory.</li>
+ *   <li>{@code committed} - Amount of memory in KB that is committed for the Java Virtual Machine to use.</li>
+ *   <li>{@code max} - Maximum amount of memory in KB that can be used for memory management.</li>
+ *   <li>{@code maxKB} - Human-friendly byte size representation of maximum memory.</li>
+ * </ul>
  *
  * <p>Created: 2025-06-30</p>
  */
@@ -51,7 +62,7 @@ public class HeapMemoryUsageReader extends AbstractMetricReader {
 
     @Override
     public void start() throws Exception {
-        memoryMXBean = ManagementFactory.getMemoryMXBean();
+        memoryMXBean = ManagementFactory.getPlatformMXBean(MemoryMXBean.class);
     }
 
     @Override
@@ -68,18 +79,46 @@ public class HeapMemoryUsageReader extends AbstractMetricReader {
         }
 
         MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
-        long used0 = memoryUsage.getUsed();
-        long used = used0 >> 10;
-        long usedToCompare = used >> 10;
+        long usedToCompare = memoryUsage.getUsed() >> 20;
         if (greater && usedToCompare == oldUsed) {
             return null;
         }
 
-        long init = memoryUsage.getInit() >> 10;
-        long committed = memoryUsage.getCommitted() >> 10;
-        long max = memoryUsage.getMax() >> 10;
+        oldUsed = usedToCompare;
+        return buildMetricData(memoryUsage);
+    }
+
+    @Override
+    public MetricData getMetricDataIfChanged() {
+        if (memoryMXBean == null) {
+            return null;
+        }
+
+        MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
+        long usedToCompare = memoryUsage.getUsed() >> 20;
+        if (usedToCompare == oldUsed) {
+            return null;
+        }
 
         oldUsed = usedToCompare;
+        return buildMetricData(memoryUsage);
+    }
+
+    @Override
+    public boolean hasChanges() {
+        if (memoryMXBean == null) {
+            return false;
+        }
+        MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
+        long usedToCompare = memoryUsage.getUsed() >> 20;
+        return (usedToCompare != oldUsed);
+    }
+
+    private MetricData buildMetricData(@NonNull MemoryUsage memoryUsage) {
+        long init = memoryUsage.getInit() >> 10;
+        long used = memoryUsage.getUsed() >> 10;
+        long committed = memoryUsage.getCommitted() >> 10;
+        long max = memoryUsage.getMax() >> 10;
 
         String usedKB = DataSizeUtils.toHumanFriendlyByteSize(memoryUsage.getUsed());
         String maxKB = DataSizeUtils.toHumanFriendlyByteSize(memoryUsage.getMax());
@@ -92,16 +131,6 @@ public class HeapMemoryUsageReader extends AbstractMetricReader {
                 .putData("committed", committed)
                 .putData("max", max)
                 .putData("maxKB", maxKB);
-    }
-
-    @Override
-    public boolean hasChanges() {
-        if (memoryMXBean == null) {
-            return false;
-        }
-        MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
-        long usedToCompare = memoryUsage.getUsed() >> 20;
-        return (usedToCompare != oldUsed);
     }
 
 }

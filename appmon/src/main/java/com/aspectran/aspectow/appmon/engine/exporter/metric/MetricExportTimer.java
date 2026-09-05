@@ -104,9 +104,7 @@ public class MetricExportTimer {
 
     private void saveMetricData() {
         if (sampledMetricData == null) {
-            if (metricReader.hasChanges()) {
-                sampledMetricData = metricReader.getMetricData(false);
-            }
+            sampledMetricData = metricReader.getMetricDataIfChanged();
         } else {
             MetricData metricData = metricReader.getMetricData(true);
             if (metricData != null) {
