@@ -21,4 +21,10 @@
         </properties>
     </bean>
 
+    <bean class="com.aspectran.aspectow.appmon.common.support.MaxMindIPCountryResolver">
+        <properties profile="dev">
+            <item name="databasePath">#{basePath}/config/console/mmdb/GeoIP2-Country-Test.mmdb</item>
+        </properties>
+    </bean>
+
 </aspectran>

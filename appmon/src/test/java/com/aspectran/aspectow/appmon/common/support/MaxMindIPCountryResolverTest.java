@@ -72,6 +72,28 @@ class MaxMindIPCountryResolverTest {
     }
 
     @Test
+    void resolveCountryCode_withRealTestMmdb() {
+        MaxMindIPCountryResolver resolver = new MaxMindIPCountryResolver(
+                "classpath:com/aspectran/aspectow/appmon/common/support/GeoIP2-Country-Test.mmdb");
+
+        // MaxMind test database sample IPs (IPv4 & IPv6)
+        assertEquals("GB", resolver.resolveCountryCode("81.2.69.160"));
+        assertEquals("US", resolver.resolveCountryCode("216.160.83.56"));
+        assertEquals("SE", resolver.resolveCountryCode("89.160.20.128"));
+        assertEquals("KR", resolver.resolveCountryCode("2001:230::1"));
+        assertEquals("JP", resolver.resolveCountryCode("2001:218::1"));
+
+        // Cache hit
+        assertEquals("GB", resolver.resolveCountryCode("81.2.69.160"));
+
+        // Unmatched IP falls back to locale
+        assertEquals("KR", resolver.resolveCountryCode("0.0.0.0", Locale.KOREA));
+        assertNull(resolver.resolveCountryCode("0.0.0.0"));
+
+        resolver.destroy();
+    }
+
+    @Test
     void lifecycle_setDatabasePathAndDestroy() {
         MaxMindIPCountryResolver resolver = new MaxMindIPCountryResolver();
         resolver.setDatabasePath(null);
