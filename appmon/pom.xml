@@ -75,6 +75,10 @@
             <version>2.4.240</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>com.maxmind.db</groupId>
+            <artifactId>maxmind-db</artifactId>
+        </dependency>
         <!-- Optional dependencies -->
         <dependency>
             <groupId>com.zaxxer</groupId>
