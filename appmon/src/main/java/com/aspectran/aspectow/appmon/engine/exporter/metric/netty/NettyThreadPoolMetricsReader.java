@@ -98,7 +98,7 @@ public class NettyThreadPoolMetricsReader extends AbstractMetricReader {
             queued = tpe.getQueue().size();
             completed = tpe.getCompletedTaskCount();
         } else if (nettyServer.isVirtualThreads()) {
-            total = active;
+            total = nettyServer.getPeakRequests();
             max = -1;
             completed = nettyServer.getTotalRequests() - active;
         } else {
@@ -106,7 +106,7 @@ public class NettyThreadPoolMetricsReader extends AbstractMetricReader {
             max = total;
         }
 
-        String format = (nettyServer.isVirtualThreads() ? "{active} (VT)" : "{active}/{total}");
+        String format = (nettyServer.isVirtualThreads() ? "{active}/{total} (VT)" : "{active}/{total}");
         MetricData metricData = new MetricData(getMetricInfo())
                 .setFormat(format)
                 .putData("workerName", nettyServer.getWorkerName())

@@ -69,10 +69,10 @@ class NettyThreadPoolMetricsReaderTest {
 
         MetricData data = reader.getMetricData(false);
         assertNotNull(data);
-        assertTrue(data.toJson().contains("\"format\":\"{active} (VT)\""));
+        assertTrue(data.toJson().contains("\"format\":\"{active}/{total} (VT)\""));
         assertEquals("netty-test", data.getData("workerName"));
         assertEquals(3, data.getData("active"));
-        assertEquals(3, data.getData("total"));
+        assertEquals(5, data.getData("total"));
         assertEquals(-1, data.getData("max"));
         assertEquals(8, data.getData("workerThreads"));
         assertEquals(1, data.getData("bossThreads"));
@@ -175,6 +175,11 @@ class NettyThreadPoolMetricsReaderTest {
         @Override
         public int getActiveRequests() {
             return 3;
+        }
+
+        @Override
+        public int getPeakRequests() {
+            return 5;
         }
 
         @Override
