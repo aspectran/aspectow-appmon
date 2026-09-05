@@ -26,26 +26,20 @@ import java.util.Properties;
 
 /**
  * Configuration holder for a Lettuce-backed Redis connection pool used by Aspectow Node Manager.
- * <p>Manages Redis endpoint URIs, timeouts, client options, and pooling parameters.</p>
+ * <p>Manages Redis endpoint URIs, timeouts, client options, and the number of shared connections.</p>
  *
  * <h2>Supported Configuration Properties (via properties or bean setters)</h2>
  * <ul>
  *   <li>{@code aspectow.redis.uri} / {@code uri} — Target Redis connection URI (e.g., {@code "redis://10.0.0.3:6379/5"})</li>
  *   <li>{@code aspectow.redis.timeout} / {@code timeout} — Redis command/connection timeout (e.g., {@code "5s"}, {@code "5000ms"})</li>
- *   <li>{@code aspectow.redis.pool.maxTotal} / {@code maxTotal} — Maximum number of allocated connections (default: 64)</li>
- *   <li>{@code aspectow.redis.pool.maxIdle} / {@code maxIdle} — Maximum number of idle connections (default: 32)</li>
- *   <li>{@code aspectow.redis.pool.minIdle} / {@code minIdle} — Minimum number of idle connections (default: 8)</li>
- *   <li>{@code aspectow.redis.pool.maxWait} / {@code maxWait} — Maximum wait duration for borrowing a connection from the pool (default: 5s, e.g., {@code "5s"}, {@code "5000ms"})</li>
+ *   <li>{@code aspectow.redis.pool.size} / {@code poolSize} — Number of shared multiplexed connections (default: 8)</li>
  * </ul>
  *
  * <h2>Example Aspectran Bean Definition</h2>
  * <pre>{@code
  * <bean id="redisConnectionPoolConfig" class="com.aspectran.aspectow.node.redis.RedisConnectionPoolConfig">
  *     <property name="timeout" value="5s"/>
- *     <property name="maxTotal" value="64"/>
- *     <property name="maxIdle" value="32"/>
- *     <property name="minIdle" value="8"/>
- *     <property name="maxWait" value="5s"/>
+ *     <property name="poolSize" value="8"/>
  *     <argument>
  *         <bean class="com.aspectran.core.support.PropertiesFactoryBean">
  *             <properties profile="prod">
@@ -62,25 +56,13 @@ import java.util.Properties;
  */
 public class RedisConnectionPoolConfig {
 
-    private static final int DEFAULT_MAX_TOTAL = 64;
-
-    private static final int DEFAULT_MAX_IDLE = 32;
-
-    private static final int DEFAULT_MIN_IDLE = 8;
-
-    private static final Duration DEFAULT_MAX_WAIT = Duration.ofSeconds(5);
+    private static final int DEFAULT_POOL_SIZE = 8;
 
     private RedisURI redisURI;
 
     private ClientOptions clientOptions;
 
-    private int maxTotal = DEFAULT_MAX_TOTAL;
-
-    private int maxIdle = DEFAULT_MAX_IDLE;
-
-    private int minIdle = DEFAULT_MIN_IDLE;
-
-    private Duration maxWait = DEFAULT_MAX_WAIT;
+    private int poolSize = DEFAULT_POOL_SIZE;
 
     /**
      * Instantiates a new RedisConnectionPoolConfig with default settings.
@@ -99,21 +81,20 @@ public class RedisConnectionPoolConfig {
         if (StringUtils.hasText(timeout)) {
             setTimeout(timeout);
         }
-        String maxTotal = properties.getProperty("aspectow.redis.pool.maxTotal");
-        if (StringUtils.hasText(maxTotal)) {
-            setMaxTotal(maxTotal);
-        }
-        String maxIdle = properties.getProperty("aspectow.redis.pool.maxIdle");
-        if (StringUtils.hasText(maxIdle)) {
-            setMaxIdle(maxIdle);
-        }
-        String minIdle = properties.getProperty("aspectow.redis.pool.minIdle");
-        if (StringUtils.hasText(minIdle)) {
-            setMinIdle(minIdle);
-        }
-        String maxWait = properties.getProperty("aspectow.redis.pool.maxWait");
-        if (StringUtils.hasText(maxWait)) {
-            setMaxWait(parseDuration(maxWait));
+        String poolSize = properties.getProperty("aspectow.redis.pool.size");
+        if (StringUtils.hasText(poolSize)) {
+            setPoolSize(poolSize);
+        } else {
+            // Backward compatibility
+            String minIdle = properties.getProperty("aspectow.redis.pool.minIdle");
+            if (StringUtils.hasText(minIdle)) {
+                setPoolSize(minIdle);
+            } else {
+                String maxTotal = properties.getProperty("aspectow.redis.pool.maxTotal");
+                if (StringUtils.hasText(maxTotal)) {
+                    setPoolSize(maxTotal);
+                }
+            }
         }
     }
 
@@ -170,107 +151,117 @@ public class RedisConnectionPoolConfig {
     }
 
     /**
-     * Returns the maximum wait duration for borrowing a connection from the pool.
-     * @return the maximum wait duration
+     * Returns the size of the shared connection pool.
+     * @return the pool size
      */
-    public Duration getMaxWaitDuration() {
-        return maxWait;
+    public int getPoolSize() {
+        return poolSize;
     }
 
     /**
-     * Sets the maximum wait duration for borrowing a connection from the pool.
-     * @param maxWait the maximum wait duration
+     * Sets the size of the shared connection pool.
+     * @param poolSize the pool size
      */
-    public void setMaxWait(Duration maxWait) {
-        this.maxWait = maxWait;
+    public void setPoolSize(int poolSize) {
+        this.poolSize = poolSize;
     }
 
     /**
-     * Sets the maximum wait duration for borrowing a connection from the pool as a string (e.g. "3s", "3000ms").
-     * @param maxWait the max wait string
+     * Sets the size of the shared connection pool as a string.
+     * @param poolSize the pool size string
      */
-    public void setMaxWait(String maxWait) {
-        if (StringUtils.hasText(maxWait)) {
-            setMaxWait(parseDuration(maxWait));
+    public void setPoolSize(String poolSize) {
+        if (StringUtils.hasText(poolSize)) {
+            setPoolSize(Integer.parseInt(poolSize.trim()));
         }
     }
 
     /**
-     * Returns the maximum number of allocated connections.
-     * @return the maximum number of allocated connections
+     * Alias for {@link #getPoolSize()} for backward compatibility.
+     * @return the pool size
      */
     public int getMaxTotal() {
-        return maxTotal;
+        return poolSize;
     }
 
     /**
-     * Sets the maximum number of allocated connections.
-     * @param maxTotal the maximum number of allocated connections
+     * Alias for {@link #setPoolSize(int)} for backward compatibility.
+     * @param maxTotal the max total
      */
     public void setMaxTotal(int maxTotal) {
-        this.maxTotal = maxTotal;
+        setPoolSize(maxTotal);
     }
 
     /**
-     * Sets the maximum number of allocated connections as a string.
+     * Alias for {@link #setPoolSize(String)} for backward compatibility.
      * @param maxTotal the max total string
      */
     public void setMaxTotal(String maxTotal) {
-        if (StringUtils.hasText(maxTotal)) {
-            setMaxTotal(Integer.parseInt(maxTotal.trim()));
-        }
+        setPoolSize(maxTotal);
     }
 
     /**
-     * Returns the maximum number of idle connections.
-     * @return the maximum number of idle connections
+     * Alias for {@link #getPoolSize()} for backward compatibility.
+     * @return the pool size
      */
     public int getMaxIdle() {
-        return maxIdle;
+        return poolSize;
     }
 
     /**
-     * Sets the maximum number of idle connections.
-     * @param maxIdle the maximum number of idle connections
+     * Alias for {@link #setPoolSize(int)} for backward compatibility.
+     * @param maxIdle the max idle
      */
     public void setMaxIdle(int maxIdle) {
-        this.maxIdle = maxIdle;
+        setPoolSize(maxIdle);
     }
 
     /**
-     * Sets the maximum number of idle connections as a string.
+     * Alias for {@link #setPoolSize(String)} for backward compatibility.
      * @param maxIdle the max idle string
      */
     public void setMaxIdle(String maxIdle) {
-        if (StringUtils.hasText(maxIdle)) {
-            setMaxIdle(Integer.parseInt(maxIdle.trim()));
-        }
+        setPoolSize(maxIdle);
     }
 
     /**
-     * Returns the minimum number of idle connections.
-     * @return the minimum number of idle connections
+     * Alias for {@link #getPoolSize()} for backward compatibility.
+     * @return the pool size
      */
     public int getMinIdle() {
-        return minIdle;
+        return poolSize;
     }
 
     /**
-     * Sets the minimum number of idle connections.
-     * @param minIdle the minimum number of idle connections
+     * Alias for {@link #setPoolSize(int)} for backward compatibility.
+     * @param minIdle the min idle
      */
     public void setMinIdle(int minIdle) {
-        this.minIdle = minIdle;
+        setPoolSize(minIdle);
     }
 
     /**
-     * Sets the minimum number of idle connections as a string.
+     * Alias for {@link #setPoolSize(String)} for backward compatibility.
      * @param minIdle the min idle string
      */
     public void setMinIdle(String minIdle) {
-        if (StringUtils.hasText(minIdle)) {
-            setMinIdle(Integer.parseInt(minIdle.trim()));
-        }
+        setPoolSize(minIdle);
+    }
+
+    /**
+     * No-op setter preserved for backward compatibility.
+     * @param maxWait the max wait duration
+     */
+    public void setMaxWait(Duration maxWait) {
+        // No-op in shared connection mode
+    }
+
+    /**
+     * No-op setter preserved for backward compatibility.
+     * @param maxWait the max wait string
+     */
+    public void setMaxWait(String maxWait) {
+        // No-op in shared connection mode
     }
 
     private static Duration parseDuration(@NonNull String text) {
@@ -319,10 +310,7 @@ public class RedisConnectionPoolConfig {
         ToStringBuilder tsb = new ToStringBuilder();
         tsb.append("redisURI", redisURI);
         tsb.append("clientOptions", clientOptions);
-        tsb.append("maxTotal", getMaxTotal());
-        tsb.append("maxIdle", getMaxIdle());
-        tsb.append("minIdle", getMinIdle());
-        tsb.append("maxWaitDuration", getMaxWaitDuration());
+        tsb.append("poolSize", poolSize);
         return tsb.toString();
     }
 

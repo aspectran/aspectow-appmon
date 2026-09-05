@@ -28,10 +28,9 @@ class RedisConnectionPoolConfigTest {
     @Test
     void testDefaults() {
         RedisConnectionPoolConfig config = new RedisConnectionPoolConfig();
-        assertEquals(64, config.getMaxTotal());
-        assertEquals(32, config.getMaxIdle());
+        assertEquals(8, config.getPoolSize());
         assertEquals(8, config.getMinIdle());
-        assertEquals(Duration.ofSeconds(5), config.getMaxWaitDuration());
+        assertEquals(8, config.getMaxTotal());
     }
 
     @Test
@@ -39,34 +38,37 @@ class RedisConnectionPoolConfigTest {
         Properties props = new Properties();
         props.setProperty("aspectow.redis.uri", "redis://localhost:6379/0");
         props.setProperty("aspectow.redis.timeout", "10s");
-        props.setProperty("aspectow.redis.pool.maxTotal", "128");
-        props.setProperty("aspectow.redis.pool.maxIdle", "64");
-        props.setProperty("aspectow.redis.pool.minIdle", "16");
-        props.setProperty("aspectow.redis.pool.maxWait", "2500ms");
+        props.setProperty("aspectow.redis.pool.size", "16");
 
         RedisConnectionPoolConfig config = new RedisConnectionPoolConfig(props);
         assertNotNull(config.getRedisURI());
         assertEquals("localhost", config.getRedisURI().getHost());
         assertEquals(6379, config.getRedisURI().getPort());
         assertEquals(Duration.ofSeconds(10), config.getRedisURI().getTimeout());
-        assertEquals(128, config.getMaxTotal());
-        assertEquals(64, config.getMaxIdle());
-        assertEquals(16, config.getMinIdle());
-        assertEquals(Duration.ofMillis(2500), config.getMaxWaitDuration());
+        assertEquals(16, config.getPoolSize());
+    }
+
+    @Test
+    void testBackwardCompatibilityProperties() {
+        Properties props = new Properties();
+        props.setProperty("aspectow.redis.uri", "redis://localhost:6379/0");
+        props.setProperty("aspectow.redis.pool.minIdle", "12");
+
+        RedisConnectionPoolConfig config = new RedisConnectionPoolConfig(props);
+        assertEquals(12, config.getPoolSize());
+        assertEquals(12, config.getMinIdle());
+        assertEquals(12, config.getMaxTotal());
     }
 
     @Test
     void testStringSetters() {
         RedisConnectionPoolConfig config = new RedisConnectionPoolConfig();
-        config.setMaxTotal("100");
-        config.setMaxIdle("50");
-        config.setMinIdle("10");
-        config.setMaxWait("8s");
+        config.setPoolSize("16");
+        assertEquals(16, config.getPoolSize());
 
-        assertEquals(100, config.getMaxTotal());
-        assertEquals(50, config.getMaxIdle());
-        assertEquals(10, config.getMinIdle());
-        assertEquals(Duration.ofSeconds(8), config.getMaxWaitDuration());
+        config.setMinIdle("4");
+        assertEquals(4, config.getPoolSize());
+        assertEquals(4, config.getMinIdle());
     }
 
 }

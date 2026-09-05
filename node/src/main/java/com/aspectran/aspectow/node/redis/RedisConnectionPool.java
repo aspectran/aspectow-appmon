@@ -135,7 +135,7 @@ public class RedisConnectionPool implements InitializableBean, DisposableBean {
             client.setOptions(poolConfig.getClientOptions());
         }
 
-        int poolSize = poolConfig.getMinIdle();
+        int poolSize = poolConfig.getPoolSize();
         if (poolSize <= 0) {
             poolSize = 8;
         }
