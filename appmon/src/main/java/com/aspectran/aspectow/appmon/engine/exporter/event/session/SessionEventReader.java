@@ -48,6 +48,7 @@ import java.lang.reflect.Constructor;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -70,7 +71,7 @@ public class SessionEventReader extends AbstractEventReader {
     public static final String USER_COUNTRY_CODE = "user.countryCode";
     public static final String USER_ACTIVITY_COUNT = "user.activityCount";
 
-    private static final Set<String> registeredTrackingTargets = ConcurrentHashMap.newKeySet();
+    private static final Map<String, UserTrackingListener> registeredTrackingListeners = new ConcurrentHashMap<>();
 
     private String serverId;
 
@@ -87,6 +88,8 @@ public class SessionEventReader extends AbstractEventReader {
     private SessionManager sessionManager;
 
     private SessionEventReadingListener sessionListener;
+
+    private UserTrackingListener userTrackingListener;
 
     private volatile boolean changed;
 
@@ -110,15 +113,24 @@ public class SessionEventReader extends AbstractEventReader {
         contextName = (arr[1] != null ? arr[1] : "");
 
         String targetKey = serverId + "/" + contextName;
-        if (registeredTrackingTargets.add(targetKey)) {
-            IPCountryResolver ipCountryResolver = null;
-            if (getExporterManager().containsBean(IPCountryResolver.class)) {
-                ipCountryResolver = getExporterManager().getBean(IPCountryResolver.class);
-            }
-            ActivityContext context = getExporterManager().getAppMonManager().getActivityContext();
-            UserTrackingListener userTrackingListener = new UserTrackingListener(context, ipCountryResolver);
-            getSessionListenerRegistration().register(userTrackingListener, contextName);
+        IPCountryResolver ipCountryResolver = null;
+        if (getExporterManager().containsBean(IPCountryResolver.class)) {
+            ipCountryResolver = getExporterManager().getBean(IPCountryResolver.class);
         }
+        ActivityContext context = getExporterManager().getAppMonManager().getActivityContext();
+        UserTrackingListener newListener = new UserTrackingListener(context, ipCountryResolver);
+        UserTrackingListener oldListener = registeredTrackingListeners.put(targetKey, newListener);
+
+        SessionListenerRegistration registration = getSessionListenerRegistration();
+        if (oldListener != null) {
+            try {
+                registration.remove(oldListener, contextName);
+            } catch (Exception e) {
+                // ignored
+            }
+        }
+        registration.register(newListener, contextName);
+        this.userTrackingListener = newListener;
 
         if (getEventInfo().hasParameters()) {
             Parameters params = getEventInfo().getParameters();
@@ -184,6 +196,16 @@ public class SessionEventReader extends AbstractEventReader {
                     // ignored
                 }
                 sessionListener = null;
+            }
+            if (userTrackingListener != null) {
+                String targetKey = serverId + "/" + contextName;
+                registeredTrackingListeners.remove(targetKey, userTrackingListener);
+                try {
+                    getSessionListenerRegistration().remove(userTrackingListener, contextName);
+                } catch (UnavailableException e) {
+                    // ignored
+                }
+                userTrackingListener = null;
             }
         }
     }
