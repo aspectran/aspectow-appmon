@@ -64,4 +64,10 @@ public interface Exporter extends LifeCycle {
      */
     void broadcast(String message);
 
+    /**
+     * Destroys the exporter and releases any allocated resources.
+     */
+    default void destroy() {
+    }
+
 }

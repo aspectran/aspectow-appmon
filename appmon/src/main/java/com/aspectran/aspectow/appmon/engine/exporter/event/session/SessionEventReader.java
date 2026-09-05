@@ -22,12 +22,9 @@ import com.aspectran.aspectow.appmon.engine.config.EventInfo;
 import com.aspectran.aspectow.appmon.engine.exporter.ExporterManager;
 import com.aspectran.aspectow.appmon.engine.exporter.event.AbstractEventReader;
 import com.aspectran.aspectow.appmon.engine.persist.counter.EventCount;
-import com.aspectran.core.component.UnavailableException;
-import com.aspectran.core.component.bean.aware.ActivityContextAware;
 import com.aspectran.core.component.session.ManagedSession;
 import com.aspectran.core.component.session.Session;
 import com.aspectran.core.component.session.SessionListener;
-import com.aspectran.core.component.session.SessionListenerRegistration;
 import com.aspectran.core.component.session.SessionManager;
 import com.aspectran.core.component.session.SessionManagerProvider;
 import com.aspectran.core.component.session.SessionStatistics;
@@ -38,12 +35,11 @@ import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.apon.Parameters;
 import com.aspectran.utils.json.JsonBuilder;
 import com.aspectran.utils.json.JsonString;
+import com.aspectran.utils.lifecycle.LifeCycle;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Constructor;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -85,6 +81,10 @@ public class SessionEventReader extends AbstractEventReader {
 
     private String nestedPropertyPath;
 
+    private LifeCycle serverLifeCycle;
+
+    private LifeCycle.Listener serverLifeCycleListener;
+
     private SessionManager sessionManager;
 
     private SessionEventReadingListener sessionListener;
@@ -112,25 +112,39 @@ public class SessionEventReader extends AbstractEventReader {
         serverId = arr[0];
         contextName = (arr[1] != null ? arr[1] : "");
 
-        String targetKey = serverId + "/" + contextName;
-        IPCountryResolver ipCountryResolver = null;
-        if (getExporterManager().containsBean(IPCountryResolver.class)) {
-            ipCountryResolver = getExporterManager().getBean(IPCountryResolver.class);
-        }
-        ActivityContext context = getExporterManager().getAppMonManager().getActivityContext();
-        UserTrackingListener newListener = new UserTrackingListener(context, ipCountryResolver);
-        UserTrackingListener oldListener = registeredTrackingListeners.put(targetKey, newListener);
+        SessionManagerProvider server = (serverId != null ? getExporterManager().getBean(serverId) : null);
+        if (server instanceof LifeCycle lifeCycle) {
+            this.serverLifeCycle = lifeCycle;
+            if (lifeCycle.isStarted()) {
+                setupSessionManager(server);
+            } else {
+                this.serverLifeCycleListener = new LifeCycle.Listener() {
+                    @Override
+                    public void lifeCycleStarted(LifeCycle event) {
+                        setupSessionManager(server);
+                        synchronized (SessionEventReader.this) {
+                            if (sessionListener != null && sessionManager != null) {
+                                try {
+                                    sessionManager.addSessionListener(sessionListener);
+                                } catch (Exception e) {
+                                    logger.warn("Failed to register SessionEventReadingListener on server start", e);
+                                }
+                            }
+                        }
+                    }
 
-        SessionListenerRegistration registration = getSessionListenerRegistration();
-        if (oldListener != null) {
-            try {
-                registration.remove(oldListener, contextName);
-            } catch (Exception e) {
-                // ignored
+                    @Override
+                    public void lifeCycleStopped(LifeCycle event) {
+                        synchronized (SessionEventReader.this) {
+                            sessionManager = null;
+                        }
+                    }
+                };
+                lifeCycle.addLifeCycleListener(serverLifeCycleListener);
             }
+        } else if (server != null) {
+            setupSessionManager(server);
         }
-        registration.register(newListener, contextName);
-        this.userTrackingListener = newListener;
 
         if (getEventInfo().hasParameters()) {
             Parameters params = getEventInfo().getParameters();
@@ -169,79 +183,132 @@ public class SessionEventReader extends AbstractEventReader {
         }
     }
 
+    private synchronized void setupSessionManager(@NonNull SessionManagerProvider server) {
+        try {
+            SessionManager sm = (StringUtils.hasLength(contextName) ?
+                    server.getSessionManager(contextName) : server.getSessionManager());
+            if (sm != null) {
+                this.sessionManager = sm;
+                registerUserTrackingListener(sm);
+            } else {
+                logger.warn("Unable to obtain session manager from {}", getEventInfo().getTarget());
+            }
+        } catch (Exception e) {
+            logger.warn("Cannot resolve session manager with {}", getEventInfo().getTarget(), e);
+        }
+    }
+
+    private void registerUserTrackingListener(@NonNull SessionManager sm) {
+        String targetKey = serverId + "/" + contextName;
+        ActivityContext currentContext = getExporterManager().getAppMonManager().getActivityContext();
+        synchronized (registeredTrackingListeners) {
+            UserTrackingListener existingListener = registeredTrackingListeners.get(targetKey);
+            if (existingListener == null || existingListener.getActivityContext() != currentContext) {
+                if (existingListener != null) {
+                    try {
+                        sm.removeSessionListener(existingListener);
+                    } catch (Exception e) {
+                        // ignored
+                    }
+                }
+                IPCountryResolver ipCountryResolver = null;
+                if (getExporterManager().containsBean(IPCountryResolver.class)) {
+                    ipCountryResolver = getExporterManager().getBean(IPCountryResolver.class);
+                }
+                UserTrackingListener newListener = new UserTrackingListener(currentContext, ipCountryResolver);
+                try {
+                    sm.addSessionListener(newListener);
+                    registeredTrackingListeners.put(targetKey, newListener);
+                    this.userTrackingListener = newListener;
+                } catch (Exception e) {
+                    logger.warn("Failed to register UserTrackingListener for {}", targetKey, e);
+                }
+            } else {
+                this.userTrackingListener = existingListener;
+            }
+        }
+    }
+
     @Override
-    public void start() {
+    public synchronized void start() {
+        if (sessionManager == null) {
+            sessionManager = resolveSessionManager();
+            if (sessionManager != null && userTrackingListener == null) {
+                registerUserTrackingListener(sessionManager);
+            }
+        }
+        if (sessionManager != null) {
+            if (sessionListener == null) {
+                sessionListener = new SessionEventReadingListener(this);
+                sessionManager.addSessionListener(sessionListener);
+                changed = true;
+            }
+        } else {
+            if (serverLifeCycle != null && !serverLifeCycle.isStarted()) {
+                sessionListener = new SessionEventReadingListener(this);
+                changed = true;
+            } else {
+                throw new RuntimeException("Cannot resolve session manager with " + getEventInfo().getTarget());
+            }
+        }
+    }
+
+    @Override
+    public synchronized void stop() {
+        changed = false;
+        if (sessionManager != null && sessionListener != null) {
+            try {
+                sessionManager.removeSessionListener(sessionListener);
+            } catch (Exception e) {
+                // ignored
+            }
+        }
+        sessionListener = null;
+    }
+
+    @Override
+    public synchronized void destroy() {
+        if (serverLifeCycle != null && serverLifeCycleListener != null) {
+            try {
+                serverLifeCycle.removeLifeCycleListener(serverLifeCycleListener);
+            } catch (Exception e) {
+                // ignored
+            }
+            serverLifeCycleListener = null;
+            serverLifeCycle = null;
+        }
+        if (userTrackingListener != null) {
+            String targetKey = serverId + "/" + contextName;
+            synchronized (registeredTrackingListeners) {
+                if (registeredTrackingListeners.remove(targetKey, userTrackingListener)) {
+                    SessionManager sm = (sessionManager != null ? sessionManager : resolveSessionManager());
+                    if (sm != null) {
+                        try {
+                            sm.removeSessionListener(userTrackingListener);
+                        } catch (Exception e) {
+                            // ignored
+                        }
+                    }
+                }
+            }
+            userTrackingListener = null;
+        }
+        sessionManager = null;
+    }
+
+    @Nullable
+    private SessionManager resolveSessionManager() {
+        if (serverId == null) {
+            return null;
+        }
         try {
             SessionManagerProvider server = getExporterManager().getBean(serverId);
-            sessionManager = (StringUtils.hasLength(contextName) ?
+            return (StringUtils.hasLength(contextName) ?
                     server.getSessionManager(contextName) : server.getSessionManager());
         } catch (Exception e) {
-            throw new RuntimeException("Cannot resolve session manager with " + getEventInfo().getTarget(), e);
+            logger.warn("Cannot resolve session manager with {}", getEventInfo().getTarget(), e);
+            return null;
         }
-        if (sessionManager != null) {
-            sessionListener = new SessionEventReadingListener(this);
-            getSessionListenerRegistration().register(sessionListener, contextName);
-            changed = true;
-        }
-    }
-
-    @Override
-    public void stop() {
-        if (sessionManager != null) {
-            changed = false;
-            if (sessionListener != null) {
-                try {
-                    getSessionListenerRegistration().remove(sessionListener, contextName);
-                } catch (UnavailableException e) {
-                    // ignored
-                }
-                sessionListener = null;
-            }
-            if (userTrackingListener != null) {
-                String targetKey = serverId + "/" + contextName;
-                registeredTrackingListeners.remove(targetKey, userTrackingListener);
-                try {
-                    getSessionListenerRegistration().remove(userTrackingListener, contextName);
-                } catch (UnavailableException e) {
-                    // ignored
-                }
-                userTrackingListener = null;
-            }
-        }
-    }
-
-    @NonNull
-    private SessionListenerRegistration getSessionListenerRegistration() {
-        if (getExporterManager().containsBean(SessionListenerRegistration.class)) {
-            return getExporterManager().getBean(SessionListenerRegistration.class);
-        }
-        return createSessionListenerRegistrationFallback();
-    }
-
-    @NonNull
-    private SessionListenerRegistration createSessionListenerRegistrationFallback() {
-        ActivityContext context = getExporterManager().getAppMonManager().getActivityContext();
-        String[] candidateClasses = {
-            "com.aspectran.undertow.support.SessionListenerRegistrationBean",
-            "com.aspectran.netty.support.SessionListenerRegistrationBean"
-        };
-        for (String className : candidateClasses) {
-            try {
-                Class<?> clazz = ClassUtils.classForName(className);
-                Constructor<?> ctor = clazz.getConstructor(String.class, String.class);
-                SessionListenerRegistration registration =
-                        (SessionListenerRegistration) ctor.newInstance(serverId, contextName);
-                if (registration instanceof ActivityContextAware aware) {
-                    aware.setActivityContext(context);
-                }
-                return registration;
-            } catch (ClassNotFoundException ignored) {
-                // Ignore and try the next candidate
-            } catch (Exception e) {
-                logger.warn("Failed to instantiate {}", className, e);
-            }
-        }
-        throw new IllegalStateException("Bean for SessionListenerRegistration must be defined");
     }
 
     @Override

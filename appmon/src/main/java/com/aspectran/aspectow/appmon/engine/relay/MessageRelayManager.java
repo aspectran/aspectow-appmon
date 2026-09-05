@@ -649,11 +649,11 @@ public class MessageRelayManager {
     }
 
     /**
-     * Destroys the manager, stopping all exporters.
+     * Destroys the manager, stopping and destroying all exporters.
      */
     public void destroy() {
         for (ExporterManager exporterManager : exporterManagers) {
-            exporterManager.stop();
+            exporterManager.destroy();
         }
         exporterManagers.clear();
     }

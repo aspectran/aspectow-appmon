@@ -171,6 +171,21 @@ public class ExporterManager {
     }
 
     /**
+     * Destroys this manager and all its managed exporters.
+     */
+    public synchronized void destroy() {
+        stop();
+        for (Exporter exporter : exporters.values()) {
+            try {
+                exporter.destroy();
+            } catch (Exception e) {
+                logger.warn(e.getMessage(), e);
+            }
+        }
+        exporters.clear();
+    }
+
+    /**
      * Broadcasts a message using the application's export service.
      * @param message the message to broadcast
      */

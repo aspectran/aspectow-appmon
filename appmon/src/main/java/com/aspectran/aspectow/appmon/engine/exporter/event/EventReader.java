@@ -47,9 +47,15 @@ public interface EventReader {
     void start() throws Exception;
 
     /**
-     * Stops the event reader and releases any resources.
+     * Stops the event reader.
      */
     void stop();
+
+    /**
+     * Destroys the event reader and releases any allocated resources.
+     */
+    default void destroy() {
+    }
 
     /**
      * Reads the current event data and returns it as a JSON string.

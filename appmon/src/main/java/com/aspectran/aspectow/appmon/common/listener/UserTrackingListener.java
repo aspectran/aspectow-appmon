@@ -25,6 +25,8 @@ import com.aspectran.utils.StringUtils;
 import com.aspectran.web.support.util.WebUtils;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Locale;
 
@@ -38,6 +40,8 @@ import static com.aspectran.aspectow.appmon.engine.exporter.event.session.Sessio
  * <p>Created: 2024-12-13</p>
  */
 public class UserTrackingListener implements SessionListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserTrackingListener.class);
 
     private final ActivityContext context;
 
@@ -71,25 +75,47 @@ public class UserTrackingListener implements SessionListener {
     }
 
     /**
+     * Returns the activity context associated with this listener.
+     * @return the activity context, or {@code null} if none was provided
+     */
+    @Nullable
+    public ActivityContext getActivityContext() {
+        return context;
+    }
+
+    /**
      * Called when a session is created. It retrieves the remote IP address
      * and locale from the current activity and stores them in the session attributes.
      * @param session the session that was created
      */
     @Override
     public void sessionCreated(@NonNull Session session) {
-        if (context != null && context.hasCurrentActivity()) {
-            Activity activity = context.getCurrentActivity();
-            if (activity.hasTranslet()) {
-                Translet translet = activity.getTranslet();
-                String ipAddress = WebUtils.getRemoteAddr(translet);
-                if (StringUtils.hasLength(ipAddress)) {
-                    session.setAttribute(USER_IP_ADDRESS, ipAddress);
-                    if (ipCountryResolver != null) {
-                        Locale locale = translet.getRequestAdapter().getLocale();
-                        String countryCode = ipCountryResolver.resolveCountryCode(ipAddress, locale);
-                        if (StringUtils.hasLength(countryCode)) {
-                            session.setAttribute(USER_COUNTRY_CODE, countryCode);
-                        }
+        if (context == null) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("Cannot track user IP: ActivityContext is null");
+            }
+            return;
+        }
+        if (!context.hasCurrentActivity()) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("Cannot track user IP: No current activity in context for session '{}'", session.getId());
+            }
+            return;
+        }
+        Activity activity = context.getCurrentActivity();
+        if (activity.hasTranslet()) {
+            Translet translet = activity.getTranslet();
+            String ipAddress = WebUtils.getRemoteAddr(translet);
+            if (StringUtils.hasLength(ipAddress)) {
+                session.setAttribute(USER_IP_ADDRESS, ipAddress);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Tracked user IP '{}' for session '{}'", ipAddress, session.getId());
+                }
+                if (ipCountryResolver != null) {
+                    Locale locale = translet.getRequestAdapter().getLocale();
+                    String countryCode = ipCountryResolver.resolveCountryCode(ipAddress, locale);
+                    if (StringUtils.hasLength(countryCode)) {
+                        session.setAttribute(USER_COUNTRY_CODE, countryCode);
                     }
                 }
             }

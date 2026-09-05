@@ -118,6 +118,15 @@ public class EventExporter extends AbstractExporter {
     }
 
     @Override
+    public void destroy() {
+        if (timer != null) {
+            timer.destroy();
+            timer = null;
+        }
+        eventReader.destroy();
+    }
+
+    @Override
     public String toString() {
         if (isStopped()) {
             return ToStringBuilder.toString(super.toString(), eventInfo);
