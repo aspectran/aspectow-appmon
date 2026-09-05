@@ -22,14 +22,26 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
-import io.lettuce.core.support.ConnectionPoolSupport;
-import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Redis connection pool based on Lettuce.
+ * Thread-safe, lock-free Redis connection pool based on Lettuce multiplexing.
+ * <p>Instead of relying on heavy pool synchronization (e.g. Apache Commons Pool2)
+ * which causes severe lock contention under high concurrency (e.g. Java 21 Virtual Threads),
+ * this implementation maintains a striped set of shared {@link StatefulRedisConnection}
+ * instances. Each shared connection is wrapped in a proxy whose {@code close()} method
+ * is a no-op, allowing callers to use standard {@code try-with-resources} blocks without
+ * closing the underlying multiplexed socket connections.</p>
  *
  * <p>Created: 2019/12/08</p>
  */
@@ -39,7 +51,11 @@ public class RedisConnectionPool implements InitializableBean, DisposableBean {
 
     private RedisClient client;
 
-    private GenericObjectPool<StatefulRedisConnection<String, String>> pool;
+    private StatefulRedisConnection<String, String>[] sharedConnections;
+
+    private StatefulRedisConnection<String, String>[] proxyConnections;
+
+    private final AtomicInteger connectionIndex = new AtomicInteger();
 
     /**
      * Instantiates a new RedisConnectionPool with the specified configuration.
@@ -50,13 +66,28 @@ public class RedisConnectionPool implements InitializableBean, DisposableBean {
     }
 
     /**
-     * Borrows a connection from the pool.
-     * @return a stateful Redis connection
-     * @throws Exception if a connection cannot be borrowed from the pool
+     * Obtains a shared stateful Redis connection from the striped pool.
+     * <p>The returned connection is thread-safe, multiplexed, and wrapped in a proxy
+     * whose {@code close()} method is a no-op so that callers using
+     * {@code try-with-resources} will not close the underlying socket connection.</p>
+     * @return a thread-safe, shared stateful Redis connection
+     * @throws Exception if the connection pool is not initialized
      */
     public StatefulRedisConnection<String, String> getConnection() throws Exception {
-        Assert.state(pool != null, "No RedisConnectionPool configured");
-        return pool.borrowObject();
+        Assert.state(proxyConnections != null && proxyConnections.length > 0, "RedisConnectionPool is not initialized");
+        int idx = (connectionIndex.getAndIncrement() & 0x7FFFFFFF) % proxyConnections.length;
+        return proxyConnections[idx];
+    }
+
+    /**
+     * Establishes and returns a new dedicated, unpooled Redis connection.
+     * <p>The caller is responsible for closing this connection (e.g. via {@code try-with-resources}).
+     * Useful for transactions (MULTI/EXEC) or blocking commands where isolation is required.</p>
+     * @return a new dedicated stateful Redis connection
+     */
+    public StatefulRedisConnection<String, String> getDedicatedConnection() {
+        Assert.state(client != null, "RedisConnectionPool is not initialized");
+        return client.connect();
     }
 
     /**
@@ -70,16 +101,25 @@ public class RedisConnectionPool implements InitializableBean, DisposableBean {
 
     /**
      * Checks if the connection pool is active and available.
-     * @return {@code true} if the pool is initialized and not closed, otherwise {@code false}
+     * @return {@code true} if the pool is initialized and at least one shared connection is open, otherwise {@code false}
      */
     public boolean isAvailable() {
-        return (pool != null && !pool.isClosed());
+        if (client == null || sharedConnections == null || sharedConnections.length == 0) {
+            return false;
+        }
+        for (StatefulRedisConnection<String, String> connection : sharedConnections) {
+            if (connection != null && connection.isOpen()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * Initializes the Redis client and connection pool.
+     * Initializes the Redis client and striped shared connections.
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void initialize() {
         Assert.state(client == null, "RedisConnectionPool is already initialized");
         RedisURI redisURI = poolConfig.getRedisURI();
@@ -94,23 +134,38 @@ public class RedisConnectionPool implements InitializableBean, DisposableBean {
         if (poolConfig.getClientOptions() != null) {
             client.setOptions(poolConfig.getClientOptions());
         }
-        pool = ConnectionPoolSupport
-                .createGenericObjectPool(()
-                        -> client.connect(), poolConfig);
+
+        int poolSize = poolConfig.getMinIdle();
+        if (poolSize <= 0) {
+            poolSize = 8;
+        }
+        poolSize = Math.clamp(poolSize, 2, 32);
+
+        sharedConnections = (StatefulRedisConnection<String, String>[]) new StatefulRedisConnection<?, ?>[poolSize];
+        proxyConnections = (StatefulRedisConnection<String, String>[]) new StatefulRedisConnection<?, ?>[poolSize];
+        for (int i = 0; i < poolSize; i++) {
+            sharedConnections[i] = client.connect();
+            proxyConnections[i] = wrapSharedConnection(sharedConnections[i]);
+        }
     }
 
     /**
-     * Closes the connection pool and shuts down the Redis client.
+     * Closes all shared connections and shuts down the Redis client.
      */
     @Override
     public void destroy() {
-        if (pool != null) {
-            try {
-                pool.close();
-            } catch (Exception e) {
-                // ignore
+        if (sharedConnections != null) {
+            for (StatefulRedisConnection<String, String> connection : sharedConnections) {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                }
             }
-            pool = null;
+            sharedConnections = null;
+            proxyConnections = null;
         }
         if (client != null) {
             try {
@@ -120,6 +175,48 @@ public class RedisConnectionPool implements InitializableBean, DisposableBean {
             }
             client = null;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @NonNull
+    private static StatefulRedisConnection<String, String> wrapSharedConnection(
+            StatefulRedisConnection<String, String> connection) {
+        return (StatefulRedisConnection<String, String>) Proxy.newProxyInstance(
+                StatefulRedisConnection.class.getClassLoader(),
+                new Class<?>[] { StatefulRedisConnection.class },
+                new SharedConnectionInvocationHandler(connection)
+        );
+    }
+
+    private static class SharedConnectionInvocationHandler implements InvocationHandler {
+
+        private final StatefulRedisConnection<String, String> delegate;
+
+        SharedConnectionInvocationHandler(StatefulRedisConnection<String, String> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        @Nullable
+        public Object invoke(Object proxy, @NonNull Method method, Object[] args) throws Throwable {
+            String methodName = method.getName();
+            if ("close".equals(methodName) && (args == null || args.length == 0)) {
+                // No-op: keep the shared connection open
+                return null;
+            }
+            if ("closeAsync".equals(methodName) && (args == null || args.length == 0)) {
+                return CompletableFuture.completedFuture(null);
+            }
+            if ("isOpen".equals(methodName) && (args == null || args.length == 0)) {
+                return delegate.isOpen();
+            }
+            try {
+                return method.invoke(delegate, args);
+            } catch (InvocationTargetException e) {
+                throw e.getTargetException();
+            }
+        }
+
     }
 
 }

@@ -394,7 +394,7 @@ public class AppMonManager extends InstantActivitySupport {
             String clusterId = nodeManager.getClusterConfig().getId();
             String appsKey = NodeMessageProtocol.getAppsHashKey(clusterId, getGroupId());
             String appsOrderKey = NodeMessageProtocol.getAppsOrderKey(clusterId, getGroupId());
-            try (StatefulRedisConnection<String, String> connection = nodeManager.getRedisConnectionPool().getConnection()) {
+            try (StatefulRedisConnection<String, String> connection = nodeManager.getRedisConnectionPool().getDedicatedConnection()) {
                 RedisCommands<String, String> sync = connection.sync();
                 sync.multi();
                 sync.del(appsKey);

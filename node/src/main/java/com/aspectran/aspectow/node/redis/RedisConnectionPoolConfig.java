@@ -19,8 +19,6 @@ import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.ToStringBuilder;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisURI;
-import io.lettuce.core.api.StatefulRedisConnection;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
@@ -62,7 +60,7 @@ import java.util.Properties;
  *
  * <p>Created: 2019/12/07</p>
  */
-public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulRedisConnection<String, String>> {
+public class RedisConnectionPoolConfig {
 
     private static final int DEFAULT_MAX_TOTAL = 64;
 
@@ -76,15 +74,18 @@ public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulR
 
     private ClientOptions clientOptions;
 
+    private int maxTotal = DEFAULT_MAX_TOTAL;
+
+    private int maxIdle = DEFAULT_MAX_IDLE;
+
+    private int minIdle = DEFAULT_MIN_IDLE;
+
+    private Duration maxWait = DEFAULT_MAX_WAIT;
+
     /**
      * Instantiates a new RedisConnectionPoolConfig with default settings.
      */
     public RedisConnectionPoolConfig() {
-        super();
-        setMaxTotal(DEFAULT_MAX_TOTAL);
-        setMaxIdle(DEFAULT_MAX_IDLE);
-        setMinIdle(DEFAULT_MIN_IDLE);
-        setMaxWait(DEFAULT_MAX_WAIT);
     }
 
     /**
@@ -169,6 +170,22 @@ public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulR
     }
 
     /**
+     * Returns the maximum wait duration for borrowing a connection from the pool.
+     * @return the maximum wait duration
+     */
+    public Duration getMaxWaitDuration() {
+        return maxWait;
+    }
+
+    /**
+     * Sets the maximum wait duration for borrowing a connection from the pool.
+     * @param maxWait the maximum wait duration
+     */
+    public void setMaxWait(Duration maxWait) {
+        this.maxWait = maxWait;
+    }
+
+    /**
      * Sets the maximum wait duration for borrowing a connection from the pool as a string (e.g. "3s", "3000ms").
      * @param maxWait the max wait string
      */
@@ -176,6 +193,22 @@ public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulR
         if (StringUtils.hasText(maxWait)) {
             setMaxWait(parseDuration(maxWait));
         }
+    }
+
+    /**
+     * Returns the maximum number of allocated connections.
+     * @return the maximum number of allocated connections
+     */
+    public int getMaxTotal() {
+        return maxTotal;
+    }
+
+    /**
+     * Sets the maximum number of allocated connections.
+     * @param maxTotal the maximum number of allocated connections
+     */
+    public void setMaxTotal(int maxTotal) {
+        this.maxTotal = maxTotal;
     }
 
     /**
@@ -189,6 +222,22 @@ public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulR
     }
 
     /**
+     * Returns the maximum number of idle connections.
+     * @return the maximum number of idle connections
+     */
+    public int getMaxIdle() {
+        return maxIdle;
+    }
+
+    /**
+     * Sets the maximum number of idle connections.
+     * @param maxIdle the maximum number of idle connections
+     */
+    public void setMaxIdle(int maxIdle) {
+        this.maxIdle = maxIdle;
+    }
+
+    /**
      * Sets the maximum number of idle connections as a string.
      * @param maxIdle the max idle string
      */
@@ -196,6 +245,22 @@ public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulR
         if (StringUtils.hasText(maxIdle)) {
             setMaxIdle(Integer.parseInt(maxIdle.trim()));
         }
+    }
+
+    /**
+     * Returns the minimum number of idle connections.
+     * @return the minimum number of idle connections
+     */
+    public int getMinIdle() {
+        return minIdle;
+    }
+
+    /**
+     * Sets the minimum number of idle connections.
+     * @param minIdle the minimum number of idle connections
+     */
+    public void setMinIdle(int minIdle) {
+        this.minIdle = minIdle;
     }
 
     /**
