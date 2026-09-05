@@ -34,14 +34,20 @@ import java.util.Properties;
  * <ul>
  *   <li>{@code aspectow.redis.uri} / {@code uri} — Target Redis connection URI (e.g., {@code "redis://10.0.0.3:6379/5"})</li>
  *   <li>{@code aspectow.redis.timeout} / {@code timeout} — Redis command/connection timeout (e.g., {@code "5s"}, {@code "5000ms"})</li>
- *   <li>{@code aspectow.redis.pool.maxWait} / {@code maxWait} — Maximum wait duration for borrowing a connection from the pool (e.g., {@code "3s"}, {@code "3000ms"})</li>
+ *   <li>{@code aspectow.redis.pool.maxTotal} / {@code maxTotal} — Maximum number of allocated connections (default: 64)</li>
+ *   <li>{@code aspectow.redis.pool.maxIdle} / {@code maxIdle} — Maximum number of idle connections (default: 32)</li>
+ *   <li>{@code aspectow.redis.pool.minIdle} / {@code minIdle} — Minimum number of idle connections (default: 8)</li>
+ *   <li>{@code aspectow.redis.pool.maxWait} / {@code maxWait} — Maximum wait duration for borrowing a connection from the pool (default: 5s, e.g., {@code "5s"}, {@code "5000ms"})</li>
  * </ul>
  *
  * <h2>Example Aspectran Bean Definition</h2>
  * <pre>{@code
  * <bean id="redisConnectionPoolConfig" class="com.aspectran.aspectow.node.redis.RedisConnectionPoolConfig">
  *     <property name="timeout" value="5s"/>
- *     <property name="maxWait" value="3s"/>
+ *     <property name="maxTotal" value="64"/>
+ *     <property name="maxIdle" value="32"/>
+ *     <property name="minIdle" value="8"/>
+ *     <property name="maxWait" value="5s"/>
  *     <argument>
  *         <bean class="com.aspectran.core.support.PropertiesFactoryBean">
  *             <properties profile="prod">
@@ -58,6 +64,14 @@ import java.util.Properties;
  */
 public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulRedisConnection<String, String>> {
 
+    private static final int DEFAULT_MAX_TOTAL = 64;
+
+    private static final int DEFAULT_MAX_IDLE = 32;
+
+    private static final int DEFAULT_MIN_IDLE = 8;
+
+    private static final Duration DEFAULT_MAX_WAIT = Duration.ofSeconds(5);
+
     private RedisURI redisURI;
 
     private ClientOptions clientOptions;
@@ -67,7 +81,10 @@ public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulR
      */
     public RedisConnectionPoolConfig() {
         super();
-        setMaxWait(Duration.ofSeconds(3));
+        setMaxTotal(DEFAULT_MAX_TOTAL);
+        setMaxIdle(DEFAULT_MAX_IDLE);
+        setMinIdle(DEFAULT_MIN_IDLE);
+        setMaxWait(DEFAULT_MAX_WAIT);
     }
 
     /**
@@ -80,6 +97,18 @@ public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulR
         String timeout = properties.getProperty("aspectow.redis.timeout");
         if (StringUtils.hasText(timeout)) {
             setTimeout(timeout);
+        }
+        String maxTotal = properties.getProperty("aspectow.redis.pool.maxTotal");
+        if (StringUtils.hasText(maxTotal)) {
+            setMaxTotal(maxTotal);
+        }
+        String maxIdle = properties.getProperty("aspectow.redis.pool.maxIdle");
+        if (StringUtils.hasText(maxIdle)) {
+            setMaxIdle(maxIdle);
+        }
+        String minIdle = properties.getProperty("aspectow.redis.pool.minIdle");
+        if (StringUtils.hasText(minIdle)) {
+            setMinIdle(minIdle);
         }
         String maxWait = properties.getProperty("aspectow.redis.pool.maxWait");
         if (StringUtils.hasText(maxWait)) {
@@ -149,6 +178,36 @@ public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulR
         }
     }
 
+    /**
+     * Sets the maximum number of allocated connections as a string.
+     * @param maxTotal the max total string
+     */
+    public void setMaxTotal(String maxTotal) {
+        if (StringUtils.hasText(maxTotal)) {
+            setMaxTotal(Integer.parseInt(maxTotal.trim()));
+        }
+    }
+
+    /**
+     * Sets the maximum number of idle connections as a string.
+     * @param maxIdle the max idle string
+     */
+    public void setMaxIdle(String maxIdle) {
+        if (StringUtils.hasText(maxIdle)) {
+            setMaxIdle(Integer.parseInt(maxIdle.trim()));
+        }
+    }
+
+    /**
+     * Sets the minimum number of idle connections as a string.
+     * @param minIdle the min idle string
+     */
+    public void setMinIdle(String minIdle) {
+        if (StringUtils.hasText(minIdle)) {
+            setMinIdle(Integer.parseInt(minIdle.trim()));
+        }
+    }
+
     private static Duration parseDuration(@NonNull String text) {
         String trimmed = text.trim().toLowerCase();
         try {
@@ -195,6 +254,10 @@ public class RedisConnectionPoolConfig extends GenericObjectPoolConfig<StatefulR
         ToStringBuilder tsb = new ToStringBuilder();
         tsb.append("redisURI", redisURI);
         tsb.append("clientOptions", clientOptions);
+        tsb.append("maxTotal", getMaxTotal());
+        tsb.append("maxIdle", getMaxIdle());
+        tsb.append("minIdle", getMinIdle());
+        tsb.append("maxWaitDuration", getMaxWaitDuration());
         return tsb.toString();
     }
 
