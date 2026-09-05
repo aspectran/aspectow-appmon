@@ -3,6 +3,8 @@
 
     <include file="${aspectran.basePath:-app}/config/logging/included/logback-default.xml"/>
     <include file="${aspectran.basePath:-app}/config/logging/included/logback-scheduler.xml"/>
-    <include file="${aspectran.basePath:-app}/config/logging/included/logback-undertow.xml"/>
+    <include file="${aspectran.basePath:-app}/config/logging/included/logback-accesslog.xml"/>
+
+    <logger name="com.aspectran.aspectow.demo" level="debug"/>
 
 </configuration>
