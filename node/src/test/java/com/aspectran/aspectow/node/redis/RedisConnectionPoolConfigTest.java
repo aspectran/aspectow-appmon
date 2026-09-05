@@ -29,8 +29,6 @@ class RedisConnectionPoolConfigTest {
     void testDefaults() {
         RedisConnectionPoolConfig config = new RedisConnectionPoolConfig();
         assertEquals(8, config.getPoolSize());
-        assertEquals(8, config.getMinIdle());
-        assertEquals(8, config.getMaxTotal());
     }
 
     @Test
@@ -49,26 +47,10 @@ class RedisConnectionPoolConfigTest {
     }
 
     @Test
-    void testBackwardCompatibilityProperties() {
-        Properties props = new Properties();
-        props.setProperty("aspectow.redis.uri", "redis://localhost:6379/0");
-        props.setProperty("aspectow.redis.pool.minIdle", "12");
-
-        RedisConnectionPoolConfig config = new RedisConnectionPoolConfig(props);
-        assertEquals(12, config.getPoolSize());
-        assertEquals(12, config.getMinIdle());
-        assertEquals(12, config.getMaxTotal());
-    }
-
-    @Test
     void testStringSetters() {
         RedisConnectionPoolConfig config = new RedisConnectionPoolConfig();
         config.setPoolSize("16");
         assertEquals(16, config.getPoolSize());
-
-        config.setMinIdle("4");
-        assertEquals(4, config.getPoolSize());
-        assertEquals(4, config.getMinIdle());
     }
 
 }

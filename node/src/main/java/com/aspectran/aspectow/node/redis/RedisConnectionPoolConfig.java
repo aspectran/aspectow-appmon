@@ -84,17 +84,6 @@ public class RedisConnectionPoolConfig {
         String poolSize = properties.getProperty("aspectow.redis.pool.size");
         if (StringUtils.hasText(poolSize)) {
             setPoolSize(poolSize);
-        } else {
-            // Backward compatibility
-            String minIdle = properties.getProperty("aspectow.redis.pool.minIdle");
-            if (StringUtils.hasText(minIdle)) {
-                setPoolSize(minIdle);
-            } else {
-                String maxTotal = properties.getProperty("aspectow.redis.pool.maxTotal");
-                if (StringUtils.hasText(maxTotal)) {
-                    setPoolSize(maxTotal);
-                }
-            }
         }
     }
 
@@ -174,94 +163,6 @@ public class RedisConnectionPoolConfig {
         if (StringUtils.hasText(poolSize)) {
             setPoolSize(Integer.parseInt(poolSize.trim()));
         }
-    }
-
-    /**
-     * Alias for {@link #getPoolSize()} for backward compatibility.
-     * @return the pool size
-     */
-    public int getMaxTotal() {
-        return poolSize;
-    }
-
-    /**
-     * Alias for {@link #setPoolSize(int)} for backward compatibility.
-     * @param maxTotal the max total
-     */
-    public void setMaxTotal(int maxTotal) {
-        setPoolSize(maxTotal);
-    }
-
-    /**
-     * Alias for {@link #setPoolSize(String)} for backward compatibility.
-     * @param maxTotal the max total string
-     */
-    public void setMaxTotal(String maxTotal) {
-        setPoolSize(maxTotal);
-    }
-
-    /**
-     * Alias for {@link #getPoolSize()} for backward compatibility.
-     * @return the pool size
-     */
-    public int getMaxIdle() {
-        return poolSize;
-    }
-
-    /**
-     * Alias for {@link #setPoolSize(int)} for backward compatibility.
-     * @param maxIdle the max idle
-     */
-    public void setMaxIdle(int maxIdle) {
-        setPoolSize(maxIdle);
-    }
-
-    /**
-     * Alias for {@link #setPoolSize(String)} for backward compatibility.
-     * @param maxIdle the max idle string
-     */
-    public void setMaxIdle(String maxIdle) {
-        setPoolSize(maxIdle);
-    }
-
-    /**
-     * Alias for {@link #getPoolSize()} for backward compatibility.
-     * @return the pool size
-     */
-    public int getMinIdle() {
-        return poolSize;
-    }
-
-    /**
-     * Alias for {@link #setPoolSize(int)} for backward compatibility.
-     * @param minIdle the min idle
-     */
-    public void setMinIdle(int minIdle) {
-        setPoolSize(minIdle);
-    }
-
-    /**
-     * Alias for {@link #setPoolSize(String)} for backward compatibility.
-     * @param minIdle the min idle string
-     */
-    public void setMinIdle(String minIdle) {
-        setPoolSize(minIdle);
-    }
-
-    /**
-     * No-op setter preserved for backward compatibility.
-     * @param maxWait the max wait duration
-     */
-    public void setMaxWait(Duration maxWait) {
-        // No-op in shared connection mode
-    }
-
-    /**
-     * No-op setter preserved for backward compatibility.
-     * @param maxWait the max wait string
-     */
-    public void setMaxWait(String maxWait) {
-        // No-op in shared connection mode
     }
 
     private static Duration parseDuration(@NonNull String text) {
