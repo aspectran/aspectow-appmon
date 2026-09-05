@@ -52,12 +52,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>aspectran-with-undertow</artifactId>
+            <artifactId>aspectran-with-netty</artifactId>
             <version>${aspectran.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>aspectran-with-netty</artifactId>
+            <artifactId>aspectran-with-undertow</artifactId>
             <version>${aspectran.version}</version>
         </dependency>
         <dependency>
