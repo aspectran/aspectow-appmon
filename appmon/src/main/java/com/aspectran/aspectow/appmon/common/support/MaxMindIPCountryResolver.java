@@ -17,6 +17,7 @@ package com.aspectran.aspectow.appmon.common.support;
 
 import com.aspectran.core.component.bean.ablility.DisposableBean;
 import com.aspectran.utils.Assert;
+import com.aspectran.utils.ResourceUtils;
 import com.aspectran.utils.StringUtils;
 import com.aspectran.utils.SystemUtils;
 import com.aspectran.utils.cache.Cache;
@@ -29,8 +30,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
+import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -38,9 +42,13 @@ import java.util.Map;
 /**
  * MaxMind GeoIP2 / GeoLite2 MMDB database based {@link IPCountryResolver} implementation.
  *
- * <p>Reads country data directly from a local MMDB database file (e.g. {@code GeoLite2-Country.mmdb}
- * or {@code GeoLite2-City.mmdb}) using {@link Reader.FileMode#MEMORY_MAPPED} mode for zero-copy,
- * high-performance lookups with minimal JVM heap footprint.</p>
+ * <p>Reads country data directly from an MMDB database file (e.g. {@code GeoLite2-Country.mmdb}
+ * or {@code GeoLite2-City.mmdb}) located on the file system or in the classpath
+ * (e.g. {@code classpath:GeoLite2-Country.mmdb}).</p>
+ *
+ * <p>Uses {@link Reader.FileMode#MEMORY_MAPPED} mode for file system resources for zero-copy,
+ * high-performance lookups with minimal JVM heap footprint, or loads via stream when packaged
+ * inside a JAR.</p>
  *
  * <p>Created: 2026-09-06</p>
  */
@@ -90,19 +98,13 @@ public class MaxMindIPCountryResolver implements IPCountryResolver, DisposableBe
         this.databasePath = databasePath;
         closeReader();
         if (StringUtils.hasText(databasePath)) {
-            File dbFile = new File(databasePath);
-            if (dbFile.isFile()) {
-                try {
-                    this.reader = new Reader(dbFile, Reader.FileMode.MEMORY_MAPPED);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Initialized MaxMind GeoIP database from {}", dbFile.getAbsolutePath());
-                    }
-                } catch (IOException e) {
-                    logger.error("Failed to load MaxMind GeoIP database from {}", dbFile.getAbsolutePath(), e);
-                    this.reader = null;
+            try {
+                this.reader = createReader(databasePath);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Initialized MaxMind GeoIP database from {}", databasePath);
                 }
-            } else {
-                logger.warn("MaxMind GeoIP database file not found: {}", databasePath);
+            } catch (Exception e) {
+                logger.warn("Failed to load MaxMind GeoIP database from {}: {}", databasePath, e.getMessage());
                 this.reader = null;
             }
             if (cache != null) {
@@ -115,6 +117,56 @@ public class MaxMindIPCountryResolver implements IPCountryResolver, DisposableBe
                 cache = null;
             }
         }
+    }
+
+    @NonNull
+    private Reader createReader(@NonNull String location) throws IOException {
+        // 1. Explicit classpath resource
+        if (location.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)) {
+            URL url = ResourceUtils.getURL(location);
+            try {
+                File file = ResourceUtils.getFile(url);
+                if (file.isFile()) {
+                    return new Reader(file, Reader.FileMode.MEMORY_MAPPED);
+                }
+            } catch (FileNotFoundException ignored) {
+                // Inside a JAR or not directly in file system
+            }
+            try (InputStream in = url.openStream()) {
+                return new Reader(in);
+            }
+        }
+
+        // 2. Explicit file: URL
+        if (location.startsWith(ResourceUtils.FILE_URL_PREFIX)) {
+            File file = ResourceUtils.getFile(location);
+            return new Reader(file, Reader.FileMode.MEMORY_MAPPED);
+        }
+
+        // 3. Regular file system path
+        File file = new File(location);
+        if (file.isFile()) {
+            return new Reader(file, Reader.FileMode.MEMORY_MAPPED);
+        }
+
+        // 4. Fallback: try loading from classpath if not found as a regular file
+        try {
+            URL url = ResourceUtils.getURL(ResourceUtils.CLASSPATH_URL_PREFIX + location);
+            try {
+                File classPathFile = ResourceUtils.getFile(url);
+                if (classPathFile.isFile()) {
+                    return new Reader(classPathFile, Reader.FileMode.MEMORY_MAPPED);
+                }
+            } catch (FileNotFoundException ignored) {
+            }
+            try (InputStream in = url.openStream()) {
+                return new Reader(in);
+            }
+        } catch (Exception ignored) {
+            // Ignore fallback failure and throw original not found
+        }
+
+        throw new FileNotFoundException("MaxMind GeoIP database not found at " + location);
     }
 
     public int getMaxCacheSize() {

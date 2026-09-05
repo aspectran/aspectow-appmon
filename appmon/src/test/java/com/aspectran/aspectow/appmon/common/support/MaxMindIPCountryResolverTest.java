@@ -64,6 +64,14 @@ class MaxMindIPCountryResolverTest {
     }
 
     @Test
+    void resolveCountryCode_withClasspathLocation_gracefullyDegradesWhenNotFound() {
+        MaxMindIPCountryResolver resolver = new MaxMindIPCountryResolver("classpath:non-existent.mmdb");
+
+        assertEquals("KR", resolver.resolveCountryCode("1.1.1.1", Locale.KOREA));
+        assertNull(resolver.resolveCountryCode("1.1.1.1", null));
+    }
+
+    @Test
     void lifecycle_setDatabasePathAndDestroy() {
         MaxMindIPCountryResolver resolver = new MaxMindIPCountryResolver();
         resolver.setDatabasePath(null);
