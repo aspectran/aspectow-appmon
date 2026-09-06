@@ -17,8 +17,8 @@
 /**
  * HTTP Polling implementation of the AppMon client.
  *
- * @version 4.0
- * @last-modified 2026-08-15
+ * @version 4.1
+ * @last-modified 2026-08-29
  */
 class PollingClient extends BaseClient {
     constructor(node, viewer, onSubscribed, onClosed, onFailed, isGatewayMode = false) {

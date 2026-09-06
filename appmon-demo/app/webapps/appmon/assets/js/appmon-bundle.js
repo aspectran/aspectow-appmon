@@ -1892,7 +1892,7 @@ class DashboardViewer {
  * Responsible for assembling the dashboard UI based on configuration data.
  *
  * @version 4.1
- * @last-modified 2026-08-29
+ * @last-modified 2026-09-06
  */
 class DashboardBuilder {
     constructor(options = {}) {
@@ -2769,7 +2769,8 @@ class DashboardBuilder {
 
     addNodeMetric(nodeInfo, metricInfo) {
         const $bar = $(`.node.metrics-bar[data-node-index=${nodeInfo.index}]`).show();
-        const $metric = $bar.find(".metric").first().hide().clone().addClass("available");
+        const $metric = $bar.find(".metric").first().hide().clone().addClass("available")
+            .attr({ "data-node-index": nodeInfo.index, "data-metric-id": metricInfo.id });
         $metric.find("dt").text(metricInfo.title + " :").attr("title", metricInfo.description);
         return $metric.appendTo($bar).show();
     }

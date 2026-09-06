@@ -18,8 +18,8 @@
  * The chart component for the AppMon dashboard.
  * Responsible for rendering and updating individual charts using Chart.js.
  *
- * @version 4.0
- * @last-modified 2026-05-22
+ * @version 4.1
+ * @last-modified 2026-08-29
  */
 class DashboardChart {
     constructor($container, eventId) {

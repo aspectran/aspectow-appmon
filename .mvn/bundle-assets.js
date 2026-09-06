@@ -109,7 +109,7 @@ function bundleJsFiles(srcDir, fileList, outputBundleName, destDirs) {
 
     // Distribute
     destDirs.forEach((dir) => {
-        if (fs.existsSync(dir)) {
+        if (fs.existsSync(dir) && path.resolve(dir) !== path.resolve(srcDir)) {
             fs.writeFileSync(path.join(dir, `${outputBundleName}.js`), fs.readFileSync(bundleFile));
             if (fs.existsSync(minFile)) {
                 fs.writeFileSync(path.join(dir, `${outputBundleName}.min.js`), fs.readFileSync(minFile));
@@ -156,7 +156,7 @@ function bundleCssFiles(srcDir, fileList, outputBundleName, destDirs) {
 
     // Distribute
     destDirs.forEach((dir) => {
-        if (fs.existsSync(dir)) {
+        if (fs.existsSync(dir) && path.resolve(dir) !== path.resolve(srcDir)) {
             fs.writeFileSync(path.join(dir, `${outputBundleName}.css`), fs.readFileSync(bundleFile));
             if (fs.existsSync(minFile)) {
                 fs.writeFileSync(path.join(dir, `${outputBundleName}.min.css`), fs.readFileSync(minFile));
@@ -168,12 +168,12 @@ function bundleCssFiles(srcDir, fileList, outputBundleName, destDirs) {
 
 const targetVersion = process.argv[2] || null;
 
-// 1. AppMon Assets (Auto-detect latest appmon@X.Y)
-const appmonDir = getAssetDir("appmon", targetVersion);
-console.log(`[bundle-assets] Target AppMon directory: ${path.relative(rootDir, appmonDir)}`);
+// 1. AppMon Assets (Source: appmon-demo)
+const appmonSrcDir = path.join(rootDir, "appmon-demo", "app", "webapps", "appmon", "assets");
+console.log(`[bundle-assets] Source AppMon directory: ${path.relative(rootDir, appmonSrcDir)}`);
 
-const appmonJsSrc = path.join(appmonDir, "js");
-const appmonCssSrc = path.join(appmonDir, "css");
+const appmonJsSrc = path.join(appmonSrcDir, "js");
+const appmonCssSrc = path.join(appmonSrcDir, "css");
 const appmonJsFiles = [
     "base-client.js",
     "websocket-client.js",
@@ -188,25 +188,30 @@ const appmonCssFiles = [
     "appmon-dark.css"
 ];
 const appmonJsDestDirs = [
-    appmonJsSrc,
-    path.join(rootDir, "appmon-demo", "app", "webapps", "appmon", "assets", "js"),
     path.join(rootDir, "console-demo", "app", "webapps", "console", "assets", "appmon", "js")
 ];
 const appmonCssDestDirs = [
-    appmonCssSrc,
-    path.join(rootDir, "appmon-demo", "app", "webapps", "appmon", "assets", "css"),
     path.join(rootDir, "console-demo", "app", "webapps", "console", "assets", "appmon", "css")
 ];
+
+if (targetVersion) {
+    const appmonReleaseDir = path.join(assetsDir, `appmon@${targetVersion}`);
+    if (fs.existsSync(appmonReleaseDir)) {
+        appmonJsDestDirs.push(path.join(appmonReleaseDir, "js"));
+        appmonCssDestDirs.push(path.join(appmonReleaseDir, "css"));
+        console.log(`[bundle-assets] Target release directory: ${path.relative(rootDir, appmonReleaseDir)}`);
+    }
+}
 
 bundleJsFiles(appmonJsSrc, appmonJsFiles, "appmon-bundle", appmonJsDestDirs);
 bundleCssFiles(appmonCssSrc, appmonCssFiles, "appmon-bundle", appmonCssDestDirs);
 
-// 2. Console Assets (Auto-detect latest console@X.Y)
-const consoleDir = getAssetDir("console", targetVersion);
-console.log(`[bundle-assets] Target Console directory: ${path.relative(rootDir, consoleDir)}`);
+// 2. Console Assets (Source: console-demo)
+const consoleSrcDir = path.join(rootDir, "console-demo", "app", "webapps", "console", "assets");
+console.log(`[bundle-assets] Source Console directory: ${path.relative(rootDir, consoleSrcDir)}`);
 
-const consoleJsSrc = path.join(consoleDir, "js");
-const consoleCssSrc = path.join(consoleDir, "css");
+const consoleJsSrc = path.join(consoleSrcDir, "js");
+const consoleCssSrc = path.join(consoleSrcDir, "css");
 const consoleJsFiles = [
     "console-common.js",
     "apon-highlighter.js",
@@ -215,14 +220,17 @@ const consoleJsFiles = [
 const consoleCssFiles = [
     "console.css"
 ];
-const consoleJsDestDirs = [
-    consoleJsSrc,
-    path.join(rootDir, "console-demo", "app", "webapps", "console", "assets", "js")
-];
-const consoleCssDestDirs = [
-    consoleCssSrc,
-    path.join(rootDir, "console-demo", "app", "webapps", "console", "assets", "css")
-];
+const consoleJsDestDirs = [];
+const consoleCssDestDirs = [];
+
+if (targetVersion) {
+    const consoleReleaseDir = path.join(assetsDir, `console@${targetVersion}`);
+    if (fs.existsSync(consoleReleaseDir)) {
+        consoleJsDestDirs.push(path.join(consoleReleaseDir, "js"));
+        consoleCssDestDirs.push(path.join(consoleReleaseDir, "css"));
+        console.log(`[bundle-assets] Target release directory: ${path.relative(rootDir, consoleReleaseDir)}`);
+    }
+}
 
 bundleJsFiles(consoleJsSrc, consoleJsFiles, "console-bundle", consoleJsDestDirs);
 bundleCssFiles(consoleCssSrc, consoleCssFiles, "console-bundle", consoleCssDestDirs);

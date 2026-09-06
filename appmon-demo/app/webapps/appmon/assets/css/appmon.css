@@ -15,8 +15,8 @@
  */
 
 /*
- * @version 4.0
- * @last-modified 2026-08-12
+ * @version 4.1
+ * @last-modified 2026-09-06
  */
 
 /* For console-integrated */
@@ -92,12 +92,16 @@
     align-content: center;
     font-weight: normal;
     font-size: .9em;
+    white-space: nowrap;
 }
 .metrics-bar .metric dl dd {
     margin: 0;
     padding: 0 .8rem 0 0;
     align-content: center;
     font-weight: bold;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
 }
 .node.metrics-bar {
     position: relative;
@@ -129,6 +133,9 @@
         align-self: center;
         padding-right: 12px;
     }
+    @media screen and (min-width: 768px) {
+        min-width: 2.8rem;
+    }
 }
 .node.metrics-bar .metric {
     border-left: 1px solid #ccc;
@@ -144,6 +151,28 @@
 .node.metrics-bar .metric dl {
     @media screen and (max-width: 768px) {
         display: inline-flex;
+    }
+}
+.node.metrics-bar .metric dl dt {
+    @media screen and (max-width: 768px) {
+        min-width: 3.8rem;
+    }
+}
+.node.metrics-bar .metric dl dd {
+    @media screen and (max-width: 768px) {
+        text-align: left;
+    }
+}
+@media screen and (min-width: 768px) {
+    .metrics-bar .metric[data-metric-id="cpu"] dl dd {
+        min-width: 4rem;
+    }
+    .metrics-bar .metric[data-metric-id="heap"] dl dd {
+        min-width: 8.8rem;
+    }
+    .metrics-bar .metric[data-metric-id="tp"] dl dd,
+    .metrics-bar .metric[data-metric-id$="-tp"] dl dd {
+        min-width: 5.8rem;
     }
 }
 .instance.metrics-bar {
