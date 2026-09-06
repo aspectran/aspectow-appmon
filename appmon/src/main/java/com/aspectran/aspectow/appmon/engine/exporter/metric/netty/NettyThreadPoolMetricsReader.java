@@ -145,9 +145,9 @@ public class NettyThreadPoolMetricsReader extends AbstractMetricReader {
             max = total;
         }
 
-        String format = (nettyServer.isVirtualThreads() ? "{active}/{total} (VT)" : "{active}/{total}");
         MetricData metricData = new MetricData(getMetricInfo())
-                .setFormat(format)
+                .setFormat("{active}/{total}")
+                .setUnit(nettyServer.isVirtualThreads() ? "VT" : "")
                 .putData("workerName", nettyServer.getWorkerName())
                 .putData("active", active)
                 .putData("total", total)

@@ -41,6 +41,7 @@ public class MetricInfo extends DefaultParameters {
     private static final ParameterKey exportInterval;
     private static final ParameterKey heading;
     private static final ParameterKey format;
+    private static final ParameterKey unit;
 
     private static final ParameterKey[] parameterKeys;
 
@@ -55,6 +56,7 @@ public class MetricInfo extends DefaultParameters {
         exportInterval = new ParameterKey("exportInterval", ValueType.INT);
         heading = new ParameterKey("heading", ValueType.BOOLEAN);
         format = new ParameterKey("format", ValueType.STRING);
+        unit = new ParameterKey("unit", ValueType.STRING);
 
         parameterKeys = new ParameterKey[] {
                 id,
@@ -66,7 +68,8 @@ public class MetricInfo extends DefaultParameters {
                 sampleInterval,
                 exportInterval,
                 heading,
-                format
+                format,
+                unit
         };
     }
 
@@ -303,6 +306,22 @@ public class MetricInfo extends DefaultParameters {
      */
     public void setFormat(String format) {
         putValue(MetricInfo.format, format);
+    }
+
+    /**
+     * Returns the unit associated with this metric.
+     * @return the unit of measurement as a string
+     */
+    public String getUnit() {
+        return getString(unit);
+    }
+
+    /**
+     * Sets the unit of measurement for this metric.
+     * @param unit the unit of measurement as a string
+     */
+    public void setUnit(String unit) {
+        putValue(MetricInfo.unit, unit);
     }
 
     /**

@@ -37,6 +37,8 @@ public class MetricData {
 
     private String format;
 
+    private String unit;
+
     private final LinkedHashMap<String, Object> data = new LinkedHashMap<>();
 
     /**
@@ -48,6 +50,7 @@ public class MetricData {
         this.title = metricInfo.getTitle();
         this.heading = metricInfo.isHeading();
         this.format = metricInfo.getFormat();
+        this.unit = metricInfo.getUnit();
     }
 
     /**
@@ -58,6 +61,18 @@ public class MetricData {
     public MetricData setFormat(String format) {
         if (this.format == null) {
             this.format = format;
+        }
+        return this;
+    }
+
+    /**
+     * Sets the unit of measurement for the metric data, if not already set.
+     * @param unit the unit of measurement as a string
+     * @return this MetricData instance
+     */
+    public MetricData setUnit(String unit) {
+        if (this.unit == null) {
+            this.unit = unit;
         }
         return this;
     }
@@ -95,6 +110,7 @@ public class MetricData {
                     .put("title", title)
                     .put("heading", heading)
                     .put("format", format)
+                    .put("unit", unit)
                     .put("data", data)
                 .endObject()
                 .toString();

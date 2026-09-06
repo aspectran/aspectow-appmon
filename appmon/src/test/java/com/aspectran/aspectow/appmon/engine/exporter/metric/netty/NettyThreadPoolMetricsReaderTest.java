@@ -69,7 +69,8 @@ class NettyThreadPoolMetricsReaderTest {
 
         MetricData data = reader.getMetricData(false);
         assertNotNull(data);
-        assertTrue(data.toJson().contains("\"format\":\"{active}/{total} (VT)\""));
+        assertTrue(data.toJson().contains("\"format\":\"{active}/{total}\""));
+        assertTrue(data.toJson().contains("\"unit\":\"VT\""));
         assertEquals("netty-test", data.getData("workerName"));
         assertEquals(3, data.getData("active"));
         assertEquals(5, data.getData("total"));
