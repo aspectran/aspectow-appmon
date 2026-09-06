@@ -55,8 +55,8 @@
                     <argument>
                         workerName: cn0
                         maxActiveSessions: 999
-                        maxIdleSeconds: 600
-                        evictionIdleSeconds: 300
+                        maxIdleSeconds: 1800
+                        evictionIdleSeconds: 600
                         maxIdleSecondsForNew: 120
                         evictionIdleSecondsForNew: 60
                         scavengingIntervalSeconds: 180
