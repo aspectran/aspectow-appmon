@@ -165,10 +165,10 @@
 }
 @media screen and (min-width: 768px) {
     .metrics-bar .metric[data-metric-id="cpu"] dl dd {
-        min-width: 4rem;
+        min-width: 4.3rem;
     }
     .metrics-bar .metric[data-metric-id="heap"] dl dd {
-        min-width: 8.8rem;
+        min-width: 10.5rem;
     }
     .metrics-bar .metric[data-metric-id="tp"] dl dd,
     .metrics-bar .metric[data-metric-id$="-tp"] dl dd {
