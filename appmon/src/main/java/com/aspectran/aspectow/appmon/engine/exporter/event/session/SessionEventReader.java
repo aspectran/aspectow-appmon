@@ -121,8 +121,8 @@ public class SessionEventReader extends AbstractEventReader {
                 this.serverLifeCycleListener = new LifeCycle.Listener() {
                     @Override
                     public void lifeCycleStarted(LifeCycle event) {
-                        setupSessionManager(server);
                         synchronized (SessionEventReader.this) {
+                            setupSessionManager(server);
                             if (sessionListener != null && sessionManager != null) {
                                 try {
                                     sessionManager.addSessionListener(sessionListener);
@@ -183,7 +183,7 @@ public class SessionEventReader extends AbstractEventReader {
         }
     }
 
-    private synchronized void setupSessionManager(@NonNull SessionManagerProvider server) {
+    private void setupSessionManager(@NonNull SessionManagerProvider server) {
         try {
             SessionManager sm = (StringUtils.hasLength(contextName) ?
                     server.getSessionManager(contextName) : server.getSessionManager());
