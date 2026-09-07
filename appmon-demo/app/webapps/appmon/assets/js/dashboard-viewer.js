@@ -1065,8 +1065,8 @@ class DashboardViewer {
                     const $item = $sessions.find("li[data-sid='" + sessionId + "']");
                     if (!$item.hasClass("inactive")) {
                         $item.addClass("inactive");
-                        const inactiveInterval = Math.min($item.data("inactive-interval") || this.tempResidentInactiveSecs, this.tempResidentInactiveSecs);
-                        setTimeout(() => $item.remove(), inactiveInterval * 1000);
+                        const timer = setTimeout(() => $item.remove(), this.tempResidentInactiveSecs * 1000);
+                        $item.data("timer", timer);
                     }
                 });
             }
@@ -1091,11 +1091,12 @@ class DashboardViewer {
             .attr("data-inactive-interval", session.inactiveInterval)
             .append($count);
 
+        const inactiveInterval = Math.max(session.inactiveInterval || 0, this.tempResidentInactiveSecs * 1000);
+        const timer = setTimeout(() => $li.remove(), inactiveInterval);
+        $li.data("timer", timer);
+
         if (session.tempResident) {
             $li.addClass("inactive");
-            const inactiveInterval = Math.min(session.inactiveInterval || 30, 30);
-            const timer = setTimeout(() => $li.remove(), inactiveInterval * 1000);
-            $li.data("timer", timer);
         }
 
         if (session.countryCode) {
