@@ -437,7 +437,7 @@ public class SessionEventReader extends AbstractEventReader {
                     .put("countryCode", session.getAttribute(USER_COUNTRY_CODE))
                     .put("activityCount", (count != null ? count.get() : 0))
                     .put("createAt", formatTime(session.getCreationTime()))
-                    .put("inactiveInterval", session.getMaxInactiveInterval())
+                    .put("inactiveInterval", session.getRemainingInactiveInterval())
                     .put("tempResident", session.isTempResident())
                 .endObject()
                 .toJsonString();
