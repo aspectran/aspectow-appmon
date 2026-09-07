@@ -74,7 +74,7 @@ class NettyThreadPoolMetricsReaderTest {
         assertEquals("netty-test", data.getData("workerName"));
         assertEquals(3, data.getData("active"));
         assertEquals(5, data.getData("total"));
-        assertEquals(-1, data.getData("max"));
+        assertEquals(5, data.getData("max"));
         assertEquals(8, data.getData("workerThreads"));
         assertEquals(1, data.getData("bossThreads"));
         assertEquals(true, data.getData("virtualThreads"));
