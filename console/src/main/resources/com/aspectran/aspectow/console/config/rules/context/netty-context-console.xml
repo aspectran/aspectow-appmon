@@ -15,6 +15,7 @@
     <bean id="netty.context.console"
           class="com.aspectran.netty.server.NettyContext"
           scope="prototype">
+        <property name="order" valueType="int">#{field:java.lang.Integer^MAX_VALUE}</property>
         <property name="contextPath">/%{netty.context.console.name}</property>
         <property name="aspectranConfigFile">%{netty.context.console.config}</property>
         <property name="sessionManager">#{netty.context.console.sessionManager}</property>

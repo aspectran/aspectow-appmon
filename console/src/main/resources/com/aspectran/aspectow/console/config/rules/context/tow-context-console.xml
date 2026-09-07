@@ -15,6 +15,7 @@
     <bean id="tow.context.console.servletContext"
           class="com.aspectran.undertow.server.servlet.TowServletContext"
           scope="prototype">
+        <property name="order" valueType="int">#{field:java.lang.Integer^MAX_VALUE}</property>
         <property name="deploymentName">%{tow.context.console.name}</property>
         <property name="contextPath">/%{tow.context.console.name}</property>
         <property name="scratchDir">%{system:aspectran.workPath:/work}/_webapps/%{tow.context.console.name}</property>
