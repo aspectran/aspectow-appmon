@@ -27,6 +27,7 @@ app: {
         reader: com.aspectran.aspectow.appmon.engine.exporter.metric.jvm.CpuUsageReader
         sampleInterval: 1000
         heading: true
+        unit: %
     }
     metric: {
         id: heap

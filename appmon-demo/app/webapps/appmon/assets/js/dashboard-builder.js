@@ -19,7 +19,7 @@
  * Responsible for assembling the dashboard UI based on configuration data.
  *
  * @version 4.1
- * @last-modified 2026-09-06
+ * @last-modified 2026-09-07
  */
 class DashboardBuilder {
     constructor(options = {}) {
@@ -899,6 +899,9 @@ class DashboardBuilder {
         const $metric = $bar.find(".metric").first().hide().clone().addClass("available")
             .attr({ "data-node-index": nodeInfo.index, "data-metric-id": metricInfo.id });
         $metric.find("dt").text(metricInfo.title + " :").attr("title", metricInfo.description);
+        if (metricInfo.unit) {
+            $metric.find(".unit").text(metricInfo.unit);
+        }
         return $metric.appendTo($bar).show();
     }
 
@@ -936,6 +939,9 @@ class DashboardBuilder {
         const $metric = $bar.find(".metric").first().hide().clone().addClass("available")
             .attr({ "data-node-index": nodeInfo.index, "data-app-id": appInfo.id, "data-metric-id": metricInfo.id });
         $metric.find("dt").text(metricInfo.title + " :").attr("title", metricInfo.description);
+        if (metricInfo.unit) {
+            $metric.find(".unit").text(metricInfo.unit);
+        }
         return $metric.appendTo($bar).show();
     }
 

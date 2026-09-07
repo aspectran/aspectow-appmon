@@ -51,7 +51,8 @@ class CpuUsageReaderTest {
             assertNotNull(data.getData("processCpu"));
             assertNotNull(data.getData("systemCpu"));
             assertNotNull(data.getData("processors"));
-            assertTrue(data.toJson().contains("\"format\":\"{processCpu}%\""));
+            assertTrue(data.toJson().contains("\"format\":\"{processCpu}\""));
+            assertTrue(data.toJson().contains("\"unit\":\"%\""));
 
             // Immediately calling getMetricDataIfChanged when not changed should return null
             assertNull(reader.getMetricDataIfChanged());

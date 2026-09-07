@@ -19,7 +19,7 @@
  * Responsible for rendering monitoring data, including logs, metrics, and charts.
  *
  * @version 4.1
- * @last-modified 2026-08-29
+ * @last-modified 2026-09-07
  */
 class DashboardViewer {
     constructor(sampleInterval, options = {}) {
@@ -419,13 +419,26 @@ class DashboardViewer {
     processMetricData(appId, exporterType, metricId, exporterKey, metricData) {
         const $metric = this.getMetric$(exporterKey);
         if ($metric) {
+            const $dd = $metric.find("dd");
+            let $val = $dd.find(".value");
+            if (!$val.length) {
+                $dd.empty();
+                $val = $("<span class=\"value\"></span>").appendTo($dd);
+                if (metricData.unit) {
+                    $("<small class=\"unit\"></small>").text(metricData.unit).appendTo($dd);
+                }
+            } else {
+                const $unit = $dd.find(".unit");
+                if ($unit.length && !$unit.text() && metricData.unit) {
+                    $unit.text(metricData.unit);
+                }
+            }
             let formatted = metricData.format;
             for (let key in metricData.data) {
                 formatted = formatted.replace("{" + key + "}", metricData.data[key]);
             }
-            $metric.find("dd")
-                .text(formatted)
-                .attr("title", JSON.stringify(metricData.data, null, 2));
+            $val.text(formatted);
+            $dd.attr("title", JSON.stringify(metricData.data, null, 2));
         }
     }
 

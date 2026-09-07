@@ -144,7 +144,8 @@ public class CpuUsageReader extends AbstractMetricReader {
         int processors = osMXBean.getAvailableProcessors();
 
         MetricData metricData = new MetricData(getMetricInfo())
-                .setFormat("{processCpu}%")
+                .setFormat("{processCpu}")
+                .setUnit("%")
                 .putData("processCpu", processCpu)
                 .putData("systemCpu", systemCpu)
                 .putData("processors", processors);

@@ -103,6 +103,12 @@
     text-align: right;
     white-space: nowrap;
 }
+.metrics-bar .metric dl dd small,
+.metrics-bar .metric dl dd .unit {
+    margin-left: 2px;
+    font-size: .8em;
+    font-weight: normal;
+}
 .node.metrics-bar {
     position: relative;
     height: auto;
@@ -172,7 +178,7 @@
     }
     .metrics-bar .metric[data-metric-id="tp"] dl dd,
     .metrics-bar .metric[data-metric-id$="-tp"] dl dd {
-        min-width: 5.8rem;
+        min-width: 5.2rem;
     }
 }
 .instance.metrics-bar {
