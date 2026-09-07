@@ -2373,6 +2373,8 @@ class DashboardBuilder {
         this.clients = [];
         this.currentGroupId = null;
         this.selectedNodeIdByGroup = {};
+        this.currentAjax = null;
+        this.nodeJoinedTimer = null;
     }
 
     build(baseUrl, appsToSubscribe, nodeToSubscribe) {
@@ -2381,9 +2383,15 @@ class DashboardBuilder {
         this.nodeToSubscribe = nodeToSubscribe;
         this.currentGroupId = null;
         this.selectedNodeIdByGroup = {};
+
+        if (this.currentAjax) {
+            this.currentAjax.abort();
+            this.currentAjax = null;
+        }
+
         this.suspendMonitoring();
         this.clearView();
-        $.ajax({
+        this.currentAjax = $.ajax({
             url: baseUrl + "/appmon/config/data",
             type: "get",
             dataType: "json",
@@ -2392,6 +2400,7 @@ class DashboardBuilder {
                 appsToSubscribe: appsToSubscribe || null
             },
             success: (data) => {
+                this.currentAjax = null;
                 if (data) {
                     if (!data.appsToSubscribe) {
                         alert("No verified apps found. Please check the configuration of the backend.");
@@ -2460,6 +2469,7 @@ class DashboardBuilder {
                         console.log("app", app);
                     });
 
+                    this.clearView();
                     this.buildView();
                     this.bindEvents();
                     if (this.nodes.length) {
@@ -2493,7 +2503,11 @@ class DashboardBuilder {
                     }
                 }
             },
-            error: (xhr) => {
+            error: (xhr, status) => {
+                this.currentAjax = null;
+                if (status === "abort") {
+                    return;
+                }
                 if (xhr.status === 403) {
                     alert("Authentication has expired. You will be redirected to the main page.");
                     location.href = baseUrl;
@@ -2503,6 +2517,10 @@ class DashboardBuilder {
     }
 
     rebuild() {
+        if (this.nodeJoinedTimer) {
+            clearTimeout(this.nodeJoinedTimer);
+            this.nodeJoinedTimer = null;
+        }
         this.build(this.baseUrl, this.appsToSubscribe, this.nodeToSubscribe);
     }
 
@@ -2572,7 +2590,11 @@ class DashboardBuilder {
         const onNodeJoined = (node) => {
             this.groups.forEach(group => {
                 if (group.id === node.group) {
-                    setTimeout(() => {
+                    if (this.nodeJoinedTimer) {
+                        clearTimeout(this.nodeJoinedTimer);
+                    }
+                    this.nodeJoinedTimer = setTimeout(() => {
+                        this.nodeJoinedTimer = null;
                         this.showNewNodeNotification(node.id);
                     }, 3000);
                 }
@@ -2648,6 +2670,7 @@ class DashboardBuilder {
         if ($notification.length > 0) {
             $notification.find(".node-id").text(nodeId);
             $notification.find(".refresh-btn").off("click").on("click", () => {
+                $notification.hide();
                 this.rebuild();
             });
             $notification.fadeIn();
@@ -3116,6 +3139,10 @@ class DashboardBuilder {
     }
 
     suspendMonitoring() {
+        if (this.nodeJoinedTimer) {
+            clearTimeout(this.nodeJoinedTimer);
+            this.nodeJoinedTimer = null;
+        }
         this.clients.forEach(client => {
             if (client) client.stop();
         });
@@ -3141,9 +3168,11 @@ class DashboardBuilder {
     clearView() {
         $("#appmon-popup-message").hide();
         $(".group.tabs .tabs-title.available, .node.tabs .tabs-title.available, .app.tabs .tabs-title.available, " +
-          ".node.metrics-bar.available, .app.metrics-bar.available, .control-bar.available, " +
+          ".node.metrics-bar.available, .node.metrics-bar .metric.available, " +
+          ".app.metrics-bar.available, .app.metrics-bar .metric.available, .control-bar.available, " +
           ".event-box.available, .visual-box.available, .chart-box.available, .console-box.available").remove();
-        $(".group.tabs .tabs-title, .node.tabs .tabs-title, .app.tabs .tabs-title, .app.metrics-bar, .console-box").show();
+        $(".group.tabs .tabs-title:not(.available), .node.tabs .tabs-title:not(.available), .app.tabs .tabs-title:not(.available), " +
+          ".node.metrics-bar:not(.available), .app.metrics-bar:not(.available), .console-box:not(.available)").hide();
     }
 
     clearConsole(nodeIndex) {

@@ -19,7 +19,7 @@
  * Responsible for assembling the dashboard UI based on configuration data.
  *
  * @version 4.1
- * @last-modified 2026-09-06
+ * @last-modified 2026-09-07
  */
 class DashboardBuilder {
     constructor(options = {}) {
@@ -36,6 +36,8 @@ class DashboardBuilder {
         this.clients = [];
         this.currentGroupId = null;
         this.selectedNodeIdByGroup = {};
+        this.currentAjax = null;
+        this.nodeJoinedTimer = null;
     }
 
     build(baseUrl, appsToSubscribe, nodeToSubscribe) {
@@ -44,9 +46,15 @@ class DashboardBuilder {
         this.nodeToSubscribe = nodeToSubscribe;
         this.currentGroupId = null;
         this.selectedNodeIdByGroup = {};
+
+        if (this.currentAjax) {
+            this.currentAjax.abort();
+            this.currentAjax = null;
+        }
+
         this.suspendMonitoring();
         this.clearView();
-        $.ajax({
+        this.currentAjax = $.ajax({
             url: baseUrl + "/appmon/config/data",
             type: "get",
             dataType: "json",
@@ -55,6 +63,7 @@ class DashboardBuilder {
                 appsToSubscribe: appsToSubscribe || null
             },
             success: (data) => {
+                this.currentAjax = null;
                 if (data) {
                     if (!data.appsToSubscribe) {
                         alert("No verified apps found. Please check the configuration of the backend.");
@@ -123,6 +132,7 @@ class DashboardBuilder {
                         console.log("app", app);
                     });
 
+                    this.clearView();
                     this.buildView();
                     this.bindEvents();
                     if (this.nodes.length) {
@@ -156,7 +166,11 @@ class DashboardBuilder {
                     }
                 }
             },
-            error: (xhr) => {
+            error: (xhr, status) => {
+                this.currentAjax = null;
+                if (status === "abort") {
+                    return;
+                }
                 if (xhr.status === 403) {
                     alert("Authentication has expired. You will be redirected to the main page.");
                     location.href = baseUrl;
@@ -166,6 +180,10 @@ class DashboardBuilder {
     }
 
     rebuild() {
+        if (this.nodeJoinedTimer) {
+            clearTimeout(this.nodeJoinedTimer);
+            this.nodeJoinedTimer = null;
+        }
         this.build(this.baseUrl, this.appsToSubscribe, this.nodeToSubscribe);
     }
 
@@ -235,7 +253,11 @@ class DashboardBuilder {
         const onNodeJoined = (node) => {
             this.groups.forEach(group => {
                 if (group.id === node.group) {
-                    setTimeout(() => {
+                    if (this.nodeJoinedTimer) {
+                        clearTimeout(this.nodeJoinedTimer);
+                    }
+                    this.nodeJoinedTimer = setTimeout(() => {
+                        this.nodeJoinedTimer = null;
                         this.showNewNodeNotification(node.id);
                     }, 3000);
                 }
@@ -311,6 +333,7 @@ class DashboardBuilder {
         if ($notification.length > 0) {
             $notification.find(".node-id").text(nodeId);
             $notification.find(".refresh-btn").off("click").on("click", () => {
+                $notification.hide();
                 this.rebuild();
             });
             $notification.fadeIn();
@@ -714,6 +737,36 @@ class DashboardBuilder {
                 });
             }
         });
+        $(document).off("click.metricPopover", ".metrics-bar .metric.available")
+            .on("click.metricPopover", ".metrics-bar .metric.available", (e) => {
+                e.stopPropagation();
+                const $metric = $(e.currentTarget);
+                const nodeIndex = $metric.data("node-index");
+                const exporterKey = $metric.data("exporter-key");
+                if (nodeIndex !== undefined && this.viewers[nodeIndex]) {
+                    this.viewers.forEach((v, idx) => {
+                        if (idx !== nodeIndex) v.hideMetricPopover();
+                    });
+                    this.viewers[nodeIndex].toggleMetricPopover(exporterKey, $metric);
+                }
+            });
+        $(document).off("click.metricPopoverClose", "#metric-popover .btn-close-popover")
+            .on("click.metricPopoverClose", "#metric-popover .btn-close-popover", (e) => {
+                e.stopPropagation();
+                this.viewers.forEach(v => v.hideMetricPopover());
+            });
+        $(document).off("click.metricPopoverOutside")
+            .on("click.metricPopoverOutside", (e) => {
+                if (!$(e.target).closest("#metric-popover, .metrics-bar .metric.available").length) {
+                    this.viewers.forEach(v => v.hideMetricPopover());
+                }
+            });
+        $(document).off("keydown.metricPopover")
+            .on("keydown.metricPopover", (e) => {
+                if (e.key === "Escape") {
+                    this.viewers.forEach(v => v.hideMetricPopover());
+                }
+            });
     }
 
     refreshData(appId, withLogs, dateOffset) {
@@ -749,6 +802,10 @@ class DashboardBuilder {
     }
 
     suspendMonitoring() {
+        if (this.nodeJoinedTimer) {
+            clearTimeout(this.nodeJoinedTimer);
+            this.nodeJoinedTimer = null;
+        }
         this.clients.forEach(client => {
             if (client) client.stop();
         });
@@ -774,9 +831,11 @@ class DashboardBuilder {
     clearView() {
         $("#appmon-popup-message").hide();
         $(".group.tabs .tabs-title.available, .node.tabs .tabs-title.available, .app.tabs .tabs-title.available, " +
-          ".node.metrics-bar.available, .app.metrics-bar.available, .control-bar.available, " +
+          ".node.metrics-bar.available, .node.metrics-bar .metric.available, " +
+          ".app.metrics-bar.available, .app.metrics-bar .metric.available, .control-bar.available, " +
           ".event-box.available, .visual-box.available, .chart-box.available, .console-box.available").remove();
-        $(".group.tabs .tabs-title, .node.tabs .tabs-title, .app.tabs .tabs-title, .app.metrics-bar, .console-box").show();
+        $(".group.tabs .tabs-title:not(.available), .node.tabs .tabs-title:not(.available), .app.tabs .tabs-title:not(.available), " +
+          ".node.metrics-bar:not(.available), .app.metrics-bar:not(.available), .console-box:not(.available)").hide();
     }
 
     clearConsole(nodeIndex) {
@@ -839,6 +898,7 @@ class DashboardBuilder {
                             const $metric = (metric.heading || !$eventBox.length) ? 
                                 this.addNodeMetric(node, metric) :
                                 this.addAppMetric($eventBox, node, app, metric);
+                            $metric.data("exporter-key", app.id + ":metric:" + metric.id);
                             viewer.putMetric$(app.id, metric.id, $metric);
                         });
                     }
@@ -899,6 +959,9 @@ class DashboardBuilder {
         const $metric = $bar.find(".metric").first().hide().clone().addClass("available")
             .attr({ "data-node-index": nodeInfo.index, "data-metric-id": metricInfo.id });
         $metric.find("dt").text(metricInfo.title + " :").attr("title", metricInfo.description);
+        if (metricInfo.unit) {
+            $metric.find(".unit").text(metricInfo.unit);
+        }
         return $metric.appendTo($bar).show();
     }
 
@@ -936,6 +999,9 @@ class DashboardBuilder {
         const $metric = $bar.find(".metric").first().hide().clone().addClass("available")
             .attr({ "data-node-index": nodeInfo.index, "data-app-id": appInfo.id, "data-metric-id": metricInfo.id });
         $metric.find("dt").text(metricInfo.title + " :").attr("title", metricInfo.description);
+        if (metricInfo.unit) {
+            $metric.find(".unit").text(metricInfo.unit);
+        }
         return $metric.appendTo($bar).show();
     }
 
