@@ -2217,9 +2217,12 @@ class DashboardViewer {
             .attr("data-inactive-interval", session.inactiveInterval)
             .append($count);
 
-        const inactiveInterval = Math.max(session.inactiveInterval || 0, this.tempResidentInactiveSecs * 1000);
-        const timer = setTimeout(() => $li.remove(), inactiveInterval);
-        $li.data("timer", timer);
+        const inactiveInterval = session.inactiveInterval;
+        if (inactiveInterval) {
+            $li.attr("data-inactive-interval", inactiveInterval)
+            const timer = setTimeout(() => $li.remove(), inactiveInterval * 1000);
+            $li.data("timer", timer);
+        }
 
         if (session.tempResident) {
             $li.addClass("inactive");
@@ -2257,6 +2260,12 @@ class DashboardViewer {
             const $count = $li.find(".count").text(activityCount);
             if (activityCount > 1) $count.addClass("counting");
             $li.show();
+            const inactiveInterval = $li.data("inactive-interval");
+            if (inactiveInterval) {
+                clearTimeout($li.data("timer"));
+                const timer = setTimeout(() => $li.remove(), inactiveInterval * 1000);
+                $li.data("timer", timer);
+            }
         }
     }
 
