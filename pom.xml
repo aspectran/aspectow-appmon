@@ -482,6 +482,7 @@
                                     <executable>node</executable>
                                     <arguments>
                                         <argument>${main.basedir}/.mvn/bundle-assets.js</argument>
+                                        <argument>4.1</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
