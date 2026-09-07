@@ -310,7 +310,9 @@
         min-width: 10.5rem;
     }
     .metrics-bar .metric[data-metric-id="tp"] dl dd,
-    .metrics-bar .metric[data-metric-id$="-tp"] dl dd {
+    .metrics-bar .metric[data-metric-id$="-tp"] dl dd,
+    .metrics-bar .metric[data-metric-id="cp"] dl dd,
+    .metrics-bar .metric[data-metric-id$="-cp"] dl dd {
         min-width: 5.2rem;
     }
 }

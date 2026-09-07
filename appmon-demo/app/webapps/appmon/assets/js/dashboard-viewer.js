@@ -485,15 +485,52 @@ class DashboardViewer {
             val2 = (typeof data.total === "number" ? data.total : null);
             label1 = "Active Threads";
             label2 = "Total Threads";
+        } else if (metricId.startsWith("cp") || metricId.endsWith("-cp") || metricId === "cp" || data.poolName) {
+            val1 = (typeof data.used === "number" ? data.used : (typeof data.active === "number" ? data.active : 0));
+            val2 = (typeof data.total === "number" ? data.total : (typeof data.max === "number" ? data.max : null));
+            label1 = "Used Connections";
+            label2 = "Total Connections";
         } else {
-            const numKeys = Object.keys(data).filter(k => typeof data[k] === "number");
-            if (numKeys.length > 0) {
-                val1 = data[numKeys[0]];
-                label1 = numKeys[0];
+            // Determine primary and secondary values from format string if available
+            const formatKeys = [];
+            if (metricData.format) {
+                const matches = metricData.format.match(/\{([a-zA-Z0-9_-]+)\}/g);
+                if (matches) {
+                    matches.forEach(m => {
+                        const k = m.slice(1, -1);
+                        if (typeof data[k] === "number" && !formatKeys.includes(k)) {
+                            formatKeys.push(k);
+                        }
+                    });
+                }
             }
-            if (numKeys.length > 1) {
-                val2 = data[numKeys[1]];
-                label2 = numKeys[1];
+            if (formatKeys.length > 0) {
+                val1 = data[formatKeys[0]];
+                label1 = formatKeys[0];
+                if (formatKeys.length > 1) {
+                    val2 = data[formatKeys[1]];
+                    label2 = formatKeys[1];
+                }
+            } else {
+                const priorityKeys = ["used", "active", "current", "count", "value", "total"];
+                const numKeys = Object.keys(data).filter(k => typeof data[k] === "number");
+                const pKey = priorityKeys.find(k => typeof data[k] === "number");
+                if (pKey) {
+                    val1 = data[pKey];
+                    label1 = pKey;
+                    const remKeys = numKeys.filter(k => k !== pKey);
+                    if (remKeys.length > 0) {
+                        val2 = data[remKeys[0]];
+                        label2 = remKeys[0];
+                    }
+                } else if (numKeys.length > 0) {
+                    val1 = data[numKeys[0]];
+                    label1 = numKeys[0];
+                    if (numKeys.length > 1) {
+                        val2 = data[numKeys[1]];
+                        label2 = numKeys[1];
+                    }
+                }
             }
         }
 
@@ -703,6 +740,19 @@ class DashboardViewer {
             }
             if (last.data.workerName) {
                 $details.append(`<span><strong>Worker:</strong>${last.data.workerName}</span>`);
+            }
+        } else if (last.metricId.startsWith("cp") || last.metricId.endsWith("-cp") || last.metricId === "cp" || last.data.poolName) {
+            if (last.data.idle !== undefined) {
+                $details.append(`<span><strong>Idle:</strong>${last.data.idle}</span>`);
+            }
+            if (last.data.awaiting !== undefined) {
+                $details.append(`<span><strong>Awaiting:</strong>${last.data.awaiting}</span>`);
+            }
+            if (last.data.active !== undefined) {
+                $details.append(`<span><strong>Active:</strong>${last.data.active}</span>`);
+            }
+            if (last.data.poolName) {
+                $details.append(`<span><strong>Pool:</strong>${last.data.poolName}</span>`);
             }
         }
 
