@@ -100,6 +100,7 @@ public class SessionEventCounter extends AbstractEventCounter {
         return createSessionListenerRegistrationFallback(context);
     }
 
+    @NonNull
     private SessionListenerRegistration createSessionListenerRegistrationFallback(@NonNull ActivityContext context) {
         String[] candidateClasses = {
             "com.aspectran.undertow.support.SessionListenerRegistrationBean",
