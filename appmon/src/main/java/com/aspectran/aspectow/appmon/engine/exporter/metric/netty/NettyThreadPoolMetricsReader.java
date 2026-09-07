@@ -138,7 +138,7 @@ public class NettyThreadPoolMetricsReader extends AbstractMetricReader {
             completed = tpe.getCompletedTaskCount();
         } else if (nettyServer.isVirtualThreads()) {
             total = nettyServer.getPeakRequests();
-            max = -1;
+            max = total;
             completed = nettyServer.getTotalRequests() - active;
         } else {
             total = getWorkerThreads();

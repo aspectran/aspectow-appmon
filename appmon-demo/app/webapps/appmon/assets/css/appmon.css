@@ -109,6 +109,139 @@
     font-size: .8em;
     font-weight: normal;
 }
+.metrics-bar .metric {
+    cursor: pointer;
+    transition: background-color .15s ease-in-out;
+}
+.metrics-bar .metric:hover {
+    background-color: rgba(0, 0, 0, .04);
+}
+.metrics-bar .metric dl dd.sparkline-wrap {
+    min-width: unset !important;
+    padding: 0 .5rem 0 0;
+    display: inline-flex;
+    align-items: center;
+}
+.metrics-bar .metric dl dd.sparkline-wrap canvas.sparkline {
+    width: 48px;
+    height: 16px;
+    vertical-align: middle;
+    border-radius: 2px;
+    display: block;
+}
+
+/* Metric Popover */
+.metric-popover {
+    position: absolute;
+    z-index: 1060;
+    width: 310px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, .18), 0 8px 10px -6px rgba(0, 0, 0, .1);
+    padding: 10px 12px 8px;
+    font-size: 12px;
+    color: #334155;
+}
+.metric-popover .popover-arrow {
+    position: absolute;
+    top: -6px;
+    left: 24px;
+    width: 10px;
+    height: 10px;
+    background: #ffffff;
+    border-left: 1px solid #cbd5e1;
+    border-top: 1px solid #cbd5e1;
+    transform: rotate(45deg);
+}
+.metric-popover .popover-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+.metric-popover .popover-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: #0f172a;
+}
+.metric-popover .popover-current {
+    font-weight: 700;
+    font-size: 13px;
+    margin-left: 6px;
+    color: #0284c7;
+    font-variant-numeric: tabular-nums;
+}
+.metric-popover .btn-close-popover {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #94a3b8;
+    font-size: 18px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+}
+.metric-popover .btn-close-popover:hover {
+    color: #475569;
+}
+.metric-popover .popover-chart-wrap {
+    width: 100%;
+    height: 110px;
+    position: relative;
+    border-radius: 4px;
+    background: #f8fafc;
+    overflow: hidden;
+}
+.metric-popover canvas.popover-chart {
+    width: 100%;
+    height: 110px;
+    display: block;
+}
+.metric-popover .popover-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid #f1f5f9;
+}
+.metric-popover .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+}
+.metric-popover .stat-label {
+    color: #64748b;
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+.metric-popover .stat-val {
+    font-weight: 700;
+    font-size: 12px;
+    color: #1e293b;
+    font-variant-numeric: tabular-nums;
+}
+.metric-popover .popover-details {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #64748b;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    line-height: 1.4;
+}
+.metric-popover .popover-details span {
+    background: #f1f5f9;
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+.metric-popover .popover-details strong {
+    color: #334155;
+    margin-right: 3px;
+}
 .node.metrics-bar {
     position: relative;
     height: auto;

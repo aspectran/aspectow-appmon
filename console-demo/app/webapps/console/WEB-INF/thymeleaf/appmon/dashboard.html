@@ -101,6 +101,7 @@
                         <dl>
                             <dt></dt>
                             <dd><span class="value"></span><small class="unit"></small></dd>
+                            <dd class="sparkline-wrap" title="Click to view metric history"><canvas class="sparkline" width="48" height="16"></canvas></dd>
                         </dl>
                     </div>
                 </div>
@@ -181,6 +182,27 @@
             <button type="button" class="btn btn-primary mt-3 resume-here">
                 <i class="bi bi-play-fill"></i> Resume monitoring here
             </button>
+        </div>
+        <div id="metric-popover" class="metric-popover" style="display: none;">
+            <div class="popover-arrow"></div>
+            <div class="popover-header">
+                <div class="popover-title-area">
+                    <span class="popover-title"></span>
+                    <span class="popover-current"></span>
+                </div>
+                <button type="button" class="btn-close-popover" title="Close"><i class="bi bi-x"></i></button>
+            </div>
+            <div class="popover-body">
+                <div class="popover-chart-wrap">
+                    <canvas class="popover-chart" width="296" height="110"></canvas>
+                </div>
+                <div class="popover-stats">
+                    <span class="stat-item"><span class="stat-label">Min</span><span class="stat-val stat-min">-</span></span>
+                    <span class="stat-item"><span class="stat-label">Max</span><span class="stat-val stat-max">-</span></span>
+                    <span class="stat-item"><span class="stat-label">Avg</span><span class="stat-val stat-avg">-</span></span>
+                </div>
+                <div class="popover-details"></div>
+            </div>
         </div>
     </th:block>
     <script layout:fragment="script" th:inline="javascript">

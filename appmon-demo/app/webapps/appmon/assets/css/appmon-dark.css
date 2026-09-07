@@ -43,6 +43,54 @@
             border-right: 1px solid #3b3f42;
         }
     }
+    .metrics-bar .metric:hover {
+        background-color: rgba(255, 255, 255, .06);
+    }
+    .metric-popover {
+        background: #1e293b;
+        border-color: #334155;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, .5), 0 8px 10px -6px rgba(0, 0, 0, .3);
+        color: #e2e8f0;
+    }
+    .metric-popover .popover-arrow {
+        background: #1e293b;
+        border-left-color: #334155;
+        border-top-color: #334155;
+    }
+    .metric-popover .popover-title {
+        color: #f8fafc;
+    }
+    .metric-popover .popover-current {
+        color: #38bdf8;
+    }
+    .metric-popover .btn-close-popover {
+        color: #64748b;
+    }
+    .metric-popover .btn-close-popover:hover {
+        color: #cbd5e1;
+    }
+    .metric-popover .popover-chart-wrap {
+        background: #0f172a;
+    }
+    .metric-popover .popover-stats {
+        border-top-color: #334155;
+    }
+    .metric-popover .stat-label {
+        color: #94a3b8;
+    }
+    .metric-popover .stat-val {
+        color: #f1f5f9;
+    }
+    .metric-popover .popover-details {
+        color: #94a3b8;
+    }
+    .metric-popover .popover-details span {
+        background: #334155;
+        color: #e2e8f0;
+    }
+    .metric-popover .popover-details strong {
+        color: #f8fafc;
+    }
     .instance.metrics-bar {
         background-color: #2a2f33;
     }

@@ -714,6 +714,36 @@ class DashboardBuilder {
                 });
             }
         });
+        $(document).off("click.metricPopover", ".metrics-bar .metric.available")
+            .on("click.metricPopover", ".metrics-bar .metric.available", (e) => {
+                e.stopPropagation();
+                const $metric = $(e.currentTarget);
+                const nodeIndex = $metric.data("node-index");
+                const exporterKey = $metric.data("exporter-key");
+                if (nodeIndex !== undefined && this.viewers[nodeIndex]) {
+                    this.viewers.forEach((v, idx) => {
+                        if (idx !== nodeIndex) v.hideMetricPopover();
+                    });
+                    this.viewers[nodeIndex].toggleMetricPopover(exporterKey, $metric);
+                }
+            });
+        $(document).off("click.metricPopoverClose", "#metric-popover .btn-close-popover")
+            .on("click.metricPopoverClose", "#metric-popover .btn-close-popover", (e) => {
+                e.stopPropagation();
+                this.viewers.forEach(v => v.hideMetricPopover());
+            });
+        $(document).off("click.metricPopoverOutside")
+            .on("click.metricPopoverOutside", (e) => {
+                if (!$(e.target).closest("#metric-popover, .metrics-bar .metric.available").length) {
+                    this.viewers.forEach(v => v.hideMetricPopover());
+                }
+            });
+        $(document).off("keydown.metricPopover")
+            .on("keydown.metricPopover", (e) => {
+                if (e.key === "Escape") {
+                    this.viewers.forEach(v => v.hideMetricPopover());
+                }
+            });
     }
 
     refreshData(appId, withLogs, dateOffset) {
@@ -839,6 +869,7 @@ class DashboardBuilder {
                             const $metric = (metric.heading || !$eventBox.length) ? 
                                 this.addNodeMetric(node, metric) :
                                 this.addAppMetric($eventBox, node, app, metric);
+                            $metric.data("exporter-key", app.id + ":metric:" + metric.id);
                             viewer.putMetric$(app.id, metric.id, $metric);
                         });
                     }
