@@ -38,6 +38,7 @@ Aspectow features a modular architecture designed to scale seamlessly from stand
 - **Java**: 21 or later
 - **Maven**: 3.9.4 or later (the included Maven wrapper `./build.sh` is recommended)
 - **Redis** (Optional): Required for cluster mode, distributed locking, and virtual WebSocket relaying.
+- **Node.js** (Optional): Required only when bundling and minifying frontend web assets (`.mvn/bundle-assets.js`).
 
 ## Building from Source
 
@@ -57,6 +58,52 @@ To build Aspectow from the source code, run the following commands:
    ```sh
    ./build.sh rebuild
    ```
+
+## Generating Web Assets
+
+Aspectow includes bundled and minified JavaScript and CSS assets for both the **AppMon** telemetry dashboard and the **Management Console**. The bundling script (`.mvn/bundle-assets.js`) concatenates source scripts and stylesheets, minifies them using `terser` (for JavaScript) and `esbuild` (for CSS), and synchronizes the generated bundles across demo web application directories and versioned release asset directories (e.g., `assets/appmon@4.1`, `assets/console@4.1`).
+
+Depending on your workflow, you can generate and update these assets using one of the following methods:
+
+### Method 1: Direct Execution with Node.js (Fastest & Recommended for Frontend Development)
+
+For rapid frontend iterations, you can execute the bundling script directly using Node.js without invoking Maven or compiling Java classes:
+
+```sh
+node .mvn/bundle-assets.js [version]
+```
+
+- **Without arguments**: Bundles the source files and updates the demo web application directories:
+  ```sh
+  node .mvn/bundle-assets.js
+  ```
+- **With a version argument (e.g., `4.1`)**: Additionally synchronizes the generated bundles to the corresponding release directories (`assets/appmon@4.1` and `assets/console@4.1`):
+  ```sh
+  node .mvn/bundle-assets.js 4.1
+  ```
+
+### Method 2: Maven Profile Execution (Without Compiling Java Code)
+
+You can trigger asset generation through Maven without compiling any Java sources or traversing submodules by leveraging the `bundle-assets` profile with the non-recursive flag:
+
+- **Direct goal execution (fastest via Maven)**:
+  ```sh
+  ./mvnw exec:exec@bundle-assets -Pbundle-assets -N
+  ```
+  *(Note: The `-N` / `--non-recursive` flag restricts execution strictly to the root project, skipping submodule builds, tests, and standard lifecycle phases.)*
+
+- **Via lifecycle phase**:
+  ```sh
+  ./mvnw generate-resources -Pbundle-assets -N
+  ```
+
+### Method 3: Full Maven Build Including Assets
+
+To rebuild the entire project from source while refreshing all web assets at the same time, activate the `bundle-assets` profile during the build:
+
+```sh
+./mvnw clean install -Pbundle-assets
+```
 
 ## Running the Demo
 
