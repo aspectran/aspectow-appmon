@@ -11,7 +11,9 @@
         <property name="netty.context.root.name">root</property>
     </environment>
 
-    <bean id="netty.context.root" class="com.aspectran.netty.server.NettyContext">
+    <bean id="netty.context.root"
+          class="com.aspectran.netty.server.NettyContext"
+          scope="prototype">
         <property name="contextPath">/</property>
         <property name="sessionManager">#{netty.context.root.sessionManager}</property>
         <property name="sessionConfig">#{netty.context.root.sessionConfig}</property>

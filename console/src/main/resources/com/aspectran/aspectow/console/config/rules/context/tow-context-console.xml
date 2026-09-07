@@ -54,7 +54,9 @@
         </properties>
     </bean>
 
-    <bean id="tow.context.console.servletSessionConfig" class="io.undertow.servlet.api.ServletSessionConfig">
+    <bean id="tow.context.console.servletSessionConfig"
+          class="io.undertow.servlet.api.ServletSessionConfig"
+          scope="prototype">
         <property name="sessionTrackingModes" type="set">
             <value>#{class:jakarta.servlet.SessionTrackingMode^COOKIE}</value>
         </property>
