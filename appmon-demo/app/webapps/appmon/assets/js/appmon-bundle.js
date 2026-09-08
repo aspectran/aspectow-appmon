@@ -2181,6 +2181,7 @@ class DashboardViewer {
             }
 
             if (eventData.createdSessions) {
+                //console.log("Created sessions:", eventData.createdSessions);
                 eventData.createdSessions.forEach(session => this.addSession($sessions, typeof session === "string" ? JSON.parse(session) : session));
             }
             if (eventData.destroyedSessions) {
@@ -2203,19 +2204,22 @@ class DashboardViewer {
                 });
             }
             if (eventData.residedSessions) {
+                //console.log("Resided sessions:", eventData.residedSessions);
                 eventData.residedSessions.forEach(session => this.addSession($sessions, typeof session === "string" ? JSON.parse(session) : session));
             }
         }
     }
 
     addSession($sessions, session) {
+        //console.log("Adding session:", session);
         $sessions.find("li[data-sid='" + session.sessionId + "']").each(function () {
             const timer = $(this).data("timer");
             if (timer) clearTimeout(timer);
         }).remove();
 
         const $count = $("<div class='count'></div>").text(session.activityCount || 0);
-        if (session.activityCount > 1 || !session.countryCode) $count.addClass("counting");
+        if (session.activityCount > 0) $count.text(session.activityCount);
+        if (session.activityCount > 0 && !session.tempResident || !session.countryCode) $count.addClass("counting");
         if (session.username) $count.addClass("active");
 
         const $li = $("<li/>")
