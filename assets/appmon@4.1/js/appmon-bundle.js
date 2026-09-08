@@ -1145,7 +1145,7 @@ class DashboardChart {
  * Responsible for rendering monitoring data, including logs, metrics, and charts.
  *
  * @version 4.1
- * @last-modified 2026-09-07
+ * @last-modified 2026-09-08
  */
 class DashboardViewer {
     constructor(sampleInterval, options = {}) {
@@ -2188,12 +2188,13 @@ class DashboardViewer {
             }
             if (eventData.evictedSessions) {
                 eventData.evictedSessions.forEach(sessionId => {
-                    const $item = $sessions.find("li[data-sid='" + sessionId + "']");
-                    if (!$item.hasClass("inactive")) {
-                        $item.addClass("inactive");
-                        const timer = setTimeout(() => $item.remove(), this.tempResidentInactiveSecs * 1000);
-                        $item.data("timer", timer);
-                    }
+                    const $li = $sessions.find("li[data-sid='" + sessionId + "']");
+                    let timer = $(this).data("timer");
+                    if (timer) clearTimeout(timer);
+                    if ($li.data("temp-resident")) $li.remove(); // Temp resident session removed immediately upon eviction
+                    timer = setTimeout(() => $li.remove(), this.tempResidentInactiveSecs * 1000);
+                    $li.data("timer", timer);
+                    $li.addClass("inactive");
                 });
             }
             if (eventData.residedSessions) {
@@ -2225,7 +2226,7 @@ class DashboardViewer {
         }
 
         if (session.tempResident) {
-            $li.addClass("inactive");
+            $li.attr("data-temp-resident", true).addClass("inactive");
         }
 
         if (session.countryCode) {
