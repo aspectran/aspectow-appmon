@@ -1065,10 +1065,15 @@ class DashboardViewer {
                     const $li = $sessions.find("li[data-sid='" + sessionId + "']");
                     let timer = $(this).data("timer");
                     if (timer) clearTimeout(timer);
-                    if ($li.data("temp-resident")) $li.remove(); // Temp resident session removed immediately upon eviction
-                    timer = setTimeout(() => $li.remove(), this.tempResidentInactiveSecs * 1000);
-                    $li.data("timer", timer);
+                    if ($li.data("temp-resident")) {
+                        $li.remove(); // Temp resident session removed immediately upon eviction
+                        return;
+                    }
                     $li.addClass("inactive");
+                    let inactiveInterval = $li.data("inactive-interval") || 0;
+                    inactiveInterval = (inactiveInterval <= 0 ? this.tempResidentInactiveSecs : Math.min(inactiveInterval, this.tempResidentInactiveSecs)) * 1000;
+                    timer = setTimeout(() => $li.remove(), inactiveInterval);
+                    $li.data("timer", timer);
                 });
             }
             if (eventData.residedSessions) {
@@ -1137,8 +1142,9 @@ class DashboardViewer {
             $li.show();
             const inactiveInterval = $li.data("inactive-interval");
             if (inactiveInterval) {
-                clearTimeout($li.data("timer"));
-                const timer = setTimeout(() => $li.remove(), inactiveInterval * 1000);
+                let timer = $li.data("timer");
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(() => $li.remove(), inactiveInterval * 1000);
                 $li.data("timer", timer);
             }
         }
