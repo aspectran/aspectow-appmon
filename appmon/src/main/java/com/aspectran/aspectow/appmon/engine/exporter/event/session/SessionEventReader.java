@@ -427,6 +427,11 @@ public class SessionEventReader extends AbstractEventReader {
 
     private JsonString serialize(@NonNull Session session) {
         AtomicInteger count = session.getAttribute(USER_ACTIVITY_COUNT);
+        int activityCount = (count != null ? count.get() : 0);
+        boolean tempResident = session.isTempResident();
+        if (activityCount == 0 && !tempResident) {
+            activityCount++;
+        }
         return new JsonBuilder()
                 .nullWritable(false)
                 .prettyPrint(false)
@@ -435,10 +440,10 @@ public class SessionEventReader extends AbstractEventReader {
                     .put("username", resolveUsername(session))
                     .put("ipAddress", session.getAttribute(USER_IP_ADDRESS))
                     .put("countryCode", session.getAttribute(USER_COUNTRY_CODE))
-                    .put("activityCount", (count != null ? count.get() : 0))
+                    .put("activityCount", activityCount)
                     .put("createAt", formatTime(session.getCreationTime()))
                     .put("inactiveInterval", session.getMaxInactiveInterval())
-                    .put("tempResident", session.isTempResident())
+                    .put("tempResident", tempResident)
                 .endObject()
                 .toJsonString();
     }
