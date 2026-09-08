@@ -1098,7 +1098,7 @@ class DashboardViewer {
             .append($count);
 
         const inactiveInterval = session.inactiveInterval;
-        if (inactiveInterval) {
+        if (inactiveInterval && inactiveInterval > 0) {
             $li.attr("data-inactive-interval", inactiveInterval)
             const timer = setTimeout(() => $li.remove(), inactiveInterval * 1000);
             $li.data("timer", timer);
