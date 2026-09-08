@@ -78,7 +78,9 @@ public class WebsocketMessageRelayer extends SimplifiedEndpoint implements Messa
         try {
             AppMonTokenIssuer.validateToken(token);
         } catch (InvalidPBTokenException e) {
-            logger.error("Invalid token: {}", token);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Invalid token: {}", token);
+            }
             return false;
         }
         return true;
