@@ -43,7 +43,6 @@ class DashboardViewer {
         this.metricHistories = {};
         this.maxMetricHistory = 60;
         this.activePopoverKey = null;
-        this.activePopoverMetric$ = null;
     }
 
     setClient(client) {
@@ -646,7 +645,6 @@ class DashboardViewer {
         if (!history || !history.length) return;
 
         this.activePopoverKey = exporterKey;
-        this.activePopoverMetric$ = $metric;
 
         const $popover = $("#metric-popover");
         if (!$popover.length) return;
@@ -669,7 +667,6 @@ class DashboardViewer {
 
     hideMetricPopover() {
         this.activePopoverKey = null;
-        this.activePopoverMetric$ = null;
         $("#metric-popover").hide();
     }
 

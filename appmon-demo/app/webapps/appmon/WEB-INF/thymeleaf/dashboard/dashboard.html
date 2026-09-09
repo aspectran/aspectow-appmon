@@ -4,13 +4,24 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{templates/default}">
 <head>
-<th:block th:if="${#{currentEnvironment}.matchesProfiles('cdn-assets')}">
+<th:block th:if="${#{currentEnvironment}.matchesProfiles('(cdn-assets, !dev)')}">
     <link rel="stylesheet" th:href="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.1/css/appmon-bundle.min.css|"/>
     <script th:src="|https://cdn.jsdelivr.net/gh/aspectran/aspectow@main/assets/appmon@4.1/js/appmon-bundle.min.js|"></script>
 </th:block>
-<th:block th:unless="${#{currentEnvironment}.matchesProfiles('cdn-assets')}">
-    <link rel="stylesheet" th:href="@{/assets/css/appmon-bundle.min.css?v=20260909}"/>
-    <script th:src="@{/assets/js/appmon-bundle.min.js?v=20260909}"></script>
+<th:block th:if="${#{currentEnvironment}.matchesProfiles('(cdn-assets, dev)')}">
+    <link rel="stylesheet" th:href="@{/assets/appmon/css/appmon-bundle.min.css?v=20260909}"/>
+    <script th:src="@{/assets/appmon/js/appmon-bundle.min.js?v=20260909}"></script>
+</th:block>
+<th:block th:if="${#{currentEnvironment}.matchesProfiles('dev')}">
+    <link rel="stylesheet" th:href="@{/assets/css/appmon.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/appmon-dark.css}"/>
+    <script th:src="@{/assets/js/dashboard-builder.js}"></script>
+    <script th:src="@{/assets/js/dashboard-viewer.js}"></script>
+    <script th:src="@{/assets/js/dashboard-chart.js}"></script>
+    <script th:src="@{/assets/js/traffic-painter.js}"></script>
+    <script th:src="@{/assets/js/base-client.js}"></script>
+    <script th:src="@{/assets/js/websocket-client.js}"></script>
+    <script th:src="@{/assets/js/polling-client.js}"></script>
 </th:block>
 </head>
 <body>
@@ -26,11 +37,11 @@
                     </li>
                 </ul>
             </div>
-            <div class="container node metrics-bar no-title">
+            <div class="container node metrics-bar">
                 <div class="node-badge">
                     <i class="bi bi-server"></i><span class="number"></span>
                 </div>
-                <div class="node-metrics">
+                <div class="node-metrics" style="display: none;">
                     <div class="metric">
                         <dl>
                             <dt><span class="name"></span></dt>
@@ -39,7 +50,7 @@
                         </dl>
                     </div>
                 </div>
-                <div class="app-metrics">
+                <div class="app-metrics" style="display: none;">
                     <div class="metric">
                         <dl>
                             <dt><span class="name"></span></dt>
