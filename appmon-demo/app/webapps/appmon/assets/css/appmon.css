@@ -284,22 +284,23 @@
     @media screen and (max-width: 768px) {
         display: block;
         grid-column: 2;
-        text-align: left;
     }
 }
 .node.metrics-bar .metric dl {
     @media screen and (max-width: 768px) {
-        display: inline-flex;
+        display: flex;
+        width: 100%;
     }
 }
 .node.metrics-bar .metric dl dt {
     @media screen and (max-width: 768px) {
         min-width: 3.8rem;
+        flex: 1;
     }
 }
 .node.metrics-bar .metric dl dd {
     @media screen and (max-width: 768px) {
-        text-align: left;
+        text-align: right;
     }
 }
 @media screen and (min-width: 768px) {
