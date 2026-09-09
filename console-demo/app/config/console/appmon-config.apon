@@ -21,6 +21,20 @@ app: {
         id: session
         target: netty.server/console
     }
+    metric: {
+        id: cpu
+        title: CPU
+        description: Shows JVM process and system CPU usage
+        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.jvm.CpuUsageReader
+        sampleInterval: 1000
+    }
+    metric: {
+        id: heap
+        title: Heap
+        description: Shows JVM Heap memory usage status
+        reader: com.aspectran.aspectow.appmon.engine.exporter.metric.jvm.HeapMemoryUsageReader
+        sampleInterval: 500
+    }
     log: {
         id: app
         file: console.log

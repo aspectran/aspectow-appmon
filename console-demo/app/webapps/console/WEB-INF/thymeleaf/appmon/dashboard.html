@@ -37,15 +37,26 @@
                 </ul>
             </div>
             <div class="container node metrics-bar no-title">
-                <div class="title">
+                <div class="node-badge">
                     <i class="bi bi-server"></i><span class="number"></span>
                 </div>
-                <div class="metric">
-                    <dl>
-                        <dt></dt>
-                        <dd><span class="value"></span><small class="unit"></small></dd>
-                        <dd class="sparkline-wrap" title="Click to view metric history"><canvas class="sparkline" width="48" height="16"></canvas></dd>
-                    </dl>
+                <div class="node-metrics">
+                    <div class="metric">
+                        <dl>
+                            <dt><span class="name"></span></dt>
+                            <dd><span class="value"></span><small class="unit"></small></dd>
+                            <dd class="sparkline-wrap" title="Click to view metric history"><canvas class="sparkline" width="48" height="16"></canvas></dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="app-metrics">
+                    <div class="metric">
+                        <dl>
+                            <dt><span class="name"></span></dt>
+                            <dd><span class="value"></span><small class="unit"></small></dd>
+                            <dd class="sparkline-wrap" title="Click to view metric history"><canvas class="sparkline" width="48" height="16"></canvas></dd>
+                        </dl>
+                    </div>
                 </div>
             </div>
         </div>
@@ -95,15 +106,6 @@
                             <div class="sampling-timer-bar"></div>
                             <div class="sampling-timer-status" title="Sampling interval"></div>
                         </div>
-                    </div>
-                </div>
-                <div class="app metrics-bar">
-                    <div class="metric">
-                        <dl>
-                            <dt></dt>
-                            <dd><span class="value"></span><small class="unit"></small></dd>
-                            <dd class="sparkline-wrap" title="Click to view metric history"><canvas class="sparkline" width="48" height="16"></canvas></dd>
-                        </dl>
                     </div>
                 </div>
                 <div class="session-box">
